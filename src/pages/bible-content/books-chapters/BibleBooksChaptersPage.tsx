@@ -25,12 +25,7 @@ const BibleBooksChaptersPage = () => {
               <ToolbarDescription>Manage Bible books, chapters, and verses.</ToolbarDescription>
             </ToolbarHeading>
             <ToolbarActions>
-              <a href="#" className="btn btn-sm btn-light">
-                Import Structure
-              </a>
-              <a href="#" className="btn btn-sm btn-primary">
-                Add New Book
-              </a>
+              <span className="text-sm text-gray-500">Content management not available in Phase 1</span>
             </ToolbarActions>
           </Toolbar>
         </Container>

@@ -16,7 +16,7 @@ const deepMerge = (obj1: any, obj2: any): any => {
 
 const generateUniqueToken = (): string => {
   const timestamp: number = new Date().getTime();
-  const randomString: string = Math.random().toString(36).substring(2, 8); // Random string of length 6
+  const randomString: string = Math.random().toString(36).substring(2, 8);
 
   return `${timestamp}-${randomString}`;
 };

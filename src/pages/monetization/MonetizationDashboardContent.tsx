@@ -65,8 +65,8 @@ const MonetizationDashboardContent: React.FC = () => {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         <Card>
           <CardContent className="flex items-center gap-4">
-            <div className="p-3 bg-blue-100 rounded-lg">
-              <Users className="w-6 h-6 text-blue-600" />
+            <div className="p-3 bg-amber-100 rounded-lg">
+              <Users className="w-6 h-6 text-amber-600" />
             </div>
             <div>
               <p className="text-sm text-gray-600">Total Free Users</p>

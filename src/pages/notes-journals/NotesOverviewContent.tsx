@@ -235,7 +235,7 @@ const NotesOverviewContent: React.FC = () => {
             <p className="font-medium text-sm truncate">{row.original.title}</p>
             <p className="text-xs text-gray-600 truncate">{row.original.content}</p>
             <div className="flex gap-1 mt-1">
-              {row.original.hasAudio && <Volume2 className="w-3 h-3 text-blue-500" />}
+              {row.original.hasAudio && <Volume2 className="w-3 h-3 text-amber-500" />}
               {row.original.hasAttachments && <Paperclip className="w-3 h-3 text-green-500" />}
               {row.original.isFavorite && <span className="text-yellow-500">★</span>}
             </div>

@@ -7,6 +7,7 @@ const PersonalInfo = () => {
     <div className="card min-w-full">
       <div className="card-header">
         <h3 className="card-title">Personal Info</h3>
+        <div className="text-sm text-gray-500">Read-only in Phase 1</div>
       </div>
       <div className="card-table scrollable-x-auto pb-3">
         <table className="table align-middle text-sm text-gray-500">
@@ -26,9 +27,9 @@ const PersonalInfo = () => {
               <td className="py-2 text-gray-600 font-normal">Name</td>
               <td className="py-2 text-gray-800 font-normaltext-sm">Jason Tatum</td>
               <td className="py-2 text-center">
-                <a href="#" className="btn btn-sm btn-icon btn-clear btn-primary">
+                <button className="btn btn-sm btn-icon btn-clear btn-primary opacity-50 cursor-not-allowed" disabled title="Editing not available in Phase 1">
                   <KeenIcon icon="notepad-edit" />
-                </a>
+                </button>
               </td>
             </tr>
             <tr>
@@ -37,27 +38,27 @@ const PersonalInfo = () => {
                 <span className="badge badge-sm badge-outline badge-success">Available now</span>
               </td>
               <td className="py-3 text-center">
-                <a href="#" className="btn btn-sm btn-icon btn-clear btn-primary">
+                <button className="btn btn-sm btn-icon btn-clear btn-primary opacity-50 cursor-not-allowed" disabled title="Editing not available in Phase 1">
                   <KeenIcon icon="notepad-edit" />
-                </a>
+                </button>
               </td>
             </tr>
             <tr>
               <td className="py-3 text-gray-600 font-normal">Birthday</td>
               <td className="py-3 text-gray-700 text-sm font-normal">28 May 1996</td>
               <td className="py-3 text-center">
-                <a href="#" className="btn btn-sm btn-icon btn-clear btn-primary">
+                <button className="btn btn-sm btn-icon btn-clear btn-primary opacity-50 cursor-not-allowed" disabled title="Editing not available in Phase 1">
                   <KeenIcon icon="notepad-edit" />
-                </a>
+                </button>
               </td>
             </tr>
             <tr>
               <td className="py-3 text-gray-600 font-normal">Gender</td>
               <td className="py-3 text-gray-700 text-sm font-normal">Male</td>
               <td className="py-3 text-center">
-                <a href="#" className="btn btn-sm btn-icon btn-clear btn-primary">
+                <button className="btn btn-sm btn-icon btn-clear btn-primary opacity-50 cursor-not-allowed" disabled title="Editing not available in Phase 1">
                   <KeenIcon icon="notepad-edit" />
-                </a>
+                </button>
               </td>
             </tr>
             <tr>

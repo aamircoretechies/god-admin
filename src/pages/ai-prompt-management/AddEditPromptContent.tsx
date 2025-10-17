@@ -120,7 +120,7 @@ const AddEditPromptContent: React.FC = () => {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                <AlertCircle className="w-5 h-5 text-blue-600" />
+                <AlertCircle className="w-5 h-5 text-amber-600" />
                 Prompt Content
               </CardTitle>
             </CardHeader>

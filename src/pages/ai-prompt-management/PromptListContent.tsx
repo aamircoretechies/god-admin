@@ -146,7 +146,7 @@ const PromptListContent: React.FC = () => {
 
   const getCategoryBadge = (category: string) => {
     const colors = {
-      'Verse Explanation': 'bg-blue-100 text-blue-800',
+      'Verse Explanation': 'bg-amber-100 text-amber-800',
       'Chapter Summary': 'bg-purple-100 text-purple-800',
       'Daily Reflection': 'bg-green-100 text-green-800',
       'Study Guide': 'bg-orange-100 text-orange-800',

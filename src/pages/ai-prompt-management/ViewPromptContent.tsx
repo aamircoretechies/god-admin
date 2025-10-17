@@ -55,7 +55,7 @@ const ViewPromptContent: React.FC = () => {
 
   const getCategoryBadge = (category: string) => {
     const colors = {
-      'Verse Explanation': 'bg-blue-100 text-blue-800',
+      'Verse Explanation': 'bg-amber-100 text-amber-800',
       'Chapter Summary': 'bg-purple-100 text-purple-800',
       'Daily Reflection': 'bg-green-100 text-green-800',
       'Study Guide': 'bg-orange-100 text-orange-800',
@@ -132,9 +132,9 @@ const ViewPromptContent: React.FC = () => {
               <CardTitle>Usage Examples</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="bg-blue-50 p-4 rounded-lg">
-                <h4 className="font-semibold text-blue-900 mb-2">Example Input:</h4>
-                <p className="text-sm text-blue-800">John 3:16 - "For God so loved the world..."</p>
+              <div className="bg-amber-50 p-4 rounded-lg">
+                <h4 className="font-semibold text-amber-900 mb-2">Example Input:</h4>
+                <p className="text-sm text-amber-800">John 3:16 - "For God so loved the world..."</p>
               </div>
               <div className="bg-green-50 p-4 rounded-lg">
                 <h4 className="font-semibold text-green-900 mb-2">Expected Output:</h4>

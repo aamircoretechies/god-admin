@@ -14,8 +14,8 @@ const ChannelStats = () => {
   const items: IChannelStatsItems = [
       { icon: <Users className="w-6 h-6 text-olive-500" />, value: '9.3k', label: 'Total Users' },
     { icon: <Eye className="w-6 h-6 text-clay-500" />, value: '24k', label: 'Lessons Views' },
-    { icon: <UserPlus className="w-6 h-6 text-forest-500" />, value: '608', label: 'New Subscribers' },
-    { icon: <Mic className="w-6 h-6 text-forest-500" />, value: '2.5k', label: 'Stream Audience' }
+    { icon: <UserPlus className="w-6 h-6 text-forest-500" />, value: '608', label: 'New Users Today' },
+    { icon: <Mic className="w-6 h-6 text-forest-500" />, value: '2.5k', label: 'Reports (Issues)' }
   ];
 
 

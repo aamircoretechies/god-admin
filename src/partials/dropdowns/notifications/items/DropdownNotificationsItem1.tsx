@@ -1,7 +1,5 @@
 import { toAbsoluteUrl } from '@/utils';
 import { Link } from 'react-router-dom';
-import { KeenIcon } from '@/components';
-import { ChangeEvent, useState } from 'react';
 
 interface IDropdownNotificationsItemProps {
   userName: string;
@@ -24,7 +22,6 @@ const DropdownNotificationsItem1 = ({
   specialist,
   text
 }: IDropdownNotificationsItemProps) => {
-  const [emailInput, setEmailInput] = useState('');
   return (
     <div className="flex grow gap-2.5 px-5">
       <div className="relative shrink-0 mt-0.5">
@@ -55,26 +52,6 @@ const DropdownNotificationsItem1 = ({
           </span>
         </div>
 
-        <div className="card shadow-none flex flex-col gap-2.5 p-3.5 rounded-lg bg-light-active">
-          <div className="text-2sm font-semibold text-gray-600 mb-px">
-            <Link to="#" className="hover:text-primary-active text-gray-900 font-semibold">
-              @Cody
-            </Link>
-            <span className="text-gray-700 font-medium"> {text} </span>
-          </div>
-
-          <label className="input input-sm">
-            <input
-              type="text"
-              onChange={(e) => setEmailInput(e.target.value)}
-              placeholder="Reply"
-              value={emailInput}
-            />
-            <button className="btn btn-icon">
-              <KeenIcon icon="picture" />
-            </button>
-          </label>
-        </div>
       </div>
     </div>
   );

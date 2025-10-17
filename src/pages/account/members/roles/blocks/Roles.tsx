@@ -1,6 +1,6 @@
 import { KeenIcon } from '@/components';
 
-import { CardAddNew, CardRole } from '@/partials/cards';
+import { CardRole } from '@/partials/cards';
 import { ReactNode } from 'react';
 
 interface Badge {
@@ -29,10 +29,10 @@ const Roles = () => {
         fill: 'fill-primary-light',
         stroke: 'stroke-primary-clarity'
       },
-      title: 'Administrator',
-      subTitle: 'Default role',
-      description: 'Manages system settings and user access, ensures system stability.',
-      team: '1 person',
+      title: 'Admin',
+      subTitle: 'Full access',
+      description: 'Full system access including user management, content moderation, and system settings.',
+      team: '2 people',
       path: '/public-profile/profiles/creator'
     },
     {
@@ -42,28 +42,12 @@ const Roles = () => {
         fill: 'fill-brand-light',
         stroke: 'stroke-brand-clarity'
       },
-      title: 'Viewer',
-      subTitle: 'Default role',
-      description: "Can view data but doesn't have editing privileges.",
-      team: '32 people',
+      title: 'Moderator',
+      subTitle: 'Content moderation',
+      description: 'Can moderate content, review AI responses, and manage user feedback.',
+      team: '5 people',
       path: '/public-profile/profiles/company'
     },
-   
-    {
-      badge: {
-        size: 'size-[44px]',
-        badge: <KeenIcon icon="delivery-24" className="text-1.5xl text-danger" />,
-        fill: 'fill-danger-light',
-        stroke: 'stroke-danger-clarity'
-      },
-      title: 'Customer Support',
-      subTitle: 'Default role',
-      description: 'Provides assistance and resolves customer inquiries and issues.',
-      team: '32 people',
-      path: '/public-profile/profiles/blogger'
-    },
- 
-    
     {
       badge: {
         size: 'size-[44px]',
@@ -71,10 +55,10 @@ const Roles = () => {
         fill: 'fill-success-light',
         stroke: 'stroke-success-clarity'
       },
-      title: 'Sales Manager',
-      subTitle: 'Default role',
-      description: 'Manages sales team and drives revenue growth.',
-      team: '1 person',
+      title: 'User',
+      subTitle: 'Standard access',
+      description: 'Basic user access to view content and submit feedback.',
+      team: '12,840 people',
       path: '/public-profile/profiles/feeds'
     }
   ];
@@ -98,14 +82,6 @@ const Roles = () => {
       {items.map((item, index) => {
         return renderItem(item, index);
       })}
-
-      <CardAddNew
-        path="/public-profile/works"
-        size="size-[60px]"
-        iconSize="text-2xl"
-        title="Add New Role"
-        subTitle="Ignite Professional Adventures"
-      />
     </div>
   );
 };

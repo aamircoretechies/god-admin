@@ -137,7 +137,7 @@ const SystemAlertsContent: React.FC = () => {
       case 'medium':
         return <Badge variant="default" className="bg-yellow-100 text-yellow-800">Medium</Badge>;
       case 'low':
-        return <Badge variant="default" className="bg-blue-100 text-blue-800">Low</Badge>;
+        return <Badge variant="default" className="bg-amber-100 text-amber-800">Low</Badge>;
       default:
         return <Badge variant="outline">{severity}</Badge>;
     }
@@ -150,7 +150,7 @@ const SystemAlertsContent: React.FC = () => {
       case 'error':
         return <XCircle className="w-5 h-5 text-red-600" />;
       case 'info':
-        return <AlertCircle className="w-5 h-5 text-blue-600" />;
+        return <AlertCircle className="w-5 h-5 text-amber-600" />;
       case 'success':
         return <CheckCircle className="w-5 h-5 text-green-600" />;
       default:
@@ -161,7 +161,7 @@ const SystemAlertsContent: React.FC = () => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'new':
-        return <Badge variant="default" className="bg-blue-100 text-blue-800">New</Badge>;
+        return <Badge variant="default" className="bg-amber-100 text-amber-800">New</Badge>;
       case 'acknowledged':
         return <Badge variant="default" className="bg-yellow-100 text-yellow-800">Acknowledged</Badge>;
       case 'resolved':
@@ -176,7 +176,7 @@ const SystemAlertsContent: React.FC = () => {
       'spam': 'bg-red-100 text-red-800',
       'rate_limit': 'bg-orange-100 text-orange-800',
       'security': 'bg-purple-100 text-purple-800',
-      'performance': 'bg-blue-100 text-blue-800',
+      'performance': 'bg-amber-100 text-amber-800',
       'user_behavior': 'bg-pink-100 text-pink-800'
     };
     
@@ -219,8 +219,8 @@ const SystemAlertsContent: React.FC = () => {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <Bell className="w-5 h-5 text-blue-600" />
+              <div className="p-2 bg-amber-100 rounded-lg">
+                <Bell className="w-5 h-5 text-amber-600" />
               </div>
               <div>
                 <p className="text-sm text-gray-600">Total Alerts</p>
@@ -299,7 +299,7 @@ const SystemAlertsContent: React.FC = () => {
             alert.severity === 'critical' ? 'border-l-red-500' :
             alert.severity === 'high' ? 'border-l-orange-500' :
             alert.severity === 'medium' ? 'border-l-yellow-500' :
-            'border-l-blue-500'
+            'border-l-amber-500'
           }`}>
             <CardContent className="p-6">
               <div className="flex items-start gap-4">

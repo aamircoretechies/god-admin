@@ -32,11 +32,7 @@ interface IUsersData {
     email: string;
   };
   labels: string[];
-  license: {
-    type: string;
-    left: string;
-  };
-  payment: string;
+  joinDate?: string;
   enforce: boolean;
 }
 
@@ -77,7 +73,7 @@ const Users = () => {
         id: 'user',
         header: ({ column }) => (
           <DataGridColumnHeader
-            title="Subscriber"
+            title="New User"
             filter={<ColumnInputFilter column={column} />}
             column={column}
           />
@@ -126,31 +122,17 @@ const Users = () => {
         }
       }, */
       {
-        accessorFn: (row: IUsersData) => row.license,
-        id: 'license',
-        header: ({ column }) => <DataGridColumnHeader title="License" column={column} />,
+        accessorFn: (row: IUsersData) => row.joinDate || '2024-01-15',
+        id: 'joinDate',
+        header: ({ column }) => <DataGridColumnHeader title="Join Date" column={column} />,
         enableSorting: true,
         cell: (info: any) => (
-          <div className="flex flex-col">
-            <span className="text-sm text-gray-800 font-medium">
-              {info.row.original.license.type}
-            </span>
-            <span className="text-xs text-gray-600">{info.row.original.license.left}</span>
-          </div>
+          <span className="text-sm text-gray-800 font-medium">
+            {info.row.original.joinDate || '2024-01-15'}
+          </span>
         ),
         meta: {
-          headerClassName: 'min-w-[175px]',
-          cellClassName: 'text-gray-700 font-normal'
-        }
-      },
-      {
-        accessorFn: (row: IUsersData) => row.payment,
-        id: 'payment',
-        header: ({ column }) => <DataGridColumnHeader title="Latest Payment" column={column} />,
-        enableSorting: true,
-        cell: (info: any) => info.row.original.payment,
-        meta: {
-          className: 'min-w-[175px]',
+          headerClassName: 'min-w-[120px]',
           cellClassName: 'text-gray-800 font-medium'
         }
       },
@@ -210,7 +192,7 @@ const Users = () => {
 
     return (
       <div className="card-header flex-wrap gap-2 border-b-0 px-5">
-        <h3 className="card-title font-medium text-sm">Showing 10 of 49,053 users</h3>
+        <h3 className="card-title font-medium text-sm">Showing 10 of 49,053 new users</h3>
 
         <div className="flex flex-wrap gap-2 lg:gap-5">
           <div className="flex">
@@ -218,7 +200,7 @@ const Users = () => {
               <KeenIcon icon="magnifier" />
               <input
                 type="text"
-                placeholder="Search users"
+                placeholder="Search new users"
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
               />

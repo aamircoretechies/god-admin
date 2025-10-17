@@ -2,12 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { getHeight } from '@/utils';
 import { useViewport } from '@/hooks';
 import {
-  DropdownNotificationsItem1,
-  DropdownNotificationsItem2,
-  DropdownNotificationsItem3,
-  DropdownNotificationsItem4,
-  DropdownNotificationsItem5,
-  DropdownNotificationsItem6
+  DropdownNotificationsItem1
 } from './items';
 
 const DropdownNotificationsAll = () => {
@@ -37,44 +32,6 @@ const DropdownNotificationsAll = () => {
           specialist="Web Design 2024"
           text="For an expert opinion, check out what Mike has to say on this topic!"
         />
-
-        <div className="border-b border-b-gray-200"></div>
-
-        <DropdownNotificationsItem2 />
-
-        <div className="border-b border-b-gray-200"></div>
-
-        <DropdownNotificationsItem3
-          userName="Guy Hawkins"
-          avatar="300-27.png"
-          badgeColor="bg-gray-400"
-          description="requested access to"
-          link="AirSpace"
-          day="project"
-          date="14 hours ago"
-          info="Dev Team"
-        />
-
-        <div className="border-b border-b-gray-200"></div>
-
-        <DropdownNotificationsItem4 />
-
-        <div className="border-b border-b-gray-200"></div>
-
-        <DropdownNotificationsItem5
-          userName="Raymond Pawell"
-          avatar="300-11.png"
-          badgeColor="badge-success"
-          description="posted a new article"
-          link="2024 Roadmap"
-          day=""
-          date="1 hour ago"
-          info="Roadmap"
-        />
-
-        <div className="border-b border-b-gray-200"></div>
-
-        <DropdownNotificationsItem6 />
       </div>
     );
   };

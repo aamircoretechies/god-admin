@@ -10,7 +10,7 @@ import {
 } from '@/partials/toolbar';
 import { PageNavbar } from '@/pages/account';
 
-import { AccountTeamMembersContent } from '.';
+import { AccountTeamMembersContent, AddMemberForm } from '.';
 import { useLayout } from '@/providers';
 
 const AccountTeamMembersPage = () => {
@@ -31,9 +31,7 @@ const AccountTeamMembersPage = () => {
               <a href="#" className="btn btn-sm btn-light">
                 Import Members
               </a>
-              <a href="#" className="btn btn-sm btn-primary">
-                Add Member
-              </a>
+              <AddMemberForm />
             </ToolbarActions>
           </Toolbar>
         </Container>

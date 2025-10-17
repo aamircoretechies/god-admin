@@ -5,6 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
+import { VerseDetailModal } from '@/components/verse-detail-modal/VerseDetailModal';
 import { 
   BookOpen, 
   Plus, 
@@ -94,6 +95,8 @@ const BibleBooksChaptersContent = () => {
   const [isCreatingChapter, setIsCreatingChapter] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [testamentFilter, setTestamentFilter] = useState<string>('all');
+  const [selectedVerse, setSelectedVerse] = useState<any>(null);
+  const [isVerseModalOpen, setIsVerseModalOpen] = useState(false);
   const [bookFormData, setBookFormData] = useState<Partial<BibleBook>>({
     name: '',
     testament: 'old',
@@ -124,15 +127,8 @@ const BibleBooksChaptersContent = () => {
   };
 
   const handleCreateBook = () => {
-    setIsCreatingBook(true);
-    setBookFormData({
-      name: '',
-      testament: 'old',
-      chapters: 0,
-      verses: 0,
-      description: '',
-      status: 'draft'
-    });
+    // Content creation not available in Phase 1 - read-only mode
+    console.log('Content creation disabled in Phase 1');
   };
 
   const handleSaveBook = () => {
@@ -153,13 +149,26 @@ const BibleBooksChaptersContent = () => {
   };
 
   const handleCreateChapter = (bookId: string) => {
-    setIsCreatingChapter(true);
-    setChapterFormData({
-      bookId,
-      number: 1,
-      verses: 0,
-      status: 'draft'
-    });
+    // Content creation not available in Phase 1 - read-only mode
+    console.log('Content creation disabled in Phase 1');
+  };
+
+  const handleViewVerse = (bookName: string, chapterNumber: number, verseNumber: number) => {
+    // Mock verse data for demonstration
+    const mockVerse = {
+      id: `${bookName}-${chapterNumber}-${verseNumber}`,
+      book: bookName,
+      chapter: chapterNumber,
+      verse: verseNumber,
+      text: `This is a sample verse text from ${bookName} ${chapterNumber}:${verseNumber}. In a real implementation, this would be fetched from the database.`,
+      translation: 'KJV',
+      language: 'English',
+      createdAt: '2024-01-15T10:30:00Z',
+      updatedAt: '2024-01-15T10:30:00Z'
+    };
+    
+    setSelectedVerse(mockVerse);
+    setIsVerseModalOpen(true);
   };
 
   const handleSaveChapter = () => {
@@ -184,14 +193,14 @@ const BibleBooksChaptersContent = () => {
       case 'inactive':
         return 'bg-gray-100 text-gray-800';
       case 'draft':
-        return 'bg-blue-100 text-blue-800';
+        return 'bg-amber-100 text-amber-800';
       default:
         return 'bg-gray-100 text-gray-800';
     }
   };
 
   const getTestamentColor = (testament: string) => {
-    return testament === 'old' ? 'bg-orange-100 text-orange-800' : 'bg-blue-100 text-blue-800';
+    return testament === 'old' ? 'bg-orange-100 text-orange-800' : 'bg-amber-100 text-amber-800';
   };
 
   return (
@@ -387,8 +396,8 @@ const BibleBooksChaptersContent = () => {
                     ) : (
                       <ChevronRight className="w-4 h-4 text-gray-500" />
                     )}
-                    <div className="p-2 bg-blue-100 rounded-lg">
-                      <BookOpen className="w-4 h-4 text-blue-600" />
+                    <div className="p-2 bg-amber-100 rounded-lg">
+                      <BookOpen className="w-4 h-4 text-amber-600" />
                     </div>
                     <div>
                       <h3 className="font-semibold text-gray-900">{book.name}</h3>
@@ -415,10 +424,12 @@ const BibleBooksChaptersContent = () => {
                       <Button 
                         size="sm" 
                         onClick={() => handleCreateChapter(book.id)}
-                        className="bg-primary hover:bg-primary-dark"
+                        className="bg-gray-300 hover:bg-gray-300 cursor-not-allowed"
+                        disabled
+                        title="Content creation not available in Phase 1"
                       >
                         <Plus className="w-4 h-4 mr-1" />
-                        Add Chapter
+                        Add Chapter (Phase 2)
                       </Button>
                     </div>
 
@@ -439,9 +450,9 @@ const BibleBooksChaptersContent = () => {
                                 <Eye className="w-4 h-4 mr-1" />
                                 View
                               </Button>
-                              <Button variant="outline" size="sm">
+                              <Button variant="outline" size="sm" disabled title="Content editing not available in Phase 1">
                                 <Edit className="w-4 h-4 mr-1" />
-                                Edit
+                                Edit (Phase 2)
                               </Button>
                             </div>
                           </div>
@@ -545,6 +556,13 @@ const BibleBooksChaptersContent = () => {
           </CardContent>
         </Card>
       )}
+
+      {/* Verse Detail Modal */}
+      <VerseDetailModal
+        isOpen={isVerseModalOpen}
+        onClose={() => setIsVerseModalOpen(false)}
+        verse={selectedVerse}
+      />
     </div>
   );
 };

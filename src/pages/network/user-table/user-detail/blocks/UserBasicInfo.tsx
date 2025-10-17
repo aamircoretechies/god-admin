@@ -5,12 +5,12 @@ const UserBasicInfo = () => {
   // Mock data - in real app this would come from props or API
   const userData = {
     id: 'USR-2024-001',
-    name: 'Tyler Hero',
+    fullName: 'Tyler Hero',
     email: 'tyler.hero@gmail.com',
-    password: '••••••••••••••••',
+    memberSince: 'March 15, 2024',
     accountType: 'Premium',
-    avatar: '300-3.png',
-    joinDate: 'March 15, 2024'
+    status: 'Active',
+    avatar: '300-3.png'
   };
 
   return (
@@ -29,15 +29,15 @@ const UserBasicInfo = () => {
               <img
                 src={toAbsoluteUrl(`/media/avatars/${userData.avatar}`)}
                 className="size-20 rounded-full"
-                alt={userData.name}
+                alt={userData.fullName}
               />
               <div className="absolute -bottom-1 -right-1 size-6 bg-success rounded-full border-2 border-white flex items-center justify-center">
                 <KeenIcon icon="check" className="size-3 text-white" />
               </div>
             </div>
             <div className="text-center lg:text-left">
-              <h4 className="text-lg font-semibold text-gray-900">{userData.name}</h4>
-              <p className="text-sm text-gray-600">Member since {userData.joinDate}</p>
+              <h4 className="text-lg font-semibold text-gray-900">{userData.fullName}</h4>
+              <p className="text-sm text-gray-600">Member since {userData.memberSince}</p>
             </div>
           </div>
 
@@ -52,20 +52,18 @@ const UserBasicInfo = () => {
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700">Full Name</label>
-                <p className="text-sm text-gray-900">{userData.name}</p>
+                <p className="text-sm text-gray-900">{userData.fullName}</p>
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700">Email / Login ID</label>
                 <p className="text-sm text-gray-900">{userData.email}</p>
               </div>
+              <div>
+                <label className="text-sm font-medium text-gray-700">Member Since</label>
+                <p className="text-sm text-gray-900">{userData.memberSince}</p>
+              </div>
             </div>
             <div className="space-y-3">
-              <div>
-                <label className="text-sm font-medium text-gray-700">Password (hashed)</label>
-                <p className="text-sm text-gray-900 font-mono bg-gray-50 px-2 py-1 rounded">
-                  {userData.password}
-                </p>
-              </div>
               <div>
                 <label className="text-sm font-medium text-gray-700">Account Type</label>
                 <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
@@ -75,7 +73,7 @@ const UserBasicInfo = () => {
               <div>
                 <label className="text-sm font-medium text-gray-700">Status</label>
                 <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-success/10 text-success">
-                  Active
+                  {userData.status}
                 </span>
               </div>
             </div>

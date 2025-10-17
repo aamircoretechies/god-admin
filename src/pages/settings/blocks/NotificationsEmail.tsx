@@ -22,126 +22,44 @@ const NotificationsEmail = () => {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="space-y-2">
-            <Label htmlFor="smtp_host">SMTP Host</Label>
-            <Input 
-              id="smtp_host" 
-              placeholder="smtp.gmail.com"
-              defaultValue="smtp.gmail.com"
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="smtp_port">SMTP Port</Label>
-            <Input 
-              id="smtp_port" 
-              type="number"
-              placeholder="587"
-              defaultValue="587"
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="smtp_username">SMTP Username</Label>
-            <Input 
-              id="smtp_username" 
-              placeholder="noreply@growondaily.com"
-              defaultValue="noreply@growondaily.com"
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="smtp_password">SMTP Password</Label>
-            <Input 
-              id="smtp_password" 
-              type="password"
-              placeholder="Enter password"
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="from_email">From Email</Label>
-            <Input 
-              id="from_email" 
-              type="email"
-              placeholder="noreply@growondaily.com"
-              defaultValue="noreply@growondaily.com"
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="from_name">From Name</Label>
-            <Input 
-              id="from_name" 
-              placeholder="GrowOnDaily"
-              defaultValue="GrowOnDaily"
-            />
-          </div>
-        </div>
-        
+        {/* Phase 1 Notification Preferences - Optional Phase 1 */}
         <div className="space-y-4">
-          <h4 className="font-medium text-gray-900">Email Settings</h4>
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <div>
-                <Label htmlFor="email_ssl">Enable SSL</Label>
-                <p className="text-sm text-gray-500">Use SSL/TLS for email encryption</p>
-              </div>
-              <Switch id="email_ssl" defaultChecked />
+          <div className="bg-amber-50 border border-amber-200 rounded-lg p-4">
+            <div className="flex items-center gap-2 text-amber-800">
+              <Settings className="w-4 h-4" />
+              <span className="font-medium">Optional Phase 1 Feature</span>
             </div>
-            
-            <div className="flex items-center justify-between">
-              <div>
-                <Label htmlFor="email_authentication">SMTP Authentication</Label>
-                <p className="text-sm text-gray-500">Require authentication for SMTP</p>
-              </div>
-              <Switch id="email_authentication" defaultChecked />
-            </div>
-            
-            <div className="flex items-center justify-between">
-              <div>
-                <Label htmlFor="email_queue">Email Queue</Label>
-                <p className="text-sm text-gray-500">Queue emails for better delivery</p>
-              </div>
-              <Switch id="email_queue" defaultChecked />
-            </div>
+            <p className="text-sm text-amber-700 mt-1">
+              Email notifications are optional for Phase 1. Configure if needed.
+            </p>
           </div>
-        </div>
-        
-        <div className="space-y-4">
-          <h4 className="font-medium text-gray-900">Notification Types</h4>
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <div>
-                <Label htmlFor="welcome_emails">Welcome Emails</Label>
-                <p className="text-sm text-gray-500">Send welcome emails to new users</p>
+          
+          <div className="space-y-4">
+            <h4 className="font-medium text-gray-900">Notification Preferences</h4>
+            <div className="space-y-3">
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label htmlFor="system_emails">System Emails</Label>
+                  <p className="text-sm text-gray-500">Receive system-generated emails</p>
+                </div>
+                <Switch id="system_emails" defaultChecked />
               </div>
-              <Switch id="welcome_emails" defaultChecked />
-            </div>
-            
-            <div className="flex items-center justify-between">
-              <div>
-                <Label htmlFor="password_reset">Password Reset</Label>
-                <p className="text-sm text-gray-500">Send password reset emails</p>
+              
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label htmlFor="alerts">Alerts</Label>
+                  <p className="text-sm text-gray-500">Receive alert notifications</p>
+                </div>
+                <Switch id="alerts" defaultChecked />
               </div>
-              <Switch id="password_reset" defaultChecked />
-            </div>
-            
-            <div className="flex items-center justify-between">
-              <div>
-                <Label htmlFor="content_notifications">Content Notifications</Label>
-                <p className="text-sm text-gray-500">Notify about new content</p>
+              
+              <div className="flex items-center justify-between">
+                <div>
+                  <Label htmlFor="maintenance_notices">Maintenance Notices</Label>
+                  <p className="text-sm text-gray-500">Receive maintenance notifications</p>
+                </div>
+                <Switch id="maintenance_notices" defaultChecked />
               </div>
-              <Switch id="content_notifications" defaultChecked />
-            </div>
-            
-            <div className="flex items-center justify-between">
-              <div>
-                <Label htmlFor="system_alerts">System Alerts</Label>
-                <p className="text-sm text-gray-500">Send system alert emails</p>
-              </div>
-              <Switch id="system_alerts" defaultChecked />
             </div>
           </div>
         </div>

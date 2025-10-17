@@ -11,18 +11,12 @@ import {
   MessageSquare,
   FileText,
   BookOpen,
-  Users,
-  Calendar,
-  Download,
-  Filter,
-  Star,
-  ThumbsUp,
-  ThumbsDown
+  Calendar
 } from 'lucide-react';
 
 interface SearchResult {
   id: string;
-  type: 'verse' | 'explanation' | 'reflection' | 'translation';
+  type: 'verse' | 'explanation' | 'reflection';
   title: string;
   content: string;
   book: string;
@@ -31,7 +25,6 @@ interface SearchResult {
   translation: string;
   relevance: number;
   views: number;
-  rating: number;
   lastAccessed: string;
 }
 
@@ -56,7 +49,6 @@ interface AnalyticsData {
     title: string;
     type: string;
     views: number;
-    rating: number;
   }>;
 }
 
@@ -72,7 +64,6 @@ const mockSearchResults: SearchResult[] = [
     translation: 'KJV',
     relevance: 95,
     views: 1250,
-    rating: 4.8,
     lastAccessed: '2024-01-20'
   },
   {
@@ -86,7 +77,6 @@ const mockSearchResults: SearchResult[] = [
     translation: 'KJV',
     relevance: 88,
     views: 890,
-    rating: 4.5,
     lastAccessed: '2024-01-19'
   }
 ];
@@ -103,8 +93,7 @@ const mockAnalyticsData: AnalyticsData = {
   contentEngagement: [
     { type: 'Verses', views: 12500, interactions: 8900 },
     { type: 'Explanations', views: 8900, interactions: 6700 },
-    { type: 'Reflections', views: 6500, interactions: 4200 },
-    { type: 'Translations', views: 3200, interactions: 1800 }
+    { type: 'Reflections', views: 6500, interactions: 4200 }
   ],
   userActivity: [
     { date: '2024-01-15', searches: 450, views: 1200 },
@@ -116,11 +105,11 @@ const mockAnalyticsData: AnalyticsData = {
     { date: '2024-01-21', searches: 720, views: 1680 }
   ],
   topContent: [
-    { id: '1', title: 'John 3:16', type: 'verse', views: 1250, rating: 4.8 },
-    { id: '2', title: 'Psalm 23', type: 'verse', views: 980, rating: 4.9 },
-    { id: '3', title: 'Romans 8:28', type: 'verse', views: 890, rating: 4.7 },
-    { id: '4', title: 'The Power of Prayer', type: 'reflection', views: 750, rating: 4.6 },
-    { id: '5', title: 'God\'s Grace Explained', type: 'explanation', views: 680, rating: 4.5 }
+    { id: '1', title: 'John 3:16', type: 'verse', views: 1250 },
+    { id: '2', title: 'Psalm 23', type: 'verse', views: 980 },
+    { id: '3', title: 'Romans 8:28', type: 'verse', views: 890 },
+    { id: '4', title: 'The Power of Prayer', type: 'reflection', views: 750 },
+    { id: '5', title: 'God\'s Grace Explained', type: 'explanation', views: 680 }
   ]
 };
 
@@ -153,7 +142,7 @@ const ContentSearchAnalyticsContent = () => {
   const getTypeColor = (type: string) => {
     switch (type) {
       case 'verse':
-        return 'bg-blue-100 text-blue-800';
+        return 'bg-amber-100 text-amber-800';
       case 'explanation':
         return 'bg-purple-100 text-purple-800';
       case 'reflection':
@@ -222,7 +211,6 @@ const ContentSearchAnalyticsContent = () => {
                     <SelectItem value="verse">Verses</SelectItem>
                     <SelectItem value="explanation">Explanations</SelectItem>
                     <SelectItem value="reflection">Reflections</SelectItem>
-                    <SelectItem value="translation">Translations</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -285,10 +273,6 @@ const ContentSearchAnalyticsContent = () => {
                           <span>{result.views.toLocaleString()}</span>
                         </div>
                         <div className="flex items-center space-x-1">
-                          <Star className="w-4 h-4" />
-                          <span>{result.rating}</span>
-                        </div>
-                        <div className="flex items-center space-x-1">
                           <Calendar className="w-4 h-4" />
                           <span>{result.lastAccessed}</span>
                         </div>
@@ -321,8 +305,8 @@ const ContentSearchAnalyticsContent = () => {
               {analyticsData.popularSearches.map((search, index) => (
                 <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
                   <div className="flex items-center space-x-3">
-                    <div className="flex items-center justify-center w-8 h-8 bg-blue-100 rounded-full">
-                      <span className="text-sm font-bold text-blue-600">{index + 1}</span>
+                    <div className="flex items-center justify-center w-8 h-8 bg-amber-100 rounded-full">
+                      <span className="text-sm font-bold text-amber-600">{index + 1}</span>
                     </div>
                     <div>
                       <h3 className="font-medium text-gray-900">{search.term}</h3>
@@ -366,7 +350,7 @@ const ContentSearchAnalyticsContent = () => {
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2">
                       <div 
-                        className="bg-blue-600 h-2 rounded-full" 
+                        className="bg-amber-600 h-2 rounded-full" 
                         style={{ width: `${(content.interactions / content.views) * 100}%` }}
                       ></div>
                     </div>
@@ -391,7 +375,7 @@ const ContentSearchAnalyticsContent = () => {
             {analyticsData.userActivity.map((activity, index) => (
               <div key={index} className="flex items-center justify-between">
                 <div className="flex items-center space-x-3">
-                  <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                  <div className="w-3 h-3 bg-amber-500 rounded-full"></div>
                   <span className="text-sm text-gray-600">{activity.date}</span>
                 </div>
                 <div className="flex items-center space-x-4">
@@ -408,7 +392,7 @@ const ContentSearchAnalyticsContent = () => {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center">
-            <Star className="w-5 h-5 mr-2" />
+            <TrendingUp className="w-5 h-5 mr-2" />
             Top Performing Content
           </CardTitle>
         </CardHeader>
@@ -420,7 +404,6 @@ const ContentSearchAnalyticsContent = () => {
                   <th className="text-left py-3 px-4 font-medium text-gray-900">Content</th>
                   <th className="text-center py-3 px-4 font-medium text-gray-900">Type</th>
                   <th className="text-center py-3 px-4 font-medium text-gray-900">Views</th>
-                  <th className="text-center py-3 px-4 font-medium text-gray-900">Rating</th>
                   <th className="text-center py-3 px-4 font-medium text-gray-900">Actions</th>
                 </tr>
               </thead>
@@ -434,12 +417,6 @@ const ContentSearchAnalyticsContent = () => {
                       </Badge>
                     </td>
                     <td className="py-3 px-4 text-center text-gray-600">{content.views.toLocaleString()}</td>
-                    <td className="py-3 px-4 text-center">
-                      <div className="flex items-center justify-center space-x-1">
-                        <Star className="w-4 h-4 text-yellow-400 fill-current" />
-                        <span className="text-gray-600">{content.rating}</span>
-                      </div>
-                    </td>
                     <td className="py-3 px-4 text-center">
                       <Button variant="outline" size="sm">
                         <Eye className="w-4 h-4 mr-1" />

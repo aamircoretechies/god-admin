@@ -1,27 +1,9 @@
 import { useResponsive, useScrollPosition } from '@/hooks';
 import {
   GeneralSettings,
-  SystemAppSettings,
-  SystemDatabaseConfig,
   SystemApiConfig,
-  SystemSecuritySettings,
-  SystemPerformance,
-  UserManagementRoles,
-  UserManagementPermissions,
-  UserManagementAccessControl,
-  UserManagementGroups,
-  ContentManagementSettings,
-  ContentModerationRules,
-  ContentAiConfig,
   NotificationsEmail,
-  NotificationsSystemAlerts,
-  NotificationsAlertRules,
-  BackupSettings,
-  MaintenanceSettings,
-  LogManagement,
-  AdvancedDeveloperTools,
-  AdvancedSystemInfo,
-  AdvancedDiagnostics
+  CacheOfflineControl
 } from './blocks';
 import clsx from 'clsx';
 import { useEffect, useRef, useState } from 'react';
@@ -86,47 +68,11 @@ const SettingsSidebarContent = () => {
       <div className="flex flex-col items-stretch grow gap-5 lg:gap-7.5">
         <GeneralSettings />
 
-        <SystemAppSettings />
-
-        <SystemDatabaseConfig />
-
         <SystemApiConfig />
 
-        <SystemSecuritySettings />
-
-        <SystemPerformance />
-
-        <UserManagementRoles />
-
-        <UserManagementPermissions />
-
-        <UserManagementAccessControl />
-
-        <UserManagementGroups />
-
-        <ContentManagementSettings />
-
-        <ContentModerationRules />
-
-        <ContentAiConfig />
+        <CacheOfflineControl />
 
         <NotificationsEmail />
-
-        <NotificationsSystemAlerts />
-
-        <NotificationsAlertRules />
-
-        <BackupSettings />
-
-        <MaintenanceSettings />
-
-        <LogManagement />
-
-        <AdvancedDeveloperTools />
-
-        <AdvancedSystemInfo />
-
-        <AdvancedDiagnostics />
       </div>
     </div>
   );

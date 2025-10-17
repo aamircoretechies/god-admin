@@ -220,7 +220,7 @@ const ActivityLogListContent: React.FC = () => {
       case 'Admin':
         return <Badge variant="destructive">Admin</Badge>;
       case 'Moderator':
-        return <Badge variant="default" className="bg-blue-100 text-blue-800">Moderator</Badge>;
+        return <Badge variant="default" className="bg-amber-100 text-amber-800">Moderator</Badge>;
       default:
         return <Badge variant="outline">{role}</Badge>;
     }
@@ -228,7 +228,7 @@ const ActivityLogListContent: React.FC = () => {
 
   const getActivityTypeBadge = (type: string) => {
     const colors = {
-      'Verse Read': 'bg-blue-100 text-blue-800',
+      'Verse Read': 'bg-amber-100 text-amber-800',
       'AI Query': 'bg-purple-100 text-purple-800',
       'Bookmark': 'bg-green-100 text-green-800',
       'Share': 'bg-orange-100 text-orange-800',
@@ -356,7 +356,7 @@ const ActivityLogListContent: React.FC = () => {
               <p className="text-xs text-gray-500 truncate">"{row.original.queryText}"</p>
             )}
             {row.original.bookReference && (
-              <p className="text-xs text-blue-600">
+                <p className="text-xs text-amber-600">
                 {row.original.bookReference} {row.original.chapterReference}:{row.original.verseReference}
               </p>
             )}

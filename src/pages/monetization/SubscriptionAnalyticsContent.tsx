@@ -138,8 +138,8 @@ const SubscriptionAnalyticsContent: React.FC = () => {
 
         <Card>
           <CardContent className="flex items-center gap-4 p-6">
-            <div className="p-3 bg-blue-100 rounded-lg flex-shrink-0">
-            <Target className="w-6 h-6 text-blue-600" />
+            <div className="p-3 bg-amber-100 rounded-lg flex-shrink-0">
+            <Target className="w-6 h-6 text-amber-600" />
             </div>
             <div className="flex-1">
               <p className="text-sm text-gray-600">Conversion Rate</p>
@@ -198,7 +198,7 @@ const SubscriptionAnalyticsContent: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t">
               <div className="text-center">
                 <p className="text-sm text-gray-600">Free User Growth</p>
-                <p className="text-lg font-bold text-blue-600">+50%</p>
+                <p className="text-lg font-bold text-amber-600">+50%</p>
                 <p className="text-xs text-gray-500">Last 6 months</p>
               </div>
               <div className="text-center">
@@ -284,7 +284,7 @@ const SubscriptionAnalyticsContent: React.FC = () => {
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                  <div className="w-3 h-3 bg-amber-500 rounded-full"></div>
                   <span className="text-sm">Free Users</span>
                 </div>
                 <div className="flex items-center gap-2">
@@ -333,11 +333,11 @@ const SubscriptionAnalyticsContent: React.FC = () => {
                 <p className="text-sm text-green-700">Premium users increased by 153% in 6 months</p>
               </div>
             </div>
-            <div className="flex items-center gap-3 p-3 bg-blue-50 rounded-lg">
-              <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
+            <div className="flex items-center gap-3 p-3 bg-amber-50 rounded-lg">
+              <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
               <div>
-                <p className="font-medium text-blue-900">High Conversion Rate</p>
-                <p className="text-sm text-blue-700">21.1% conversion rate, above industry average</p>
+                <p className="font-medium text-amber-900">High Conversion Rate</p>
+                <p className="text-sm text-amber-700">21.1% conversion rate, above industry average</p>
               </div>
             </div>
             <div className="flex items-center gap-3 p-3 bg-yellow-50 rounded-lg">

@@ -170,7 +170,7 @@ const UserActivityDetailContent: React.FC = () => {
 
   const getActivityTypeBadge = (type: string) => {
     const colors = {
-      'Verse Read': 'bg-blue-100 text-blue-800',
+      'Verse Read': 'bg-amber-100 text-amber-800',
       'AI Query': 'bg-purple-100 text-purple-800',
       'Bookmark': 'bg-green-100 text-green-800',
       'Share': 'bg-orange-100 text-orange-800',
@@ -235,7 +235,7 @@ const UserActivityDetailContent: React.FC = () => {
       case 'Admin':
         return <Badge variant="destructive">Admin</Badge>;
       case 'Moderator':
-        return <Badge variant="default" className="bg-blue-100 text-blue-800">Moderator</Badge>;
+        return <Badge variant="default" className="bg-amber-100 text-amber-800">Moderator</Badge>;
       default:
         return <Badge variant="outline">{role}</Badge>;
     }
@@ -296,8 +296,8 @@ const UserActivityDetailContent: React.FC = () => {
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-blue-100 rounded-lg">
-                <BookOpen className="w-5 h-5 text-blue-600" />
+              <div className="p-2 bg-amber-100 rounded-lg">
+                <BookOpen className="w-5 h-5 text-amber-600" />
               </div>
               <div>
                 <p className="text-sm text-gray-600">Verse Reads</p>
@@ -370,7 +370,7 @@ const UserActivityDetailContent: React.FC = () => {
               <div key={activity.id} className="flex gap-4">
                 {/* Timeline Line */}
                 <div className="flex flex-col items-center">
-                  <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                  <div className="w-3 h-3 bg-amber-500 rounded-full"></div>
                   {index < userActivities.length - 1 && (
                     <div className="w-0.5 h-16 bg-gray-200 mt-2"></div>
                   )}
@@ -397,7 +397,7 @@ const UserActivityDetailContent: React.FC = () => {
                   )}
                   
                   {activity.bookReference && (
-                    <p className="text-sm text-blue-600 mb-2">
+                    <p className="text-sm text-amber-600 mb-2">
                       {activity.bookReference} {activity.chapterReference}:{activity.verseReference}
                     </p>
                   )}

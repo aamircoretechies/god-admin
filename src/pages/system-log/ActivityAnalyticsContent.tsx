@@ -25,7 +25,7 @@ const SimpleBarChart = ({ data, title }: { data: any[], title: string }) => (
           <div className="w-20 text-xs text-gray-600">{item.label}</div>
           <div className="flex-1 bg-gray-200 rounded-full h-2">
             <div 
-              className="bg-blue-500 h-2 rounded-full" 
+              className="bg-amber-500 h-2 rounded-full" 
               style={{ width: `${item.percentage}%` }}
             ></div>
           </div>
@@ -41,7 +41,7 @@ const SimpleLineChart = ({ data, title }: { data: any[], title: string }) => (
     <h4 className="text-sm font-medium text-gray-700">{title}</h4>
     <div className="h-32 flex items-end gap-1">
       {data.map((item, index) => (
-        <div key={index} className="flex-1 bg-blue-500 rounded-t" style={{ height: `${item.value}%` }}>
+        <div key={index} className="flex-1 bg-amber-500 rounded-t" style={{ height: `${item.value}%` }}>
           <div className="text-xs text-white text-center mt-1">{item.value}</div>
         </div>
       ))}
@@ -99,8 +99,8 @@ const ActivityAnalyticsContent: React.FC = () => {
         <Card>
           <CardContent className="flex items-center gap-4 p-6">
             <div className="flex-shrink-0">
-              <div className="p-3 bg-blue-100 rounded-lg">
-                <Users className="w-6 h-6 text-blue-600" />
+              <div className="p-3 bg-amber-100 rounded-lg">
+                <Users className="w-6 h-6 text-amber-600" />
               </div>
             </div>
             <div className="flex-1">
@@ -295,8 +295,8 @@ const ActivityAnalyticsContent: React.FC = () => {
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="text-center p-4 bg-blue-50 rounded-lg">
-              <div className="text-2xl font-bold text-blue-600">65%</div>
+            <div className="text-center p-4 bg-amber-50 rounded-lg">
+              <div className="text-2xl font-bold text-amber-600">65%</div>
               <div className="text-sm text-gray-600">Mobile</div>
               <div className="text-xs text-gray-500">iOS: 38% | Android: 27%</div>
             </div>

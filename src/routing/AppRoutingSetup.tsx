@@ -33,6 +33,8 @@ import {
   ViewPrompt, 
   PromptHistory 
 } from '@/pages/ai-prompt-management';
+import { FeedbackInboxPage } from '@/pages/feedback/FeedbackInboxPage';
+import { AIFlagReviewPage } from '@/pages/feedback/AIFlagReviewPage';
 import { 
   ActivityLogList, 
   UserActivityDetail, 
@@ -167,6 +169,10 @@ const AppRoutingSetup = (): ReactElement => {
           <Route path="/ai-prompt-management/edit/:id" element={<AddEditPrompt />} />
           <Route path="/ai-prompt-management/view/:id" element={<ViewPrompt />} />
           <Route path="/ai-prompt-management/history/:id" element={<PromptHistory />} />
+          
+          {/* Feedback & Moderation Routes */}
+          <Route path="/feedback/inbox" element={<FeedbackInboxPage />} />
+          <Route path="/feedback/ai-flags" element={<AIFlagReviewPage />} />
           
           {/* System Log Routes */}
           <Route path="/system-log" element={<ActivityLogList />} />

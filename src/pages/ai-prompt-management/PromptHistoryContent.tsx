@@ -111,7 +111,7 @@ const PromptHistoryContent: React.FC = () => {
                   key={version.id}
                   className={`p-3 rounded-lg border cursor-pointer transition-colors ${
                     selectedVersion === version.id
-                      ? 'border-blue-500 bg-blue-50'
+                      ? 'border-amber-500 bg-amber-50'
                       : 'border-gray-200 hover:border-gray-300'
                   }`}
                   onClick={() => setSelectedVersion(version.id)}
@@ -151,7 +151,7 @@ const PromptHistoryContent: React.FC = () => {
                       <ul className="text-xs text-gray-600 space-y-1">
                         {version.changes.map((change, index) => (
                           <li key={index} className="flex items-start gap-1">
-                            <span className="text-blue-500">•</span>
+                            <span className="text-amber-500">•</span>
                             {change}
                           </li>
                         ))}
@@ -238,7 +238,7 @@ const PromptHistoryContent: React.FC = () => {
                       <ul className="space-y-2">
                         {selectedVersionData.changes.map((change, index) => (
                           <li key={index} className="flex items-start gap-2">
-                            <span className="text-blue-500 mt-1">•</span>
+                            <span className="text-amber-500 mt-1">•</span>
                             <span className="text-sm text-gray-700">{change}</span>
                           </li>
                         ))}

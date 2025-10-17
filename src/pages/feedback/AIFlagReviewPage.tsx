@@ -1,5 +1,4 @@
 import { Fragment } from 'react';
-
 import { Container } from '@/components/container';
 import {
   Toolbar,
@@ -8,36 +7,40 @@ import {
   ToolbarHeading,
   ToolbarPageTitle
 } from '@/partials/toolbar';
-import { PageNavbar } from '@/pages/account';
-
-import { AccountRolesContent } from '.';
 import { useLayout } from '@/providers';
+import { AIFlagReviewContent } from './AIFlagReviewContent';
 
-const AccountRolesPage = () => {
+const AIFlagReviewPage = () => {
   const { currentLayout } = useLayout();
 
   return (
     <Fragment>
-
       {currentLayout?.name === 'demo1-layout' && (
         <Container>
           <Toolbar>
             <ToolbarHeading>
               <ToolbarPageTitle />
-              <ToolbarDescription>Overview of all the roles and permissions.</ToolbarDescription>
+              <ToolbarDescription>Review and moderate flagged AI responses.</ToolbarDescription>
             </ToolbarHeading>
             <ToolbarActions>
-              <span className="text-sm text-gray-500">Role creation not available in Phase 1</span>
+              <a href="#" className="btn btn-sm btn-light">
+                Export Flags
+              </a>
+              <a href="#" className="btn btn-sm btn-primary">
+                Bulk Actions
+              </a>
             </ToolbarActions>
           </Toolbar>
         </Container>
       )}
 
       <Container>
-        <AccountRolesContent />
+        <AIFlagReviewContent />
       </Container>
     </Fragment>
   );
 };
 
-export { AccountRolesPage };
+export { AIFlagReviewPage };
+
+

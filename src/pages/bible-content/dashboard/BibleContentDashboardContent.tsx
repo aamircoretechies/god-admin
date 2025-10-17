@@ -141,8 +141,8 @@ const BibleContentDashboardContent = () => {
                 <p className="text-2xl font-bold text-gray-900">{contentStats.totalTranslations}</p>
                 <p className="text-sm text-green-600">+2 this month</p>
               </div>
-              <div className="p-3 bg-blue-100 rounded-full">
-                <Languages className="w-6 h-6 text-blue-600" />
+              <div className="p-3 bg-amber-100 rounded-full">
+                <Languages className="w-6 h-6 text-amber-600" />
               </div>
             </div>
           </CardContent>
@@ -291,13 +291,8 @@ const BibleContentDashboardContent = () => {
             <table className="w-full">
               <thead>
                 <tr className="border-b">
-                  <th className="text-left py-3 px-4 font-medium text-gray-900">Translation</th>
+                  <th className="text-left py-3 px-4 font-medium text-gray-900">Name</th>
                   <th className="text-left py-3 px-4 font-medium text-gray-900">Language</th>
-                  <th className="text-center py-3 px-4 font-medium text-gray-900">Verses</th>
-                  <th className="text-center py-3 px-4 font-medium text-gray-900">Status</th>
-                  <th className="text-center py-3 px-4 font-medium text-gray-900">Last Updated</th>
-                  <th className="text-center py-3 px-4 font-medium text-gray-900">File Size</th>
-                  <th className="text-center py-3 px-4 font-medium text-gray-900">Actions</th>
                 </tr>
               </thead>
               <tbody>
@@ -310,30 +305,6 @@ const BibleContentDashboardContent = () => {
                       </div>
                     </td>
                     <td className="py-3 px-4 text-gray-600">{translation.language}</td>
-                    <td className="py-3 px-4 text-center text-gray-600">{translation.verseCount.toLocaleString()}</td>
-                    <td className="py-3 px-4 text-center">
-                      <div className="flex items-center justify-center space-x-2">
-                        {getStatusIcon(translation.status)}
-                        <Badge className={getStatusColor(translation.status)}>
-                          {translation.status.charAt(0).toUpperCase() + translation.status.slice(1)}
-                        </Badge>
-                      </div>
-                    </td>
-                    <td className="py-3 px-4 text-center text-gray-600">{translation.lastUpdated}</td>
-                    <td className="py-3 px-4 text-center text-gray-600">{translation.fileSize}</td>
-                    <td className="py-3 px-4 text-center">
-                      <div className="flex items-center justify-center space-x-2">
-                        <Button variant="outline" size="sm">
-                          <Eye className="w-4 h-4" />
-                        </Button>
-                        <Button variant="outline" size="sm">
-                          <Edit className="w-4 h-4" />
-                        </Button>
-                        <Button variant="outline" size="sm">
-                          <Download className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -357,9 +328,9 @@ const BibleContentDashboardContent = () => {
                 <Brain className="w-4 h-4 mr-2" />
                 Review AI Explanations
               </Button>
-              <Button className="w-full justify-start" variant="outline">
+              <Button className="w-full justify-start" variant="outline" disabled title="AI generation not available in Phase 1">
                 <TrendingUp className="w-4 h-4 mr-2" />
-                Generate New Explanations
+                Generate New Explanations (Phase 2)
               </Button>
               <Button className="w-full justify-start" variant="outline">
                 <AlertCircle className="w-4 h-4 mr-2" />
@@ -378,46 +349,22 @@ const BibleContentDashboardContent = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              <Button className="w-full justify-start" variant="outline">
+              <Button className="w-full justify-start" variant="outline" disabled title="Content management not available in Phase 1">
                 <BookOpen className="w-4 h-4 mr-2" />
-                Manage Books & Chapters
+                Manage Books & Chapters (Phase 2)
               </Button>
-              <Button className="w-full justify-start" variant="outline">
+              <Button className="w-full justify-start" variant="outline" disabled title="Content editing not available in Phase 1">
                 <FileText className="w-4 h-4 mr-2" />
-                Edit Verses
+                Edit Verses (Phase 2)
               </Button>
-              <Button className="w-full justify-start" variant="outline">
+              <Button className="w-full justify-start" variant="outline" disabled title="Content import not available in Phase 1">
                 <Upload className="w-4 h-4 mr-2" />
-                Bulk Import Content
+                Bulk Import (Phase 2)
               </Button>
             </div>
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <TrendingUp className="w-5 h-5 mr-2" />
-              Analytics & Reports
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
-              <Button className="w-full justify-start" variant="outline">
-                <TrendingUp className="w-4 h-4 mr-2" />
-                Content Analytics
-              </Button>
-              <Button className="w-full justify-start" variant="outline">
-                <Eye className="w-4 h-4 mr-2" />
-                Search Content
-              </Button>
-              <Button className="w-full justify-start" variant="outline">
-                <Download className="w-4 h-4 mr-2" />
-                Export Reports
-              </Button>
-            </div>
-          </CardContent>
-        </Card>
       </div>
     </div>
   );

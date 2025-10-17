@@ -3,11 +3,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { 
   Settings, 
-  Globe, 
-  Clock, 
-  Languages,
+  Upload,
+  Palette,
   Save,
   RefreshCw
 } from 'lucide-react';
@@ -22,106 +22,54 @@ const GeneralSettings = () => {
         </CardTitle>
       </CardHeader>
       <CardContent className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Phase 1 General Settings - Brand Identity Alignment */}
+        <div className="space-y-6">
           <div className="space-y-2">
-            <Label htmlFor="app_name">Application Name</Label>
+            <Label htmlFor="site_title">Site Title</Label>
             <Input 
-              id="app_name" 
-              placeholder="Enter application name"
+              id="site_title" 
+              placeholder="Enter site title"
               defaultValue="GrowOnDaily"
             />
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="app_version">Application Version</Label>
-            <Input 
-              id="app_version" 
-              placeholder="Version number"
-              defaultValue="1.0.0"
-            />
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="timezone">Default Timezone</Label>
-            <div className="flex items-center gap-2">
-              <Clock className="w-4 h-4 text-gray-400" />
-              <Input 
-                id="timezone" 
-                placeholder="Select timezone"
-                defaultValue="UTC"
-              />
+            <Label htmlFor="logo_upload">Logo Upload</Label>
+            <div className="flex items-center gap-3">
+              <div className="w-16 h-16 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center">
+                <Upload className="w-6 h-6 text-gray-400" />
+              </div>
+              <div className="flex-1">
+                <Button variant="outline" size="sm" className="w-full">
+                  <Upload className="w-4 h-4 mr-2" />
+                  Upload Logo
+                </Button>
+                <p className="text-xs text-gray-500 mt-1">Recommended: 200x60px, PNG/JPG</p>
+              </div>
             </div>
           </div>
           
           <div className="space-y-2">
-            <Label htmlFor="language">Default Language</Label>
-            <div className="flex items-center gap-2">
-              <Languages className="w-4 h-4 text-gray-400" />
-              <Input 
-                id="language" 
-                placeholder="Select language"
-                defaultValue="English"
-              />
-            </div>
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="domain">Domain URL</Label>
-            <div className="flex items-center gap-2">
-              <Globe className="w-4 h-4 text-gray-400" />
-              <Input 
-                id="domain" 
-                placeholder="https://growondaily.com"
-                defaultValue="https://growondaily.com"
-              />
-            </div>
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="admin_email">Admin Email</Label>
-            <Input 
-              id="admin_email" 
-              type="email"
-              placeholder="admin@growondaily.com"
-              defaultValue="admin@growondaily.com"
-            />
-          </div>
-        </div>
-        
-        <div className="space-y-4">
-          <h4 className="font-medium text-gray-900">System Options</h4>
-          <div className="space-y-3">
-            <div className="flex items-center justify-between">
-              <div>
-                <Label htmlFor="maintenance_mode">Maintenance Mode</Label>
-                <p className="text-sm text-gray-500">Enable maintenance mode to restrict access</p>
-              </div>
-              <Switch id="maintenance_mode" />
-            </div>
-            
-            <div className="flex items-center justify-between">
-              <div>
-                <Label htmlFor="debug_mode">Debug Mode</Label>
-                <p className="text-sm text-gray-500">Enable debug logging for development</p>
-              </div>
-              <Switch id="debug_mode" />
-            </div>
-            
-            <div className="flex items-center justify-between">
-              <div>
-                <Label htmlFor="auto_backup">Auto Backup</Label>
-                <p className="text-sm text-gray-500">Automatically backup system data</p>
-              </div>
-              <Switch id="auto_backup" defaultChecked />
-            </div>
-            
-            <div className="flex items-center justify-between">
-              <div>
-                <Label htmlFor="email_notifications">Email Notifications</Label>
-                <p className="text-sm text-gray-500">Send system notifications via email</p>
-              </div>
-              <Switch id="email_notifications" defaultChecked />
-            </div>
+            <Label htmlFor="theme_selector">Theme Selector</Label>
+            <Select defaultValue="light">
+              <SelectTrigger>
+                <SelectValue placeholder="Select theme" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="light">
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 bg-white border border-gray-300 rounded"></div>
+                    Light Theme
+                  </div>
+                </SelectItem>
+                <SelectItem value="dark">
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 bg-gray-800 border border-gray-600 rounded"></div>
+                    Dark Theme
+                  </div>
+                </SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </div>
         

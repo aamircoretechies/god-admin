@@ -89,6 +89,17 @@ export const MENU_SIDEBAR: TMenuConfig = [
     ]
   },
 
+  {
+    title: 'Feedback & Moderation',
+    icon: 'message-text',
+    children: [
+      {
+        title: 'Feedback Inbox',
+        path: '/feedback/inbox'
+      }
+    ]
+  },
+
   /* {
     title: 'Reading Plan',
     icon: 'directbox-default',
@@ -134,7 +145,7 @@ export const MENU_SIDEBAR: TMenuConfig = [
     heading: 'System Settings'
   },
   
- {
+ /* {
     title: 'Monetization',
     icon: 'bill',
     children: [
@@ -146,15 +157,11 @@ export const MENU_SIDEBAR: TMenuConfig = [
       {
         title: 'Subscription Reports',
         path: '/monetization/subscription-reports'
-      },
-      /* {
-        title: 'Transactions',
-        path: '/monetization/transactions'
-      }, */
+      }
      
      
     ]
-  },
+  }, */
   
 
  
