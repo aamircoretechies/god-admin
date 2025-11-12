@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -22,8 +22,12 @@ import {
   FileText,
   MessageSquare,
   ThumbsUp,
-  ThumbsDown
+  ThumbsDown,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
+import { fetchAIExplanations, type AIExplanationResponse } from '@/services/aiExplanationsApi';
+import { DummyDataIndicator } from '@/components/dummy-data-indicator';
 
 interface AIExplanation {
   id: string;
@@ -31,63 +35,112 @@ interface AIExplanation {
   book: string;
   chapter: number;
   verse: number;
-  verseText: string;
+  verseText: string; // Dummy - not in API
   explanation: string;
   status: 'pending' | 'approved' | 'rejected' | 'needs_review';
   aiGenerated: boolean;
-  theologicalAccuracy: number;
-  clarity: number;
+  theologicalAccuracy: number; // Dummy - not in API
+  clarity: number; // Dummy - not in API
   createdAt: string;
   updatedAt: string;
   reviewer?: string;
-  feedback?: string;
+  feedback?: string; // Dummy - not in API
   category: 'theological' | 'historical' | 'cultural' | 'linguistic' | 'general';
+  translation?: {
+    full_name: string;
+    abbreviation: string;
+  };
 }
 
-const mockExplanations: AIExplanation[] = [
-  {
-    id: '1',
-    verseId: '1',
-    book: 'Genesis',
-    chapter: 1,
-    verse: 1,
-    verseText: 'In the beginning God created the heaven and the earth.',
-    explanation: 'This verse establishes the fundamental truth that God is the Creator of all things. The Hebrew word "bara" (created) is used exclusively of God\'s creative activity and implies creation from nothing. This verse sets the foundation for all biblical theology.',
-    status: 'approved',
-    aiGenerated: true,
-    theologicalAccuracy: 95,
-    clarity: 90,
-    createdAt: '2024-01-15',
-    updatedAt: '2024-01-16',
-    reviewer: 'Dr. Smith',
-    category: 'theological'
-  },
-  {
-    id: '2',
-    verseId: '2',
-    book: 'Genesis',
-    chapter: 1,
-    verse: 2,
-    verseText: 'And the earth was without form, and void; and darkness was upon the face of the deep. And the Spirit of God moved upon the face of the waters.',
-    explanation: 'This verse describes the initial state of creation before God began to organize and fill the earth. The Hebrew terms "tohu" (formless) and "bohu" (void) indicate a state of chaos and emptiness. The Spirit of God\'s movement suggests divine preparation for the creative work to follow.',
-    status: 'pending',
-    aiGenerated: true,
-    theologicalAccuracy: 88,
-    clarity: 85,
-    createdAt: '2024-01-17',
-    updatedAt: '2024-01-17',
-    category: 'linguistic'
-  }
-];
+// Transform API response to component format
+const transformExplanation = (apiData: AIExplanationResponse): AIExplanation => {
+  return {
+    id: apiData.explanation_id,
+    verseId: apiData.verse.verse_id,
+    book: apiData.verse.book,
+    chapter: apiData.verse.chapter,
+    verse: apiData.verse.verse,
+    verseText: '', // Dummy - not in API
+    explanation: apiData.content,
+    status: apiData.status.toLowerCase() as 'pending' | 'approved' | 'rejected' | 'needs_review',
+    aiGenerated: apiData.ai_generated,
+    theologicalAccuracy: 0, // Dummy - not in API
+    clarity: 0, // Dummy - not in API
+    createdAt: new Date(apiData.created_at).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    }),
+    updatedAt: new Date(apiData.updated_at).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    }),
+    reviewer: apiData.reviewed_by || undefined,
+    feedback: undefined, // Dummy - not in API
+    category: (apiData.category.toLowerCase() as any) || 'general',
+    translation: apiData.translation
+  };
+};
 
 const AIExplanationManagementContent = () => {
-  const [explanations, setExplanations] = useState<AIExplanation[]>(mockExplanations);
+  const [explanations, setExplanations] = useState<AIExplanation[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const pageSize = 10;
   const [selectedExplanation, setSelectedExplanation] = useState<AIExplanation | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [isEditing, setIsEditing] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [statusFilter, categoryFilter, searchTerm]);
+
+  // Fetch explanations from API (with debounce for search)
+  useEffect(() => {
+    const loadExplanations = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await fetchAIExplanations({
+          page: currentPage,
+          limit: pageSize,
+          status: statusFilter !== 'all' ? statusFilter : undefined,
+          category: categoryFilter !== 'all' ? categoryFilter : undefined,
+          search: searchTerm || undefined
+        });
+
+        if (response.status === 1 && response.data) {
+          const transformed = response.data.map(transformExplanation);
+          setExplanations(transformed);
+          // Note: API doesn't return pagination info in the example, so we'll estimate
+          // If API returns pagination, update this
+          setTotalCount(transformed.length);
+          setTotalPages(Math.ceil(transformed.length / pageSize) || 1);
+        } else {
+          throw new Error(response.message || 'Failed to fetch explanations');
+        }
+      } catch (err: any) {
+        setError(err?.message || 'Failed to load AI explanations');
+        setExplanations([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const debounceTimer = setTimeout(() => {
+      loadExplanations();
+    }, searchTerm ? 500 : 0);
+
+    return () => clearTimeout(debounceTimer);
+  }, [currentPage, statusFilter, categoryFilter, searchTerm]);
   const [formData, setFormData] = useState<Partial<AIExplanation>>({
     book: '',
     chapter: 1,
@@ -100,14 +153,8 @@ const AIExplanationManagementContent = () => {
     clarity: 0
   });
 
-  const filteredExplanations = explanations.filter(explanation => {
-    const matchesSearch = explanation.verseText.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         explanation.explanation.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         explanation.book.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || explanation.status === statusFilter;
-    const matchesCategory = categoryFilter === 'all' || explanation.category === categoryFilter;
-    return matchesSearch && matchesStatus && matchesCategory;
-  });
+  // Filtering is now done server-side, but we can still do client-side filtering if needed
+  const filteredExplanations = explanations;
 
   const handleCreateNew = () => {
     setIsCreating(true);
@@ -206,6 +253,34 @@ const AIExplanationManagementContent = () => {
     return 'text-red-600';
   };
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading AI explanations...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <Card className="max-w-md">
+          <CardContent className="p-6">
+            <div className="text-center">
+              <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Error Loading Explanations</h3>
+              <p className="text-gray-600 mb-4">{error}</p>
+              <Button onClick={() => window.location.reload()}>Retry</Button>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Stats Cards */}
@@ -215,7 +290,7 @@ const AIExplanationManagementContent = () => {
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Total Explanations</p>
-                <p className="text-2xl font-bold text-gray-900">{explanations.length}</p>
+                <p className="text-2xl font-bold text-gray-900">{totalCount}</p>
               </div>
               <div className="p-3 bg-blue-100 rounded-full">
                 <Brain className="w-6 h-6 text-blue-600" />
@@ -496,8 +571,19 @@ const AIExplanationManagementContent = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            {filteredExplanations.map((explanation) => (
+          {filteredExplanations.length === 0 ? (
+            <div className="text-center py-12">
+              <Brain className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">No Explanations Found</h3>
+              <p className="text-gray-600 mb-4">
+                {searchTerm || statusFilter !== 'all' || categoryFilter !== 'all'
+                  ? 'Try adjusting your filters to see more results.'
+                  : 'No AI explanations available at the moment.'}
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {filteredExplanations.map((explanation) => (
               <div key={explanation.id} className="p-4 border rounded-lg">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center space-x-3">
@@ -507,8 +593,16 @@ const AIExplanationManagementContent = () => {
                     <div>
                       <h3 className="font-semibold text-gray-900">
                         {explanation.book} {explanation.chapter}:{explanation.verse}
+                        {explanation.translation && (
+                          <span className="text-sm font-normal text-gray-500 ml-2">
+                            ({explanation.translation.abbreviation})
+                          </span>
+                        )}
                       </h3>
-                      <p className="text-sm text-gray-600 italic">"{explanation.verseText}"</p>
+                      <p className="text-sm text-gray-600 italic flex items-center gap-1">
+                        {explanation.verseText || 'Verse text not available'}
+                        {!explanation.verseText && <DummyDataIndicator text="Verse text is not available in the API" />}
+                      </p>
                     </div>
                   </div>
                   <div className="flex items-center space-x-2">
@@ -530,14 +624,16 @@ const AIExplanationManagementContent = () => {
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-3 text-sm">
                   <div className="flex items-center space-x-2">
                     <ThumbsUp className="w-4 h-4 text-gray-500" />
-                    <span className={`font-medium ${getAccuracyColor(explanation.theologicalAccuracy)}`}>
+                    <span className="font-medium text-gray-600 flex items-center gap-1">
                       Accuracy: {explanation.theologicalAccuracy}%
+                      <DummyDataIndicator text="Theological accuracy score is not available in the API" />
                     </span>
                   </div>
                   <div className="flex items-center space-x-2">
                     <MessageSquare className="w-4 h-4 text-gray-500" />
-                    <span className={`font-medium ${getAccuracyColor(explanation.clarity)}`}>
+                    <span className="font-medium text-gray-600 flex items-center gap-1">
                       Clarity: {explanation.clarity}%
+                      <DummyDataIndicator text="Clarity score is not available in the API" />
                     </span>
                   </div>
                   <div className="flex items-center space-x-2">
@@ -589,8 +685,38 @@ const AIExplanationManagementContent = () => {
                   </div>
                 </div>
               </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
+
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between mt-6 pt-6 border-t">
+              <div className="text-sm text-gray-600">
+                Showing page {currentPage} of {totalPages}
+              </div>
+              <div className="flex items-center space-x-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                  disabled={currentPage === 1}
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                  Previous
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                  disabled={currentPage === totalPages}
+                >
+                  Next
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

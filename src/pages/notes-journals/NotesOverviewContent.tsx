@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ColumnDef } from '@tanstack/react-table';
 import { DataGrid, DataGridColumnHeader, DataGridRowSelect, DataGridRowSelectAll } from '@/components/data-grid';
@@ -14,20 +14,19 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { 
   Search, 
-  Filter, 
   MoreVertical, 
   Eye, 
   Edit, 
   Trash2, 
   Download, 
   Flag, 
-  User, 
-  Calendar,
-  Tag,
-  BookOpen,
   Volume2,
-  Paperclip
+  Paperclip,
+  AlertCircle,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
+import { fetchNotes, type NoteResponse } from '@/services/notesApi';
 
 // Types
 interface Note {
@@ -49,73 +48,167 @@ interface Note {
   language: string;
 }
 
-// Mock data
-const mockNotes: Note[] = [
-  {
-    id: '1',
-    userId: 'user1',
-    userName: 'John Doe',
-    userEmail: 'john@example.com',
-    userAvatar: '/media/avatars/300-1.png',
-    title: 'Reflection on Psalm 23',
-    content: 'The Lord is my shepherd, I shall not want...',
-    linkedVerses: ['Psalm 23:1-6'],
-    tags: ['Faith', 'Trust', 'Comfort'],
-    status: 'active',
-    createdAt: '2024-01-15T10:30:00Z',
-    updatedAt: '2024-01-15T10:30:00Z',
-    hasAudio: true,
-    hasAttachments: false,
-    isFavorite: true,
-    language: 'English'
-  },
-  {
-    id: '2',
-    userId: 'user2',
-    userName: 'Jane Smith',
-    userEmail: 'jane@example.com',
-    userAvatar: '/media/avatars/300-2.png',
-    title: 'Daily Prayer Journal',
-    content: 'Today I am grateful for...',
-    linkedVerses: ['1 Thessalonians 5:18'],
-    tags: ['Gratitude', 'Prayer'],
-    status: 'flagged',
-    createdAt: '2024-01-14T08:15:00Z',
-    updatedAt: '2024-01-14T08:15:00Z',
-    hasAudio: false,
-    hasAttachments: true,
-    isFavorite: false,
-    language: 'English'
-  },
-  {
-    id: '3',
-    userId: 'user3',
-    userName: 'Mike Johnson',
-    userEmail: 'mike@example.com',
-    userAvatar: '/media/avatars/300-3.png',
-    title: 'Study Notes on Romans',
-    content: 'Romans 8:28 - All things work together for good...',
-    linkedVerses: ['Romans 8:28', 'Romans 8:29'],
-    tags: ['Study', 'Romans', 'God\'s Plan'],
-    status: 'active',
-    createdAt: '2024-01-13T14:20:00Z',
-    updatedAt: '2024-01-13T14:20:00Z',
-    hasAudio: true,
-    hasAttachments: true,
-    isFavorite: true,
-    language: 'English'
-  }
-];
+// Transform API response to component format
+const transformNote = (apiData: NoteResponse): Note => {
+  // Parse verse_id to extract verse reference
+  const parseVerseId = (verseId: string | null): string[] => {
+    if (!verseId) return [];
+    
+    // Handle different verse_id formats:
+    // "Genesis_1_3_SV" -> "Genesis 1:3 (SV)"
+    // "Gen_1_1_SV" -> "Gen 1:1 (SV)"
+    // "Jude_1_1_SV" -> "Jude 1:1 (SV)"
+    // "Jude_23_1_SV" -> "Jude 23:1 (SV)"
+    // "Jude_1_SV" -> "Jude 1 (SV)"
+    // "Gen_1_2" -> "Gen 1:2"
+    
+    try {
+      const parts = verseId.split('_');
+      if (parts.length >= 2) {
+        const book = parts[0];
+        const chapter = parts[1];
+        
+        // Check if last part is a version (2-3 letter code like SV, KJV)
+        const lastPart = parts[parts.length - 1];
+        const isVersion = lastPart.length <= 3 && /^[A-Z]+$/.test(lastPart);
+        
+        if (parts.length >= 4 && isVersion) {
+          // Format: Book_Chapter_Verse_Version
+          const verse = parts[2];
+          return [`${book} ${chapter}:${verse} (${lastPart})`];
+        } else if (parts.length === 3 && isVersion) {
+          // Format: Book_Chapter_Version
+          return [`${book} ${chapter} (${lastPart})`];
+        } else if (parts.length >= 3) {
+          // Format: Book_Chapter_Verse (no version)
+          const verse = parts[2];
+          return [`${book} ${chapter}:${verse}`];
+        } else {
+          // Format: Book_Chapter (no version)
+          return [`${book} ${chapter}`];
+        }
+      }
+    } catch {
+      // If parsing fails, return the original verse_id
+      return [verseId];
+    }
+    
+    return [verseId];
+  };
+
+  // Clean emotion_tags - some might be JSON strings
+  const cleanTags = (tags: string[]): string[] => {
+    return tags
+      .filter(tag => {
+        // Skip JSON strings and CONTINUE_READING entries
+        if (tag.startsWith('{') || tag.startsWith('CONTINUE_READING')) {
+          return false;
+        }
+        return true;
+      })
+      .map(tag => {
+        // Capitalize first letter
+        return tag.charAt(0).toUpperCase() + tag.slice(1).toLowerCase();
+      });
+  };
+
+  // Extract title from content (first line or first 50 chars)
+  const extractTitle = (content: string): string => {
+    if (content.startsWith('CONTINUE_READING')) {
+      return 'Reading Progress';
+    }
+    const firstLine = content.split('\n')[0];
+    return firstLine.length > 50 ? firstLine.substring(0, 50) + '...' : firstLine;
+  };
+
+  const verseId = apiData.verse_id;
+  const linkedVerses = parseVerseId(verseId);
+  const tags = cleanTags(apiData.emotion_tags);
+  const title = extractTitle(apiData.content);
+
+  return {
+    id: apiData.note_id,
+    userId: apiData.user_id,
+    userName: `User ${apiData.user_id.slice(0, 8)}`, // Fallback since API doesn't provide name
+    userEmail: `user-${apiData.user_id.slice(0, 8)}@example.com`, // Fallback
+    userAvatar: undefined,
+    title: title,
+    content: apiData.content,
+    linkedVerses: linkedVerses,
+    tags: tags,
+    status: 'active', // Default status, API doesn't provide this
+    createdAt: apiData.created_at,
+    updatedAt: apiData.updated_at,
+    hasAudio: false, // API doesn't provide this
+    hasAttachments: false, // API doesn't provide this
+    isFavorite: false, // API doesn't provide this
+    language: 'English' // Default, API doesn't provide this
+  };
+};
 
 const NotesOverviewContent: React.FC = () => {
+  const [notes, setNotes] = useState<Note[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [userFilter, setUserFilter] = useState<string>('all');
   const [languageFilter, setLanguageFilter] = useState<string>('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const pageSize = 10;
 
-  // Filter notes
+  // Fetch notes from API
+  useEffect(() => {
+    const loadNotes = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await fetchNotes({
+          page: currentPage,
+          limit: pageSize,
+          search: searchTerm || undefined,
+          user_id: userFilter !== 'all' ? userFilter : undefined
+        });
+
+        if (response.success && response.data) {
+          const transformed = response.data.map(transformNote);
+          setNotes(transformed);
+          setTotalCount(response.metadata.total);
+          setTotalPages(response.metadata.totalPages);
+        } else {
+          throw new Error('Failed to fetch notes');
+        }
+      } catch (err: any) {
+        setError(err?.message || 'Failed to load notes');
+        setNotes([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const debounceTimer = setTimeout(() => {
+      loadNotes();
+    }, searchTerm ? 500 : 0);
+
+    return () => clearTimeout(debounceTimer);
+  }, [currentPage, searchTerm, userFilter]);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [statusFilter, userFilter, languageFilter, searchTerm]);
+
+  // Get unique user IDs for filter
+  const uniqueUserIds = useMemo(() => {
+    const userIds = new Set(notes.map(n => n.userId));
+    return Array.from(userIds);
+  }, [notes]);
+
+  // Filter notes (client-side filtering as fallback, but API should handle it)
   const filteredNotes = useMemo(() => {
-    return mockNotes.filter(note => {
+    return notes.filter(note => {
       const matchesSearch = 
         note.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         note.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -130,7 +223,7 @@ const NotesOverviewContent: React.FC = () => {
 
       return matchesSearch && matchesStatus && matchesUser && matchesLanguage;
     });
-  }, [searchTerm, statusFilter, userFilter, languageFilter]);
+  }, [notes, searchTerm, statusFilter, userFilter, languageFilter]);
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -391,9 +484,14 @@ const NotesOverviewContent: React.FC = () => {
             className="px-3 py-2 border border-gray-300 rounded-md text-sm"
           >
             <option value="all">All Users</option>
-            <option value="user1">John Doe</option>
-            <option value="user2">Jane Smith</option>
-            <option value="user3">Mike Johnson</option>
+            {uniqueUserIds.map((userId) => {
+              const note = notes.find(n => n.userId === userId);
+              return (
+                <option key={userId} value={userId}>
+                  {note?.userName || `User ${userId.slice(0, 8)}`}
+                </option>
+              );
+            })}
           </select>
           <select
             value={languageFilter}
@@ -408,24 +506,79 @@ const NotesOverviewContent: React.FC = () => {
         </div>
         <div className="flex items-center gap-2">
           <span className="text-sm text-gray-600">
-            Showing {filteredNotes.length} of {mockNotes.length} notes
+            Showing {filteredNotes.length} of {totalCount || notes.length} notes
           </span>
         </div>
       </div>
     </div>
   );
 
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading notes...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center max-w-md">
+          <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">Error Loading Notes</h3>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <Button onClick={() => window.location.reload()}>Retry</Button>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <DataGrid
-      columns={columns}
-      data={filteredNotes}
-      rowSelection={true}
-      onRowSelectionChange={handleRowSelection}
-      pagination={{ size: 10 }}
-      sorting={[{ id: 'createdAt', desc: true }]}
-      toolbar={<Toolbar />}
-      layout={{ card: true }}
-    />
+    <div className="space-y-4">
+      <DataGrid
+        columns={columns}
+        data={filteredNotes}
+        rowSelection={true}
+        onRowSelectionChange={handleRowSelection}
+        pagination={{ size: 10 }}
+        sorting={[{ id: 'createdAt', desc: true }]}
+        toolbar={<Toolbar />}
+        layout={{ card: true }}
+      />
+      
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <div className="flex items-center justify-between p-4 border-t">
+          <div className="text-sm text-gray-600">
+            Showing page {currentPage} of {totalPages} ({totalCount} total notes)
+          </div>
+          <div className="flex items-center space-x-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+              disabled={currentPage === 1}
+            >
+              <ChevronLeft className="w-4 h-4" />
+              Previous
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+              disabled={currentPage === totalPages}
+            >
+              Next
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
 

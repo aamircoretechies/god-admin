@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,7 +10,6 @@ import {
   BookOpen, 
   Plus, 
   Edit, 
-  Trash2, 
   Save,
   X,
   ChevronDown,
@@ -21,82 +20,45 @@ import {
   Eye,
   Copy
 } from 'lucide-react';
+import { fetchBibleBooks, fetchBibleBookDetail } from '@/services/bibleBooksApi';
+import { DummyDataIndicator } from '@/components/dummy-data-indicator';
 
 interface BibleBook {
   id: string;
   name: string;
+  shortName: string;
   testament: 'old' | 'new';
   chapters: number;
-  verses: number;
-  description: string;
-  status: 'active' | 'inactive' | 'draft';
+  verses: number; // Dummy - not in API
+  description: string; // Dummy - not in API
+  status: 'active' | 'inactive' | 'draft'; // Dummy - not in API
+  bookOrder: number;
 }
 
 interface Chapter {
   id: string;
   bookId: string;
   number: number;
-  verses: number;
-  status: 'active' | 'inactive' | 'draft';
+  verses: number; // Dummy - not in API
+  status: 'active' | 'inactive' | 'draft'; // Dummy - not in API
 }
 
-const mockBooks: BibleBook[] = [
-  {
-    id: '1',
-    name: 'Genesis',
-    testament: 'old',
-    chapters: 50,
-    verses: 1533,
-    description: 'The first book of the Bible, containing the creation story and early history.',
-    status: 'active'
-  },
-  {
-    id: '2',
-    name: 'Exodus',
-    testament: 'old',
-    chapters: 40,
-    verses: 1213,
-    description: 'The second book of the Bible, containing the story of the Israelites\' exodus from Egypt.',
-    status: 'active'
-  },
-  {
-    id: '3',
-    name: 'Matthew',
-    testament: 'new',
-    chapters: 28,
-    verses: 1071,
-    description: 'The first book of the New Testament, containing the Gospel of Matthew.',
-    status: 'active'
-  },
-  {
-    id: '4',
-    name: 'Mark',
-    testament: 'new',
-    chapters: 16,
-    verses: 678,
-    description: 'The second book of the New Testament, containing the Gospel of Mark.',
-    status: 'active'
-  }
-];
-
-const mockChapters: Chapter[] = [
-  { id: '1', bookId: '1', number: 1, verses: 31, status: 'active' },
-  { id: '2', bookId: '1', number: 2, verses: 25, status: 'active' },
-  { id: '3', bookId: '1', number: 3, verses: 24, status: 'active' },
-  { id: '4', bookId: '3', number: 1, verses: 25, status: 'active' },
-  { id: '5', bookId: '3', number: 2, verses: 23, status: 'active' }
-];
 
 const BibleBooksChaptersContent = () => {
-  const [books, setBooks] = useState<BibleBook[]>(mockBooks);
-  const [chapters, setChapters] = useState<Chapter[]>(mockChapters);
+  const [books, setBooks] = useState<BibleBook[]>([]);
+  const [chapters, setChapters] = useState<{ [bookId: string]: Chapter[] }>({});
   const [expandedBooks, setExpandedBooks] = useState<string[]>([]);
+  const [loadingBooks, setLoadingBooks] = useState(true);
+  const [loadingChapters, setLoadingChapters] = useState<{ [bookId: string]: boolean }>({});
+  const [error, setError] = useState<string | null>(null);
   const [isCreatingBook, setIsCreatingBook] = useState(false);
   const [isCreatingChapter, setIsCreatingChapter] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [testamentFilter, setTestamentFilter] = useState<string>('all');
   const [selectedVerse, setSelectedVerse] = useState<any>(null);
   const [isVerseModalOpen, setIsVerseModalOpen] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
   const [bookFormData, setBookFormData] = useState<Partial<BibleBook>>({
     name: '',
     testament: 'old',
@@ -112,6 +74,66 @@ const BibleBooksChaptersContent = () => {
     status: 'draft'
   });
 
+  // Load books on component mount
+  useEffect(() => {
+    const loadBooks = async () => {
+      try {
+        setLoadingBooks(true);
+        setError(null);
+        const response = await fetchBibleBooks({ page: currentPage, limit: 20 });
+        if (response.status === 1) {
+          const transformedBooks: BibleBook[] = response.data.map((book) => ({
+            id: book.book_id,
+            name: book.long_name,
+            shortName: book.short_name,
+            testament: (book.testament === 'OLD' ? 'old' : 'new') as 'old' | 'new',
+            chapters: book.total_chapters,
+            verses: 0, // Dummy - not in API
+            description: '', // Dummy - not in API
+            status: 'active' as const, // Dummy - not in API
+            bookOrder: book.book_order
+          }));
+          setBooks(transformedBooks);
+        } else {
+          setError('Failed to load books');
+        }
+      } catch (err: any) {
+        setError(err?.message || 'Failed to load books');
+      } finally {
+        setLoadingBooks(false);
+      }
+    };
+
+    loadBooks();
+  }, [currentPage]);
+
+  // Load chapters when a book is expanded
+  const loadChaptersForBook = async (bookId: string) => {
+    if (chapters[bookId]) {
+      // Already loaded
+      return;
+    }
+
+    try {
+      setLoadingChapters(prev => ({ ...prev, [bookId]: true }));
+      const response = await fetchBibleBookDetail(bookId);
+      if (response.status === 1) {
+        const transformedChapters: Chapter[] = response.data.chapters.map((chapter) => ({
+          id: chapter.chapter_id,
+          bookId: bookId,
+          number: chapter.chapter_number,
+          verses: 0, // Dummy - not in API
+          status: 'active' as const // Dummy - not in API
+        }));
+        setChapters(prev => ({ ...prev, [bookId]: transformedChapters }));
+      }
+    } catch (err: any) {
+      console.error('Failed to load chapters:', err);
+    } finally {
+      setLoadingChapters(prev => ({ ...prev, [bookId]: false }));
+    }
+  };
+
   const filteredBooks = books.filter(book => {
     const matchesSearch = book.name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesTestament = testamentFilter === 'all' || book.testament === testamentFilter;
@@ -119,11 +141,16 @@ const BibleBooksChaptersContent = () => {
   });
 
   const toggleBookExpansion = (bookId: string) => {
-    setExpandedBooks(prev => 
-      prev.includes(bookId) 
+    setExpandedBooks(prev => {
+      const isExpanded = prev.includes(bookId);
+      if (!isExpanded) {
+        // Load chapters when expanding
+        loadChaptersForBook(bookId);
+      }
+      return isExpanded
         ? prev.filter(id => id !== bookId)
-        : [...prev, bookId]
-    );
+        : [...prev, bookId];
+    });
   };
 
   const handleCreateBook = () => {
@@ -202,6 +229,29 @@ const BibleBooksChaptersContent = () => {
   const getTestamentColor = (testament: string) => {
     return testament === 'old' ? 'bg-orange-100 text-orange-800' : 'bg-amber-100 text-amber-800';
   };
+
+  if (loadingBooks && books.length === 0) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <div className="spinner-border spinner-border-sm text-primary" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </div>
+          <p className="text-sm text-gray-600 mt-2">Loading books...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error && books.length === 0) {
+    return (
+      <div className="card">
+        <div className="card-body">
+          <div className="alert alert-danger">{error}</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -369,6 +419,29 @@ const BibleBooksChaptersContent = () => {
               <span className="text-sm text-gray-600">
                 {filteredBooks.length} books
               </span>
+              {totalPages > 1 && (
+                <div className="flex items-center gap-2 ml-4">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                    disabled={currentPage === 1 || loadingBooks}
+                  >
+                    Previous
+                  </Button>
+                  <span className="text-sm text-gray-600">
+                    Page {currentPage} of {totalPages}
+                  </span>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                    disabled={currentPage === totalPages || loadingBooks}
+                  >
+                    Next
+                  </Button>
+                </div>
+              )}
             </div>
           </div>
         </CardContent>
@@ -401,18 +474,35 @@ const BibleBooksChaptersContent = () => {
                     </div>
                     <div>
                       <h3 className="font-semibold text-gray-900">{book.name}</h3>
-                      <p className="text-sm text-gray-600">{book.description}</p>
+                      <p className="text-sm text-gray-600">
+                        {book.description || (
+                          <span className="text-gray-400 italic">
+                            <DummyDataIndicator text="Description not available" />
+                          </span>
+                        )}
+                      </p>
                     </div>
                   </div>
                   <div className="flex items-center space-x-2">
                     <Badge className={getTestamentColor(book.testament)}>
                       {book.testament === 'old' ? 'OT' : 'NT'}
                     </Badge>
+                    <div className="flex items-center gap-1">
                     <Badge className={getStatusColor(book.status)}>
                       {book.status.charAt(0).toUpperCase() + book.status.slice(1)}
                     </Badge>
+                      <DummyDataIndicator text="Status" />
+                    </div>
                     <span className="text-sm text-gray-500">
-                      {book.chapters} chapters, {book.verses.toLocaleString()} verses
+                      {book.chapters} chapters
+                      {book.verses > 0 && (
+                        <span>, {book.verses.toLocaleString()} verses</span>
+                      )}
+                      {book.verses === 0 && (
+                        <span className="ml-2">
+                          <DummyDataIndicator text="Verse count" />
+                        </span>
+                      )}
                     </span>
                   </div>
                 </div>
@@ -433,18 +523,38 @@ const BibleBooksChaptersContent = () => {
                       </Button>
                     </div>
 
+                    {loadingChapters[book.id] ? (
+                      <div className="flex items-center justify-center py-8">
+                        <div className="text-center">
+                          <div className="spinner-border spinner-border-sm text-primary" role="status">
+                            <span className="visually-hidden">Loading...</span>
+                          </div>
+                          <p className="text-sm text-gray-600 mt-2">Loading chapters...</p>
+                        </div>
+                      </div>
+                    ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                      {chapters
-                        .filter(chapter => chapter.bookId === book.id)
-                        .map((chapter) => (
+                        {chapters[book.id]?.map((chapter) => (
                           <div key={chapter.id} className="border rounded-lg p-3 bg-white">
                             <div className="flex items-center justify-between mb-2">
                               <h5 className="font-medium text-gray-900">Chapter {chapter.number}</h5>
+                              <div className="flex items-center gap-1">
                               <Badge className={getStatusColor(chapter.status)}>
                                 {chapter.status.charAt(0).toUpperCase() + chapter.status.slice(1)}
                               </Badge>
+                                <DummyDataIndicator text="Status" />
+                              </div>
                             </div>
-                            <p className="text-sm text-gray-600 mb-2">{chapter.verses} verses</p>
+                            <p className="text-sm text-gray-600 mb-2 flex items-center gap-2">
+                              {chapter.verses > 0 ? (
+                                <span>{chapter.verses} verses</span>
+                              ) : (
+                                <>
+                                  <span className="text-gray-400 italic">N/A verses</span>
+                                  <DummyDataIndicator text="Verse count" />
+                                </>
+                              )}
+                            </p>
                             <div className="flex space-x-2">
                               <Button variant="outline" size="sm">
                                 <Eye className="w-4 h-4 mr-1" />
@@ -457,7 +567,13 @@ const BibleBooksChaptersContent = () => {
                             </div>
                           </div>
                         ))}
+                        {(!chapters[book.id] || chapters[book.id].length === 0) && !loadingChapters[book.id] && (
+                          <p className="text-sm text-gray-500 col-span-full text-center py-4">
+                            No chapters found
+                          </p>
+                        )}
                     </div>
+                    )}
                   </div>
                 )}
               </div>

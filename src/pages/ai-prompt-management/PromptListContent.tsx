@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ColumnDef } from '@tanstack/react-table';
 import { DataGrid, DataGridColumnHeader, DataGridRowSelect, DataGridRowSelectAll } from '@/components/data-grid';
@@ -20,8 +20,10 @@ import {
   History,
   Copy,
   CheckCircle,
-  XCircle
+  XCircle,
+  AlertCircle
 } from 'lucide-react';
+import { fetchPrompts, type PromptResponse } from '@/services/promptsApi';
 
 // Types
 interface AIPrompt {
@@ -29,98 +31,114 @@ interface AIPrompt {
   title: string;
   description: string;
   content: string;
-  category: 'Verse Explanation' | 'Chapter Summary' | 'Daily Reflection' | 'Study Guide' | 'Prayer Guide';
-  targetRole: 'All Users' | 'Premium Only' | 'Admin Only';
-  language: 'English' | 'Dutch';
-  status: 'Active' | 'Inactive';
-  createdBy: string;
+  category: string;
+  targetRole: string;
+  language: string;
+  status: string;
+  createdBy?: string;
   createdAt: string;
   updatedAt: string;
-  version: number;
+  version: string;
+  usageCount?: number;
+  tags?: string[];
+  isPublic?: boolean;
 }
 
-// Mock data
-const mockPrompts: AIPrompt[] = [
-  {
-    id: '1',
-    title: 'Verse Explanation Template',
-    description: 'AI prompt for explaining biblical verses in simple terms',
-    content: 'Please explain the following Bible verse in simple, easy-to-understand language. Include the historical context, key themes, and practical application for daily life.',
-    category: 'Verse Explanation',
-    targetRole: 'All Users',
-    language: 'English',
-    status: 'Active',
-    createdBy: 'Admin User',
-    createdAt: '2024-01-15T10:30:00Z',
-    updatedAt: '2024-01-20T14:20:00Z',
-    version: 3
-  },
-  {
-    id: '2',
-    title: 'Chapter Summary Generator',
-    description: 'Generate comprehensive summaries of Bible chapters',
-    content: 'Create a detailed summary of the following Bible chapter. Include the main events, key characters, important themes, and spiritual lessons that can be applied today.',
-    category: 'Chapter Summary',
-    targetRole: 'Premium Only',
-    language: 'English',
-    status: 'Active',
-    createdBy: 'Admin User',
-    createdAt: '2024-01-10T09:15:00Z',
-    updatedAt: '2024-01-18T16:45:00Z',
-    version: 2
-  },
-  {
-    id: '3',
-    title: 'Daily Reflection Prompt',
-    description: 'Guide users in daily spiritual reflection',
-    content: 'Help me reflect on this Bible passage for my daily spiritual growth. What does this teach me about God, myself, and how I should live?',
-    category: 'Daily Reflection',
-    targetRole: 'All Users',
-    language: 'English',
-    status: 'Active',
-    createdBy: 'Admin User',
-    createdAt: '2024-01-12T11:20:00Z',
-    updatedAt: '2024-01-19T13:30:00Z',
-    version: 1
-  },
-  {
-    id: '4',
-    title: 'Study Guide Template',
-    description: 'Create structured study guides for Bible study groups',
-    content: 'Develop a comprehensive study guide for this Bible passage. Include discussion questions, background information, and application points for group study.',
-    category: 'Study Guide',
-    targetRole: 'Premium Only',
-    language: 'English',
-    status: 'Inactive',
-    createdBy: 'Admin User',
-    createdAt: '2024-01-08T15:40:00Z',
-    updatedAt: '2024-01-16T10:15:00Z',
-    version: 1
-  },
-  {
-    id: '5',
-    title: 'Prayer Guide Generator',
-    description: 'Generate prayer prompts based on Bible passages',
-    content: 'Based on this Bible passage, help me create a prayer that reflects the themes and lessons found in this text.',
-    category: 'Prayer Guide',
-    targetRole: 'All Users',
-    language: 'Dutch',
-    status: 'Active',
-    createdBy: 'Admin User',
-    createdAt: '2024-01-14T12:00:00Z',
-    updatedAt: '2024-01-21T09:30:00Z',
-    version: 2
-  }
-];
+// Transform API response to component format
+const transformPrompt = (apiData: PromptResponse): AIPrompt => {
+  // Format target_role: "AllUsers" -> "All Users"
+  const formatTargetRole = (role: string): string => {
+    return role.replace(/([A-Z])/g, ' $1').trim();
+  };
+
+  // Format category: "VerseExplanation" -> "Verse Explanation"
+  const formatCategory = (category: string): string => {
+    return category.replace(/([A-Z])/g, ' $1').trim();
+  };
+
+  // Extract version number from "v1" format
+  const extractVersion = (version: string): string => {
+    return version.replace('v', '');
+  };
+
+  return {
+    id: apiData.template_id,
+    title: apiData.title,
+    description: apiData.description,
+    content: '', // Not in API response
+    category: formatCategory(apiData.category),
+    targetRole: formatTargetRole(apiData.target_role),
+    language: apiData.language,
+    status: apiData.status,
+    createdAt: apiData.created_at,
+    updatedAt: apiData.last_updated,
+    version: extractVersion(apiData.version),
+    usageCount: apiData.usage_count,
+    tags: apiData.tags,
+    isPublic: apiData.is_public
+  };
+};
 
 const PromptListContent: React.FC = () => {
+  const [prompts, setPrompts] = useState<AIPrompt[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const pageSize = 10;
 
-  // Filter prompts
+  // Convert formatted category back to API format (e.g., "Verse Explanation" -> "VerseExplanation")
+  const convertCategoryToApiFormat = (category: string): string => {
+    return category.replace(/\s+/g, '');
+  };
+
+  // Fetch prompts from API
+  useEffect(() => {
+    const loadPrompts = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await fetchPrompts({
+          page: currentPage,
+          limit: pageSize,
+          status: statusFilter !== 'all' ? statusFilter : undefined,
+          category: categoryFilter !== 'all' ? convertCategoryToApiFormat(categoryFilter) : undefined,
+          search: searchTerm || undefined
+        });
+
+        if (response.status === 1 && response.data) {
+          const transformed = response.data.map(transformPrompt);
+          setPrompts(transformed);
+          setTotalCount(transformed.length); // Note: API might return total count separately
+        } else {
+          throw new Error(response.message || 'Failed to fetch prompts');
+        }
+      } catch (err: any) {
+        setError(err?.message || 'Failed to load prompts');
+        setPrompts([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const debounceTimer = setTimeout(() => {
+      loadPrompts();
+    }, searchTerm ? 500 : 0);
+
+    return () => clearTimeout(debounceTimer);
+  }, [currentPage, statusFilter, categoryFilter, searchTerm]);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [statusFilter, categoryFilter, searchTerm]);
+
+  // Filter prompts (client-side filtering as fallback, but API should handle it)
   const filteredPrompts = useMemo(() => {
-    return mockPrompts.filter(prompt => {
+    return prompts.filter(prompt => {
       const matchesSearch = 
         prompt.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         prompt.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -131,7 +149,7 @@ const PromptListContent: React.FC = () => {
 
       return matchesSearch && matchesStatus && matchesCategory;
     });
-  }, [searchTerm, statusFilter, categoryFilter]);
+  }, [prompts, searchTerm, statusFilter, categoryFilter]);
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -145,16 +163,19 @@ const PromptListContent: React.FC = () => {
   };
 
   const getCategoryBadge = (category: string) => {
-    const colors = {
+    const colors: Record<string, string> = {
       'Verse Explanation': 'bg-amber-100 text-amber-800',
       'Chapter Summary': 'bg-purple-100 text-purple-800',
       'Daily Reflection': 'bg-green-100 text-green-800',
       'Study Guide': 'bg-orange-100 text-orange-800',
-      'Prayer Guide': 'bg-pink-100 text-pink-800'
+      'Prayer Guide': 'bg-pink-100 text-pink-800',
+      'Historical Context': 'bg-blue-100 text-blue-800',
+      'Chapter Context': 'bg-indigo-100 text-indigo-800',
+      'Other': 'bg-gray-100 text-gray-800'
     };
     
     return (
-      <Badge variant="default" className={colors[category as keyof typeof colors] || 'bg-gray-100 text-gray-800'}>
+      <Badge variant="default" className={colors[category] || 'bg-gray-100 text-gray-800'}>
         {category}
       </Badge>
     );
@@ -349,6 +370,12 @@ const PromptListContent: React.FC = () => {
     console.log(`Selected ${selectedRowIds.length} prompts:`, selectedRowIds);
   };
 
+  // Get unique categories from prompts
+  const uniqueCategories = useMemo(() => {
+    const categories = new Set(prompts.map(p => p.category));
+    return Array.from(categories).sort();
+  }, [prompts]);
+
   const Toolbar = () => (
     <div className="flex flex-col gap-4 p-5">
       <div className="flex items-center justify-between">
@@ -377,21 +404,43 @@ const PromptListContent: React.FC = () => {
             className="px-3 py-2 border border-gray-300 rounded-md text-sm"
           >
             <option value="all">All Categories</option>
-            <option value="Verse Explanation">Verse Explanation</option>
-            <option value="Chapter Summary">Chapter Summary</option>
-            <option value="Daily Reflection">Daily Reflection</option>
-            <option value="Study Guide">Study Guide</option>
-            <option value="Prayer Guide">Prayer Guide</option>
+            {uniqueCategories.map(category => (
+              <option key={category} value={category}>{category}</option>
+            ))}
           </select>
         </div>
         <div className="flex items-center gap-2">
           <span className="text-sm text-gray-600">
-            Showing {filteredPrompts.length} of {mockPrompts.length} prompts
+            Showing {filteredPrompts.length} of {totalCount || prompts.length} prompts
           </span>
         </div>
       </div>
     </div>
   );
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading prompts...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center max-w-md">
+          <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">Error Loading Prompts</h3>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <Button onClick={() => window.location.reload()}>Retry</Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <DataGrid

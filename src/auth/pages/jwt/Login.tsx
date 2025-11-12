@@ -4,7 +4,6 @@ import clsx from 'clsx';
 import * as Yup from 'yup';
 import { useFormik } from 'formik';
 import { KeenIcon } from '@/components';
-import { toAbsoluteUrl } from '@/utils';
 import { useAuthContext } from '@/auth';
 import { useLayout } from '@/providers';
 import { Alert } from '@/components';
@@ -22,10 +21,13 @@ const loginSchema = Yup.object().shape({
   remember: Yup.boolean()
 });
 
-const initialValues = {
-  email: 'demo@example.com',
-  password: 'demo1234',
-  remember: false
+const getInitialValues = () => {
+  const savedEmail = localStorage.getItem('email');
+  return {
+    email: savedEmail || '',
+    password: '',
+    remember: !!savedEmail
+  };
 };
 
 const Login = () => {
@@ -38,27 +40,29 @@ const Login = () => {
   const { currentLayout } = useLayout();
 
   const formik = useFormik({
-    initialValues,
+    initialValues: getInitialValues(),
     validationSchema: loginSchema,
     onSubmit: async (values, { setStatus, setSubmitting }) => {
       setLoading(true);
+      setStatus('');
 
       try {
         if (!login) {
           throw new Error('JWTProvider is required for this form.');
         }
 
-        await login('demo@keenthemes.com', values.password);
+        await login(values.email, values.password);
 
         if (values.remember) {
-          localStorage.setItem('email', "demo@keenthemes.com");
+          localStorage.setItem('email', values.email);
         } else {
           localStorage.removeItem('email');
         }
 
         navigate(from, { replace: true });
-      } catch {
-        setStatus('The login details are incorrect');
+      } catch (error: any) {
+        const errorMessage = error?.message || 'The login details are incorrect';
+        setStatus(errorMessage);
         setSubmitting(false);
       }
       setLoading(false);

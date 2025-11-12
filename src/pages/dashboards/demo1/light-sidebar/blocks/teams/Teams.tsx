@@ -17,6 +17,7 @@ import axios from 'axios';
 import { formatIsoDate } from '@/utils/Date';
 import { TeamUsers } from './TeamUsers';
 import { Input } from '@/components/ui/input';
+import { API_URL } from '@/utils/Api';
 
 type TeamsQueryApiResponse = QueryApiResponse<Team>;
 
@@ -159,7 +160,7 @@ const Teams = () => {
       }
 
       const response = await axios.get<TeamsQueryApiResponse>(
-        `${import.meta.env.VITE_APP_API_URL}/teams/query?${queryParams.toString()}`
+        `${API_URL}/teams/query?${queryParams.toString()}`
       );
 
       return {

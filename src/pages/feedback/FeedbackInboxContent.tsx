@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -12,7 +12,6 @@ import {
 } from '@/components/ui/select';
 import { 
   Search, 
-  Filter, 
   MessageSquare, 
   Flag, 
   CheckCircle, 
@@ -20,8 +19,12 @@ import {
   Clock,
   User,
   BookOpen,
-  AlertTriangle
+  AlertTriangle,
+  AlertCircle,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
+import { fetchFlaggedContent, type FlaggedContentResponse } from '@/services/flaggedContentApi';
 
 interface FeedbackItem {
   id: string;
@@ -29,65 +32,100 @@ interface FeedbackItem {
   user: string;
   verse: string;
   comment: string;
-  status: 'unresolved' | 'resolved';
+  status: 'unresolved' | 'resolved' | 'pending';
   timestamp: string;
   aiResponse?: string;
+  tags?: string[];
+  reporter?: {
+    email: string;
+    full_name: string;
+    role: string;
+  };
 }
+
+// Transform API response to component format
+const transformFlaggedContent = (apiData: FlaggedContentResponse): FeedbackItem => {
+  // Map status: PENDING -> pending, others -> resolved/unresolved
+  const mapStatus = (status: string): 'unresolved' | 'resolved' | 'pending' => {
+    if (status === 'PENDING') return 'pending';
+    if (status === 'RESOLVED' || status === 'APPROVED') return 'resolved';
+    return 'unresolved';
+  };
+
+  // Map content_type to type
+  const mapType = (contentType: string): 'Content' | 'Audio' | 'Other' => {
+    if (contentType === 'verse' || contentType === 'explanation') return 'Content';
+    if (contentType === 'audio') return 'Audio';
+    return 'Other';
+  };
+
+  // Format verse reference
+  const verseRef = `${apiData.book} ${apiData.chapter}:${apiData.verse} (${apiData.version})`;
+
+  return {
+    id: apiData.report_id,
+    type: mapType(apiData.content_type),
+    user: apiData.reporter?.full_name || apiData.reporter?.email || 'Unknown User',
+    verse: verseRef,
+    comment: apiData.description || apiData.reason,
+    status: mapStatus(apiData.status),
+    timestamp: apiData.created_at,
+    tags: apiData.tags,
+    reporter: apiData.reporter
+  };
+};
 
 const FeedbackInboxContent = () => {
   const [filter, setFilter] = useState('all');
   const [searchTerm, setSearchTerm] = useState('');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [feedbackData, setFeedbackData] = useState<FeedbackItem[]>([]);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const pageSize = 10;
 
-  const feedbackData: FeedbackItem[] = [
-    {
-      id: '1',
-      type: 'Content',
-      user: 'John Doe',
-      verse: 'John 3:16',
-      comment: 'The AI explanation seems to contradict traditional theology',
-      status: 'unresolved',
-      timestamp: '2024-01-20T10:30:00Z',
-      aiResponse: 'For God so loved the world that he gave his one and only Son, that whoever believes in him shall not perish but have eternal life.'
-    },
-    {
-      id: '2',
-      type: 'Audio',
-      user: 'Sarah Wilson',
-      verse: 'Psalm 23:1',
-      comment: 'Great explanation! Could you add more historical context?',
-      status: 'resolved',
-      timestamp: '2024-01-20T09:15:00Z'
-    },
-    {
-      id: '3',
-      type: 'Content',
-      user: 'Mike Johnson',
-      verse: 'Romans 8:28',
-      comment: 'This response is offensive and inappropriate',
-      status: 'unresolved',
-      timestamp: '2024-01-20T08:45:00Z',
-      aiResponse: 'And we know that in all things God works for the good of those who love him, who have been called according to his purpose.'
-    },
-    {
-      id: '4',
-      type: 'Other',
-      user: 'Emily Chen',
-      verse: 'Matthew 5:14',
-      comment: 'The explanation was helpful but could be more detailed',
-      status: 'resolved',
-      timestamp: '2024-01-19T16:20:00Z'
-    },
-    {
-      id: '5',
-      type: 'Audio',
-      user: 'David Brown',
-      verse: '1 Corinthians 13:4',
-      comment: 'This doesn\'t match what my pastor taught',
-      status: 'unresolved',
-      timestamp: '2024-01-19T14:30:00Z',
-      aiResponse: 'Love is patient, love is kind. It does not envy, it does not boast, it is not proud.'
-    }
-  ];
+  // Fetch flagged content from API
+  useEffect(() => {
+    const loadFlaggedContent = async () => {
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await fetchFlaggedContent({
+          page: currentPage,
+          limit: pageSize,
+          status: filter !== 'all' ? filter.toUpperCase() : undefined,
+          search: searchTerm || undefined
+        });
+
+        if (response.status === 1 && response.data) {
+          const transformed = response.data.map(transformFlaggedContent);
+          setFeedbackData(transformed);
+          setTotalCount(response.metadata.total);
+          setTotalPages(response.metadata.totalPages);
+        } else {
+          throw new Error(response.message || 'Failed to fetch flagged content');
+        }
+      } catch (err: any) {
+        setError(err?.message || 'Failed to load flagged content');
+        setFeedbackData([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    const debounceTimer = setTimeout(() => {
+      loadFlaggedContent();
+    }, searchTerm ? 500 : 0);
+
+    return () => clearTimeout(debounceTimer);
+  }, [currentPage, filter, searchTerm]);
+
+  // Reset to page 1 when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [filter, searchTerm]);
 
   const getTypeIcon = (type: string) => {
     switch (type) {
@@ -104,6 +142,8 @@ const FeedbackInboxContent = () => {
 
   const getStatusBadge = (status: string) => {
     switch (status) {
+      case 'pending':
+        return <Badge variant="default" className="bg-yellow-100 text-yellow-800">Pending</Badge>;
       case 'unresolved':
         return <Badge variant="default" className="bg-red-100 text-red-800">Unresolved</Badge>;
       case 'resolved':
@@ -136,7 +176,9 @@ const FeedbackInboxContent = () => {
     });
   };
 
-  const filteredData = feedbackData.filter(item => {
+  // Client-side filtering as fallback (API should handle it)
+  const filteredData = useMemo(() => {
+    return feedbackData.filter(item => {
     const matchesFilter = filter === 'all' || item.status === filter;
     const matchesSearch = searchTerm === '' || 
       item.user.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -144,6 +186,31 @@ const FeedbackInboxContent = () => {
       item.comment.toLowerCase().includes(searchTerm.toLowerCase());
     return matchesFilter && matchesSearch;
   });
+  }, [feedbackData, filter, searchTerm]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading flagged content...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center max-w-md">
+          <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">Error Loading Feedback</h3>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <Button onClick={() => window.location.reload()}>Retry</Button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -171,6 +238,7 @@ const FeedbackInboxContent = () => {
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="all">All Items</SelectItem>
+                <SelectItem value="pending">Pending</SelectItem>
                 <SelectItem value="unresolved">Unresolved</SelectItem>
                 <SelectItem value="resolved">Resolved</SelectItem>
               </SelectContent>
@@ -207,10 +275,20 @@ const FeedbackInboxContent = () => {
                 </div>
                 <p className="text-gray-700 mb-3">{item.comment}</p>
                 
-                {item.aiResponse && (
-                  <div className="bg-gray-50 p-3 rounded-lg">
-                    <div className="text-sm font-medium text-gray-600 mb-1">AI Response:</div>
-                    <p className="text-sm text-gray-700">{item.aiResponse}</p>
+                {item.tags && item.tags.length > 0 && (
+                  <div className="flex flex-wrap gap-2 mb-3">
+                    {item.tags.map((tag, index) => (
+                      <Badge key={index} variant="outline" className="text-xs">
+                        {tag}
+                      </Badge>
+                    ))}
+                  </div>
+                )}
+
+                {item.reporter && (
+                  <div className="text-sm text-gray-600 mb-2">
+                    <User className="w-4 h-4 inline mr-1" />
+                    {item.reporter.email} ({item.reporter.role})
                   </div>
                 )}
               </div>
@@ -245,7 +323,44 @@ const FeedbackInboxContent = () => {
           <CardContent className="p-12 text-center">
             <MessageSquare className="w-12 h-12 text-gray-400 mx-auto mb-4" />
             <h3 className="text-lg font-medium text-gray-900 mb-2">No feedback found</h3>
-            <p className="text-gray-500">Try adjusting your search or filter criteria.</p>
+            <p className="text-gray-500">
+              {searchTerm || filter !== 'all'
+                ? 'Try adjusting your search or filter criteria.'
+                : 'No flagged content available at the moment.'}
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
+      {/* Pagination */}
+      {totalPages > 1 && (
+        <Card>
+          <CardContent className="p-4">
+            <div className="flex items-center justify-between">
+              <div className="text-sm text-gray-600">
+                Showing page {currentPage} of {totalPages} ({totalCount} total items)
+              </div>
+              <div className="flex items-center space-x-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                  disabled={currentPage === 1}
+                >
+                  <ChevronLeft className="w-4 h-4" />
+                  Previous
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                  disabled={currentPage === totalPages}
+                >
+                  Next
+                  <ChevronRight className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
           </CardContent>
         </Card>
       )}

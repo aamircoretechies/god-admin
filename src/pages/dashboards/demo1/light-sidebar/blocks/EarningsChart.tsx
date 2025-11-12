@@ -10,9 +10,10 @@ import {
   SelectTrigger,
   SelectValue
 } from '@/components/ui/select';
+import { API_URL } from '@/utils/Api';
 
 const fetchEarningsChart = () => {
-  return axios.get<number[]>(`${import.meta.env.VITE_APP_API_URL}/sales/index`);
+  return axios.get<number[]>(`${API_URL}/sales/index`);
 };
 
 const EarningsChart = () => {

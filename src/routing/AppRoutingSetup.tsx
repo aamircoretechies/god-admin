@@ -270,7 +270,7 @@ const AppRoutingSetup = (): ReactElement => {
           <Route path="/network/user-table/market-authors" element={<NetworkMarketAuthorsPage />} />
           <Route path="/network/user-table/saas-users" element={<NetworkSaasUsersPage />} />
           <Route path="/network/user-table/store-clients" element={<NetworkStoreClientsPage />} />
-          <Route path="/network/user-table/user-detail" element={<NetworkUserDetailPage />} />
+          <Route path="/network/user-table/user-detail/:id" element={<NetworkUserDetailPage />} />
           <Route path="/network/user-table/visitors" element={<NetworkVisitorsPage />} />
           <Route path="/auth/welcome-message" element={<AuthenticationWelcomeMessagePage />} />
           <Route

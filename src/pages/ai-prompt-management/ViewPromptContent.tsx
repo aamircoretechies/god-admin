@@ -1,4 +1,5 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -6,64 +7,168 @@ import {
   Edit, 
   Copy, 
   History, 
+  FileText,
+  AlertCircle,
   Calendar,
   User,
-  FileText,
   Tag,
-  Globe,
+  TrendingUp,
   CheckCircle,
-  XCircle
+  XCircle,
+  Trash2
 } from 'lucide-react';
+import { fetchPromptDetail, deletePrompt, type PromptDetailResponse } from '@/services/promptsApi';
 
 const ViewPromptContent: React.FC = () => {
-  // Mock prompt data
-  const promptData = {
-    id: '1',
-    title: 'Verse Explanation Template',
-    description: 'AI prompt for explaining biblical verses in simple terms',
-    content: 'Please explain the following Bible verse in simple, easy-to-understand language. Include the historical context, key themes, and practical application for daily life. Focus on making the message accessible to readers of all backgrounds while maintaining theological accuracy.',
-    category: 'Verse Explanation',
-    targetRole: 'All Users',
-    language: 'English',
-    status: 'Active',
-    createdBy: 'Admin User',
-    createdAt: '2024-01-15T10:30:00Z',
-    updatedAt: '2024-01-20T14:20:00Z',
-    version: 3
+  const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [promptData, setPromptData] = useState<PromptDetailResponse | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+
+  // Format category: "VerseExplanation" -> "Verse Explanation"
+  const formatCategory = (category: string): string => {
+    return category.replace(/([A-Z])/g, ' $1').trim();
   };
 
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit'
-    });
+  // Format target_role: "AllUsers" -> "All Users"
+  const formatTargetRole = (role: string): string => {
+    return role.replace(/([A-Z])/g, ' $1').trim();
   };
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case 'Active':
-        return <Badge variant="default" className="bg-green-100 text-green-800">Active</Badge>;
-      case 'Inactive':
-        return <Badge variant="secondary" className="bg-gray-100 text-gray-600">Inactive</Badge>;
-      default:
-        return <Badge variant="outline">{status}</Badge>;
-    }
+  // Clean and format markdown content for better display
+  const cleanMarkdown = (content: string): string => {
+    if (!content) return '';
+    
+    let cleaned = content;
+    
+    // Remove bold markers (**text** -> text)
+    cleaned = cleaned.replace(/\*\*(.*?)\*\*/g, '$1');
+    
+    // Remove italic markers (*text* -> text) - simple approach
+    // First handle cases where * is not part of **
+    cleaned = cleaned.replace(/([^*])\*([^*]+?)\*([^*])/g, '$1$2$3');
+    
+    // Format numbered lists (keep the numbers, ensure proper spacing)
+    cleaned = cleaned.replace(/^(\d+)\.\s+/gm, '$1. ');
+    
+    // Format bullet lists (convert - to •)
+    cleaned = cleaned.replace(/^-\s+/gm, '• ');
+    
+    // Clean up multiple newlines (max 2 consecutive)
+    cleaned = cleaned.replace(/\n{3,}/g, '\n\n');
+    
+    // Trim each line but preserve structure
+    cleaned = cleaned.split('\n').map(line => {
+      // Don't trim list items or numbered items
+      if (line.match(/^[•\d]\.\s/) || line.trim() === '') {
+        return line;
+      }
+      return line.trim();
+    }).join('\n');
+    
+    return cleaned;
   };
+
+  // Format content with proper structure
+  const formatContent = (content: string): React.ReactNode => {
+    const cleaned = cleanMarkdown(content);
+    const lines = cleaned.split('\n');
+    
+    return (
+      <div className="space-y-3">
+        {lines.map((line, index) => {
+          const trimmedLine = line.trim();
+          
+          // Skip empty lines (they'll create spacing naturally)
+          if (!trimmedLine) {
+            return null;
+          }
+          
+          // Check if it's a heading (all caps or ends with colon and is short)
+          if ((trimmedLine.match(/^[A-Z][A-Z\s:]+$/) && trimmedLine.length < 60) || 
+              (trimmedLine.endsWith(':') && trimmedLine.length < 50 && trimmedLine === trimmedLine.toUpperCase())) {
+            return (
+              <h4 key={index} className="font-semibold text-gray-900 mt-6 mb-3 first:mt-0 text-base">
+                {trimmedLine.replace(':', '')}
+              </h4>
+            );
+          }
+          
+          // Check if it's a numbered list item
+          if (trimmedLine.match(/^\d+\.\s/)) {
+            return (
+              <div key={index} className="ml-2 text-gray-700 leading-relaxed">
+                {trimmedLine}
+              </div>
+            );
+          }
+          
+          // Check if it's a bullet list item
+          if (trimmedLine.startsWith('•')) {
+            return (
+              <div key={index} className="ml-2 text-gray-700 leading-relaxed">
+                {trimmedLine}
+              </div>
+            );
+          }
+          
+          // Regular paragraph
+          return (
+            <p key={index} className="text-gray-700 leading-relaxed">
+              {trimmedLine}
+            </p>
+          );
+        })}
+      </div>
+    );
+  };
+
+  // Fetch prompt detail
+  useEffect(() => {
+    const loadPromptDetail = async () => {
+      if (!id) {
+        setError('Prompt ID is missing');
+        setLoading(false);
+        return;
+      }
+
+      setLoading(true);
+      setError(null);
+      try {
+        const response = await fetchPromptDetail(id);
+        if (response.status === 1 && response.data) {
+          setPromptData(response.data);
+        } else {
+          throw new Error(response.message || 'Failed to fetch prompt detail');
+        }
+      } catch (err: any) {
+        setError(err?.message || 'Failed to load prompt detail');
+        setPromptData(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadPromptDetail();
+  }, [id]);
 
   const getCategoryBadge = (category: string) => {
-    const colors = {
+    const colors: Record<string, string> = {
       'Verse Explanation': 'bg-amber-100 text-amber-800',
       'Chapter Summary': 'bg-purple-100 text-purple-800',
       'Daily Reflection': 'bg-green-100 text-green-800',
       'Study Guide': 'bg-orange-100 text-orange-800',
-      'Prayer Guide': 'bg-pink-100 text-pink-800'
+      'Prayer Guide': 'bg-pink-100 text-pink-800',
+      'Historical Context': 'bg-blue-100 text-blue-800',
+      'Chapter Context': 'bg-indigo-100 text-indigo-800',
+      'Other': 'bg-gray-100 text-gray-800'
     };
     
     return (
-      <Badge variant="default" className={colors[category as keyof typeof colors] || 'bg-gray-100 text-gray-800'}>
+      <Badge variant="default" className={colors[category] || 'bg-gray-100 text-gray-800'}>
         {category}
       </Badge>
     );
@@ -82,6 +187,86 @@ const ViewPromptContent: React.FC = () => {
     }
   };
 
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'Active':
+        return <Badge variant="default" className="bg-green-100 text-green-800">Active</Badge>;
+      case 'Inactive':
+        return <Badge variant="secondary" className="bg-gray-100 text-gray-600">Inactive</Badge>;
+      default:
+        return <Badge variant="outline">{status}</Badge>;
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit'
+    });
+  };
+
+  const handleDelete = async () => {
+    if (!id || !promptData) return;
+
+    setDeleting(true);
+    setError(null);
+
+    try {
+      const response = await deletePrompt(id);
+      if (response.status === 1) {
+        navigate('/ai-prompt-management');
+      } else {
+        throw new Error(response.message || 'Failed to delete prompt');
+      }
+    } catch (err: any) {
+      setError(err?.message || 'Failed to delete prompt');
+      setDeleting(false);
+      setShowDeleteConfirm(false);
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4"></div>
+          <p className="text-gray-600">Loading prompt preview...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center max-w-md">
+          <AlertCircle className="w-12 h-12 text-red-500 mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">Error Loading Prompt</h3>
+          <p className="text-gray-600 mb-4">{error}</p>
+          <Button onClick={() => window.location.reload()}>Retry</Button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!promptData) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <AlertCircle className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+          <h3 className="text-lg font-semibold text-gray-900 mb-2">No Prompt Found</h3>
+          <p className="text-gray-600">The prompt you're looking for doesn't exist.</p>
+        </div>
+      </div>
+    );
+  }
+
+  const formattedCategory = formatCategory(promptData.category);
+  const formattedTargetRole = formatTargetRole(promptData.target_role);
+
   return (
     <div className="space-y-6">
       {/* Header */}
@@ -95,13 +280,17 @@ const ViewPromptContent: React.FC = () => {
             <Copy className="w-4 h-4 mr-2" />
             Duplicate
           </Button>
-          <Button variant="outline">
-            <History className="w-4 h-4 mr-2" />
-            View History
+          <Button variant="outline" asChild>
+            <Link to={`/ai-prompt-management/history/${promptData.template_id}`}>
+              <History className="w-4 h-4 mr-2" />
+              View History
+            </Link>
           </Button>
-          <Button>
-            <Edit className="w-4 h-4 mr-2" />
-            Edit Prompt
+          <Button asChild>
+            <Link to={`/ai-prompt-management/edit/${promptData.template_id}`}>
+              <Edit className="w-4 h-4 mr-2" />
+              Edit Prompt
+            </Link>
           </Button>
         </div>
       </div>
@@ -118,30 +307,10 @@ const ViewPromptContent: React.FC = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="bg-gray-50 p-4 rounded-lg">
-                <pre className="text-sm font-mono whitespace-pre-wrap text-gray-800">
-                  {promptData.content}
-                </pre>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Usage Examples */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Usage Examples</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="bg-amber-50 p-4 rounded-lg">
-                <h4 className="font-semibold text-amber-900 mb-2">Example Input:</h4>
-                <p className="text-sm text-amber-800">John 3:16 - "For God so loved the world..."</p>
-              </div>
-              <div className="bg-green-50 p-4 rounded-lg">
-                <h4 className="font-semibold text-green-900 mb-2">Expected Output:</h4>
-                <p className="text-sm text-green-800">
-                  This verse explains God's love for humanity and the purpose of Jesus' coming. 
-                  It teaches us about God's character, the value of human life, and the path to eternal life.
-                </p>
+              <div className="bg-gray-50 p-6 rounded-lg border border-gray-200">
+                <div className="prose prose-sm max-w-none">
+                  {formatContent(promptData.content)}
+                </div>
               </div>
             </CardContent>
           </Card>
@@ -149,7 +318,7 @@ const ViewPromptContent: React.FC = () => {
 
         {/* Sidebar */}
         <div className="space-y-6">
-          {/* Status & Metadata */}
+          {/* Status & Configuration */}
           <Card>
             <CardHeader>
               <CardTitle>Status & Configuration</CardTitle>
@@ -161,11 +330,11 @@ const ViewPromptContent: React.FC = () => {
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium">Category</span>
-                {getCategoryBadge(promptData.category)}
+                {getCategoryBadge(formattedCategory)}
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium">Target Role</span>
-                {getRoleBadge(promptData.targetRole)}
+                {getRoleBadge(formattedTargetRole)}
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium">Language</span>
@@ -173,10 +342,46 @@ const ViewPromptContent: React.FC = () => {
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium">Version</span>
-                <Badge variant="outline">v{promptData.version}</Badge>
+                <Badge variant="outline">{promptData.version}</Badge>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium flex items-center gap-1">
+                  <TrendingUp className="w-4 h-4" />
+                  Usage Count
+                </span>
+                <span className="text-sm font-semibold text-gray-900">{promptData.usage_count}</span>
+              </div>
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium">Public</span>
+                {promptData.is_public ? (
+                  <CheckCircle className="w-4 h-4 text-green-600" />
+                ) : (
+                  <XCircle className="w-4 h-4 text-gray-400" />
+                )}
               </div>
             </CardContent>
           </Card>
+
+          {/* Tags */}
+          {promptData.tags && promptData.tags.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Tag className="w-5 h-5" />
+                  Tags
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="flex flex-wrap gap-2">
+                  {promptData.tags.map((tag, index) => (
+                    <Badge key={index} variant="outline" className="text-xs">
+                      {tag}
+                    </Badge>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
           {/* Metadata */}
           <Card>
@@ -184,26 +389,34 @@ const ViewPromptContent: React.FC = () => {
               <CardTitle>Metadata</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="flex items-start gap-3">
-                <User className="w-4 h-4 text-gray-400 mt-0.5" />
-                <div>
-                  <p className="text-sm font-medium">Created By</p>
-                  <p className="text-sm text-gray-600">{promptData.createdBy}</p>
+              {promptData.creator && (
+                <div className="flex items-start gap-3">
+                  <User className="w-4 h-4 text-gray-400 mt-0.5" />
+                  <div className="flex-1">
+                    <p className="text-sm font-medium">Created By</p>
+                    <p className="text-sm text-gray-600">{promptData.creator.email}</p>
+                    <p className="text-xs text-gray-500">{promptData.creator.role}</p>
+                  </div>
                 </div>
-              </div>
+              )}
               <div className="flex items-start gap-3">
                 <Calendar className="w-4 h-4 text-gray-400 mt-0.5" />
                 <div>
                   <p className="text-sm font-medium">Created On</p>
-                  <p className="text-sm text-gray-600">{formatDate(promptData.createdAt)}</p>
+                  <p className="text-sm text-gray-600">{formatDate(promptData.created_at)}</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
                 <Calendar className="w-4 h-4 text-gray-400 mt-0.5" />
                 <div>
                   <p className="text-sm font-medium">Last Updated</p>
-                  <p className="text-sm text-gray-600">{formatDate(promptData.updatedAt)}</p>
+                  <p className="text-sm text-gray-600">{formatDate(promptData.last_updated)}</p>
                 </div>
+              </div>
+              <div className="pt-2 border-t">
+                <p className="text-xs text-gray-500 font-mono break-all">
+                  ID: {promptData.template_id}
+                </p>
               </div>
             </CardContent>
           </Card>
@@ -214,33 +427,78 @@ const ViewPromptContent: React.FC = () => {
               <CardTitle>Quick Actions</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              <Button variant="outline" className="w-full justify-start">
-                <Edit className="w-4 h-4 mr-2" />
-                Edit Prompt
+              <Button variant="outline" className="w-full justify-start" asChild>
+                <Link to={`/ai-prompt-management/edit/${promptData.template_id}`}>
+                  <Edit className="w-4 h-4 mr-2" />
+                  Edit Prompt
+                </Link>
               </Button>
               <Button variant="outline" className="w-full justify-start">
                 <Copy className="w-4 h-4 mr-2" />
                 Duplicate Prompt
               </Button>
-              <Button variant="outline" className="w-full justify-start">
-                <History className="w-4 h-4 mr-2" />
-                View History
+              <Button variant="outline" className="w-full justify-start" asChild>
+                <Link to={`/ai-prompt-management/history/${promptData.template_id}`}>
+                  <History className="w-4 h-4 mr-2" />
+                  View History
+                </Link>
               </Button>
-              {promptData.status === 'Active' ? (
-                <Button variant="outline" className="w-full justify-start text-orange-600">
-                  <XCircle className="w-4 h-4 mr-2" />
-                  Deactivate
-                </Button>
-              ) : (
-                <Button variant="outline" className="w-full justify-start text-green-600">
-                  <CheckCircle className="w-4 h-4 mr-2" />
-                  Activate
-                </Button>
-              )}
+              <Button 
+                variant="outline" 
+                className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
+                onClick={() => setShowDeleteConfirm(true)}
+                disabled={deleting}
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Delete Prompt
+              </Button>
             </CardContent>
           </Card>
         </div>
       </div>
+
+      {/* Delete Confirmation Dialog */}
+      {showDeleteConfirm && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <Card className="max-w-md w-full mx-4">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2 text-red-600">
+                <AlertCircle className="w-5 h-5" />
+                Confirm Delete
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <p className="text-gray-700 mb-4">
+                Are you sure you want to delete "{promptData.title}"? This action cannot be undone.
+              </p>
+              {error && (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4 flex items-center gap-2">
+                  <AlertCircle className="w-4 h-4 text-red-600" />
+                  <p className="text-sm text-red-800">{error}</p>
+                </div>
+              )}
+              <div className="flex gap-3">
+                <Button
+                  variant="destructive"
+                  onClick={handleDelete}
+                  disabled={deleting}
+                  className="flex-1"
+                >
+                  {deleting ? 'Deleting...' : 'Delete'}
+                </Button>
+                <Button
+                  variant="outline"
+                  onClick={() => setShowDeleteConfirm(false)}
+                  disabled={deleting}
+                  className="flex-1"
+                >
+                  Cancel
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
     </div>
   );
 };

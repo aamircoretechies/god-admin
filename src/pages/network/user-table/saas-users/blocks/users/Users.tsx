@@ -1,14 +1,11 @@
 import { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { toAbsoluteUrl } from '@/utils';
-import { UsersData } from './UsersData';
 import {
   DataGrid,
   DataGridColumnHeader,
   KeenIcon,
-  useDataGrid,
-  DataGridRowSelectAll,
-  DataGridRowSelect
+  useDataGrid
 } from '@/components';
 import { ColumnDef, Column, RowSelectionState } from '@tanstack/react-table';
 import {
@@ -20,20 +17,14 @@ import {
 } from '@/components/ui/select';
 import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
+import { fetchUsersForDataGrid, type TransformedUserData } from '@/services/usersApi';
 
 interface IColumnFilterProps<TData, TValue> {
   column: Column<TData, TValue>;
 }
 
-interface IUsersData {
-  user: {
-    avatar: string;
-    name: string;
-    email: string;
-  };
-  labels: string[];
-  joinDate?: string;
-  enforce: boolean;
+interface IUsersData extends TransformedUserData {
+  enforce?: boolean;
 }
 
 const EnforceSwitch = ({ enforce }: { enforce: boolean }) => {
@@ -87,13 +78,18 @@ const Users = () => {
               alt=""
             />
             <div className="flex flex-col">
-              <Link className="font-medium text-gray-900 hover:text-primary-active mb-px"  to="/network/user-table/user-detail" >
+              <Link 
+                className="font-medium text-gray-900 hover:text-primary-active mb-px"  
+                to={`/network/user-table/user-detail/${info.row.original.id}`}
+              >
                 {info.row.original.user.name}
               </Link>
-              <Link className="text-2sm text-gray-700 hover:text-primary-active"  to="/network/user-table/user-detail">
+              <Link 
+                className="text-2sm text-gray-700 hover:text-primary-active"  
+                to={`/network/user-table/user-detail/${info.row.original.id}`}
+              >
                 {info.row.original.user.email}
               </Link>
-              
             </div>
           </div>
         ),
@@ -128,7 +124,7 @@ const Users = () => {
         enableSorting: true,
         cell: (info: any) => (
           <span className="text-sm text-gray-800 font-medium">
-            {info.row.original.joinDate || '2024-01-15'}
+            {info.row.original.joinDate || 'N/A'}
           </span>
         ),
         meta: {
@@ -151,10 +147,10 @@ const Users = () => {
         id: 'actions',
         header: ({ column }) => <DataGridColumnHeader title="Actions" column={column} />,
         enableSorting: false,
-        cell: () => (
+        cell: (info: any) => (
           <div className="flex gap-2">
             <Link 
-              to="/network/user-table/user-detail" 
+              to={`/network/user-table/user-detail/${info.row.original.id}`}
               className="btn btn-sm btn-outline btn-primary"
             >
               View Details
@@ -169,8 +165,6 @@ const Users = () => {
     ],
     []
   );
-
-  const data: IUsersData[] = useMemo(() => UsersData, []);
 
   const handleRowSelection = (state: RowSelectionState) => {
     const selectedRowIds = Object.keys(state);
@@ -187,12 +181,14 @@ const Users = () => {
   };
 
   const Toolbar = () => {
-    const { table } = useDataGrid();
+    const { table, totalRows } = useDataGrid();
     const [searchInput, setSearchInput] = useState('');
 
     return (
       <div className="card-header flex-wrap gap-2 border-b-0 px-5">
-        <h3 className="card-title font-medium text-sm">Showing 10 of 49,053 new users</h3>
+        <h3 className="card-title font-medium text-sm">
+          Showing {table.getState().pagination.pageSize} of {totalRows} users
+        </h3>
 
         <div className="flex flex-wrap gap-2 lg:gap-5">
           <div className="flex">
@@ -242,13 +238,14 @@ const Users = () => {
   return (
     <DataGrid
       columns={columns}
-      data={data}
       rowSelection={true}
       onRowSelectionChange={handleRowSelection}
-      pagination={{ size: 5 }}
-      sorting={[{ id: 'user', desc: false }]}
+      pagination={{ size: 10 }}
+      sorting={[{ id: 'joinDate', desc: true }]}
       toolbar={<Toolbar />}
       layout={{ card: true }}
+      serverSide={true}
+      onFetchData={fetchUsersForDataGrid}
     />
   );
 };

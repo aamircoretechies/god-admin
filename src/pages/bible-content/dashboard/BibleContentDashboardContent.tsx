@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -16,6 +16,8 @@ import {
   Upload,
   Download
 } from 'lucide-react';
+import { fetchBibleDashboard, getLanguageName, type BibleDashboardResponse } from '@/services/bibleContentApi';
+import { DummyDataIndicator } from '@/components/dummy-data-indicator';
 
 interface Translation {
   id: string;
@@ -37,71 +39,84 @@ interface ContentStats {
   flaggedContent: number;
 }
 
-const mockTranslations: Translation[] = [
-  {
-    id: '1',
-    name: 'King James Version',
-    version: 'KJV',
-    language: 'English',
-    status: 'active',
-    verseCount: 31102,
-    lastUpdated: '2024-01-15',
-    fileSize: '2.3 MB'
-  },
-  {
-    id: '2',
-    name: 'English Standard Version',
-    version: 'ESV',
-    language: 'English',
-    status: 'active',
-    verseCount: 31102,
-    lastUpdated: '2024-01-10',
-    fileSize: '2.1 MB'
-  },
-  {
-    id: '3',
-    name: 'New International Version',
-    version: 'NIV',
-    language: 'English',
-    status: 'active',
-    verseCount: 31102,
-    lastUpdated: '2024-01-12',
-    fileSize: '2.0 MB'
-  },
-  {
-    id: '4',
-    name: 'Reina Valera',
-    version: 'RV1960',
-    language: 'Spanish',
-    status: 'pending',
-    verseCount: 31102,
-    lastUpdated: '2024-01-18',
-    fileSize: '2.4 MB'
-  },
-  {
-    id: '5',
-    name: 'Nueva Versión Internacional',
-    version: 'NVI',
-    language: 'Spanish',
-    status: 'inactive',
-    verseCount: 31102,
-    lastUpdated: '2024-01-05',
-    fileSize: '2.2 MB'
-  }
-];
-
-const mockContentStats: ContentStats = {
-  totalTranslations: 5,
-  totalVerses: 155510,
-  activeTranslations: 3,
-  pendingUpdates: 1,
-  aiExplanations: 12450,
-  flaggedContent: 23
-};
 
 const BibleContentDashboardContent = () => {
-  const [translations] = useState<Translation[]>(mockTranslations);
-  const [contentStats] = useState<ContentStats>(mockContentStats);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [dashboardData, setDashboardData] = useState<BibleDashboardResponse['data'] | null>(null);
+
+  useEffect(() => {
+    const loadDashboardData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const response = await fetchBibleDashboard();
+        if (response.success) {
+          setDashboardData(response.data);
+        } else {
+          setError('Failed to load dashboard data');
+        }
+      } catch (err: any) {
+        setError(err?.message || 'Failed to load dashboard data');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadDashboardData();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <div className="spinner-border spinner-border-sm text-primary" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </div>
+          <p className="text-sm text-gray-600 mt-2">Loading dashboard data...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !dashboardData) {
+    return (
+      <div className="card">
+        <div className="card-body">
+          <div className="alert alert-danger">{error || 'Failed to load dashboard data'}</div>
+        </div>
+      </div>
+    );
+  }
+
+  // Transform API data to component format
+  const contentStats: ContentStats = {
+    totalTranslations: dashboardData.overview.totalTranslations,
+    totalVerses: dashboardData.overview.totalVerses,
+    activeTranslations: dashboardData.overview.activeTranslations,
+    pendingUpdates: dashboardData.translationsByStatus.Pending || 0,
+    aiExplanations: dashboardData.overview.aiExplanations,
+    flaggedContent: dashboardData.overview.flaggedContent
+  };
+
+  // Transform topTranslations to component format
+  // Top translations are likely active since they're the most used
+  const translations: Translation[] = dashboardData.topTranslations.map((translation) => {
+    // For now, assume top translations are active
+    // If needed, we can enhance this by matching with recentActivity.versions
+    const status: 'active' | 'inactive' | 'pending' = 'active';
+    
+    return {
+      id: translation.version_id,
+      name: translation.name,
+      version: translation.abbreviation,
+      language: getLanguageName(translation.language),
+      status,
+      verseCount: translation.total_verses,
+      lastUpdated: new Date(translation.created_at).toLocaleDateString(),
+      fileSize: 'N/A' // Not in API response - dummy data
+    };
+  });
 
   const getStatusColor = (status: string) => {
     switch (status) {
@@ -139,7 +154,14 @@ const BibleContentDashboardContent = () => {
               <div>
                 <p className="text-sm font-medium text-gray-600">Total Translations</p>
                 <p className="text-2xl font-bold text-gray-900">{contentStats.totalTranslations}</p>
-                <p className="text-sm text-green-600">+2 this month</p>
+                <p className={`text-sm ${
+                  dashboardData.monthlyStats.translations.change >= 0 
+                    ? 'text-green-600' 
+                    : 'text-red-600'
+                }`}>
+                  {dashboardData.monthlyStats.translations.change >= 0 ? '+' : ''}
+                  {dashboardData.monthlyStats.translations.change} this month
+                </p>
               </div>
               <div className="p-3 bg-amber-100 rounded-full">
                 <Languages className="w-6 h-6 text-amber-600" />
@@ -154,7 +176,11 @@ const BibleContentDashboardContent = () => {
               <div>
                 <p className="text-sm font-medium text-gray-600">Total Verses</p>
                 <p className="text-2xl font-bold text-gray-900">{contentStats.totalVerses.toLocaleString()}</p>
-                <p className="text-sm text-green-600">Across all translations</p>
+                <p className="text-sm text-green-600">
+                  {dashboardData.monthlyStats.verses.thisMonth > 0 
+                    ? `+${dashboardData.monthlyStats.verses.thisMonth.toLocaleString()} this month`
+                    : 'Across all translations'}
+                </p>
               </div>
               <div className="p-3 bg-green-100 rounded-full">
                 <FileText className="w-6 h-6 text-green-600" />
@@ -169,7 +195,15 @@ const BibleContentDashboardContent = () => {
               <div>
                 <p className="text-sm font-medium text-gray-600">AI Explanations</p>
                 <p className="text-2xl font-bold text-gray-900">{contentStats.aiExplanations.toLocaleString()}</p>
-                <p className="text-sm text-green-600">+1,250 this week</p>
+                <p className={`text-sm ${
+                  dashboardData.monthlyStats.aiExplanations.thisMonth > 0 
+                    ? 'text-green-600' 
+                    : 'text-gray-600'
+                }`}>
+                  {dashboardData.monthlyStats.aiExplanations.thisMonth > 0 
+                    ? `+${dashboardData.monthlyStats.aiExplanations.thisMonth.toLocaleString()} this month`
+                    : 'No new this month'}
+                </p>
               </div>
               <div className="p-3 bg-purple-100 rounded-full">
                 <Brain className="w-6 h-6 text-purple-600" />
@@ -293,6 +327,7 @@ const BibleContentDashboardContent = () => {
                 <tr className="border-b">
                   <th className="text-left py-3 px-4 font-medium text-gray-900">Name</th>
                   <th className="text-left py-3 px-4 font-medium text-gray-900">Language</th>
+                  <th className="text-left py-3 px-4 font-medium text-gray-900">File Size</th>
                 </tr>
               </thead>
               <tbody>
@@ -304,7 +339,22 @@ const BibleContentDashboardContent = () => {
                         <p className="text-sm text-gray-600">{translation.version}</p>
                       </div>
                     </td>
-                    <td className="py-3 px-4 text-gray-600">{translation.language}</td>
+                    <td className="py-3 px-4">
+                      <div className="flex items-center gap-2">
+                        <span className="text-gray-600">{translation.language}</span>
+                        {translation.verseCount > 0 && (
+                          <span className="text-xs text-gray-500">
+                            ({translation.verseCount.toLocaleString()} verses)
+                          </span>
+                        )}
+                      </div>
+                    </td>
+                    <td className="py-3 px-4">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-gray-400 italic">N/A</span>
+                        <DummyDataIndicator text="File size" />
+                      </div>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -312,6 +362,75 @@ const BibleContentDashboardContent = () => {
           </div>
         </CardContent>
       </Card>
+
+      {/* Recent Activity */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <AlertCircle className="w-5 h-5 mr-2 text-red-600" />
+              Recent Reports ({dashboardData.recentActivity.reports.length})
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {dashboardData.recentActivity.reports.slice(0, 5).map((report) => (
+                <div key={report.report_id} className="flex items-center justify-between p-3 bg-red-50 rounded-lg">
+                  <div>
+                    <h3 className="font-medium text-gray-900">
+                      {report.book} {report.chapter}:{report.verse}
+                    </h3>
+                    <p className="text-sm text-gray-600">
+                      {report.version} • {new Date(report.created_at).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <Badge className={`${
+                    report.status === 'PENDING' 
+                      ? 'bg-yellow-100 text-yellow-800' 
+                      : 'bg-gray-100 text-gray-800'
+                  }`}>
+                    {report.status}
+                  </Badge>
+                </div>
+              ))}
+              {dashboardData.recentActivity.reports.length === 0 && (
+                <p className="text-sm text-gray-500 text-center py-4">No recent reports</p>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <Brain className="w-5 h-5 mr-2 text-purple-600" />
+              Recent AI Explanations ({dashboardData.recentActivity.aiExplanations.length})
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {dashboardData.recentActivity.aiExplanations.slice(0, 5).map((explanation) => (
+                <div key={explanation.verse_id} className="flex items-center justify-between p-3 bg-purple-50 rounded-lg">
+                  <div>
+                    <h3 className="font-medium text-gray-900">
+                      {explanation.book.long_name} {explanation.chapter_number}:{explanation.verse_number}
+                    </h3>
+                    <p className="text-sm text-gray-600">
+                      {new Date(explanation.created_at).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <Button variant="outline" size="sm">
+                    <Eye className="w-4 h-4" />
+                  </Button>
+                </div>
+              ))}
+              {dashboardData.recentActivity.aiExplanations.length === 0 && (
+                <p className="text-sm text-gray-500 text-center py-4">No recent AI explanations</p>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
       {/* Quick Actions */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">

@@ -1,4 +1,5 @@
 export * from './Assets';
+export * from './Api';
 export * from './Data';
 export * from './Devices';
 export * from './Dom';
