@@ -66,7 +66,7 @@ const SettingsSidebarContent = () => {
       )}
 
       <div className="flex flex-col items-stretch grow gap-5 lg:gap-7.5">
-        <GeneralSettings />
+        {/* <GeneralSettings /> */}
 
         <SystemApiConfig />
 

@@ -28,9 +28,9 @@ const BibleContentDashboardPage = () => {
               <a href="#" className="btn btn-sm btn-light">
                 Export Data
               </a>
-              <a href="#" className="btn btn-sm btn-primary">
+           {/*    <a href="#" className="btn btn-sm btn-primary">
                 Upload Translation
-              </a>
+              </a> */}
             </ToolbarActions>
           </Toolbar>
         </Container>

@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -216,18 +216,20 @@ const BibleBooksChaptersContent = () => {
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'active':
-        return 'bg-green-100 text-green-800';
+        return 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300';
       case 'inactive':
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-300';
       case 'draft':
-        return 'bg-amber-100 text-amber-800';
+        return 'bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300';
       default:
-        return 'bg-gray-100 text-gray-800';
+        return 'bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-300';
     }
   };
 
   const getTestamentColor = (testament: string) => {
-    return testament === 'old' ? 'bg-orange-100 text-orange-800' : 'bg-amber-100 text-amber-800';
+    return testament === 'old' 
+      ? 'bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300' 
+      : 'bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300';
   };
 
   if (loadingBooks && books.length === 0) {
@@ -361,7 +363,7 @@ const BibleBooksChaptersContent = () => {
                 </div>
 
                 <div className="p-4 bg-gray-50 rounded-lg">
-                  <h4 className="font-medium text-gray-900 mb-2">Quick Actions</h4>
+                  <h4 className="font-medium text-gray-900 dark:text-white mb-2">Quick Actions</h4>
                   <div className="space-y-2">
                     <Button variant="outline" className="w-full justify-start">
                       <Copy className="w-4 h-4 mr-2" />
@@ -415,8 +417,8 @@ const BibleBooksChaptersContent = () => {
               </Select>
             </div>
             <div className="flex items-center space-x-2">
-              <Filter className="w-4 h-4 text-gray-500" />
-              <span className="text-sm text-gray-600">
+              <Filter className="w-4 h-4 text-gray-500 dark:text-gray-400" />
+              <span className="text-sm text-gray-600 dark:text-gray-400">
                 {filteredBooks.length} books
               </span>
               {totalPages > 1 && (
@@ -460,27 +462,21 @@ const BibleBooksChaptersContent = () => {
             {filteredBooks.map((book) => (
               <div key={book.id} className="border rounded-lg">
                 <div 
-                  className="flex items-center justify-between p-4 cursor-pointer hover:bg-gray-50"
+                  className="flex items-center justify-between p-4 cursor-pointer hover:bg-coal-100"
                   onClick={() => toggleBookExpansion(book.id)}
                 >
                   <div className="flex items-center space-x-3">
                     {expandedBooks.includes(book.id) ? (
-                      <ChevronDown className="w-4 h-4 text-gray-500" />
+                      <ChevronDown className="w-4 h-4 text-gray-500 dark:text-gray-400" />
                     ) : (
-                      <ChevronRight className="w-4 h-4 text-gray-500" />
+                      <ChevronRight className="w-4 h-4 text-gray-500 dark:text-gray-400" />
                     )}
-                    <div className="p-2 bg-amber-100 rounded-lg">
-                      <BookOpen className="w-4 h-4 text-amber-600" />
+                    <div className="p-2 bg-amber-100 dark:bg-amber-900/30 rounded-lg">
+                      <BookOpen className="w-4 h-4 text-amber-600 dark:text-amber-400" />
                     </div>
                     <div>
                       <h3 className="font-semibold text-gray-900">{book.name}</h3>
-                      <p className="text-sm text-gray-600">
-                        {book.description || (
-                          <span className="text-gray-400 italic">
-                            <DummyDataIndicator text="Description not available" />
-                          </span>
-                        )}
-                      </p>
+                      <p className="text-sm text-gray-600">{book.description}</p>
                     </div>
                   </div>
                   <div className="flex items-center space-x-2">
@@ -491,30 +487,20 @@ const BibleBooksChaptersContent = () => {
                     <Badge className={getStatusColor(book.status)}>
                       {book.status.charAt(0).toUpperCase() + book.status.slice(1)}
                     </Badge>
-                      <DummyDataIndicator text="Status" />
-                    </div>
                     <span className="text-sm text-gray-500">
-                      {book.chapters} chapters
-                      {book.verses > 0 && (
-                        <span>, {book.verses.toLocaleString()} verses</span>
-                      )}
-                      {book.verses === 0 && (
-                        <span className="ml-2">
-                          <DummyDataIndicator text="Verse count" />
-                        </span>
-                      )}
+                      {book.chapters} chapters, {book.verses.toLocaleString()} verses
                     </span>
                   </div>
                 </div>
 
                 {expandedBooks.includes(book.id) && (
-                  <div className="border-t bg-gray-50 p-4">
+                  <div className="border-t bg-gray-50 dark:bg-coal-100 p-4">
                     <div className="flex items-center justify-between mb-3">
-                      <h4 className="font-medium text-gray-900">Chapters</h4>
+                      <h4 className="font-medium text-gray-900 dark:text-white">Chapters</h4>
                       <Button 
                         size="sm" 
                         onClick={() => handleCreateChapter(book.id)}
-                        className="bg-gray-300 hover:bg-gray-300 cursor-not-allowed"
+                        className="bg-gray-300 hover:bg-gray-300 dark:bg-coal-100 dark:hover:bg-coal-100 cursor-not-allowed"
                         disabled
                         title="Content creation not available in Phase 1"
                       >
@@ -534,32 +520,26 @@ const BibleBooksChaptersContent = () => {
                       </div>
                     ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                        {chapters[book.id]?.map((chapter) => (
+                      {chapters
+                        .filter(chapter => chapter.bookId === book.id)
+                        .map((chapter) => (
                           <div key={chapter.id} className="border rounded-lg p-3 bg-white">
                             <div className="flex items-center justify-between mb-2">
                               <h5 className="font-medium text-gray-900">Chapter {chapter.number}</h5>
-                              <div className="flex items-center gap-1">
                               <Badge className={getStatusColor(chapter.status)}>
                                 {chapter.status.charAt(0).toUpperCase() + chapter.status.slice(1)}
                               </Badge>
                                 <DummyDataIndicator text="Status" />
                               </div>
                             </div>
-                            <p className="text-sm text-gray-600 mb-2 flex items-center gap-2">
-                              {chapter.verses > 0 ? (
-                                <span>{chapter.verses} verses</span>
-                              ) : (
-                                <>
-                                  <span className="text-gray-400 italic">N/A verses</span>
-                                  <DummyDataIndicator text="Verse count" />
-                                </>
-                              )}
-                            </p>
+                            <p className="text-sm text-gray-600 mb-2">{chapter.verses} verses</p>
                             <div className="flex space-x-2">
-                              <Button variant="outline" size="sm">
-                                <Eye className="w-4 h-4 mr-1" />
-                                View
-                              </Button>
+                              <Link to={`/bible-content/books-chapters/view/${book.id}/${chapter.id}`}>
+                                <Button variant="outline" size="sm">
+                                  <Eye className="w-4 h-4 mr-1" />
+                                  View
+                                </Button>
+                              </Link>
                               <Button variant="outline" size="sm" disabled title="Content editing not available in Phase 1">
                                 <Edit className="w-4 h-4 mr-1" />
                                 Edit (Phase 2)
@@ -645,7 +625,7 @@ const BibleBooksChaptersContent = () => {
 
               <div className="space-y-4">
                 <div className="p-4 bg-gray-50 rounded-lg">
-                  <h4 className="font-medium text-gray-900 mb-2">Quick Actions</h4>
+                  <h4 className="font-medium text-gray-900 dark:text-white mb-2">Quick Actions</h4>
                   <div className="space-y-2">
                     <Button variant="outline" className="w-full justify-start">
                       <Copy className="w-4 h-4 mr-2" />

@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -20,7 +19,6 @@ import {
 } from '@/components/ui/dialog';
 import { 
   UserPlus, 
-  X, 
   Eye, 
   EyeOff 
 } from 'lucide-react';
@@ -30,10 +28,16 @@ interface AddMemberFormData {
   password: string;
   firstName: string;
   lastName: string;
-  role: 'admin' | 'moderator';
+  role: 'admin' | 'moderator' | 'member' | 'editor';
 }
 
-const AddMemberForm = () => {
+interface AddMemberModalProps {
+  trigger?: React.ReactNode;
+}
+
+const AddMemberModal: React.FC<AddMemberModalProps> = ({ 
+  trigger 
+}) => {
   const [isOpen, setIsOpen] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState<AddMemberFormData>({
@@ -41,7 +45,7 @@ const AddMemberForm = () => {
     password: '',
     firstName: '',
     lastName: '',
-    role: 'moderator'
+    role: 'member'
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -68,7 +72,7 @@ const AddMemberForm = () => {
         password: '',
         firstName: '',
         lastName: '',
-        role: 'moderator'
+        role: 'member'
       });
       
       setIsOpen(false);
@@ -91,40 +95,35 @@ const AddMemberForm = () => {
       password: '',
       firstName: '',
       lastName: '',
-      role: 'moderator'
+      role: 'member'
     });
   };
 
-  const handleOpenDialog = () => {
-    setIsOpen(true);
-  };
+  const defaultTrigger = (
+    <Button>
+      <UserPlus className="w-4 h-4 mr-2" />
+      Add Member
+    </Button>
+  );
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <button 
-          type="button" 
-          className="btn btn-sm btn-primary"
-          onClick={handleOpenDialog}
-        >
-          <UserPlus className="w-4 h-4 mr-2" />
-          Add Member
-        </button>
+        {trigger || defaultTrigger}
       </DialogTrigger>
       
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
-          <DialogTitle>Add New Team Member</DialogTitle>
+          <DialogTitle>Add New Member</DialogTitle>
           <DialogDescription>
-            Create a new team member account with admin or moderator role.
+            Create a new member account with appropriate role and permissions.
           </DialogDescription>
         </DialogHeader>
         
-        <div className="px-6 pt-4 pb-6">
-          <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="firstName">First Name</Label>
+              <Label htmlFor="firstName">First Name *</Label>
               <Input
                 id="firstName"
                 type="text"
@@ -136,7 +135,7 @@ const AddMemberForm = () => {
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="lastName">Last Name</Label>
+              <Label htmlFor="lastName">Last Name *</Label>
               <Input
                 id="lastName"
                 type="text"
@@ -149,7 +148,7 @@ const AddMemberForm = () => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
+            <Label htmlFor="email">Email Address *</Label>
             <Input
               id="email"
               type="email"
@@ -161,7 +160,7 @@ const AddMemberForm = () => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
+            <Label htmlFor="password">Password *</Label>
             <div className="relative">
               <Input
                 id="password"
@@ -186,13 +185,14 @@ const AddMemberForm = () => {
                 )}
               </Button>
             </div>
+            <p className="text-xs text-gray-500">Minimum 6 characters</p>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="role">Role</Label>
+            <Label htmlFor="role">Role *</Label>
             <Select 
               value={formData.role} 
-              onValueChange={(value: 'admin' | 'moderator') => handleInputChange('role', value)}
+              onValueChange={(value: 'admin' | 'moderator' | 'member' | 'editor') => handleInputChange('role', value)}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select role" />
@@ -200,6 +200,8 @@ const AddMemberForm = () => {
               <SelectContent>
                 <SelectItem value="admin">Admin</SelectItem>
                 <SelectItem value="moderator">Moderator</SelectItem>
+                <SelectItem value="editor">Editor</SelectItem>
+                <SelectItem value="member">Member</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -222,10 +224,10 @@ const AddMemberForm = () => {
             </Button>
           </div>
         </form>
-        </div>
       </DialogContent>
     </Dialog>
   );
 };
 
-export { AddMemberForm };
+export { AddMemberModal };
+
