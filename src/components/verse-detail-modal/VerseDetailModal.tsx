@@ -48,7 +48,7 @@ const VerseDetailModal: React.FC<VerseDetailModalProps> = ({ isOpen, onClose, ve
               <CardTitle className="text-lg">Verse Text</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="bg-gray-50 p-4 rounded-lg">
+              <div className="bg-gray-200 dark:bg-coal-100 p-4 rounded-lg">
                 <p className="text-lg leading-relaxed italic">"{verse.text}"</p>
               </div>
             </CardContent>

@@ -9,8 +9,8 @@ import { ReadingPlanContentPage } from '@/pages/reading-plan/ReadingPlanContentP
 import { ReadingPlanAnalyticsPage } from '@/pages/reading-plan/ReadingPlanAnalyticsPage';
 import { ReadingPlanNotificationsPage } from '@/pages/reading-plan/ReadingPlanNotificationsPage';
 import { BibleContentDashboardPage } from '@/pages/bible-content/dashboard';
-import { BibleTranslationsPage } from '@/pages/bible-content/translations';
-import { BibleBooksChaptersPage } from '@/pages/bible-content/books-chapters';
+import { BibleTranslationsPage, ViewTranslationPage } from '@/pages/bible-content/translations';
+import { BibleBooksChaptersPage, ViewChapterPage } from '@/pages/bible-content/books-chapters';
 import { AIExplanationManagementPage } from '@/pages/bible-content/ai-explanations/AIExplanationManagementPage';
 import { TheologicalInsightsPage } from '@/pages/bible-content/theological-insights/TheologicalInsightsPage';
 import { ContentModerationPage } from '@/pages/bible-content/moderation';
@@ -145,7 +145,9 @@ const AppRoutingSetup = (): ReactElement => {
           {/* Bible Content Routes */}
           <Route path="/bible-content" element={<BibleContentDashboardPage />} />
           <Route path="/bible-content/translations" element={<BibleTranslationsPage />} />
+          <Route path="/bible-content/translations/view/:id" element={<ViewTranslationPage />} />
           <Route path="/bible-content/books-chapters" element={<BibleBooksChaptersPage />} />
+          <Route path="/bible-content/books-chapters/view/:bookId/:chapterId" element={<ViewChapterPage />} />
           <Route path="/bible-content/ai-explanations" element={<AIExplanationManagementPage />} />
           <Route path="/bible-content/theological-insights" element={<TheologicalInsightsPage />} />
           <Route path="/bible-content/moderation" element={<ContentModerationPage />} />

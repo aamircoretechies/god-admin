@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -270,7 +271,7 @@ const BibleTranslationsContent = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Translation Name
                   </label>
                   <Input
@@ -282,7 +283,7 @@ const BibleTranslationsContent = () => {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Version Code
                     </label>
                     <Input
@@ -292,7 +293,7 @@ const BibleTranslationsContent = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Language
                     </label>
                     <Select
@@ -314,7 +315,7 @@ const BibleTranslationsContent = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Description
                   </label>
                   <Textarea
@@ -327,7 +328,7 @@ const BibleTranslationsContent = () => {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Publisher
                     </label>
                     <Input
@@ -337,7 +338,7 @@ const BibleTranslationsContent = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                       Year
                     </label>
                     <Input
@@ -351,7 +352,7 @@ const BibleTranslationsContent = () => {
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     Status
                   </label>
                   <Select
@@ -371,7 +372,7 @@ const BibleTranslationsContent = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                     License
                   </label>
                   <Input
@@ -386,19 +387,19 @@ const BibleTranslationsContent = () => {
                     checked={formData.isPublic}
                     onCheckedChange={(checked) => setFormData({ ...formData, isPublic: checked })}
                   />
-                  <label className="text-sm font-medium text-gray-700">
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300">
                     Public Translation
                   </label>
                 </div>
 
-                <div className="p-4 bg-gray-50 rounded-lg">
-                  <h4 className="font-medium text-gray-900 mb-2">Upload Translation File</h4>
+                <div className="p-4 bg-gray-50 dark:bg-coal-100 rounded-lg ">
+                  <h4 className="font-medium text-gray-900 dark:text-white mb-2">Upload Translation File</h4>
                   <div className="space-y-2">
-                    <Button variant="outline" className="w-full">
+                    <Button variant="outline" className="w-full dark:border-gray-600 dark:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-white">
                       <Upload className="w-4 h-4 mr-2" />
                       Choose File
                     </Button>
-                    <p className="text-xs text-gray-500">
+                    <p className="text-xs text-gray-500 dark:text-gray-400">
                       Supported formats: JSON, XML, TXT (Max 10MB)
                     </p>
                   </div>
@@ -406,7 +407,7 @@ const BibleTranslationsContent = () => {
               </div>
             </div>
 
-            <div className="flex justify-end space-x-3 mt-6 pt-6 border-t">
+            <div className="flex justify-end space-x-3 mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
               <Button variant="outline" onClick={handleCancel}>
                 Cancel
               </Button>
@@ -527,10 +528,12 @@ const BibleTranslationsContent = () => {
                     {translation.publisher} • {translation.year} • {translation.license}
                   </div>
                   <div className="flex space-x-2">
-                    <Button variant="outline" size="sm">
-                      <Eye className="w-4 h-4 mr-1" />
-                      View
-                    </Button>
+                    <Link to={`/bible-content/translations/view/${translation.id}`}>
+                      <Button variant="outline" size="sm">
+                        <Eye className="w-4 h-4 mr-1" />
+                        View
+                      </Button>
+                    </Link>
                     <Button variant="outline" size="sm" onClick={() => handleEdit(translation)}>
                       <Edit className="w-4 h-4 mr-1" />
                       Edit

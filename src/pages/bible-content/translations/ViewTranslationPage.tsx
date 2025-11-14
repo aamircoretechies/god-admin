@@ -9,10 +9,10 @@ import {
   ToolbarPageTitle
 } from '@/partials/toolbar';
 
-import { BibleTranslationsContent } from './BibleTranslationsContent';
+import { ViewTranslationContent } from './ViewTranslationContent';
 import { useLayout } from '@/providers';
 
-const BibleTranslationsPage = () => {
+const ViewTranslationPage = () => {
   const { currentLayout } = useLayout();
 
   return (
@@ -22,25 +22,23 @@ const BibleTranslationsPage = () => {
           <Toolbar>
             <ToolbarHeading>
               <ToolbarPageTitle />
-              <ToolbarDescription>Manage Bible translations and versions.</ToolbarDescription>
+              <ToolbarDescription>View translation details and information.</ToolbarDescription>
             </ToolbarHeading>
-        {/*     <ToolbarActions> */}
-           {/*    <a href="#" className="btn btn-sm btn-light">
-                Import Translation
-              </a> */}
-              {/* <a href="#" className="btn btn-sm btn-primary">
-                Add New Translation
-              </a> */}
-         {/*    </ToolbarActions> */}
+            <ToolbarActions>
+              <a href="#" className="btn btn-sm btn-light">
+                Back to List
+              </a>
+            </ToolbarActions>
           </Toolbar>
         </Container>
       )}
 
       <Container>
-        <BibleTranslationsContent />
+        <ViewTranslationContent />
       </Container>
     </Fragment>
   );
 };
 
-export { BibleTranslationsPage }; 
+export { ViewTranslationPage };
+
