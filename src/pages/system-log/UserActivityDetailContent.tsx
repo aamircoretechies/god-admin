@@ -1,21 +1,21 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useParams } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Avatar } from '@/components/ui/avatar';
+import { toAbsoluteUrl } from '@/utils';
+import { fetchUserActivityLogs, type UserActivityLogResponse } from '@/services/activityLogsApi';
+import { fetchUserProfile } from '@/services/usersApi';
+import { AlertCircle } from 'lucide-react';
 import { 
-  User, 
   Mail, 
   Calendar,
-  MapPin,
   Shield,
   AlertTriangle,
-  UserX,
   Smartphone,
   Monitor,
   Tablet,
-  CheckCircle,
-  XCircle,
   Clock,
   Activity,
   TrendingUp,
@@ -29,143 +29,178 @@ import {
 
 interface UserActivity {
   id: string;
-  activityType: 'Verse Read' | 'AI Query' | 'Bookmark' | 'Share' | 'Feedback Submitted' | 'Login' | 'Logout' | 'Password Change' | 'Profile Update';
+  activityType: string;
   details: string;
   bookReference?: string;
   chapterReference?: string;
   verseReference?: string;
   queryText?: string;
-  device: 'Mobile iOS' | 'Mobile Android' | 'Web Desktop' | 'Web Mobile' | 'Tablet';
+  device: string;
   platform: string;
   ipAddress: string;
   timestamp: string;
   status: 'Success' | 'Error' | 'Warning';
-  errorMessage?: string;
+  errorMessage?: string | null;
   sessionId: string;
-  location?: string;
+  location?: string | null;
 }
 
-const UserActivityDetailContent: React.FC = () => {
-  const [selectedTimeRange, setSelectedTimeRange] = useState('7days');
+// Transform API response to component format
+const transformUserActivity = (apiData: UserActivityLogResponse): UserActivity => {
+  // Parse verse reference if available
+  let bookReference: string | undefined;
+  let chapterReference: string | undefined;
+  let verseReference: string | undefined;
+  
+  if (apiData.verseReference) {
+    // Try to parse "John 3:16" or "Romans 8" format
+    const match = apiData.verseReference.match(/^(\w+)\s+(\d+):(\d+)$/);
+    if (match) {
+      bookReference = match[1];
+      chapterReference = match[2];
+      verseReference = match[3];
+    } else {
+      const chapterMatch = apiData.verseReference.match(/^(\w+)\s+(\d+)$/);
+      if (chapterMatch) {
+        bookReference = chapterMatch[1];
+        chapterReference = chapterMatch[2];
+      } else {
+        verseReference = apiData.verseReference;
+      }
+    }
+  }
 
-  // Mock user data
-  const userData = {
-    id: 'user1',
-    name: 'John Doe',
-    email: 'john.doe@example.com',
-    avatar: '/media/avatars/300-1.png',
-    role: 'Premium',
-    joinDate: '2023-06-15',
-    lastActive: '2024-01-21T14:30:00Z',
-    totalActivities: 1247,
-    location: 'New York, US',
-    status: 'Active'
+  return {
+    id: apiData.log_id,
+    activityType: apiData.activityType,
+    details: apiData.details,
+    bookReference: bookReference,
+    chapterReference: chapterReference,
+    verseReference: verseReference || apiData.verseReference || undefined,
+    device: apiData.device,
+    platform: apiData.device, // Use device as platform
+    ipAddress: apiData.ipAddress,
+    timestamp: apiData.dateTime,
+    status: apiData.status as 'Success' | 'Error' | 'Warning',
+    errorMessage: apiData.errorMessage || undefined,
+    sessionId: apiData.sessionId,
+    location: apiData.location || undefined
+  };
+};
+
+const UserActivityDetailContent: React.FC = () => {
+  const { id: userId } = useParams<{ id: string }>();
+  const [selectedTimeRange, setSelectedTimeRange] = useState('7days');
+  const [userActivities, setUserActivities] = useState<UserActivity[]>([]);
+  const [userData, setUserData] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Map time range to days
+  const getDaysFromRange = (range: string): number => {
+    switch (range) {
+      case '24hours':
+        return 1;
+      case '7days':
+        return 7;
+      case '30days':
+        return 30;
+      case '90days':
+        return 90;
+      default:
+        return 7;
+    }
   };
 
-  // Mock activity timeline
-  const userActivities: UserActivity[] = [
-    {
-      id: '1',
-      activityType: 'Verse Read',
-      details: 'Read John 3:16',
-      bookReference: 'John',
-      chapterReference: '3',
-      verseReference: '16',
-      device: 'Mobile iOS',
-      platform: 'iOS 17.2',
-      ipAddress: '192.168.1.100',
-      timestamp: '2024-01-21T14:30:00Z',
-      status: 'Success',
-      sessionId: 'sess_123456',
-      location: 'New York, US'
-    },
-    {
-      id: '2',
-      activityType: 'AI Query',
-      details: 'Asked about the meaning of love in 1 Corinthians 13',
-      queryText: 'What does 1 Corinthians 13 say about love?',
-      device: 'Mobile iOS',
-      platform: 'iOS 17.2',
-      ipAddress: '192.168.1.100',
-      timestamp: '2024-01-21T14:25:00Z',
-      status: 'Success',
-      sessionId: 'sess_123456',
-      location: 'New York, US'
-    },
-    {
-      id: '3',
-      activityType: 'Bookmark',
-      details: 'Bookmarked Psalm 23',
-      bookReference: 'Psalms',
-      chapterReference: '23',
-      device: 'Mobile iOS',
-      platform: 'iOS 17.2',
-      ipAddress: '192.168.1.100',
-      timestamp: '2024-01-21T14:20:00Z',
-      status: 'Success',
-      sessionId: 'sess_123456',
-      location: 'New York, US'
-    },
-    {
-      id: '4',
-      activityType: 'Login',
-      details: 'Successful login',
-      device: 'Mobile iOS',
-      platform: 'iOS 17.2',
-      ipAddress: '192.168.1.100',
-      timestamp: '2024-01-21T14:15:00Z',
-      status: 'Success',
-      sessionId: 'sess_123456',
-      location: 'New York, US'
-    },
-    {
-      id: '5',
-      activityType: 'AI Query',
-      details: 'Failed AI query due to rate limit',
-      queryText: 'Explain the book of Revelation',
-      device: 'Web Desktop',
-      platform: 'Chrome 120.0',
-      ipAddress: '192.168.1.101',
-      timestamp: '2024-01-21T10:30:00Z',
-      status: 'Error',
-      errorMessage: 'Rate limit exceeded. Please try again in 1 minute.',
-      sessionId: 'sess_123457',
-      location: 'New York, US'
-    },
-    {
-      id: '6',
-      activityType: 'Share',
-      details: 'Shared John 3:16 on social media',
-      bookReference: 'John',
-      chapterReference: '3',
-      verseReference: '16',
-      device: 'Web Desktop',
-      platform: 'Chrome 120.0',
-      ipAddress: '192.168.1.101',
-      timestamp: '2024-01-21T09:45:00Z',
-      status: 'Success',
-      sessionId: 'sess_123457',
-      location: 'New York, US'
+  useEffect(() => {
+    if (!userId) {
+      setError('User ID is required');
+      setLoading(false);
+      return;
     }
-  ];
+
+    const loadData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        
+        // Fetch user profile and activity logs in parallel
+        const [profileResponse, activityResponse] = await Promise.all([
+          fetchUserProfile(userId),
+          fetchUserActivityLogs(userId, {
+            page: 1,
+            limit: 50,
+            days: getDaysFromRange(selectedTimeRange)
+          })
+        ]);
+
+        // Set user data
+        if (profileResponse.status === 1 && profileResponse.data?.basicUserInfo) {
+          const basicInfo = profileResponse.data.basicUserInfo;
+          const avatarNumber = (parseInt(basicInfo.userId.replace(/-/g, ''), 16) % 34) + 1;
+          
+          setUserData({
+            id: basicInfo.userId,
+            name: basicInfo.fullName,
+            email: basicInfo.email,
+            avatar: `/media/avatars/300-${avatarNumber}.png`,
+            role: basicInfo.accountType,
+            joinDate: basicInfo.memberSince,
+            status: basicInfo.status === 'active' ? 'Active' : 'Inactive'
+          });
+        }
+
+        // Set activity logs
+        if (activityResponse.status === 1 && activityResponse.data) {
+          const transformedActivities = activityResponse.data.map(transformUserActivity);
+          setUserActivities(transformedActivities);
+        } else {
+          setError(activityResponse.message || 'Failed to load activity logs');
+        }
+      } catch (err: any) {
+        console.error('Error loading user activity:', err);
+        setError(err?.message || 'Failed to load user activity');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadData();
+  }, [userId, selectedTimeRange]);
+
+  // Calculate statistics from activities
+  const statistics = React.useMemo(() => {
+    const verseReads = userActivities.filter((a) => a.activityType === 'Verse Read').length;
+    const aiQueries = userActivities.filter((a) => a.activityType === 'AI Query').length;
+    const bookmarks = userActivities.filter((a) => a.activityType === 'Bookmark').length;
+    const uniqueSessions = new Set(userActivities.map((a) => a.sessionId)).size;
+
+    return {
+      verseReads,
+      aiQueries,
+      bookmarks,
+      sessions: uniqueSessions
+    };
+  }, [userActivities]);
 
   const getActivityIcon = (type: string) => {
-    switch (type) {
-      case 'Verse Read':
-        return <BookOpen className="w-4 h-4" />;
-      case 'AI Query':
-        return <MessageSquare className="w-4 h-4" />;
-      case 'Bookmark':
-        return <Bookmark className="w-4 h-4" />;
-      case 'Share':
-        return <Share className="w-4 h-4" />;
-      case 'Login':
-        return <LogIn className="w-4 h-4" />;
-      case 'Logout':
-        return <LogOut className="w-4 h-4" />;
-      default:
-        return <Activity className="w-4 h-4" />;
+    const normalizedType = type.toLowerCase();
+    if (normalizedType.includes('verse') || normalizedType.includes('read')) {
+      return <BookOpen className="w-4 h-4" />;
+    } else if (normalizedType.includes('ai') || normalizedType.includes('query')) {
+      return <MessageSquare className="w-4 h-4" />;
+    } else if (normalizedType.includes('bookmark')) {
+      return <Bookmark className="w-4 h-4" />;
+    } else if (normalizedType.includes('share')) {
+      return <Share className="w-4 h-4" />;
+    } else if (normalizedType.includes('login')) {
+      return <LogIn className="w-4 h-4" />;
+    } else if (normalizedType.includes('logout')) {
+      return <LogOut className="w-4 h-4" />;
+    } else if (normalizedType.includes('reflection') || normalizedType.includes('note')) {
+      return <BookOpen className="w-4 h-4" />;
     }
+    return <Activity className="w-4 h-4" />;
   };
 
   const getActivityTypeBadge = (type: string) => {
@@ -202,18 +237,14 @@ const UserActivityDetailContent: React.FC = () => {
   };
 
   const getDeviceIcon = (device: string) => {
-    switch (device) {
-      case 'Mobile iOS':
-      case 'Mobile Android':
-        return <Smartphone className="w-4 h-4" />;
-      case 'Web Desktop':
-      case 'Web Mobile':
-        return <Monitor className="w-4 h-4" />;
-      case 'Tablet':
-        return <Tablet className="w-4 h-4" />;
-      default:
-        return <Monitor className="w-4 h-4" />;
+    if (device.includes('Mobile')) {
+      return <Smartphone className="w-4 h-4" />;
+    } else if (device.includes('Web')) {
+      return <Monitor className="w-4 h-4" />;
+    } else if (device.includes('Tablet')) {
+      return <Tablet className="w-4 h-4" />;
     }
+    return <Monitor className="w-4 h-4" />;
   };
 
   const formatDate = (dateString: string) => {
@@ -227,19 +258,46 @@ const UserActivityDetailContent: React.FC = () => {
   };
 
   const getRoleBadge = (role: string) => {
-    switch (role) {
-      case 'Free':
+    const normalizedRole = role.toUpperCase();
+    switch (normalizedRole) {
+      case 'FREE':
         return <Badge variant="secondary">Free</Badge>;
-      case 'Premium':
+      case 'PREMIUM':
         return <Badge variant="default" className="bg-purple-100 text-purple-800">Premium</Badge>;
-      case 'Admin':
+      case 'ADMIN':
         return <Badge variant="destructive">Admin</Badge>;
-      case 'Moderator':
+      case 'MODERATOR':
         return <Badge variant="default" className="bg-amber-100 text-amber-800">Moderator</Badge>;
       default:
         return <Badge variant="outline">{role}</Badge>;
     }
   };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <div className="spinner-border spinner-border-sm text-primary" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </div>
+          <p className="text-sm text-gray-600 mt-2">Loading user activity...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !userData) {
+    return (
+      <div className="card">
+        <div className="card-body">
+          <div className="flex items-center gap-2 text-red-600">
+            <AlertCircle className="w-5 h-5" />
+            <p className="text-sm">{error || 'Failed to load user activity'}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
@@ -248,7 +306,7 @@ const UserActivityDetailContent: React.FC = () => {
         <CardContent className="p-6">
           <div className="flex items-start gap-6">
             <Avatar className="w-20 h-20">
-              <img src={userData.avatar} alt={userData.name} />
+              <img src={toAbsoluteUrl(userData.avatar)} alt={userData.name} />
             </Avatar>
             <div className="flex-1">
               <div className="flex items-center gap-4 mb-4">
@@ -265,15 +323,17 @@ const UserActivityDetailContent: React.FC = () => {
                 </div>
                 <div className="flex items-center gap-2">
                   <Calendar className="w-4 h-4 text-gray-400" />
-                  <span className="text-sm text-gray-600">Joined {new Date(userData.joinDate).toLocaleDateString()}</span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <MapPin className="w-4 h-4 text-gray-400" />
-                  <span className="text-sm text-gray-600">{userData.location}</span>
+                  <span className="text-sm text-gray-600">Joined {userData.joinDate}</span>
                 </div>
                 <div className="flex items-center gap-2">
                   <Activity className="w-4 h-4 text-gray-400" />
-                  <span className="text-sm text-gray-600">{userData.totalActivities} activities</span>
+                  <span className="text-sm text-gray-600">{userActivities.length} activities</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Clock className="w-4 h-4 text-gray-400" />
+                  <span className="text-sm text-gray-600">
+                    {userActivities.length > 0 ? formatDate(userActivities[0].timestamp) : 'No recent activity'}
+                  </span>
                 </div>
               </div>
             </div>
@@ -301,7 +361,7 @@ const UserActivityDetailContent: React.FC = () => {
               </div>
               <div>
                 <p className="text-sm text-gray-600">Verse Reads</p>
-                <p className="text-xl font-bold">847</p>
+                <p className="text-xl font-bold">{statistics.verseReads}</p>
               </div>
             </div>
           </CardContent>
@@ -314,7 +374,7 @@ const UserActivityDetailContent: React.FC = () => {
               </div>
               <div>
                 <p className="text-sm text-gray-600">AI Queries</p>
-                <p className="text-xl font-bold">234</p>
+                <p className="text-xl font-bold">{statistics.aiQueries}</p>
               </div>
             </div>
           </CardContent>
@@ -327,7 +387,7 @@ const UserActivityDetailContent: React.FC = () => {
               </div>
               <div>
                 <p className="text-sm text-gray-600">Bookmarks</p>
-                <p className="text-xl font-bold">156</p>
+                <p className="text-xl font-bold">{statistics.bookmarks}</p>
               </div>
             </div>
           </CardContent>
@@ -340,7 +400,7 @@ const UserActivityDetailContent: React.FC = () => {
               </div>
               <div>
                 <p className="text-sm text-gray-600">Sessions</p>
-                <p className="text-xl font-bold">89</p>
+                <p className="text-xl font-bold">{statistics.sessions}</p>
               </div>
             </div>
           </CardContent>
@@ -365,8 +425,13 @@ const UserActivityDetailContent: React.FC = () => {
           </div>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            {userActivities.map((activity, index) => (
+          {userActivities.length === 0 ? (
+            <div className="text-center py-8">
+              <p className="text-sm text-gray-500">No activities found for the selected time range.</p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {userActivities.map((activity, index) => (
               <div key={activity.id} className="flex gap-4">
                 {/* Timeline Line */}
                 <div className="flex flex-col items-center">
@@ -416,8 +481,9 @@ const UserActivityDetailContent: React.FC = () => {
                   </div>
                 </div>
               </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

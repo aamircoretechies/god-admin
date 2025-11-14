@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
+import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Avatar } from '@/components/ui/avatar';
+import { fetchAlerts, resolveAlert, dismissAlert, acknowledgeAlert, type AlertResponse } from '@/services/alertsApi';
 import { 
   AlertTriangle, 
   AlertCircle, 
@@ -14,9 +14,7 @@ import {
   MapPin,
   Activity,
   TrendingUp,
-  TrendingDown,
   Bell,
-  Settings,
   Eye,
   Ban
 } from 'lucide-react';
@@ -37,96 +35,177 @@ interface SystemAlert {
   actionRequired: boolean;
 }
 
+// Transform API response to component format
+const transformAlert = (apiData: AlertResponse): SystemAlert => {
+  // Map severity
+  const severityMap: Record<string, 'low' | 'medium' | 'high' | 'critical'> = {
+    'LOW': 'low',
+    'MEDIUM': 'medium',
+    'HIGH': 'high',
+    'CRITICAL': 'critical'
+  };
+
+  // Map status
+  const statusMap: Record<string, 'new' | 'acknowledged' | 'resolved'> = {
+    'NEW': 'new',
+    'ACKNOWLEDGED': 'acknowledged',
+    'RESOLVED': 'resolved'
+  };
+
+  // Map category
+  const categoryMap: Record<string, 'spam' | 'rate_limit' | 'security' | 'performance' | 'user_behavior'> = {
+    'SPAM': 'spam',
+    'RATE_LIMIT': 'rate_limit',
+    'SECURITY': 'security',
+    'PERFORMANCE': 'performance',
+    'USER_BEHAVIOR': 'user_behavior'
+  };
+
+  // Derive type from severity and category
+  let type: 'warning' | 'error' | 'info' | 'success' = 'info';
+  if (apiData.severity === 'CRITICAL' || apiData.severity === 'HIGH') {
+    type = 'error';
+  } else if (apiData.severity === 'MEDIUM') {
+    type = 'warning';
+  } else if (apiData.status === 'RESOLVED') {
+    type = 'success';
+  }
+
+  return {
+    id: apiData.alertId,
+    type: type,
+    severity: severityMap[apiData.severity] || 'medium',
+    title: apiData.title,
+    description: apiData.message,
+    timestamp: apiData.timestamp,
+    status: statusMap[apiData.status] || 'new',
+    category: categoryMap[apiData.category] || 'performance',
+    affectedUsers: apiData.usersAffected,
+    location: apiData.location || undefined,
+    ipAddress: apiData.ipAddress || undefined,
+    actionRequired: apiData.actionRequired
+  };
+};
+
 const SystemAlertsContent: React.FC = () => {
   const [selectedFilter, setSelectedFilter] = useState('all');
+  const [alerts, setAlerts] = useState<SystemAlert[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages] = useState(1);
+  const [processingAlert, setProcessingAlert] = useState<string | null>(null);
+  const [successMessage, setSuccessMessage] = useState<string | null>(null);
 
-  // Mock alerts data
-  const alerts: SystemAlert[] = [
-    {
-      id: '1',
-      type: 'warning',
-      severity: 'high',
-      title: 'Unusual AI Query Pattern Detected',
-      description: 'User john.doe@example.com has submitted 45 AI queries in the last 10 minutes, which is 3x above normal rate.',
-      timestamp: '2024-01-21T14:30:00Z',
-      status: 'new',
-      category: 'rate_limit',
-      affectedUsers: 1,
-      location: 'New York, US',
-      ipAddress: '192.168.1.100',
-      userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_2 like Mac OS X)',
-      actionRequired: true
-    },
-    {
-      id: '2',
-      type: 'error',
-      severity: 'critical',
-      title: 'Multiple Failed Login Attempts',
-      description: 'IP address 203.45.67.89 has attempted 12 failed logins in the last 5 minutes.',
-      timestamp: '2024-01-21T14:25:00Z',
-      status: 'acknowledged',
-      category: 'security',
-      affectedUsers: 0,
-      location: 'Unknown',
-      ipAddress: '203.45.67.89',
-      userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)',
-      actionRequired: true
-    },
-    {
-      id: '3',
-      type: 'info',
-      severity: 'medium',
-      title: 'High Traffic Volume',
-      description: 'Traffic volume has increased by 150% in the last hour, primarily from mobile devices.',
-      timestamp: '2024-01-21T14:20:00Z',
-      status: 'new',
-      category: 'performance',
-      affectedUsers: 0,
-      actionRequired: false
-    },
-    {
-      id: '4',
-      type: 'warning',
-      severity: 'medium',
-      title: 'Suspicious Content Sharing',
-      description: 'User jane.smith@example.com has shared the same verse 8 times in 2 hours.',
-      timestamp: '2024-01-21T14:15:00Z',
-      status: 'new',
-      category: 'user_behavior',
-      affectedUsers: 1,
-      location: 'Los Angeles, US',
-      ipAddress: '192.168.1.101',
-      userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)',
-      actionRequired: true
-    },
-    {
-      id: '5',
-      type: 'success',
-      severity: 'low',
-      title: 'Rate Limit Reset',
-      description: 'Rate limit for user mike.johnson@example.com has been automatically reset after 1 hour.',
-      timestamp: '2024-01-21T14:10:00Z',
-      status: 'resolved',
-      category: 'rate_limit',
-      affectedUsers: 1,
-      actionRequired: false
-    },
-    {
-      id: '6',
-      type: 'error',
-      severity: 'high',
-      title: 'Geographic Anomaly',
-      description: 'User account accessed from 3 different countries within 30 minutes.',
-      timestamp: '2024-01-21T14:05:00Z',
-      status: 'new',
-      category: 'security',
-      affectedUsers: 1,
-      location: 'Multiple',
-      ipAddress: 'Multiple',
-      userAgent: 'Multiple',
-      actionRequired: true
+  const loadAlerts = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await fetchAlerts({
+        page: currentPage,
+        limit: 20
+      });
+
+      if (response.status === 1 && response.data) {
+        const transformedAlerts = response.data.map(transformAlert);
+        setAlerts(transformedAlerts);
+        // Note: API response doesn't include pagination metadata in the example
+        // Adjust if your API provides it
+      } else {
+        setError(response.message || 'Failed to load alerts');
+      }
+    } catch (err: any) {
+      console.error('Error loading alerts:', err);
+      setError(err?.message || 'Failed to load alerts');
+    } finally {
+      setLoading(false);
     }
-  ];
+  }, [currentPage]);
+
+  useEffect(() => {
+    loadAlerts();
+  }, [loadAlerts]);
+
+  const handleResolve = async (alertId: string) => {
+    try {
+      setProcessingAlert(alertId);
+      setSuccessMessage(null);
+      const response = await resolveAlert(alertId);
+      console.log('Resolve alert response:', response);
+      
+      if (response.status === 1) {
+        setSuccessMessage(response.message || 'Alert resolved successfully');
+        // Reload alerts to reflect the updated status
+        await loadAlerts();
+        // Clear success message after 3 seconds
+        setTimeout(() => setSuccessMessage(null), 3000);
+      } else {
+        setError(response.message || 'Failed to resolve alert');
+        setTimeout(() => setError(null), 5000);
+      }
+    } catch (err: any) {
+      console.error('Error resolving alert:', err);
+      const errorMsg = err?.response?.data?.message || err?.message || 'Failed to resolve alert';
+      setError(errorMsg);
+      setTimeout(() => setError(null), 5000);
+    } finally {
+      setProcessingAlert(null);
+    }
+  };
+
+  const handleDismiss = async (alertId: string) => {
+    try {
+      setProcessingAlert(alertId);
+      setSuccessMessage(null);
+      const response = await dismissAlert(alertId);
+      console.log('Dismiss alert response:', response);
+      
+      if (response.status === 1) {
+        setSuccessMessage(response.message || 'Alert dismissed successfully');
+        // Reload alerts to reflect the updated status
+        await loadAlerts();
+        // Clear success message after 3 seconds
+        setTimeout(() => setSuccessMessage(null), 3000);
+      } else {
+        setError(response.message || 'Failed to dismiss alert');
+        setTimeout(() => setError(null), 5000);
+      }
+    } catch (err: any) {
+      console.error('Error dismissing alert:', err);
+      const errorMsg = err?.response?.data?.message || err?.message || 'Failed to dismiss alert';
+      setError(errorMsg);
+      setTimeout(() => setError(null), 5000);
+    } finally {
+      setProcessingAlert(null);
+    }
+  };
+
+  const handleAcknowledge = async (alertId: string) => {
+    try {
+      setProcessingAlert(alertId);
+      setSuccessMessage(null);
+      const response = await acknowledgeAlert(alertId);
+      console.log('Acknowledge alert response:', response);
+      
+      if (response.status === 1) {
+        setSuccessMessage(response.message || 'Alert acknowledged successfully');
+        // Reload alerts to reflect the updated status
+        await loadAlerts();
+        // Clear success message after 3 seconds
+        setTimeout(() => setSuccessMessage(null), 3000);
+      } else {
+        setError(response.message || 'Failed to acknowledge alert');
+        setTimeout(() => setError(null), 5000);
+      }
+    } catch (err: any) {
+      console.error('Error acknowledging alert:', err);
+      const errorMsg = err?.response?.data?.message || err?.message || 'Failed to acknowledge alert';
+      setError(errorMsg);
+      setTimeout(() => setError(null), 5000);
+    } finally {
+      setProcessingAlert(null);
+    }
+  };
 
   const getSeverityBadge = (severity: string) => {
     switch (severity) {
@@ -180,9 +259,11 @@ const SystemAlertsContent: React.FC = () => {
       'user_behavior': 'bg-pink-100 text-pink-800'
     };
     
+    const displayName = category.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    
     return (
       <Badge variant="default" className={colors[category as keyof typeof colors] || 'bg-gray-100 text-gray-800'}>
-        {category.replace('_', ' ')}
+        {displayName}
       </Badge>
     );
   };
@@ -197,23 +278,71 @@ const SystemAlertsContent: React.FC = () => {
     });
   };
 
-  const filteredAlerts = alerts.filter(alert => {
+  const filteredAlerts = useMemo(() => {
+    return alerts.filter(alert => {
     if (selectedFilter === 'all') return true;
     if (selectedFilter === 'new') return alert.status === 'new';
     if (selectedFilter === 'critical') return alert.severity === 'critical';
     if (selectedFilter === 'action_required') return alert.actionRequired;
     return true;
   });
+  }, [alerts, selectedFilter]);
 
-  const stats = {
+  const stats = useMemo(() => {
+    return {
     total: alerts.length,
     new: alerts.filter(a => a.status === 'new').length,
     critical: alerts.filter(a => a.severity === 'critical').length,
     actionRequired: alerts.filter(a => a.actionRequired).length
   };
+  }, [alerts]);
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          {[1, 2, 3, 4].map((i) => (
+            <Card key={i}>
+              <CardContent className="p-4">
+                <div className="animate-pulse">
+                  <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
+                  <div className="h-8 bg-gray-200 rounded w-1/2"></div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <Card>
+        <CardContent className="p-6">
+          <div className="flex items-center gap-2 text-red-600">
+            <AlertCircle className="w-5 h-5" />
+            <p className="text-sm">{error}</p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <div className="space-y-6">
+      {/* Success Message */}
+      {successMessage && (
+        <Card className="border-green-500 bg-green-50">
+          <CardContent className="p-4">
+            <div className="flex items-center gap-2 text-green-700">
+              <CheckCircle className="w-5 h-5" />
+              <p className="text-sm font-medium">{successMessage}</p>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Alert Statistics */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
         <Card>
@@ -288,6 +417,29 @@ const SystemAlertsContent: React.FC = () => {
             <span className="text-sm text-gray-600">
               Showing {filteredAlerts.length} of {alerts.length} alerts
             </span>
+            {totalPages > 1 && (
+              <div className="flex items-center gap-2 ml-auto">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  disabled={currentPage === 1}
+                >
+                  Previous
+                </Button>
+                <span className="text-sm text-gray-600">
+                  Page {currentPage} of {totalPages}
+                </span>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                  disabled={currentPage === totalPages}
+                >
+                  Next
+                </Button>
+              </div>
+            )}
           </div>
         </CardContent>
       </Card>
@@ -320,10 +472,22 @@ const SystemAlertsContent: React.FC = () => {
                           Action Required
                         </Badge>
                       )}
-                      <Button variant="ghost" size="sm">
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => handleAcknowledge(alert.id)}
+                        disabled={processingAlert === alert.id || alert.status === 'acknowledged' || alert.status === 'resolved'}
+                        title="Acknowledge"
+                      >
                         <Eye className="w-4 h-4" />
                       </Button>
-                      <Button variant="ghost" size="sm">
+                      <Button 
+                        variant="ghost" 
+                        size="sm"
+                        onClick={() => handleDismiss(alert.id)}
+                        disabled={processingAlert === alert.id || alert.status === 'resolved'}
+                        title="Dismiss"
+                      >
                         <Ban className="w-4 h-4" />
                       </Button>
                     </div>
@@ -367,11 +531,21 @@ const SystemAlertsContent: React.FC = () => {
                           <UserX className="w-4 h-4 mr-2" />
                           Block User
                         </Button>
-                        <Button size="sm" variant="outline">
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => handleAcknowledge(alert.id)}
+                          disabled={processingAlert === alert.id || alert.status === 'acknowledged' || alert.status === 'resolved'}
+                        >
                           <Shield className="w-4 h-4 mr-2" />
-                          Investigate
+                          Acknowledge
                         </Button>
-                        <Button size="sm" variant="outline">
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => handleResolve(alert.id)}
+                          disabled={processingAlert === alert.id || alert.status === 'resolved'}
+                        >
                           <CheckCircle className="w-4 h-4 mr-2" />
                           Mark Resolved
                         </Button>

@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { fetchChapterDetail, type ChapterDetailData } from '@/services/bibleBooksApi';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -8,8 +9,6 @@ import {
   ArrowLeft, 
   BookOpen,
   FileText,
-  CheckCircle,
-  Clock,
   AlertCircle,
   Eye,
   Edit,
@@ -44,71 +43,86 @@ interface Verse {
   translation: string;
 }
 
-const mockBooks: BibleBook[] = [
-  {
-    id: '1',
-    name: 'Genesis',
-    testament: 'old',
-    chapters: 50,
-    verses: 1533,
-    description: 'The first book of the Bible, containing the creation story and early history.',
-    status: 'active'
-  },
-  {
-    id: '2',
-    name: 'Exodus',
-    testament: 'old',
-    chapters: 40,
-    verses: 1213,
-    description: 'The second book of the Bible, containing the story of the Israelites\' exodus from Egypt.',
-    status: 'active'
-  },
-  {
-    id: '3',
-    name: 'Matthew',
-    testament: 'new',
-    chapters: 28,
-    verses: 1071,
-    description: 'The first book of the New Testament, containing the Gospel of Matthew.',
-    status: 'active'
-  },
-  {
-    id: '4',
-    name: 'Mark',
-    testament: 'new',
-    chapters: 16,
-    verses: 678,
-    description: 'The second book of the New Testament, containing the Gospel of Mark.',
-    status: 'active'
-  }
-];
+// Transform API response to component format
+const transformChapterData = (apiData: ChapterDetailData) => {
+  const book: BibleBook = {
+    id: apiData.book_id,
+    name: apiData.chapter_overview.book,
+    testament: (apiData.status_configuration.testament === 'OLD' ? 'old' : 'new') as 'old' | 'new',
+    chapters: apiData.statistics.book_chapters,
+    verses: 0, // Not provided in API
+    description: apiData.chapter_overview.book_description,
+    status: (apiData.status_configuration.book_status?.toLowerCase() || 'active') as 'active' | 'inactive' | 'draft'
+  };
 
-const mockChapters: Chapter[] = [
-  { id: '1', bookId: '1', number: 1, verses: 31, status: 'active' },
-  { id: '2', bookId: '1', number: 2, verses: 25, status: 'active' },
-  { id: '3', bookId: '1', number: 3, verses: 24, status: 'active' },
-  { id: '4', bookId: '3', number: 1, verses: 25, status: 'active' },
-  { id: '5', bookId: '3', number: 2, verses: 23, status: 'active' }
-];
+  const chapter: Chapter = {
+    id: apiData.chapter_id,
+    bookId: apiData.book_id,
+    number: apiData.chapter_overview.chapter_number,
+    verses: apiData.statistics.total_verses,
+    status: (apiData.status_configuration.status?.toLowerCase() || 'active') as 'active' | 'inactive' | 'draft'
+  };
 
-const mockVerses: Verse[] = [
-  { id: '1', chapterId: '1', number: 1, text: 'In the beginning God created the heaven and the earth.', translation: 'KJV' },
-  { id: '2', chapterId: '1', number: 2, text: 'And the earth was without form, and void; and darkness was upon the face of the deep. And the Spirit of God moved upon the face of the waters.', translation: 'KJV' },
-  { id: '3', chapterId: '1', number: 3, text: 'And God said, Let there be light: and there was light.', translation: 'KJV' },
-  { id: '4', chapterId: '1', number: 4, text: 'And God saw the light, that it was good: and God divided the light from the darkness.', translation: 'KJV' },
-  { id: '5', chapterId: '1', number: 5, text: 'And God called the light Day, and the darkness he called Night. And the evening and the morning were the first day.', translation: 'KJV' }
-];
+  const chapterVerses: Verse[] = apiData.verses.map((verse) => ({
+    id: `${apiData.chapter_id}-verse-${verse.verse_number}`,
+    chapterId: apiData.chapter_id,
+    number: verse.verse_number,
+    text: verse.text,
+    translation: verse.version
+  }));
+
+  return { book, chapter, chapterVerses, quickActions: apiData.quick_actions };
+};
 
 const ViewChapterContent: React.FC = () => {
   const { bookId, chapterId } = useParams<{ bookId: string; chapterId: string }>();
   const navigate = useNavigate();
   const [selectedVerse, setSelectedVerse] = useState<any>(null);
   const [isVerseModalOpen, setIsVerseModalOpen] = useState(false);
-  
-  // Find the book and chapter
-  const book = mockBooks.find(b => b.id === bookId);
-  const chapter = mockChapters.find(c => c.id === chapterId && c.bookId === bookId);
-  const chapterVerses = mockVerses.filter(v => v.chapterId === chapterId);
+  const [book, setBook] = useState<BibleBook | null>(null);
+  const [chapter, setChapter] = useState<Chapter | null>(null);
+  const [chapterVerses, setChapterVerses] = useState<Verse[]>([]);
+  const [quickActions, setQuickActions] = useState<{
+    edit_chapter: boolean;
+    download_chapter: boolean;
+    upload_verses: boolean;
+    duplicate_chapter: boolean;
+  } | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const loadChapter = async () => {
+      if (!bookId || !chapterId) {
+        setError('Book ID or Chapter ID is missing');
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        setError(null);
+        const apiData = await fetchChapterDetail(bookId, chapterId);
+        
+        if (apiData) {
+          const transformed = transformChapterData(apiData);
+          setBook(transformed.book);
+          setChapter(transformed.chapter);
+          setChapterVerses(transformed.chapterVerses);
+          setQuickActions(transformed.quickActions);
+        } else {
+          setError('Chapter not found');
+        }
+      } catch (err: any) {
+        console.error('Error loading chapter:', err);
+        setError(err?.response?.data?.message || err?.message || 'Failed to load chapter');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadChapter();
+  }, [bookId, chapterId]);
 
   const handleVerseClick = (verse: Verse) => {
     if (!book || !chapter) return;
@@ -128,12 +142,28 @@ const ViewChapterContent: React.FC = () => {
     setIsVerseModalOpen(true);
   };
 
-  if (!book || !chapter) {
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <Card>
+          <CardContent className="p-6">
+            <div className="animate-pulse space-y-4">
+              <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-1/4"></div>
+              <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded"></div>
+              <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded"></div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (error || !book || !chapter) {
     return (
       <div className="text-center py-12">
         <AlertCircle className="w-12 h-12 text-gray-400 mx-auto mb-4" />
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Chapter Not Found</h3>
-        <p className="text-gray-600 dark:text-gray-400 mb-4">The chapter you're looking for doesn't exist.</p>
+        <p className="text-gray-600 dark:text-gray-400 mb-4">{error || 'The chapter you\'re looking for doesn\'t exist.'}</p>
         <Button onClick={() => navigate('/bible-content/books-chapters')}>
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to Books & Chapters
@@ -182,17 +212,29 @@ const ViewChapterContent: React.FC = () => {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline">
+          <Button 
+            variant="outline" 
+            disabled={true}
+            title="Duplicate not available"
+          >
             <Copy className="w-4 h-4 mr-2" />
             Duplicate
           </Button>
-          <Button variant="outline">
+          <Button 
+            variant="outline" 
+            disabled={true}
+            title="Download not available"
+          >
             <Download className="w-4 h-4 mr-2" />
             Download
           </Button>
-          <Button variant="outline" disabled title="Content editing not available in Phase 1">
+          <Button 
+            variant="outline" 
+            disabled={true}
+            title="Edit not available"
+          >
             <Edit className="w-4 h-4 mr-2" />
-            Edit Chapter (Phase 2)
+            Edit Chapter
           </Button>
         </div>
       </div>
@@ -332,19 +374,39 @@ const ViewChapterContent: React.FC = () => {
               <CardTitle>Quick Actions</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              <Button variant="outline" className="w-full justify-start" disabled title="Content editing not available in Phase 1">
+              <Button 
+                variant="outline" 
+                className="w-full justify-start" 
+                disabled={true}
+                title="Edit not available"
+              >
                 <Edit className="w-4 h-4 mr-2" />
-                Edit Chapter (Phase 2)
+                Edit Chapter
               </Button>
-              <Button variant="outline" className="w-full justify-start">
+              <Button 
+                variant="outline" 
+                className="w-full justify-start"
+                disabled={true}
+                title="Download not available"
+              >
                 <Download className="w-4 h-4 mr-2" />
                 Download Chapter
               </Button>
-              <Button variant="outline" className="w-full justify-start">
+              <Button 
+                variant="outline" 
+                className="w-full justify-start"
+                disabled={true}
+                title="Upload not available"
+              >
                 <Upload className="w-4 h-4 mr-2" />
                 Upload Verses
               </Button>
-              <Button variant="outline" className="w-full justify-start">
+              <Button 
+                variant="outline" 
+                className="w-full justify-start"
+                disabled={true}
+                title="Duplicate not available"
+              >
                 <Copy className="w-4 h-4 mr-2" />
                 Duplicate Chapter
               </Button>

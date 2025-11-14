@@ -1,5 +1,6 @@
-import { useState } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
+import { fetchTranslations, updateTranslation, type TranslationResponse } from '@/services/translationsApi';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,7 +10,6 @@ import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { 
   Languages, 
-  Plus, 
   Edit, 
   Trash2, 
   Save,
@@ -40,97 +40,88 @@ interface Translation {
   isPublic: boolean;
 }
 
-const mockTranslations: Translation[] = [
-  {
-    id: '1',
-    name: 'King James Version',
-    version: 'KJV',
-    language: 'English',
-    description: 'The King James Version is an English translation of the Christian Bible for the Church of England.',
-    status: 'active',
-    verseCount: 31102,
-    lastUpdated: '2024-01-15',
-    fileSize: '2.3 MB',
-    publisher: 'Public Domain',
-    year: '1611',
-    license: 'Public Domain',
-    isPublic: true
-  },
-  {
-    id: '2',
-    name: 'English Standard Version',
-    version: 'ESV',
-    language: 'English',
-    description: 'The English Standard Version is an English translation of the Bible published in 2001.',
-    status: 'active',
-    verseCount: 31102,
-    lastUpdated: '2024-01-10',
-    fileSize: '2.1 MB',
-    publisher: 'Crossway',
-    year: '2001',
-    license: 'ESV License',
-    isPublic: true
-  },
-  {
-    id: '3',
-    name: 'New International Version',
-    version: 'NIV',
-    language: 'English',
-    description: 'The New International Version is an English translation of the Bible first published in 1978.',
-    status: 'active',
-    verseCount: 31102,
-    lastUpdated: '2024-01-12',
-    fileSize: '2.0 MB',
-    publisher: 'Biblica',
-    year: '1978',
-    license: 'NIV License',
-    isPublic: true
-  },
-  {
-    id: '4',
-    name: 'Reina Valera',
-    version: 'RV1960',
-    language: 'Spanish',
-    description: 'Reina Valera is a Spanish translation of the Bible first published in 1602.',
-    status: 'pending',
-    verseCount: 31102,
-    lastUpdated: '2024-01-18',
-    fileSize: '2.4 MB',
-    publisher: 'Sociedades Bíblicas Unidas',
-    year: '1960',
-    license: 'Public Domain',
-    isPublic: true
-  },
-  {
-    id: '5',
-    name: 'Nueva Versión Internacional',
-    version: 'NVI',
-    language: 'Spanish',
-    description: 'The Nueva Versión Internacional is a Spanish translation of the Bible.',
-    status: 'inactive',
-    verseCount: 31102,
-    lastUpdated: '2024-01-05',
-    fileSize: '2.2 MB',
-    publisher: 'Biblica',
-    year: '1999',
-    license: 'NVI License',
-    isPublic: false
-  }
-];
+// Transform API response to component format
+const transformTranslation = (apiTranslation: TranslationResponse): Translation => {
+  // Format file size
+  const formatFileSize = (sizeMb: number | null | undefined): string => {
+    if (!sizeMb) return '0 KB';
+    if (sizeMb < 1) return `${(sizeMb * 1024).toFixed(0)} KB`;
+    return `${sizeMb.toFixed(2)} MB`;
+  };
 
-const languages = [
-  'English', 'Spanish', 'French', 'German', 'Portuguese', 'Italian', 'Dutch', 'Russian',
-  'Chinese', 'Japanese', 'Korean', 'Arabic', 'Hebrew', 'Greek', 'Latin', 'Swedish',
-  'Norwegian', 'Danish', 'Finnish', 'Polish', 'Czech', 'Hungarian', 'Romanian', 'Bulgarian'
-];
+  return {
+    id: apiTranslation.translation_id,
+    name: apiTranslation.name,
+    version: apiTranslation.abbreviation || '', // Map abbreviation to version
+    language: apiTranslation.language || '',
+    description: '', // API doesn't provide description
+    status: (apiTranslation.status?.toLowerCase() || 'draft') as 'active' | 'inactive' | 'pending' | 'draft',
+    verseCount: apiTranslation.total_verses || 0, // Map total_verses to verseCount
+    lastUpdated: apiTranslation.last_updated 
+      ? new Date(apiTranslation.last_updated).toISOString().split('T')[0]
+      : new Date().toISOString().split('T')[0],
+    fileSize: formatFileSize(apiTranslation.file_size_mb), // Map file_size_mb to fileSize
+    publisher: '', // API doesn't provide publisher
+    year: '', // API doesn't provide year
+    license: apiTranslation.license || '',
+    isPublic: apiTranslation.is_public ?? true
+  };
+};
+
+// Language mapping: code -> display name
+const languageMap: Record<string, string> = {
+  'en': 'English',
+  'es': 'Spanish',
+  'fr': 'French',
+  'de': 'German',
+  'pt': 'Portuguese',
+  'it': 'Italian',
+  'nl': 'Dutch',
+  'ru': 'Russian',
+  'zh': 'Chinese',
+  'ja': 'Japanese',
+  'ko': 'Korean',
+  'ar': 'Arabic',
+  'he': 'Hebrew',
+  'el': 'Greek',
+  'la': 'Latin',
+  'sv': 'Swedish',
+  'no': 'Norwegian',
+  'da': 'Danish',
+  'fi': 'Finnish',
+  'pl': 'Polish',
+  'cs': 'Czech',
+  'hu': 'Hungarian',
+  'ro': 'Romanian',
+  'bg': 'Bulgarian'
+};
+
+// Get display name for language code
+const getLanguageName = (code: string): string => {
+  return languageMap[code] || code;
+};
+
+// Get language code from display name
+const getLanguageCode = (name: string): string => {
+  const entry = Object.entries(languageMap).find(([_, displayName]) => displayName === name);
+  return entry ? entry[0] : name; // Return code if found, otherwise return as-is (might already be a code)
+};
+
+const languages = Object.values(languageMap);
 
 const BibleTranslationsContent = () => {
-  const [translations, setTranslations] = useState<Translation[]>(mockTranslations);
+  const [translations, setTranslations] = useState<Translation[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [isCreating, setIsCreating] = useState(false);
   const [editingTranslation, setEditingTranslation] = useState<Translation | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [languageFilter, setLanguageFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalCount, setTotalCount] = useState(0);
+  const [saving, setSaving] = useState(false);
   const [formData, setFormData] = useState<Partial<Translation>>({
     name: '',
     version: '',
@@ -143,13 +134,81 @@ const BibleTranslationsContent = () => {
     isPublic: true
   });
 
-  const filteredTranslations = translations.filter(translation => {
-    const matchesSearch = translation.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         translation.version.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesLanguage = languageFilter === 'all' || translation.language === languageFilter;
-    const matchesStatus = statusFilter === 'all' || translation.status === statusFilter;
-    return matchesSearch && matchesLanguage && matchesStatus;
-  });
+  // Fetch translations from API
+  useEffect(() => {
+    const loadTranslations = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const response = await fetchTranslations({
+          page: currentPage,
+          limit: 10,
+          search: searchTerm || undefined,
+          language: languageFilter !== 'all' ? languageFilter : undefined,
+          status: statusFilter !== 'all' ? statusFilter : undefined
+        });
+
+        console.log('Translations response:', response);
+
+        // Check if response is valid
+        if (!response) {
+          throw new Error('No response received from API');
+        }
+
+        // API returns {success, data, metadata}
+        if (response.success && response.data && Array.isArray(response.data)) {
+          const transformedTranslations = response.data.map(transformTranslation);
+          setTranslations(transformedTranslations);
+          
+          // Use metadata if available
+          if (response.metadata) {
+            setTotalPages(response.metadata.totalPages || 1);
+            setTotalCount(response.metadata.total || transformedTranslations.length);
+          } else {
+            // Fallback if no metadata
+            setTotalPages(1);
+            setTotalCount(transformedTranslations.length);
+          }
+        } else {
+          // Unexpected format
+          console.warn('Unexpected response format:', response);
+          setTranslations([]);
+          setError('Unexpected response format from API');
+        }
+      } catch (err: any) {
+        console.error('Error loading translations:', err);
+        console.error('Error details:', {
+          message: err?.message,
+          response: err?.response,
+          status: err?.response?.status,
+          data: err?.response?.data
+        });
+        
+        const errorMessage = err?.response?.data?.message 
+          || err?.response?.data?.error
+          || err?.message 
+          || 'Failed to load translations';
+        
+        setError(errorMessage);
+        setTranslations([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadTranslations();
+  }, [currentPage, searchTerm, languageFilter, statusFilter]);
+
+  // Get unique languages from fetched translations
+  const availableLanguages = useMemo(() => {
+    const languagesSet = new Set<string>();
+    translations.forEach(t => {
+      if (t.language) languagesSet.add(t.language);
+    });
+    return Array.from(languagesSet).sort();
+  }, [translations]);
+
+  const filteredTranslations = translations;
 
   const handleCreateNew = () => {
     setIsCreating(true);
@@ -170,35 +229,90 @@ const BibleTranslationsContent = () => {
   const handleEdit = (translation: Translation) => {
     setEditingTranslation(translation);
     setIsCreating(false);
-    setFormData(translation);
+    // Convert language code to display name for the form
+    const languageDisplayName = getLanguageName(translation.language) || translation.language;
+    setFormData({
+      ...translation,
+      language: languageDisplayName
+    });
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (editingTranslation) {
-      setTranslations(translations.map(t => t.id === editingTranslation.id ? { ...formData, id: editingTranslation.id } as Translation : t));
-      setEditingTranslation(null);
+      try {
+        setSaving(true);
+        setError(null);
+        
+        // Prepare API request data
+        // Convert language display name back to code
+        const languageCode = getLanguageCode(formData.language || '');
+        
+        const updateData = {
+          name: formData.name || '',
+          abbreviation: formData.version || '', // version maps to abbreviation
+          language: languageCode,
+          license: formData.license || '',
+          is_public: formData.isPublic ?? true
+        };
+
+        const response = await updateTranslation(editingTranslation.id, updateData);
+        
+        if (response.success) {
+          // Reload translations to get updated data
+          const updatedResponse = await fetchTranslations({
+            page: currentPage,
+            limit: 10,
+            search: searchTerm || undefined,
+            language: languageFilter !== 'all' ? languageFilter : undefined,
+            status: statusFilter !== 'all' ? statusFilter : undefined
+          });
+
+          if (updatedResponse.success && updatedResponse.data) {
+            const transformedTranslations = updatedResponse.data.map(transformTranslation);
+            setTranslations(transformedTranslations);
+            
+            if (updatedResponse.metadata) {
+              setTotalPages(updatedResponse.metadata.totalPages || 1);
+              setTotalCount(updatedResponse.metadata.total || transformedTranslations.length);
+            }
+          }
+          
+          setEditingTranslation(null);
+          setFormData({
+            name: '',
+            version: '',
+            language: '',
+            description: '',
+            status: 'draft',
+            publisher: '',
+            year: '',
+            license: '',
+            isPublic: true
+          });
+        } else {
+          setError(response.message || 'Failed to update translation');
+        }
+      } catch (err: any) {
+        console.error('Error updating translation:', err);
+        setError(err?.response?.data?.message || err?.message || 'Failed to update translation');
+      } finally {
+        setSaving(false);
+      }
     } else {
-      const newTranslation: Translation = {
-        ...formData,
-        id: Date.now().toString(),
-        verseCount: 0,
-        lastUpdated: new Date().toISOString().split('T')[0],
-        fileSize: '0 KB'
-      } as Translation;
-      setTranslations([...translations, newTranslation]);
+      // Create new translation - not implemented yet
       setIsCreating(false);
+      setFormData({
+        name: '',
+        version: '',
+        language: '',
+        description: '',
+        status: 'draft',
+        publisher: '',
+        year: '',
+        license: '',
+        isPublic: true
+      });
     }
-    setFormData({
-      name: '',
-      version: '',
-      language: '',
-      description: '',
-      status: 'draft',
-      publisher: '',
-      year: '',
-      license: '',
-      isPublic: true
-    });
   };
 
   const handleCancel = () => {
@@ -217,8 +331,25 @@ const BibleTranslationsContent = () => {
     });
   };
 
-  const handleDelete = (id: string) => {
+  const handleDelete = async (id: string) => {
+    // TODO: Implement delete API call
+    // For now, just remove from local state
     setTranslations(translations.filter(t => t.id !== id));
+  };
+
+  const handleSearchChange = (value: string) => {
+    setSearchTerm(value);
+    setCurrentPage(1); // Reset to first page on search
+  };
+
+  const handleLanguageFilterChange = (value: string) => {
+    setLanguageFilter(value);
+    setCurrentPage(1); // Reset to first page on filter change
+  };
+
+  const handleStatusFilterChange = (value: string) => {
+    setStatusFilter(value);
+    setCurrentPage(1); // Reset to first page on filter change
   };
 
   const getStatusColor = (status: string) => {
@@ -251,6 +382,37 @@ const BibleTranslationsContent = () => {
     }
   };
 
+  if (loading && translations.length === 0) {
+    return (
+      <div className="space-y-6">
+        <Card>
+          <CardContent className="p-6">
+            <div className="animate-pulse space-y-4">
+              <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+              <div className="h-10 bg-gray-200 rounded"></div>
+              <div className="h-10 bg-gray-200 rounded"></div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (error && translations.length === 0) {
+    return (
+      <div className="space-y-6">
+        <Card>
+          <CardContent className="p-6">
+            <div className="flex items-center gap-2 text-red-600">
+              <AlertCircle className="w-5 h-5" />
+              <p className="text-sm">{error}</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       {/* Create/Edit Form */}
@@ -268,6 +430,14 @@ const BibleTranslationsContent = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
+            {error && (
+              <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+                <div className="flex items-center gap-2 text-red-600">
+                  <AlertCircle className="w-4 h-4" />
+                  <p className="text-sm">{error}</p>
+                </div>
+              </div>
+            )}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-4">
                 <div>
@@ -411,9 +581,13 @@ const BibleTranslationsContent = () => {
               <Button variant="outline" onClick={handleCancel}>
                 Cancel
               </Button>
-              <Button onClick={handleSave} className="bg-primary hover:bg-primary-dark">
+              <Button 
+                onClick={handleSave} 
+                className="bg-primary hover:bg-primary-dark"
+                disabled={saving}
+              >
                 <Save className="w-4 h-4 mr-2" />
-                {editingTranslation ? 'Update Translation' : 'Create Translation'}
+                {saving ? 'Saving...' : (editingTranslation ? 'Update Translation' : 'Create Translation')}
               </Button>
             </div>
           </CardContent>
@@ -429,27 +603,35 @@ const BibleTranslationsContent = () => {
               <Input
                 placeholder="Search translations..."
                 value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
+                onChange={(e) => handleSearchChange(e.target.value)}
                 className="pl-10"
               />
             </div>
             <div>
-              <Select value={languageFilter} onValueChange={setLanguageFilter}>
+              <Select value={languageFilter} onValueChange={handleLanguageFilterChange}>
                 <SelectTrigger>
                   <SelectValue placeholder="Filter by language" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Languages</SelectItem>
-                  {languages.map((language) => (
-                    <SelectItem key={language} value={language}>
-                      {language}
-                    </SelectItem>
-                  ))}
+                  {availableLanguages.length > 0 ? (
+                    availableLanguages.map((language) => (
+                      <SelectItem key={language} value={language}>
+                        {language}
+                      </SelectItem>
+                    ))
+                  ) : (
+                    languages.map((language) => (
+                      <SelectItem key={language} value={language}>
+                        {language}
+                      </SelectItem>
+                    ))
+                  )}
                 </SelectContent>
               </Select>
             </div>
             <div>
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
+              <Select value={statusFilter} onValueChange={handleStatusFilterChange}>
                 <SelectTrigger>
                   <SelectValue placeholder="Filter by status" />
                 </SelectTrigger>
@@ -465,7 +647,7 @@ const BibleTranslationsContent = () => {
             <div className="flex items-center space-x-2">
               <Globe className="w-4 h-4 text-gray-500" />
               <span className="text-sm text-gray-600">
-                {filteredTranslations.length} translations
+                {totalCount > 0 ? totalCount : filteredTranslations.length} translations
               </span>
             </div>
           </div>
@@ -475,14 +657,31 @@ const BibleTranslationsContent = () => {
       {/* Translations List */}
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center">
-            <Languages className="w-5 h-5 mr-2" />
-            Bible Translations ({filteredTranslations.length})
+          <CardTitle className="flex items-center justify-between">
+            <span className="flex items-center">
+              <Languages className="w-5 h-5 mr-2" />
+              Bible Translations ({totalCount > 0 ? totalCount : filteredTranslations.length})
+            </span>
+            {loading && <span className="text-sm text-gray-500">Loading...</span>}
           </CardTitle>
         </CardHeader>
         <CardContent>
+          {error && (
+            <div className="mb-4 p-3 bg-red-50 border border-red-200 rounded-lg">
+              <div className="flex items-center gap-2 text-red-600">
+                <AlertCircle className="w-4 h-4" />
+                <p className="text-sm">{error}</p>
+              </div>
+            </div>
+          )}
           <div className="space-y-4">
-            {filteredTranslations.map((translation) => (
+            {filteredTranslations.length === 0 && !loading ? (
+              <div className="text-center py-8 text-gray-500">
+                <Languages className="w-12 h-12 mx-auto mb-3 text-gray-400" />
+                <p>No translations found</p>
+              </div>
+            ) : (
+              filteredTranslations.map((translation) => (
               <div key={translation.id} className="p-4 border rounded-lg">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center space-x-3">
@@ -507,7 +706,7 @@ const BibleTranslationsContent = () => {
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-3 text-sm">
                   <div className="flex items-center space-x-2">
                     <Globe className="w-4 h-4 text-gray-500" />
-                    <span className="text-gray-600">{translation.language}</span>
+                    <span className="text-gray-600">{getLanguageName(translation.language) || translation.language}</span>
                   </div>
                   <div className="flex items-center space-x-2">
                     <FileText className="w-4 h-4 text-gray-500" />
@@ -538,7 +737,7 @@ const BibleTranslationsContent = () => {
                       <Edit className="w-4 h-4 mr-1" />
                       Edit
                     </Button>
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" disabled={true}>
                       <Download className="w-4 h-4 mr-1" />
                       Download
                     </Button>
@@ -546,6 +745,7 @@ const BibleTranslationsContent = () => {
                       variant="outline" 
                       size="sm"
                       onClick={() => handleDelete(translation.id)}
+                      disabled={true}
                     >
                       <Trash2 className="w-4 h-4 mr-1" />
                       Delete
@@ -553,8 +753,36 @@ const BibleTranslationsContent = () => {
                   </div>
                 </div>
               </div>
-            ))}
+              ))
+            )}
           </div>
+          
+          {/* Pagination */}
+          {totalPages > 1 && (
+            <div className="flex items-center justify-between mt-6 pt-6 border-t">
+              <div className="text-sm text-gray-600">
+                Page {currentPage} of {totalPages}
+              </div>
+              <div className="flex gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                  disabled={currentPage === 1 || loading}
+                >
+                  Previous
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                  disabled={currentPage === totalPages || loading}
+                >
+                  Next
+                </Button>
+              </div>
+            </div>
+          )}
         </CardContent>
       </Card>
     </div>

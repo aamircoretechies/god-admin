@@ -1,21 +1,68 @@
+import { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import { KeenIcon } from '@/components';
+import { fetchUserProfile, type UserProfileResponse } from '@/services/usersApi';
 
 const UserRoleAccessControl = () => {
-  // Mock data - in real app this would come from props or API
-  const roleData = {
-    currentRole: 'User',
-    permissions: [
-      'Reading Bible content',
-      'Sharing content',
-      'Creating notes and bookmarks',
-      'Accessing AI explanations'
-    ],
-    restrictions: [
-      'Admin-only areas blocked',
-      'Cannot modify system settings',
-      'Cannot access user management'
-    ]
-  };
+  const { id } = useParams<{ id: string }>();
+  const [loading, setLoading] = useState(true);
+  const [roleData, setRoleData] = useState<UserProfileResponse['data']['roleAndAccess'] | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!id) {
+      setError('User ID is required');
+      setLoading(false);
+      return;
+    }
+
+    const loadRoleData = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const response = await fetchUserProfile(id);
+        if (response.status === 1 && response.data?.roleAndAccess) {
+          setRoleData(response.data.roleAndAccess);
+        } else {
+          setError('Failed to load role data');
+        }
+      } catch (err: any) {
+        console.error('Error loading role data:', err);
+        setError(err?.message || 'Failed to load role data');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadRoleData();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="card">
+        <div className="card-body">
+          <div className="flex items-center justify-center py-8">
+            <div className="text-center">
+              <div className="spinner-border spinner-border-sm text-primary" role="status">
+                <span className="visually-hidden">Loading...</span>
+              </div>
+              <p className="text-sm text-gray-600 mt-2">Loading role data...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !roleData) {
+    return (
+      <div className="card">
+        <div className="card-body">
+          <div className="alert alert-danger">{error || 'Failed to load role data'}</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="card">
@@ -41,7 +88,7 @@ const UserRoleAccessControl = () => {
           <div>
             <h4 className="text-sm font-medium text-gray-700 mb-3">Basic Permissions List</h4>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-              {roleData.permissions.map((permission, index) => (
+              {roleData.basicPermissionsList.map((permission, index) => (
                 <div key={index} className="flex items-center gap-2">
                   <KeenIcon icon="check" className="size-4 text-success" />
                   <span className="text-sm text-gray-900">{permission}</span>
@@ -69,5 +116,3 @@ const UserRoleAccessControl = () => {
 };
 
 export { UserRoleAccessControl };
-
-

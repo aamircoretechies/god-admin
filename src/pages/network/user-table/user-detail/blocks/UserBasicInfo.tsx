@@ -3,7 +3,6 @@ import { useParams } from 'react-router-dom';
 import { toAbsoluteUrl } from '@/utils';
 import { KeenIcon } from '@/components';
 import { fetchUserProfile, type UserProfileResponse } from '@/services/usersApi';
-import { DummyDataIndicator } from '@/components/dummy-data-indicator/DummyDataIndicator';
 
 const UserBasicInfo = () => {
   const { id } = useParams<{ id: string }>();
@@ -22,12 +21,19 @@ const UserBasicInfo = () => {
       try {
         setLoading(true);
         const response = await fetchUserProfile(id);
-        if (response.status === 1) {
+        if (response.status === 1 && response.data) {
+          // Validate that basicUserInfo exists in the response
+          if (!response.data.basicUserInfo) {
+            console.error('API response missing basicUserInfo:', response);
+            setError('Invalid user data structure received from API');
+            return;
+          }
           setUserData(response.data);
         } else {
           setError(response.message || 'Failed to load user data');
         }
       } catch (err: any) {
+        console.error('Error loading user data:', err);
         setError(err?.message || 'Failed to load user data');
       } finally {
         setLoading(false);
@@ -64,18 +70,22 @@ const UserBasicInfo = () => {
     );
   }
 
+  // Check if basicUserInfo exists
+  if (!userData.basicUserInfo) {
+    return (
+      <div className="card">
+        <div className="card-body">
+          <div className="alert alert-danger">User data structure is invalid. Missing basicUserInfo.</div>
+        </div>
+      </div>
+    );
+  }
+
   // Generate avatar from user ID
-  const avatarNumber = (parseInt(userData.basicInfo.id.replace(/-/g, ''), 16) % 34) + 1;
+  const avatarNumber = (parseInt(userData.basicUserInfo.userId.replace(/-/g, ''), 16) % 34) + 1;
 
-  // Format date
-  const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-  };
-
-  const memberSince = userData.basicInfo.memberSince 
-    ? formatDate(userData.basicInfo.memberSince)
-    : 'N/A';
+  // memberSince is already formatted in the API response
+  const memberSince = userData.basicUserInfo.memberSince || 'N/A';
 
   return (
     <div className="card">
@@ -93,14 +103,14 @@ const UserBasicInfo = () => {
               <img
                 src={toAbsoluteUrl(`/media/avatars/300-${avatarNumber}.png`)}
                 className="size-20 rounded-full"
-                alt={userData.basicInfo.name}
+                alt={userData.basicUserInfo.fullName}
               />
               <div className="absolute -bottom-1 -right-1 size-6 bg-success rounded-full border-2 border-white flex items-center justify-center">
                 <KeenIcon icon="check" className="size-3 text-white" />
               </div>
             </div>
             <div className="text-center lg:text-left">
-              <h4 className="text-lg font-semibold text-gray-900">{userData.basicInfo.name}</h4>
+              <h4 className="text-lg font-semibold text-gray-900">{userData.basicUserInfo.fullName}</h4>
               <p className="text-sm text-gray-600">Member since {memberSince}</p>
             </div>
           </div>
@@ -111,16 +121,16 @@ const UserBasicInfo = () => {
               <div>
                 <label className="text-sm font-medium text-gray-700">User ID</label>
                 <p className="text-sm text-gray-900 font-mono bg-gray-50 px-2 py-1 rounded">
-                  {userData.basicInfo.id}
+                  {userData.basicUserInfo.userId}
                 </p>
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700">Full Name</label>
-                <p className="text-sm text-gray-900">{userData.basicInfo.name}</p>
+                <p className="text-sm text-gray-900">{userData.basicUserInfo.fullName}</p>
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700">Email / Login ID</label>
-                <p className="text-sm text-gray-900">{userData.basicInfo.email}</p>
+                <p className="text-sm text-gray-900">{userData.basicUserInfo.email}</p>
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700">Member Since</label>
@@ -132,7 +142,7 @@ const UserBasicInfo = () => {
                 <label className="text-sm font-medium text-gray-700">Account Type</label>
                 <div className="flex items-center gap-2">
                   <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
-                    {userData.basicInfo.accountType}
+                    {userData.basicUserInfo.accountType}
                   </span>
                 </div>
               </div>
@@ -140,29 +150,26 @@ const UserBasicInfo = () => {
                 <label className="text-sm font-medium text-gray-700">Status</label>
                 <div className="flex items-center gap-2">
                   <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                    userData.basicInfo.status === 'active' 
+                    userData.basicUserInfo.status === 'active' 
                       ? 'bg-success/10 text-success' 
                       : 'bg-gray-100 text-gray-700'
                   }`}>
-                    {userData.basicInfo.status}
+                    {userData.basicUserInfo.status}
                   </span>
                 </div>
               </div>
-              {/* Dummy fields that are not in API response */}
-              <div>
-                <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                  Phone Number
-                  <DummyDataIndicator />
-                </label>
-                <p className="text-sm text-gray-400 italic">N/A (Dummy Data)</p>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-700 flex items-center gap-2">
-                  Address
-                  <DummyDataIndicator />
-                </label>
-                <p className="text-sm text-gray-400 italic">N/A (Dummy Data)</p>
-              </div>
+              {userData.basicUserInfo.phoneNumber && (
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Phone Number</label>
+                  <p className="text-sm text-gray-900">{userData.basicUserInfo.phoneNumber}</p>
+                </div>
+              )}
+              {userData.basicUserInfo.address && (
+                <div>
+                  <label className="text-sm font-medium text-gray-700">Address</label>
+                  <p className="text-sm text-gray-900">{userData.basicUserInfo.address}</p>
+                </div>
+              )}
             </div>
           </div>
         </div>

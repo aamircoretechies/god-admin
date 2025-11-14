@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -199,11 +200,16 @@ const BibleBooksChaptersContent = () => {
   };
 
   const handleSaveChapter = () => {
+    if (!chapterFormData.bookId) return;
+    
     const newChapter: Chapter = {
       ...chapterFormData,
       id: Date.now().toString()
     } as Chapter;
-    setChapters([...chapters, newChapter]);
+    setChapters({
+      ...chapters,
+      [chapterFormData.bookId]: [...(chapters[chapterFormData.bookId] || []), newChapter]
+    });
     setIsCreatingChapter(false);
     setChapterFormData({
       bookId: '',
@@ -484,12 +490,13 @@ const BibleBooksChaptersContent = () => {
                       {book.testament === 'old' ? 'OT' : 'NT'}
                     </Badge>
                     <div className="flex items-center gap-1">
-                    <Badge className={getStatusColor(book.status)}>
-                      {book.status.charAt(0).toUpperCase() + book.status.slice(1)}
-                    </Badge>
-                    <span className="text-sm text-gray-500">
-                      {book.chapters} chapters, {book.verses.toLocaleString()} verses
-                    </span>
+                      <Badge className={getStatusColor(book.status)}>
+                        {book.status.charAt(0).toUpperCase() + book.status.slice(1)}
+                      </Badge>
+                      <span className="text-sm text-gray-500">
+                        {book.chapters} chapters, {book.verses.toLocaleString()} verses
+                      </span>
+                    </div>
                   </div>
                 </div>
 
@@ -520,8 +527,7 @@ const BibleBooksChaptersContent = () => {
                       </div>
                     ) : (
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                      {chapters
-                        .filter(chapter => chapter.bookId === book.id)
+                      {(chapters[book.id] || [])
                         .map((chapter) => (
                           <div key={chapter.id} className="border rounded-lg p-3 bg-white">
                             <div className="flex items-center justify-between mb-2">
@@ -529,8 +535,7 @@ const BibleBooksChaptersContent = () => {
                               <Badge className={getStatusColor(chapter.status)}>
                                 {chapter.status.charAt(0).toUpperCase() + chapter.status.slice(1)}
                               </Badge>
-                                <DummyDataIndicator text="Status" />
-                              </div>
+                              <DummyDataIndicator text="Status" />
                             </div>
                             <p className="text-sm text-gray-600 mb-2">{chapter.verses} verses</p>
                             <div className="flex space-x-2">

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { 
@@ -12,8 +12,10 @@ import {
   Share,
   AlertTriangle,
   CheckCircle,
-  XCircle
+  XCircle,
+  AlertCircle
 } from 'lucide-react';
+import { fetchActivityAnalytics, type ActivityAnalyticsResponse } from '@/services/activityLogsApi';
 
 // Simple chart components (placeholder for actual chart library)
 const SimpleBarChart = ({ data, title }: { data: any[], title: string }) => (
@@ -36,64 +38,145 @@ const SimpleBarChart = ({ data, title }: { data: any[], title: string }) => (
   </div>
 );
 
-const SimpleLineChart = ({ data, title }: { data: any[], title: string }) => (
-  <div className="space-y-2">
-    <h4 className="text-sm font-medium text-gray-700">{title}</h4>
-    <div className="h-32 flex items-end gap-1">
-      {data.map((item, index) => (
-        <div key={index} className="flex-1 bg-amber-500 rounded-t" style={{ height: `${item.value}%` }}>
-          <div className="text-xs text-white text-center mt-1">{item.value}</div>
-        </div>
-      ))}
+const SimpleLineChart = ({ data, title }: { data: any[], title: string }) => {
+  // Calculate max value for percentage calculation
+  const maxValue = Math.max(...data.map(item => item.value), 1);
+  
+  return (
+    <div className="space-y-2">
+      <h4 className="text-sm font-medium text-gray-700">{title}</h4>
+      <div className="h-32 flex items-end gap-1">
+        {data.map((item, index) => (
+          <div 
+            key={index} 
+            className="flex-1 bg-amber-500 rounded-t" 
+            style={{ height: `${(item.value / maxValue) * 100}%` }}
+          >
+            <div className="text-xs text-white text-center mt-1">{item.value}</div>
+          </div>
+        ))}
+      </div>
+      <div className="flex justify-between text-xs text-gray-500">
+        {data.map((item, index) => (
+          <span key={index}>{item.label}</span>
+        ))}
+      </div>
     </div>
-    <div className="flex justify-between text-xs text-gray-500">
-      {data.map((item, index) => (
-        <span key={index}>{item.label}</span>
-      ))}
-    </div>
-  </div>
-);
+  );
+};
 
 const ActivityAnalyticsContent: React.FC = () => {
-  // Mock analytics data
-  const activityTypeData = [
-    { label: 'Verse Reads', value: 1247, percentage: 45 },
-    { label: 'AI Queries', value: 892, percentage: 32 },
-    { label: 'Bookmarks', value: 456, percentage: 16 },
-    { label: 'Shares', value: 234, percentage: 8 },
-    { label: 'Logins', value: 123, percentage: 4 }
-  ];
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [analyticsData, setAnalyticsData] = useState<ActivityAnalyticsResponse['data'] | null>(null);
+  const [days, setDays] = useState(7);
 
-  const activeUsersData = [
-    { label: 'Mon', value: 65 },
-    { label: 'Tue', value: 72 },
-    { label: 'Wed', value: 68 },
-    { label: 'Thu', value: 85 },
-    { label: 'Fri', value: 78 },
-    { label: 'Sat', value: 90 },
-    { label: 'Sun', value: 82 }
-  ];
+  useEffect(() => {
+    const loadAnalytics = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const response = await fetchActivityAnalytics(days);
+        if (response.status === 1 && response.data) {
+          setAnalyticsData(response.data);
+        } else {
+          setError(response.message || 'Failed to load analytics');
+        }
+      } catch (err: any) {
+        console.error('Error loading activity analytics:', err);
+        setError(err?.message || 'Failed to load analytics');
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const topVersesData = [
-    { label: 'John 3:16', value: 156, percentage: 25 },
-    { label: 'Psalm 23', value: 134, percentage: 21 },
-    { label: '1 Cor 13', value: 98, percentage: 16 },
-    { label: 'Matthew 6', value: 87, percentage: 14 },
-    { label: 'Romans 8', value: 76, percentage: 12 }
-  ];
+    loadAnalytics();
+  }, [days]);
 
-  const errorRateData = [
-    { label: 'Mon', value: 12 },
-    { label: 'Tue', value: 8 },
-    { label: 'Wed', value: 15 },
-    { label: 'Thu', value: 6 },
-    { label: 'Fri', value: 9 },
-    { label: 'Sat', value: 11 },
-    { label: 'Sun', value: 7 }
-  ];
+  // Transform API data to component format
+  const activityTypeData = analyticsData?.activityTypesDistribution.map(item => {
+    const total = analyticsData.activityTypesDistribution.reduce((sum, i) => sum + i.count, 0);
+    return {
+      label: item.type,
+      value: item.count,
+      percentage: total > 0 ? Math.round((item.count / total) * 100) : 0
+    };
+  }) || [];
+
+  // Transform daily active users - need day labels
+  const dayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+  const activeUsersData = analyticsData?.dailyActiveUsers.map((value, index) => ({
+    label: dayLabels[index % 7] || `Day ${index + 1}`,
+    value: value
+  })) || [];
+
+  // Transform top verses
+  const topVersesData = analyticsData?.topVerses.map(item => {
+    const total = analyticsData.topVerses.reduce((sum, i) => sum + i.count, 0);
+    return {
+      label: item.verse,
+      value: item.count,
+      percentage: total > 0 ? Math.round((item.count / total) * 100) : 0
+    };
+  }) || [];
+
+  // Transform error rate trend
+  const errorRateData = analyticsData?.errorRateTrend.map((value, index) => ({
+    label: dayLabels[index % 7] || `Day ${index + 1}`,
+    value: value
+  })) || [];
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <div className="spinner-border spinner-border-sm text-primary" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </div>
+          <p className="text-sm text-gray-600 mt-2">Loading analytics...</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !analyticsData) {
+    return (
+      <div className="card">
+        <div className="card-body">
+          <div className="flex items-center gap-2 text-red-600">
+            <AlertCircle className="w-5 h-5" />
+            <p className="text-sm">{error || 'Failed to load analytics'}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
+      {/* Period Selector */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold text-gray-900">Activity Analytics</h2>
+          <p className="text-sm text-gray-600">
+            {analyticsData.period.startDate && analyticsData.period.endDate && (
+              <>
+                {new Date(analyticsData.period.startDate).toLocaleDateString()} - {new Date(analyticsData.period.endDate).toLocaleDateString()}
+              </>
+            )}
+          </p>
+        </div>
+        <select
+          value={days}
+          onChange={(e) => setDays(Number(e.target.value))}
+          className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+        >
+          <option value={7}>Last 7 days</option>
+          <option value={30}>Last 30 days</option>
+          <option value={90}>Last 90 days</option>
+        </select>
+      </div>
+
       {/* Key Metrics */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
@@ -105,10 +188,16 @@ const ActivityAnalyticsContent: React.FC = () => {
             </div>
             <div className="flex-1">
               <p className="text-sm text-gray-600">Active Users</p>
-              <p className="text-2xl font-bold">2,847</p>
+              <p className="text-2xl font-bold">{analyticsData.metrics.activeUsers.value.toLocaleString()}</p>
               <div className="flex items-center gap-1 mt-1">
-                <TrendingUp className="w-4 h-4 text-green-600" />
-                <span className="text-sm text-green-600">+12.5%</span>
+                {analyticsData.metrics.activeUsers.trend === 'up' ? (
+                  <TrendingUp className="w-4 h-4 text-green-600" />
+                ) : (
+                  <TrendingDown className="w-4 h-4 text-red-600" />
+                )}
+                <span className={`text-sm ${analyticsData.metrics.activeUsers.trend === 'up' ? 'text-green-600' : 'text-red-600'}`}>
+                  {analyticsData.metrics.activeUsers.growth > 0 ? '+' : ''}{analyticsData.metrics.activeUsers.growth.toFixed(1)}%
+                </span>
               </div>
             </div>
           </CardContent>
@@ -123,10 +212,16 @@ const ActivityAnalyticsContent: React.FC = () => {
             </div>
             <div className="flex-1">
               <p className="text-sm text-gray-600">Total Activities</p>
-              <p className="text-2xl font-bold">15,234</p>
+              <p className="text-2xl font-bold">{analyticsData.metrics.totalActivities.value.toLocaleString()}</p>
               <div className="flex items-center gap-1 mt-1">
-                <TrendingUp className="w-4 h-4 text-green-600" />
-                <span className="text-sm text-green-600">+8.3%</span>
+                {analyticsData.metrics.totalActivities.trend === 'up' ? (
+                  <TrendingUp className="w-4 h-4 text-green-600" />
+                ) : (
+                  <TrendingDown className="w-4 h-4 text-red-600" />
+                )}
+                <span className={`text-sm ${analyticsData.metrics.totalActivities.trend === 'up' ? 'text-green-600' : 'text-red-600'}`}>
+                  {analyticsData.metrics.totalActivities.growth > 0 ? '+' : ''}{analyticsData.metrics.totalActivities.growth.toFixed(1)}%
+                </span>
               </div>
             </div>
           </CardContent>
@@ -141,10 +236,16 @@ const ActivityAnalyticsContent: React.FC = () => {
             </div>
             <div className="flex-1">
               <p className="text-sm text-gray-600">Success Rate</p>
-              <p className="text-2xl font-bold">98.7%</p>
+              <p className="text-2xl font-bold">{analyticsData.metrics.successRate.value.toFixed(1)}%</p>
               <div className="flex items-center gap-1 mt-1">
-                <TrendingUp className="w-4 h-4 text-green-600" />
-                <span className="text-sm text-green-600">+0.5%</span>
+                {analyticsData.metrics.successRate.trend === 'up' ? (
+                  <TrendingUp className="w-4 h-4 text-green-600" />
+                ) : (
+                  <TrendingDown className="w-4 h-4 text-red-600" />
+                )}
+                <span className={`text-sm ${analyticsData.metrics.successRate.trend === 'up' ? 'text-green-600' : 'text-red-600'}`}>
+                  {analyticsData.metrics.successRate.growth > 0 ? '+' : ''}{analyticsData.metrics.successRate.growth.toFixed(1)}%
+                </span>
               </div>
             </div>
           </CardContent>
@@ -159,10 +260,16 @@ const ActivityAnalyticsContent: React.FC = () => {
             </div>
             <div className="flex-1">
               <p className="text-sm text-gray-600">Error Rate</p>
-              <p className="text-2xl font-bold">1.3%</p>
+              <p className="text-2xl font-bold">{analyticsData.metrics.errorRate.value.toFixed(1)}%</p>
               <div className="flex items-center gap-1 mt-1">
-                <TrendingDown className="w-4 h-4 text-green-600" />
-                <span className="text-sm text-green-600">-0.2%</span>
+                {analyticsData.metrics.errorRate.trend === 'down' ? (
+                  <TrendingDown className="w-4 h-4 text-green-600" />
+                ) : (
+                  <TrendingUp className="w-4 h-4 text-red-600" />
+                )}
+                <span className={`text-sm ${analyticsData.metrics.errorRate.trend === 'down' ? 'text-green-600' : 'text-red-600'}`}>
+                  {analyticsData.metrics.errorRate.growth > 0 ? '+' : ''}{analyticsData.metrics.errorRate.growth.toFixed(1)}%
+                </span>
               </div>
             </div>
           </CardContent>
@@ -234,54 +341,102 @@ const ActivityAnalyticsContent: React.FC = () => {
             <div className="space-y-4">
               <h4 className="font-semibold text-gray-900">Positive Trends</h4>
               <div className="space-y-3">
-                <div className="flex items-start gap-3">
-                  <CheckCircle className="w-5 h-5 text-green-600 mt-0.5" />
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">User Engagement Up 12.5%</p>
-                    <p className="text-xs text-gray-600">Active users increased significantly this week</p>
+                {analyticsData.metrics.activeUsers.trend === 'up' && (
+                  <div className="flex items-start gap-3">
+                    <CheckCircle className="w-5 h-5 text-green-600 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">
+                        Active Users {analyticsData.metrics.activeUsers.growth > 0 ? 'Up' : 'Down'} {Math.abs(analyticsData.metrics.activeUsers.growth).toFixed(1)}%
+                      </p>
+                      <p className="text-xs text-gray-600">
+                        {analyticsData.metrics.activeUsers.value.toLocaleString()} active users in the last {days} days
+                      </p>
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <CheckCircle className="w-5 h-5 text-green-600 mt-0.5" />
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">AI Query Success Rate Improved</p>
-                    <p className="text-xs text-gray-600">98.7% success rate, up from 98.2% last week</p>
+                )}
+                {analyticsData.metrics.successRate.trend === 'up' && (
+                  <div className="flex items-start gap-3">
+                    <CheckCircle className="w-5 h-5 text-green-600 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">Success Rate Improved</p>
+                      <p className="text-xs text-gray-600">
+                        {analyticsData.metrics.successRate.value.toFixed(1)}% success rate, {analyticsData.metrics.successRate.growth > 0 ? '+' : ''}{analyticsData.metrics.successRate.growth.toFixed(1)}% from previous period
+                      </p>
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <CheckCircle className="w-5 h-5 text-green-600 mt-0.5" />
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">Mobile Usage Growing</p>
-                    <p className="text-xs text-gray-600">65% of activities now from mobile devices</p>
+                )}
+                {analyticsData.metrics.errorRate.trend === 'down' && (
+                  <div className="flex items-start gap-3">
+                    <CheckCircle className="w-5 h-5 text-green-600 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">Error Rate Decreasing</p>
+                      <p className="text-xs text-gray-600">
+                        Error rate at {analyticsData.metrics.errorRate.value.toFixed(1)}%, down {Math.abs(analyticsData.metrics.errorRate.growth).toFixed(1)}% from previous period
+                      </p>
+                    </div>
                   </div>
-                </div>
+                )}
+                {analyticsData.metrics.totalActivities.trend === 'up' && (
+                  <div className="flex items-start gap-3">
+                    <CheckCircle className="w-5 h-5 text-green-600 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">Total Activities Increased</p>
+                      <p className="text-xs text-gray-600">
+                        {analyticsData.metrics.totalActivities.value.toLocaleString()} total activities, up {analyticsData.metrics.totalActivities.growth.toFixed(1)}%
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
 
             <div className="space-y-4">
               <h4 className="font-semibold text-gray-900">Areas for Attention</h4>
               <div className="space-y-3">
-                <div className="flex items-start gap-3">
-                  <AlertTriangle className="w-5 h-5 text-orange-600 mt-0.5" />
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">Rate Limit Errors</p>
-                    <p className="text-xs text-gray-600">15% of AI query errors due to rate limiting</p>
+                {analyticsData.metrics.activeUsers.trend === 'down' && (
+                  <div className="flex items-start gap-3">
+                    <AlertTriangle className="w-5 h-5 text-orange-600 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">Active Users Declining</p>
+                      <p className="text-xs text-gray-600">
+                        Active users decreased by {Math.abs(analyticsData.metrics.activeUsers.growth).toFixed(1)}% from previous period
+                      </p>
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <AlertTriangle className="w-5 h-5 text-orange-600 mt-0.5" />
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">Session Drop-offs</p>
-                    <p className="text-xs text-gray-600">22% of users don't complete their sessions</p>
+                )}
+                {analyticsData.metrics.errorRate.value > 0 && (
+                  <div className="flex items-start gap-3">
+                    <AlertTriangle className="w-5 h-5 text-orange-600 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">Error Rate Present</p>
+                      <p className="text-xs text-gray-600">
+                        {analyticsData.metrics.errorRate.value.toFixed(1)}% error rate detected in activities
+                      </p>
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-start gap-3">
-                  <AlertTriangle className="w-5 h-5 text-orange-600 mt-0.5" />
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">Geographic Spikes</p>
-                    <p className="text-xs text-gray-600">Unusual activity patterns from certain regions</p>
+                )}
+                {analyticsData.metrics.totalActivities.trend === 'down' && (
+                  <div className="flex items-start gap-3">
+                    <AlertTriangle className="w-5 h-5 text-orange-600 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">Activity Volume Decreasing</p>
+                      <p className="text-xs text-gray-600">
+                        Total activities decreased by {Math.abs(analyticsData.metrics.totalActivities.growth).toFixed(1)}% from previous period
+                      </p>
+                    </div>
                   </div>
-                </div>
+                )}
+                {analyticsData.metrics.successRate.trend === 'down' && (
+                  <div className="flex items-start gap-3">
+                    <AlertTriangle className="w-5 h-5 text-orange-600 mt-0.5" />
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">Success Rate Declining</p>
+                      <p className="text-xs text-gray-600">
+                        Success rate decreased by {Math.abs(analyticsData.metrics.successRate.growth).toFixed(1)}% from previous period
+                      </p>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -289,30 +444,44 @@ const ActivityAnalyticsContent: React.FC = () => {
       </Card>
 
       {/* Device Usage Breakdown */}
-      <Card>
-        <CardHeader>
-          <CardTitle>Device Usage Breakdown</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div className="text-center p-4 bg-amber-50 rounded-lg">
-              <div className="text-2xl font-bold text-amber-600">65%</div>
-              <div className="text-sm text-gray-600">Mobile</div>
-              <div className="text-xs text-gray-500">iOS: 38% | Android: 27%</div>
+      {analyticsData.deviceBreakdown && analyticsData.deviceBreakdown.length > 0 && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Device Usage Breakdown</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              {analyticsData.deviceBreakdown.map((device, index) => {
+                // Group devices by category
+                const isMobile = device.device.includes('Mobile');
+                const isTablet = device.device.includes('Tablet');
+                const isWeb = device.device.includes('Web');
+                
+                let bgColor = 'bg-gray-50';
+                let textColor = 'text-gray-600';
+                if (isMobile) {
+                  bgColor = 'bg-amber-50';
+                  textColor = 'text-amber-600';
+                } else if (isTablet) {
+                  bgColor = 'bg-purple-50';
+                  textColor = 'text-purple-600';
+                } else if (isWeb) {
+                  bgColor = 'bg-green-50';
+                  textColor = 'text-green-600';
+                }
+
+                return (
+                  <div key={index} className={`text-center p-4 ${bgColor} rounded-lg`}>
+                    <div className={`text-2xl font-bold ${textColor}`}>{device.percentage}%</div>
+                    <div className="text-sm text-gray-600">{device.device}</div>
+                    <div className="text-xs text-gray-500">{device.count.toLocaleString()} activities</div>
+                  </div>
+                );
+              })}
             </div>
-            <div className="text-center p-4 bg-green-50 rounded-lg">
-              <div className="text-2xl font-bold text-green-600">28%</div>
-              <div className="text-sm text-gray-600">Desktop</div>
-              <div className="text-xs text-gray-500">Chrome: 45% | Firefox: 23%</div>
-            </div>
-            <div className="text-center p-4 bg-purple-50 rounded-lg">
-              <div className="text-2xl font-bold text-purple-600">7%</div>
-              <div className="text-sm text-gray-600">Tablet</div>
-              <div className="text-xs text-gray-500">iPad: 82% | Android: 18%</div>
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
   Users, 
@@ -7,8 +7,9 @@ import {
   BookOpen,
   TrendingUp,
   TrendingDown,
-  Activity
+  AlertCircle
 } from 'lucide-react';
+import { fetchDashboardAnalytics } from '@/services/dashboardApi';
 
 interface KPICardProps {
   title: string;
@@ -17,9 +18,10 @@ interface KPICardProps {
   changeType: 'increase' | 'decrease';
   icon: React.ReactNode;
   description: string;
+  period?: string;
 }
 
-const KPICard: React.FC<KPICardProps> = ({ title, value, change, changeType, icon, description }) => {
+const KPICard: React.FC<KPICardProps> = ({ title, value, change, changeType, icon, description, period }) => {
   return (
     <Card>
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
@@ -37,9 +39,9 @@ const KPICard: React.FC<KPICardProps> = ({ title, value, change, changeType, ico
             <TrendingDown className="w-3 h-3 text-red-500 mr-1" />
           )}
           <span className={changeType === 'increase' ? 'text-green-500' : 'text-red-500'}>
-            {change}%
+            {Math.abs(change).toFixed(1)}%
           </span>
-          <span className="ml-1">from last week</span>
+          <span className="ml-1">{period || 'from last week'}</span>
         </div>
         <p className="text-xs text-gray-500 mt-1">{description}</p>
       </CardContent>
@@ -48,40 +50,107 @@ const KPICard: React.FC<KPICardProps> = ({ title, value, change, changeType, ico
 };
 
 const BibleKPICards = () => {
-  const kpiData = [
-    {
-      title: 'Total Users',
-      value: '12,847',
-      change: 12.5,
-      changeType: 'increase' as const,
-      icon: <Users className="h-4 w-4 text-amber-500" />,
-      description: 'Active registered users'
-    },
-    {
-      title: 'Daily AI Queries',
-      value: '3,421',
-      change: 8.2,
-      changeType: 'increase' as const,
-      icon: <MessageSquare className="h-4 w-4 text-green-500" />,
-      description: 'AI explanations requested today'
-    },
-    {
-      title: 'Flagged Responses',
-      value: '23',
-      change: -15.3,
-      changeType: 'decrease' as const,
-      icon: <Flag className="h-4 w-4 text-red-500" />,
-      description: 'AI responses flagged for review'
-    },
-    {
-      title: 'Active Translations',
-      value: '47',
-      change: 2.1,
-      changeType: 'increase' as const,
-      icon: <BookOpen className="h-4 w-4 text-purple-500" />,
-      description: 'Bible translations available'
-    }
-  ];
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [kpiData, setKpiData] = useState<KPICardProps[]>([]);
+
+  useEffect(() => {
+    const loadAnalytics = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const response = await fetchDashboardAnalytics('30d');
+        
+        if (response.status === 1 && response.data) {
+          const { mainKPIs } = response.data;
+          
+          const transformedData: KPICardProps[] = [
+            {
+              title: mainKPIs.totalUsers.label,
+              value: mainKPIs.totalUsers.value,
+              change: mainKPIs.totalUsers.growth,
+              changeType: mainKPIs.totalUsers.trend === 'up' ? 'increase' : 'decrease',
+              icon: <Users className="h-4 w-4 text-amber-500" />,
+              description: mainKPIs.totalUsers.description,
+              period: mainKPIs.totalUsers.period
+            },
+            {
+              title: mainKPIs.dailyAIQueries.label,
+              value: mainKPIs.dailyAIQueries.value,
+              change: mainKPIs.dailyAIQueries.growth,
+              changeType: mainKPIs.dailyAIQueries.trend === 'up' ? 'increase' : 'decrease',
+              icon: <MessageSquare className="h-4 w-4 text-green-500" />,
+              description: mainKPIs.dailyAIQueries.description,
+              period: mainKPIs.dailyAIQueries.period
+            },
+            {
+              title: mainKPIs.flaggedResponses.label,
+              value: mainKPIs.flaggedResponses.value,
+              change: mainKPIs.flaggedResponses.growth,
+              changeType: mainKPIs.flaggedResponses.trend === 'up' ? 'increase' : 'decrease',
+              icon: <Flag className="h-4 w-4 text-red-500" />,
+              description: mainKPIs.flaggedResponses.description,
+              period: mainKPIs.flaggedResponses.period
+            },
+            {
+              title: mainKPIs.activeTranslations.label,
+              value: mainKPIs.activeTranslations.value,
+              change: mainKPIs.activeTranslations.growth,
+              changeType: mainKPIs.activeTranslations.trend === 'up' ? 'increase' : 'decrease',
+              icon: <BookOpen className="h-4 w-4 text-purple-500" />,
+              description: mainKPIs.activeTranslations.description,
+              period: mainKPIs.activeTranslations.period
+            }
+          ];
+          
+          setKpiData(transformedData);
+        } else {
+          throw new Error(response.message || 'Failed to fetch dashboard analytics');
+        }
+      } catch (err: any) {
+        setError(err?.message || 'Failed to load dashboard analytics');
+        // Set default/fallback data on error
+        setKpiData([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadAnalytics();
+  }, []);
+
+  if (loading) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {[1, 2, 3, 4].map((i) => (
+          <Card key={i}>
+            <CardContent className="p-6">
+              <div className="animate-pulse">
+                <div className="h-4 bg-gray-200 rounded w-3/4 mb-4"></div>
+                <div className="h-8 bg-gray-200 rounded w-1/2 mb-2"></div>
+                <div className="h-3 bg-gray-200 rounded w-2/3"></div>
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <Card className="md:col-span-4">
+          <CardContent className="p-6">
+            <div className="flex items-center gap-2 text-red-600">
+              <AlertCircle className="w-5 h-5" />
+              <p className="text-sm">{error}</p>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -94,6 +163,7 @@ const BibleKPICards = () => {
           changeType={kpi.changeType}
           icon={kpi.icon}
           description={kpi.description}
+          period={kpi.period}
         />
       ))}
     </div>

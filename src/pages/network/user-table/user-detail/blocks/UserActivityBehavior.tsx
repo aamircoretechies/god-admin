@@ -1,19 +1,72 @@
+import { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import { KeenIcon } from '@/components';
+import { fetchUserProfile, type UserProfileResponse } from '@/services/usersApi';
 
 const UserActivityBehavior = () => {
-  // Mock data - in real app this would come from props or API
-  const activityData = {
-    lastLoginDate: 'December 15, 2024 at 2:30 PM',
-    totalSessions: 156,
-    pagesVersesAccessed: 2847,
-    bookmarksFavorites: 89,
-    dailyVerseSubscriptionStatus: 'Active',
-    offlineAccessUsage: 'Yes'
-  };
+  const { id } = useParams<{ id: string }>();
+  const [loading, setLoading] = useState(true);
+  const [activityData, setActivityData] = useState<UserProfileResponse['data']['userActivity'] | null>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!id) {
+      setError('User ID is required');
+      setLoading(false);
+      return;
+    }
+
+    const loadActivity = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const response = await fetchUserProfile(id);
+        if (response.status === 1 && response.data?.userActivity) {
+          setActivityData(response.data.userActivity);
+        } else {
+          setError('Failed to load activity data');
+        }
+      } catch (err: any) {
+        console.error('Error loading activity:', err);
+        setError(err?.message || 'Failed to load activity data');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadActivity();
+  }, [id]);
 
   const getStatusColor = (status: string) => {
     return status === 'Active' ? 'bg-success/10 text-success' : 'bg-gray-100 text-gray-800';
   };
+
+  if (loading) {
+    return (
+      <div className="card">
+        <div className="card-body">
+          <div className="flex items-center justify-center py-8">
+            <div className="text-center">
+              <div className="spinner-border spinner-border-sm text-primary" role="status">
+                <span className="visually-hidden">Loading...</span>
+              </div>
+              <p className="text-sm text-gray-600 mt-2">Loading activity data...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error || !activityData) {
+    return (
+      <div className="card">
+        <div className="card-body">
+          <div className="alert alert-danger">{error || 'Failed to load activity data'}</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="card">
@@ -31,15 +84,21 @@ const UserActivityBehavior = () => {
             <div className="space-y-3">
               <div>
                 <label className="text-sm font-medium text-gray-700">Last Login Date</label>
-                <p className="text-sm text-gray-900">{activityData.lastLoginDate}</p>
+                <p className="text-sm text-gray-900">
+                  {activityData.basicActivityStats.lastLoginDate || 'Never'}
+                </p>
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700">Total Sessions</label>
-                <p className="text-lg font-semibold text-primary">{activityData.totalSessions.toLocaleString()}</p>
+                <p className="text-lg font-semibold text-primary">
+                  {activityData.basicActivityStats.totalSessions.toLocaleString()}
+                </p>
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700">Pages/Verses Accessed</label>
-                <p className="text-lg font-semibold text-info">{activityData.pagesVersesAccessed.toLocaleString()}</p>
+                <p className="text-lg font-semibold text-info">
+                  {activityData.basicActivityStats.pagesVersesAccessed.toLocaleString()}
+                </p>
               </div>
             </div>
           </div>
@@ -50,18 +109,24 @@ const UserActivityBehavior = () => {
             <div className="space-y-3">
               <div>
                 <label className="text-sm font-medium text-gray-700">Bookmarks / Favorites Count</label>
-                <p className="text-lg font-semibold text-warning">{activityData.bookmarksFavorites}</p>
+                <p className="text-lg font-semibold text-warning">
+                  {activityData.contentEngagement.bookmarksFavoritesCount}
+                </p>
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700">Daily Verse Subscription Status</label>
-                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(activityData.dailyVerseSubscriptionStatus)}`}>
-                  {activityData.dailyVerseSubscriptionStatus}
+                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(activityData.contentEngagement.dailyVerseSubscriptionStatus)}`}>
+                  {activityData.contentEngagement.dailyVerseSubscriptionStatus}
                 </span>
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700">Offline Access Usage</label>
-                <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-success/10 text-success">
-                  {activityData.offlineAccessUsage}
+                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                  activityData.contentEngagement.offlineAccessUsage 
+                    ? 'bg-success/10 text-success' 
+                    : 'bg-gray-100 text-gray-800'
+                }`}>
+                  {activityData.contentEngagement.offlineAccessUsage || 'No'}
                 </span>
               </div>
             </div>

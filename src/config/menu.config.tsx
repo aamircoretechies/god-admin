@@ -56,16 +56,8 @@ export const MENU_SIDEBAR: TMenuConfig = [
         path: '/bible-content/ai-explanations'
       },
       {
-        title: 'Theological Insights',
-        path: '/bible-content/theological-insights'
-      },
-      {
         title: 'Content Moderation',
         path: '/bible-content/moderation'
-      },
-      {
-        title: 'Search & Analytics',
-        path: '/bible-content/search-analytics'
       }
     ]
   },

@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ColumnDef } from '@tanstack/react-table';
 import { DataGrid, DataGridColumnHeader, DataGridRowSelect, DataGridRowSelectAll } from '@/components/data-grid';
@@ -7,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Avatar } from '@/components/ui/avatar';
 import { toAbsoluteUrl } from '@/utils';
+import { fetchActivityLogs, type ActivityLogResponse } from '@/services/activityLogsApi';
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -35,143 +36,81 @@ interface UserActivityLog {
   userName: string;
   userEmail: string;
   userAvatar: string;
-  userRole: 'Free' | 'Premium' | 'Admin' | 'Moderator';
-  activityType: 'Verse Read' | 'AI Query' | 'Bookmark' | 'Share' | 'Feedback Submitted' | 'Login' | 'Logout' | 'Password Change' | 'Profile Update';
+  userRole: 'Free' | 'Premium' | 'Admin' | 'Moderator' | 'FREE' | 'PREMIUM' | 'ADMIN' | 'MODERATOR';
+  activityType: string;
   details: string;
   bookReference?: string;
   chapterReference?: string;
   verseReference?: string;
   queryText?: string;
-  device: 'Mobile iOS' | 'Mobile Android' | 'Web Desktop' | 'Web Mobile' | 'Tablet';
+  device: string;
   platform: string;
   ipAddress: string;
-  userAgent: string;
+  userAgent?: string;
   timestamp: string;
   status: 'Success' | 'Error' | 'Warning';
-  errorMessage?: string;
+  errorMessage?: string | null;
   sessionId: string;
-  location?: string;
+  location?: string | null;
 }
 
-// Mock data
-const mockActivityLogs: UserActivityLog[] = [
-  {
-    id: '1',
-    userId: 'user1',
-    userName: 'John Doe',
-    userEmail: 'john.doe@example.com',
-    userAvatar: '/media/avatars/300-1.png',
-    userRole: 'Premium',
-    activityType: 'Verse Read',
-    details: 'Read John 3:16',
-    bookReference: 'John',
-    chapterReference: '3',
-    verseReference: '16',
-    device: 'Mobile iOS',
-    platform: 'iOS 17.2',
-    ipAddress: '192.168.1.100',
-    userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_2 like Mac OS X)',
-    timestamp: '2024-01-21T14:30:00Z',
-    status: 'Success',
-    sessionId: 'sess_123456',
-    location: 'New York, US'
-  },
-  {
-    id: '2',
-    userId: 'user2',
-    userName: 'Jane Smith',
-    userEmail: 'jane.smith@example.com',
-    userAvatar: '/media/avatars/300-2.png',
-    userRole: 'Free',
-    activityType: 'AI Query',
-    details: 'Asked about the meaning of love in 1 Corinthians 13',
-    queryText: 'What does 1 Corinthians 13 say about love?',
-    device: 'Web Desktop',
-    platform: 'Chrome 120.0',
-    ipAddress: '192.168.1.101',
-    userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
-    timestamp: '2024-01-21T14:25:00Z',
-    status: 'Success',
-    sessionId: 'sess_123457',
-    location: 'Los Angeles, US'
-  },
-  {
-    id: '3',
-    userId: 'user3',
-    userName: 'Mike Johnson',
-    userEmail: 'mike.johnson@example.com',
-    userAvatar: '/media/avatars/300-3.png',
-    userRole: 'Admin',
-    activityType: 'Login',
-    details: 'Successful login',
-    device: 'Web Desktop',
-    platform: 'Firefox 121.0',
-    ipAddress: '192.168.1.102',
-    userAgent: 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)',
-    timestamp: '2024-01-21T14:20:00Z',
-    status: 'Success',
-    sessionId: 'sess_123458',
-    location: 'Chicago, US'
-  },
-  {
-    id: '4',
-    userId: 'user4',
-    userName: 'Sarah Wilson',
-    userEmail: 'sarah.wilson@example.com',
-    userAvatar: '/media/avatars/300-4.png',
-    userRole: 'Premium',
-    activityType: 'Bookmark',
-    details: 'Bookmarked Psalm 23',
-    bookReference: 'Psalms',
-    chapterReference: '23',
-    device: 'Mobile Android',
-    platform: 'Android 14',
-    ipAddress: '192.168.1.103',
-    userAgent: 'Mozilla/5.0 (Linux; Android 14; SM-G991B)',
-    timestamp: '2024-01-21T14:15:00Z',
-    status: 'Success',
-    sessionId: 'sess_123459',
-    location: 'Miami, US'
-  },
-  {
-    id: '5',
-    userId: 'user5',
-    userName: 'David Brown',
-    userEmail: 'david.brown@example.com',
-    userAvatar: '/media/avatars/300-5.png',
-    userRole: 'Free',
-    activityType: 'AI Query',
-    details: 'Failed AI query due to rate limit',
-    queryText: 'Explain the book of Revelation',
-    device: 'Web Mobile',
-    platform: 'Safari Mobile',
-    ipAddress: '192.168.1.104',
-    userAgent: 'Mozilla/5.0 (iPhone; CPU iPhone OS 17_2 like Mac OS X)',
-    timestamp: '2024-01-21T14:10:00Z',
-    status: 'Error',
-    errorMessage: 'Rate limit exceeded. Please try again in 1 minute.',
-    sessionId: 'sess_123460',
-    location: 'Seattle, US'
-  },
-  {
-    id: '6',
-    userId: 'user6',
-    userName: 'Emily Davis',
-    userEmail: 'emily.davis@example.com',
-    userAvatar: '/media/avatars/300-6.png',
-    userRole: 'Moderator',
-    activityType: 'Feedback Submitted',
-    details: 'Submitted feedback about AI explanations',
-    device: 'Tablet',
-    platform: 'iPadOS 17.2',
-    ipAddress: '192.168.1.105',
-    userAgent: 'Mozilla/5.0 (iPad; CPU OS 17_2 like Mac OS X)',
-    timestamp: '2024-01-21T14:05:00Z',
-    status: 'Success',
-    sessionId: 'sess_123461',
-    location: 'Boston, US'
+// Transform API response to component format
+const transformActivityLog = (apiData: ActivityLogResponse): UserActivityLog => {
+  // Generate avatar from user ID
+  const avatarNumber = (parseInt(apiData.user.userId.replace(/-/g, ''), 16) % 34) + 1;
+  const userAvatar = `/media/avatars/300-${avatarNumber}.png`;
+
+  // Map role from API format to component format
+  const mapRole = (role: string): UserActivityLog['userRole'] => {
+    const roleMap: { [key: string]: UserActivityLog['userRole'] } = {
+      'FREE': 'Free',
+      'PREMIUM': 'Premium',
+      'ADMIN': 'Admin',
+      'MODERATOR': 'Moderator'
+    };
+    return roleMap[role] || (role as UserActivityLog['userRole']);
+  };
+
+  // Parse verse reference if available
+  let bookReference: string | undefined;
+  let chapterReference: string | undefined;
+  let verseReference: string | undefined;
+  
+  if (apiData.verseReference) {
+    // Try to parse "John 3:16" format
+    const match = apiData.verseReference.match(/^(\w+)\s+(\d+):(\d+)$/);
+    if (match) {
+      bookReference = match[1];
+      chapterReference = match[2];
+      verseReference = match[3];
+    } else {
+      verseReference = apiData.verseReference;
+    }
   }
-];
+
+  return {
+    id: apiData.log_id,
+    userId: apiData.user.userId,
+    userName: apiData.user.name,
+    userEmail: apiData.user.email,
+    userAvatar: userAvatar,
+    userRole: mapRole(apiData.user.role),
+    activityType: apiData.activityType,
+    details: apiData.details,
+    bookReference: bookReference,
+    chapterReference: chapterReference,
+    verseReference: verseReference || apiData.verseReference || undefined,
+    device: apiData.device,
+    platform: apiData.device, // Use device as platform since API doesn't provide separate platform
+    ipAddress: apiData.ipAddress,
+    timestamp: apiData.dateTime,
+    status: apiData.status as 'Success' | 'Error' | 'Warning',
+    errorMessage: apiData.errorMessage || undefined,
+    sessionId: apiData.sessionId,
+    location: apiData.location || undefined
+  };
+};
+
 
 const ActivityLogListContent: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -179,24 +118,52 @@ const ActivityLogListContent: React.FC = () => {
   const [activityTypeFilter, setActivityTypeFilter] = useState<string>('all');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [dateRangeFilter, setDateRangeFilter] = useState<string>('all');
+  const [activityLogs, setActivityLogs] = useState<UserActivityLog[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  // Fetch activity logs from API
+  useEffect(() => {
+    const loadActivityLogs = async () => {
+      try {
+        setLoading(true);
+        setError(null);
+        const response = await fetchActivityLogs();
+        if (response.status === 1 && response.data) {
+          const transformedLogs = response.data.map(transformActivityLog);
+          setActivityLogs(transformedLogs);
+        } else {
+          setError(response.message || 'Failed to load activity logs');
+        }
+      } catch (err: any) {
+        console.error('Error loading activity logs:', err);
+        setError(err?.message || 'Failed to load activity logs');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadActivityLogs();
+  }, []);
 
   // Filter logs
   const filteredLogs = useMemo(() => {
-    return mockActivityLogs.filter(log => {
+    return activityLogs.filter(log => {
       const matchesSearch = 
         log.userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         log.userEmail.toLowerCase().includes(searchTerm.toLowerCase()) ||
         log.details.toLowerCase().includes(searchTerm.toLowerCase()) ||
         (log.queryText && log.queryText.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (log.bookReference && log.bookReference.toLowerCase().includes(searchTerm.toLowerCase()));
+        (log.bookReference && log.bookReference.toLowerCase().includes(searchTerm.toLowerCase())) ||
+        (log.verseReference && log.verseReference.toLowerCase().includes(searchTerm.toLowerCase()));
 
-      const matchesUser = userFilter === 'all' || log.userRole === userFilter;
+      const matchesUser = userFilter === 'all' || log.userRole === userFilter || log.userRole.toLowerCase() === userFilter.toLowerCase();
       const matchesActivityType = activityTypeFilter === 'all' || log.activityType === activityTypeFilter;
       const matchesStatus = statusFilter === 'all' || log.status === statusFilter;
 
       return matchesSearch && matchesUser && matchesActivityType && matchesStatus;
     });
-  }, [searchTerm, userFilter, activityTypeFilter, statusFilter]);
+  }, [activityLogs, searchTerm, userFilter, activityTypeFilter, statusFilter]);
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -212,14 +179,15 @@ const ActivityLogListContent: React.FC = () => {
   };
 
   const getRoleBadge = (role: string) => {
-    switch (role) {
-      case 'Free':
+    const normalizedRole = role.toUpperCase();
+    switch (normalizedRole) {
+      case 'FREE':
         return <Badge variant="secondary">Free</Badge>;
-      case 'Premium':
+      case 'PREMIUM':
         return <Badge variant="default" className="bg-purple-100 text-purple-800">Premium</Badge>;
-      case 'Admin':
+      case 'ADMIN':
         return <Badge variant="destructive">Admin</Badge>;
-      case 'Moderator':
+      case 'MODERATOR':
         return <Badge variant="default" className="bg-amber-100 text-amber-800">Moderator</Badge>;
       default:
         return <Badge variant="outline">{role}</Badge>;
@@ -519,12 +487,39 @@ const ActivityLogListContent: React.FC = () => {
         </div>
         <div className="flex items-center gap-2">
           <span className="text-sm text-gray-600">
-            Showing {filteredLogs.length} of {mockActivityLogs.length} activities
+            Showing {filteredLogs.length} of {activityLogs.length} activities
           </span>
         </div>
       </div>
     </div>
   );
+
+  if (loading) {
+    return (
+      <div className="card">
+        <div className="card-body">
+          <div className="flex items-center justify-center py-12">
+            <div className="text-center">
+              <div className="spinner-border spinner-border-sm text-primary" role="status">
+                <span className="visually-hidden">Loading...</span>
+              </div>
+              <p className="text-sm text-gray-600 mt-2">Loading activity logs...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="card">
+        <div className="card-body">
+          <div className="alert alert-danger">{error}</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <DataGrid

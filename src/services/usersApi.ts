@@ -28,71 +28,57 @@ export interface UserProfileResponse {
   status: number;
   message: string;
   data: {
-    basicInfo: {
-      id: string;
-      name: string;
+    basicUserInfo: {
+      userId: string;
+      fullName: string;
       email: string;
+      memberSince: string;
       accountType: string;
       status: string;
-      memberSince: string;
-      lastLogin: string | null;
+      phoneNumber?: string;
+      address?: string;
     };
-    onboardingPreferences: Record<string, any>;
+    onboardingPreferences: {
+      experienceAndPurpose?: {
+        bibleExperienceLevel?: string;
+        reasonForUsingApp?: string;
+      };
+      engagementAndStyle?: {
+        engagementMode?: string;
+        explanationStyle?: string;
+      };
+      preferences?: {
+        bibleTranslation?: string;
+        language?: string;
+      };
+      dailyHabits?: {
+        dailyVerse?: string;
+        reflectionLength?: string;
+      };
+      customNote?: string;
+    };
     userActivity: {
-      lastLogin: string | null;
-      totalSessions: number;
-      pagesAccessed: number;
-      versesAccessed: number;
-      bookmarksCount: number;
-      offlineAccess: boolean;
-      interactionModes: {
-        reading: boolean;
-        listening: boolean;
-        writing: boolean;
+      basicActivityStats: {
+        lastLoginDate: string | null;
+        totalSessions: number;
+        pagesVersesAccessed: number;
+      };
+      contentEngagement: {
+        bookmarksFavoritesCount: number;
+        dailyVerseSubscriptionStatus: string;
+        offlineAccessUsage: string | null;
       };
     };
     roleAndAccess: {
       currentRole: string;
-      permissions: string[];
-      accessLevel: string;
-      features: {
-        premium: boolean;
-        offline: boolean;
-        analytics: boolean;
-        apiAccess: boolean;
-      };
+      basicPermissionsList: string[];
+      restrictions: string[];
     };
-    subscriptionDetails: {
-      plan: string;
-      status: string;
-      startDate: string;
-      endDate: string | null;
-      daysLeft: number;
-      autoRenew: boolean;
-      paymentMethod: string | null;
-    };
-    usageStats: {
-      totalSessions: number;
-      totalTime: number;
-      versesRead: number;
-      bookmarksCreated: number;
-      notesCreated: number;
-      lastActivity: string;
-    };
-    preferences: {
-      language: string;
-      timezone: string;
-      notifications: {
-        email: boolean;
-        push: boolean;
-        sms: boolean;
-      };
-      privacy: {
-        profileVisibility: string;
-        dataSharing: boolean;
-        analytics: boolean;
-      };
-    };
+    technicalInfo?: {
+      platform?: string;
+      appVersion?: string;
+      lastSyncTimestamp?: string | null;
+    } | null;
   };
 }
 

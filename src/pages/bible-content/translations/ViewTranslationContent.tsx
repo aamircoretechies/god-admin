@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { fetchTranslationById, type TranslationDetailData } from '@/services/translationsApi';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -34,97 +35,124 @@ interface Translation {
   isPublic: boolean;
 }
 
-const mockTranslations: Translation[] = [
-  {
-    id: '1',
-    name: 'King James Version',
-    version: 'KJV',
-    language: 'English',
-    description: 'The King James Version is an English translation of the Christian Bible for the Church of England.',
-    status: 'active',
-    verseCount: 31102,
-    lastUpdated: '2024-01-15',
-    fileSize: '2.3 MB',
-    publisher: 'Public Domain',
-    year: '1611',
-    license: 'Public Domain',
-    isPublic: true
-  },
-  {
-    id: '2',
-    name: 'English Standard Version',
-    version: 'ESV',
-    language: 'English',
-    description: 'The English Standard Version is an English translation of the Bible published in 2001.',
-    status: 'active',
-    verseCount: 31102,
-    lastUpdated: '2024-01-10',
-    fileSize: '2.1 MB',
-    publisher: 'Crossway',
-    year: '2001',
-    license: 'ESV License',
-    isPublic: true
-  },
-  {
-    id: '3',
-    name: 'New International Version',
-    version: 'NIV',
-    language: 'English',
-    description: 'The New International Version is an English translation of the Bible first published in 1978.',
-    status: 'active',
-    verseCount: 31102,
-    lastUpdated: '2024-01-12',
-    fileSize: '2.0 MB',
-    publisher: 'Biblica',
-    year: '1978',
-    license: 'NIV License',
-    isPublic: true
-  },
-  {
-    id: '4',
-    name: 'Reina Valera',
-    version: 'RV1960',
-    language: 'Spanish',
-    description: 'Reina Valera is a Spanish translation of the Bible first published in 1602.',
-    status: 'pending',
-    verseCount: 31102,
-    lastUpdated: '2024-01-18',
-    fileSize: '2.4 MB',
-    publisher: 'Sociedades Bíblicas Unidas',
-    year: '1960',
-    license: 'Public Domain',
-    isPublic: true
-  },
-  {
-    id: '5',
-    name: 'Nueva Versión Internacional',
-    version: 'NVI',
-    language: 'Spanish',
-    description: 'The Nueva Versión Internacional is a Spanish translation of the Bible.',
-    status: 'inactive',
-    verseCount: 31102,
-    lastUpdated: '2024-01-05',
-    fileSize: '2.2 MB',
-    publisher: 'Biblica',
-    year: '1999',
-    license: 'NVI License',
-    isPublic: false
-  }
-];
+// Language mapping: code -> display name
+const languageMap: Record<string, string> = {
+  'en': 'English',
+  'es': 'Spanish',
+  'fr': 'French',
+  'de': 'German',
+  'pt': 'Portuguese',
+  'it': 'Italian',
+  'nl': 'Dutch',
+  'ru': 'Russian',
+  'zh': 'Chinese',
+  'ja': 'Japanese',
+  'ko': 'Korean',
+  'ar': 'Arabic',
+  'he': 'Hebrew',
+  'el': 'Greek',
+  'la': 'Latin',
+  'sv': 'Swedish',
+  'no': 'Norwegian',
+  'da': 'Danish',
+  'fi': 'Finnish',
+  'pl': 'Polish',
+  'cs': 'Czech',
+  'hu': 'Hungarian',
+  'ro': 'Romanian',
+  'bg': 'Bulgarian'
+};
+
+// Transform API response to component format
+const transformTranslation = (apiTranslation: TranslationDetailData): Translation => {
+  // Normalize status
+  const normalizeStatus = (status: string): 'active' | 'inactive' | 'pending' | 'draft' => {
+    const lower = status.toLowerCase();
+    if (lower === 'active') return 'active';
+    if (lower === 'inactive') return 'inactive';
+    if (lower === 'pending') return 'pending';
+    return 'draft';
+  };
+
+  // Normalize visibility to boolean
+  const isPublic = apiTranslation.status_configuration.visibility.toLowerCase() === 'public';
+
+  return {
+    id: apiTranslation.translation_id,
+    name: apiTranslation.full_name,
+    version: apiTranslation.abbreviation || apiTranslation.metadata.version_code || '',
+    language: apiTranslation.status_configuration.language || '',
+    description: apiTranslation.overview.description || '',
+    status: normalizeStatus(apiTranslation.status_configuration.status),
+    verseCount: apiTranslation.statistics.total_verses || 0,
+    lastUpdated: apiTranslation.metadata.last_updated || '',
+    fileSize: apiTranslation.statistics.file_size || '0 KB',
+    publisher: apiTranslation.overview.publisher || '',
+    year: apiTranslation.overview.year_published || '',
+    license: apiTranslation.overview.license || '',
+    isPublic: isPublic
+  };
+};
 
 const ViewTranslationContent: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  
-  // Find the translation by ID
-  const translation = mockTranslations.find(t => t.id === id);
+  const [translation, setTranslation] = useState<Translation | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  if (!translation) {
+  useEffect(() => {
+    const loadTranslation = async () => {
+      if (!id) {
+        setError('Translation ID is missing');
+        setLoading(false);
+        return;
+      }
+
+      try {
+        setLoading(true);
+        setError(null);
+        const apiTranslation = await fetchTranslationById(id);
+        
+        if (apiTranslation) {
+          const transformed = transformTranslation(apiTranslation);
+          setTranslation(transformed);
+        } else {
+          setError('Translation not found');
+        }
+      } catch (err: any) {
+        console.error('Error loading translation:', err);
+        setError(err?.response?.data?.message || err?.message || 'Failed to load translation');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadTranslation();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <Card>
+          <CardContent className="p-6">
+            <div className="animate-pulse space-y-4">
+              <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+              <div className="h-10 bg-gray-200 rounded"></div>
+              <div className="h-10 bg-gray-200 rounded"></div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  if (error || !translation) {
     return (
       <div className="text-center py-12">
         <AlertCircle className="w-12 h-12 text-gray-400 mx-auto mb-4" />
         <h3 className="text-lg font-semibold text-gray-900 mb-2">Translation Not Found</h3>
-        <p className="text-gray-600 mb-4">The translation you're looking for doesn't exist.</p>
+        <p className="text-gray-600 mb-4">{error || 'The translation you\'re looking for doesn\'t exist.'}</p>
         <Button onClick={() => navigate('/bible-content/translations')}>
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to Translations
@@ -134,11 +162,25 @@ const ViewTranslationContent: React.FC = () => {
   }
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString('en-US', {
-      year: 'numeric',
-      month: 'long',
-      day: 'numeric'
-    });
+    if (!dateString) return '';
+    // If it's already a formatted date string (like "October 16, 2025"), return as-is
+    if (dateString.includes(',') && !dateString.includes('T')) {
+      return dateString;
+    }
+    // Otherwise, try to parse and format it
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) {
+        return dateString; // Return original if parsing fails
+      }
+      return date.toLocaleDateString('en-US', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric'
+      });
+    } catch {
+      return dateString; // Return original if any error occurs
+    }
   };
 
   const getStatusBadge = (status: string) => {
@@ -186,11 +228,11 @@ const ViewTranslationContent: React.FC = () => {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline">
+          <Button variant="outline" disabled={true}>
             <Copy className="w-4 h-4 mr-2" />
             Duplicate
           </Button>
-          <Button variant="outline">
+          <Button variant="outline" disabled={true}>
             <Download className="w-4 h-4 mr-2" />
             Download
           </Button>
@@ -209,21 +251,29 @@ const ViewTranslationContent: React.FC = () => {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div>
-                <h4 className="text-sm font-medium text-gray-700 mb-2">Description</h4>
-                <p className="text-gray-900">{translation.description}</p>
-              </div>
+              {translation.description && (
+                <div>
+                  <h4 className="text-sm font-medium text-gray-700 mb-2">Description</h4>
+                  <p className="text-gray-900">{translation.description}</p>
+                </div>
+              )}
               
-              <div className="grid grid-cols-2 gap-4 pt-4 border-t">
-                <div>
-                  <h4 className="text-sm font-medium text-gray-700 mb-2">Publisher</h4>
-                  <p className="text-gray-900">{translation.publisher}</p>
+              {(translation.publisher || translation.year) && (
+                <div className="grid grid-cols-2 gap-4 pt-4 border-t">
+                  {translation.publisher && (
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-700 mb-2">Publisher</h4>
+                      <p className="text-gray-900">{translation.publisher}</p>
+                    </div>
+                  )}
+                  {translation.year && (
+                    <div>
+                      <h4 className="text-sm font-medium text-gray-700 mb-2">Year Published</h4>
+                      <p className="text-gray-900">{translation.year}</p>
+                    </div>
+                  )}
                 </div>
-                <div>
-                  <h4 className="text-sm font-medium text-gray-700 mb-2">Year Published</h4>
-                  <p className="text-gray-900">{translation.year}</p>
-                </div>
-              </div>
+              )}
 
               <div className="pt-4 border-t">
                 <h4 className="text-sm font-medium text-gray-700 mb-2">License</h4>
@@ -321,15 +371,15 @@ const ViewTranslationContent: React.FC = () => {
               <CardTitle>Quick Actions</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              <Button variant="outline" className="w-full justify-start">
+              <Button variant="outline" className="w-full justify-start" disabled={true}>
                 <Download className="w-4 h-4 mr-2" />
                 Download File
               </Button>
-              <Button variant="outline" className="w-full justify-start">
+              <Button variant="outline" className="w-full justify-start" disabled={true}>
                 <Upload className="w-4 h-4 mr-2" />
                 Upload New Version
               </Button>
-              <Button variant="outline" className="w-full justify-start">
+              <Button variant="outline" className="w-full justify-start" disabled={true}>
                 <Copy className="w-4 h-4 mr-2" />
                 Duplicate Translation
               </Button>
