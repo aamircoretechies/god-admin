@@ -1,11 +1,12 @@
 /**
  * API Configuration
  * Uses proxy in development to avoid CORS issues
- * For now, using localhost:3000 for all environments
+ * In production, requires VITE_APP_API_URL environment variable to be set
+ * Example: VITE_APP_API_URL=https://api.yourdomain.com/api/v1
  */
-export const API_BASE_URL = import.meta.env.DEV 
-  ? '/api/v1' 
-  : (import.meta.env.VITE_APP_API_URL || 'http://localhost:3000/api/v1');
+export const API_BASE_URL = import.meta.env.DEV
+  ? '/api/v1'
+  : import.meta.env.VITE_APP_API_URL || window.location.origin + '/api/v1';
 
 export const API_URL = API_BASE_URL;
 
