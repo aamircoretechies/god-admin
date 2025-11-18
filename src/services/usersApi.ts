@@ -200,3 +200,108 @@ export const fetchUsersForDataGrid = async (
   };
 };
 
+// Team Members API Types
+export interface CustomRole {
+  role_id: string;
+  role_name: string;
+  description?: string;
+  permissions: {
+    users?: {
+      edit: boolean;
+      view: boolean;
+      delete: boolean;
+    };
+    content?: {
+      edit: boolean;
+      delete: boolean;
+      moderate: boolean;
+    };
+    settings?: {
+      view: boolean;
+      modify: boolean;
+    };
+  };
+  assigned_at?: string;
+  is_active?: boolean;
+}
+
+export interface TeamMember {
+  user_id: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  role: string;
+  custom_roles: CustomRole[];
+  created_at: string;
+  last_login: string | null;
+}
+
+export interface CreateTeamMemberRequest {
+  email: string;
+  password: string;
+  first_name: string;
+  last_name: string;
+  role: string;
+  custom_role_id?: string;
+}
+
+export interface CreateTeamMemberResponse {
+  status: number;
+  message: string;
+  data: {
+    user_id: string;
+    email: string;
+    first_name: string;
+    last_name: string;
+    role: string;
+    custom_roles: CustomRole[];
+    created_at: string;
+  };
+}
+
+export interface AdminCreatedUsersResponse {
+  status: number;
+  message: string;
+  data: {
+    users: TeamMember[];
+    pagination: {
+      page: number;
+      limit: number;
+      total: number;
+      pages: number;
+      hasNext: boolean;
+      hasPrev: boolean;
+    };
+  };
+}
+
+/**
+ * Create a new team member (admin-created user)
+ */
+export const createTeamMember = async (
+  data: CreateTeamMemberRequest
+): Promise<CreateTeamMemberResponse> => {
+  const response = await axios.post<CreateTeamMemberResponse>(
+    `${API_URL}/users`,
+    data
+  );
+  return response.data;
+};
+
+/**
+ * Fetch admin-created users (team members) with pagination
+ */
+export const fetchAdminCreatedUsers = async (params: {
+  page?: number;
+  limit?: number;
+}): Promise<AdminCreatedUsersResponse> => {
+  const queryParams = new URLSearchParams();
+  if (params.page) queryParams.append('page', params.page.toString());
+  if (params.limit) queryParams.append('limit', params.limit.toString());
+
+  const response = await axios.get<AdminCreatedUsersResponse>(
+    `${API_URL}/users/user-db?${queryParams.toString()}`
+  );
+  return response.data;
+};
+

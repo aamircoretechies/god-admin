@@ -246,15 +246,16 @@ const AppRoutingSetup = (): ReactElement => {
           <Route path="/account/members/members-starter" element={<AccountMembersStarterPage />} />
           <Route path="/account/members/team-members" element={<AccountTeamMembersPage />} />
           <Route path="/account/members/import-members" element={<AccountImportMembersPage />} />
-          <Route path="/account/members/roles" element={<AccountRolesPage />} />
-          <Route
+          {/* Roles and Permissions pages disabled */}
+          {/* <Route path="/account/members/roles" element={<AccountRolesPage />} /> */}
+          {/* <Route
             path="/account/members/permissions-toggle"
             element={<AccountPermissionsTogglePage />}
-          />
-          <Route
+          /> */}
+          {/* <Route
             path="/account/members/permissions-check"
             element={<AccountPermissionsCheckPage />}
-          />
+          /> */}
           <Route path="/account/integrations" element={<AccountIntegrationsPage />} />
           <Route path="/account/notifications" element={<AccountNotificationsPage />} />
           <Route path="/account/api-keys" element={<AccountApiKeysPage />} />

@@ -7,7 +7,8 @@ import { DataGrid, DataGridColumnHeader, DataGridColumnVisibility, DataGridRowSe
 import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
 import { DropdownCard1 } from '@/partials/dropdowns/general';
-import { MembersData, IMembersData } from '.';
+import { fetchAdminCreatedUsers, type TeamMember } from '@/services/usersApi';
+import { IMembersData } from '.';
 
 interface IColumnFilterProps<TData, TValue> {
   column: Column<TData, TValue>;
@@ -172,8 +173,11 @@ const Members = () => {
     [isRTL]
   );
 
-  // Memoize the team data
-  const data: IMembersData[] = useMemo(() => MembersData, []);
+  // State for team members data
+  const [teamMembers, setTeamMembers] = useState<IMembersData[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0 });
+  const [currentPage, setCurrentPage] = useState(1);
 
   // Initialize search term from localStorage if available
   const [searchTerm, setSearchTerm] = useState(() => {
@@ -185,16 +189,125 @@ const Members = () => {
     localStorage.setItem(storageFilterId, searchTerm);
   }, [searchTerm]);
 
+  // Transform API data to UI format
+  const transformTeamMember = (member: TeamMember): IMembersData => {
+    // Generate a consistent avatar based on user_id (with safety check)
+    const userId = member.user_id || member.email || 'default';
+    const avatarNumber = (parseInt(userId.replace(/-/g, '').replace(/[^0-9a-f]/gi, ''), 16) % 34) + 1;
+    const avatar = `300-${avatarNumber}.png`;
+
+    // Get role names from custom_roles (with safety check)
+    const roles: string[] = [];
+    if (member.custom_roles && Array.isArray(member.custom_roles)) {
+      member.custom_roles.forEach(cr => {
+        if (cr && cr.role_name) {
+          roles.push(cr.role_name);
+        }
+      });
+    }
+    // If no custom roles, use the base role
+    if (roles.length === 0 && member.role) {
+      roles.push(member.role);
+    }
+
+    // Format recent activity
+    const formatRecentActivity = (lastLogin: string | null) => {
+      if (!lastLogin) return '-';
+      const loginDate = new Date(lastLogin);
+      const now = new Date();
+      const diffMs = now.getTime() - loginDate.getTime();
+      const diffMins = Math.floor(diffMs / 60000);
+      const diffHours = Math.floor(diffMs / 3600000);
+      const diffDays = Math.floor(diffMs / 86400000);
+
+      if (diffMins < 60) return 'Current session';
+      if (diffHours < 24) return `Today, ${loginDate.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' })}`;
+      if (diffDays === 1) return 'Yesterday';
+      if (diffDays < 7) return `${diffDays} days ago`;
+      if (diffDays < 30) return `${Math.floor(diffDays / 7)} week${Math.floor(diffDays / 7) > 1 ? 's' : ''} ago`;
+      return 'Month ago';
+    };
+
+    // Determine status (simplified - you can enhance this based on your needs)
+    const status = member.last_login ? {
+      label: 'Active',
+      variant: 'badge-success'
+    } : {
+      label: 'Pending',
+      variant: 'badge-warning'
+    };
+
+    return {
+      id: member.user_id || member.email || `user-${Date.now()}-${Math.random()}`,
+      member: {
+        avatar,
+        name: `${member.first_name} ${member.last_name}`,
+        tasks: '0', // API doesn't provide tasks count
+        email: member.email
+      },
+      roles,
+      location: {
+        name: 'Unknown', // API doesn't provide location
+        flag: 'united-states.svg'
+      },
+      status,
+      recentlyActivity: formatRecentActivity(member.last_login)
+    };
+  };
+
+  // Fetch team members from API
+  useEffect(() => {
+    const loadTeamMembers = async () => {
+      setIsLoading(true);
+      try {
+        const response = await fetchAdminCreatedUsers({
+          page: currentPage,
+          limit: 10
+        });
+        
+        // Safety check: ensure users array exists and is valid
+        if (!response.data || !response.data.users || !Array.isArray(response.data.users)) {
+          console.error('Invalid API response structure:', response);
+          toast.error('Invalid response from server');
+          setTeamMembers([]);
+          return;
+        }
+        
+        const transformedData = response.data.users.map(transformTeamMember);
+        
+        // Log for debugging
+        console.log('API Response - Total users:', response.data.users.length);
+        console.log('Transformed data count:', transformedData.length);
+        console.log('Transformed data:', transformedData);
+        
+        setTeamMembers(transformedData);
+        setPagination({
+          page: response.data.pagination.page,
+          limit: response.data.pagination.limit,
+          total: response.data.pagination.total
+        });
+      } catch (error) {
+        console.error('Error fetching team members:', error);
+        toast.error('Failed to load team members');
+        setTeamMembers([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadTeamMembers();
+  }, [currentPage]);
+
   // Filtered data based on search term
   const filteredData = useMemo(() => {
-    if (!searchTerm) return data; // If no search term, return full data
+    if (!searchTerm) return teamMembers; // If no search term, return full data
 
-    return data.filter(
+    return teamMembers.filter(
       (member) =>
         member.member.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        member.member.tasks.toLowerCase().includes(searchTerm.toLowerCase())
+        member.member.email?.toLowerCase().includes(searchTerm.toLowerCase())
     );
-  }, [searchTerm, data]);
+  }, [searchTerm, teamMembers]);
 
   const handleRowSelection = (state: RowSelectionState) => {
     const selectedRowIds = Object.keys(state);
@@ -241,13 +354,28 @@ const Members = () => {
     );
   };
 
+  if (isLoading) {
+    return (
+      <div className="card">
+        <div className="card-body">
+          <div className="flex items-center justify-center py-10">
+            <div className="spinner-border spinner-border-sm text-primary" role="status">
+              <span className="visually-hidden">Loading...</span>
+            </div>
+            <span className="ms-2">Loading team members...</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <DataGrid 
       columns={columns} 
       data={filteredData} 
       rowSelection={true} 
       onRowSelectionChange={handleRowSelection}
-      pagination={{ size: 10 }}
+      pagination={{ size: 10 }} 
       sorting={[{ id: 'member', desc: false }]} 
       toolbar={<Toolbar />}
       layout={{ card: true }}

@@ -2,6 +2,7 @@ interface IMember {
   avatar: string;
   name: string;
   tasks: string;
+  email?: string;
 }
 
 interface ILocation {
@@ -15,6 +16,7 @@ interface IStatus {
 }
 
 interface IMembersData {
+  id?: string;
   member: IMember;
   roles: string[];
   location: ILocation;

@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -20,17 +19,19 @@ import {
 } from '@/components/ui/dialog';
 import { 
   UserPlus, 
-  X, 
   Eye, 
   EyeOff 
 } from 'lucide-react';
+import { createTeamMember } from '@/services/usersApi';
+import { toast } from 'sonner';
 
 interface AddMemberFormData {
   email: string;
   password: string;
-  firstName: string;
-  lastName: string;
-  role: 'admin' | 'moderator';
+  first_name: string;
+  last_name: string;
+  role: string;
+  custom_role_id?: string;
 }
 
 const AddMemberForm = () => {
@@ -39,9 +40,10 @@ const AddMemberForm = () => {
   const [formData, setFormData] = useState<AddMemberFormData>({
     email: '',
     password: '',
-    firstName: '',
-    lastName: '',
-    role: 'moderator'
+    first_name: '',
+    last_name: '',
+    role: 'FREE',
+    custom_role_id: undefined
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -57,28 +59,48 @@ const AddMemberForm = () => {
     setIsSubmitting(true);
 
     try {
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      // Prepare request data
+      const requestData: AddMemberFormData = {
+        email: formData.email,
+        password: formData.password,
+        first_name: formData.first_name,
+        last_name: formData.last_name,
+        role: formData.role
+      };
+
+      // Only include custom_role_id if it's provided
+      if (formData.custom_role_id && formData.custom_role_id.trim() !== '') {
+        requestData.custom_role_id = formData.custom_role_id.trim();
+      }
+
+      const response = await createTeamMember(requestData);
       
-      console.log('Adding member:', formData);
+      if (response.status === 1) {
+        toast.success(response.message || 'Member added successfully!');
+        
+        // Reset form
+        setFormData({
+          email: '',
+          password: '',
+          first_name: '',
+          last_name: '',
+          role: 'FREE',
+          custom_role_id: undefined
+        });
+        
+        setIsOpen(false);
+        
+        // Reload the page to refresh the team members list
+        // You could also use a callback prop or context to refresh the list
+        window.location.reload();
+      } else {
+        throw new Error(response.message || 'Failed to create team member');
+      }
       
-      // Reset form
-      setFormData({
-        email: '',
-        password: '',
-        firstName: '',
-        lastName: '',
-        role: 'moderator'
-      });
-      
-      setIsOpen(false);
-      
-      // Show success message (you can replace this with a toast notification)
-      alert('Member added successfully!');
-      
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error adding member:', error);
-      alert('Error adding member. Please try again.');
+      const errorMessage = error?.response?.data?.message || error?.message || 'Error adding member. Please try again.';
+      toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
@@ -89,9 +111,10 @@ const AddMemberForm = () => {
     setFormData({
       email: '',
       password: '',
-      firstName: '',
-      lastName: '',
-      role: 'moderator'
+      first_name: '',
+      last_name: '',
+      role: 'FREE',
+      custom_role_id: undefined
     });
   };
 
@@ -124,25 +147,25 @@ const AddMemberForm = () => {
           <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="firstName">First Name</Label>
+              <Label htmlFor="first_name">First Name</Label>
               <Input
-                id="firstName"
+                id="first_name"
                 type="text"
                 placeholder="Enter first name"
-                value={formData.firstName}
-                onChange={(e) => handleInputChange('firstName', e.target.value)}
+                value={formData.first_name}
+                onChange={(e) => handleInputChange('first_name', e.target.value)}
                 required
               />
             </div>
             
             <div className="space-y-2">
-              <Label htmlFor="lastName">Last Name</Label>
+              <Label htmlFor="last_name">Last Name</Label>
               <Input
-                id="lastName"
+                id="last_name"
                 type="text"
                 placeholder="Enter last name"
-                value={formData.lastName}
-                onChange={(e) => handleInputChange('lastName', e.target.value)}
+                value={formData.last_name}
+                onChange={(e) => handleInputChange('last_name', e.target.value)}
                 required
               />
             </div>
@@ -192,16 +215,37 @@ const AddMemberForm = () => {
             <Label htmlFor="role">Role</Label>
             <Select 
               value={formData.role} 
-              onValueChange={(value: 'admin' | 'moderator') => handleInputChange('role', value)}
+              onValueChange={(value: string) => handleInputChange('role', value)}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select role" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="admin">Admin</SelectItem>
-                <SelectItem value="moderator">Moderator</SelectItem>
+                <SelectItem value="FREE">FREE</SelectItem>
+                <SelectItem value="PREMIUM">PREMIUM</SelectItem>
+                <SelectItem value="ADMIN">ADMIN</SelectItem>
               </SelectContent>
             </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="custom_role_id">Custom Role (Optional)</Label>
+            <Select 
+              value={formData.custom_role_id || 'none'} 
+              onValueChange={(value: string) => {
+                const roleId = value === 'none' ? '' : value;
+                handleInputChange('custom_role_id', roleId);
+              }}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select custom role" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">None</SelectItem>
+                <SelectItem value="40f9bc3d-5636-47e5-8196-54095d49e237">Moderator</SelectItem>
+              </SelectContent>
+            </Select>
+            <p className="text-xs text-gray-500">Select a custom role or leave as None</p>
           </div>
 
           <div className="flex justify-end space-x-2 pt-4">

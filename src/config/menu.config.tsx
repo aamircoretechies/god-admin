@@ -21,17 +21,7 @@ export const MENU_SIDEBAR: TMenuConfig = [
           {
             title: 'Team Members',
             path: '/account/members/team-members'
-          },
-       
-          {
-            title: 'Roles & Permissions',
-            path: '/account/members/roles'
-          },
-       
-        
-       
-         
-          
+          }
     ]
   },
   
@@ -429,18 +419,6 @@ export const MENU_SIDEBAR: TMenuConfig = [
           {
             title: 'Import Members',
             path: '/account/members/import-members'
-          },
-          {
-            title: 'Roles',
-            path: '/account/members/roles'
-          },
-          {
-            title: 'Permissions - Toggler',
-            path: '/account/members/permissions-toggle'
-          },
-          {
-            title: 'Permissions - Check',
-            path: '/account/members/permissions-check'
           }
         ]
       },

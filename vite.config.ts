@@ -22,9 +22,9 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: 'http://localhost:3000',
+        target: 'https://api.growondaily.com',
         changeOrigin: true,
-        secure: false,
+        secure: true,
         rewrite: (path) => path.replace(/^\/api/, '/api'),
         configure: (proxy, _options) => {
           proxy.on('error', (err, _req, _res) => {
