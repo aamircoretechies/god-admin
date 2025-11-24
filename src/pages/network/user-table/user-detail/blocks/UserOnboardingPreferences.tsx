@@ -21,10 +21,17 @@ const UserOnboardingPreferences = () => {
         setLoading(true);
         setError(null);
         const response = await fetchUserProfile(id);
-        if (response.status === 1 && response.data?.onboardingPreferences) {
-          setPreferences(response.data.onboardingPreferences);
+        if (response.status === 1 && response.data) {
+          // Check if onboardingPreferences exists, if not, show empty state message
+          if (response.data.onboardingPreferences) {
+            setPreferences(response.data.onboardingPreferences);
+          } else {
+            // Set preferences to an empty object structure to show "No data" message
+            setPreferences(null);
+            setError('No onboarding preferences found for this user');
+          }
         } else {
-          setError('Failed to load preferences');
+          setError(response.message || 'Failed to load preferences');
         }
       } catch (err: any) {
         console.error('Error loading preferences:', err);
@@ -74,11 +81,37 @@ const UserOnboardingPreferences = () => {
     );
   }
 
-  if (error || !preferences) {
+  if (error && !preferences) {
     return (
       <div className="card">
+        <div className="card-header">
+          <h3 className="card-title">
+            <KeenIcon icon="setting-4" className="me-2" />
+            Onboarding Preferences
+          </h3>
+        </div>
         <div className="card-body">
-          <div className="alert alert-danger">{error || 'Failed to load preferences'}</div>
+          <div className="text-center py-8">
+            <p className="text-sm text-gray-600">{error || 'No onboarding preferences available'}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!preferences) {
+    return (
+      <div className="card">
+        <div className="card-header">
+          <h3 className="card-title">
+            <KeenIcon icon="setting-4" className="me-2" />
+            Onboarding Preferences
+          </h3>
+        </div>
+        <div className="card-body">
+          <div className="text-center py-8">
+            <p className="text-sm text-gray-600">No onboarding preferences available for this user</p>
+          </div>
         </div>
       </div>
     );

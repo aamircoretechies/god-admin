@@ -23,7 +23,9 @@ import {
   XCircle,
   AlertCircle
 } from 'lucide-react';
-import { fetchPrompts, type PromptResponse } from '@/services/promptsApi';
+import { fetchPrompts, fetchPromptDetail, createPrompt, type PromptResponse, type CreatePromptRequest } from '@/services/promptsApi';
+import { toast } from 'sonner';
+import { useNavigate } from 'react-router-dom';
 
 // Types
 interface AIPrompt {
@@ -80,6 +82,7 @@ const transformPrompt = (apiData: PromptResponse): AIPrompt => {
 };
 
 const PromptListContent: React.FC = () => {
+  const navigate = useNavigate();
   const [prompts, setPrompts] = useState<AIPrompt[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -88,6 +91,7 @@ const PromptListContent: React.FC = () => {
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
+  const [duplicatingId, setDuplicatingId] = useState<string | null>(null);
   const pageSize = 10;
 
   // Convert formatted category back to API format (e.g., "Verse Explanation" -> "VerseExplanation")
@@ -135,6 +139,45 @@ const PromptListContent: React.FC = () => {
   useEffect(() => {
     setCurrentPage(1);
   }, [statusFilter, categoryFilter, searchTerm]);
+
+  // Handle duplicate prompt
+  const handleDuplicate = async (promptId: string) => {
+    setDuplicatingId(promptId);
+    try {
+      // Fetch full prompt detail
+      const detailResponse = await fetchPromptDetail(promptId);
+      if (detailResponse.status === 1 && detailResponse.data) {
+        const promptData = detailResponse.data;
+        
+        // Create duplicate with "Copy of " prefix
+        const duplicateData: CreatePromptRequest = {
+          title: `Copy of ${promptData.title}`,
+          description: promptData.description,
+          content: promptData.content,
+          category: promptData.category,
+          targetRole: promptData.target_role,
+          language: promptData.language,
+          tags: promptData.tags || [],
+          isPublic: promptData.is_public
+        };
+
+        const createResponse = await createPrompt(duplicateData);
+        if (createResponse.status === 1 && createResponse.data) {
+          toast.success('Prompt duplicated successfully');
+          navigate(`/ai-prompt-management/view/${createResponse.data.template_id}`);
+        } else {
+          throw new Error(createResponse.message || 'Failed to duplicate prompt');
+        }
+      } else {
+        throw new Error(detailResponse.message || 'Failed to fetch prompt detail');
+      }
+    } catch (err: any) {
+      const errorMessage = err?.response?.data?.message || err?.message || 'Failed to duplicate prompt';
+      toast.error(errorMessage);
+    } finally {
+      setDuplicatingId(null);
+    }
+  };
 
   // Filter prompts (client-side filtering as fallback, but API should handle it)
   const filteredPrompts = useMemo(() => {
@@ -332,9 +375,12 @@ const PromptListContent: React.FC = () => {
                   View History
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem>
+              <DropdownMenuItem 
+                onClick={() => handleDuplicate(row.original.id)}
+                disabled={duplicatingId === row.original.id}
+              >
                 <Copy className="w-4 h-4 mr-2" />
-                Duplicate Prompt
+                {duplicatingId === row.original.id ? 'Duplicating...' : 'Duplicate Prompt'}
               </DropdownMenuItem>
               <DropdownMenuItem>
                 {row.original.status === 'Active' ? (

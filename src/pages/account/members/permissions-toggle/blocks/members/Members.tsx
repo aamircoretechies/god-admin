@@ -122,7 +122,7 @@ const Members = ({ title}: IMembersProps) => {
         id: 'click',
         header: () => '',
         enableSorting: false,
-        cell: () => (
+        cell: ({ row }) => (
           <Menu className="items-stretch">
             <MenuItem
               toggle="dropdown"
@@ -142,7 +142,7 @@ const Members = ({ title}: IMembersProps) => {
               <MenuToggle className="btn btn-sm btn-icon btn-light btn-clear">
                 <KeenIcon icon="dots-vertical" />
               </MenuToggle>
-              {DropdownCard1()}
+              {DropdownCard1({ teamMemberId: (row.original as any).id || (row.original as any).member?.name })}
             </MenuItem>
           </Menu>
         ),
@@ -178,7 +178,10 @@ const Members = ({ title}: IMembersProps) => {
     );
   }, [searchTerm, data]);
 
+  const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+
   const handleRowSelection = (state: RowSelectionState) => {
+    setRowSelection(state);
     const selectedRowIds = Object.keys(state);
 
     if (selectedRowIds.length > 0) {
@@ -186,9 +189,24 @@ const Members = ({ title}: IMembersProps) => {
         description: `Selected row IDs: ${selectedRowIds}`,
         action: {
           label: 'Undo',
-          onClick: () => console.log('Undo')
+          onClick: () => {
+            setRowSelection({});
+            // Clear selection in the table
+            const table = document.querySelector('[data-table]');
+            if (table) {
+              // Trigger table row deselection
+              const checkboxes = table.querySelectorAll('input[type="checkbox"]');
+              checkboxes.forEach((checkbox: any) => {
+                if (checkbox.checked) {
+                  checkbox.click();
+                }
+              });
+            }
+          }
         }
       });
+    } else {
+      setRowSelection({});
     }
   };
 

@@ -3,6 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import { approveFeedback, rejectFeedback } from '@/services/flaggedContentApi';
+import { toast } from 'sonner';
 import { 
   Select, 
   SelectContent, 
@@ -131,14 +133,38 @@ const AIFlagReviewContent = () => {
     });
   };
 
-  const handleApprove = (id: string) => {
-    console.log('Approving flag:', id);
-    // Add approval logic here
+  const handleApprove = async (id: string) => {
+    try {
+      const response = await approveFeedback(id, {});
+      if (response.status === 1) {
+        toast.success(response.message || 'AI response approved successfully');
+        // Update local state to reflect the change
+        // Note: In a real implementation, you would refetch the data
+      } else {
+        throw new Error(response.message || 'Failed to approve AI response');
+      }
+    } catch (err: any) {
+      const errorMessage = err?.response?.data?.message || err?.message || 'Failed to approve AI response';
+      toast.error(errorMessage);
+    }
   };
 
-  const handleReject = (id: string) => {
-    console.log('Rejecting flag:', id);
-    // Add rejection logic here
+  const handleReject = async (id: string) => {
+    try {
+      const response = await rejectFeedback(id, {
+        rejection_reason: 'Rejected by admin'
+      });
+      if (response.status === 1) {
+        toast.success(response.message || 'AI response rejected successfully');
+        // Update local state to reflect the change
+        // Note: In a real implementation, you would refetch the data
+      } else {
+        throw new Error(response.message || 'Failed to reject AI response');
+      }
+    } catch (err: any) {
+      const errorMessage = err?.response?.data?.message || err?.message || 'Failed to reject AI response';
+      toast.error(errorMessage);
+    }
   };
 
   const handleEdit = (id: string) => {

@@ -87,6 +87,7 @@ const HeaderTopbar = () => {
         </MenuItem>
       </Menu> */}
 
+      {/* Notification Tab - Commented out
       <Menu>
         <MenuItem
           ref={itemNotificationsRef}
@@ -110,6 +111,7 @@ const HeaderTopbar = () => {
           {DropdownNotifications({ menuTtemRef: itemNotificationsRef })}
         </MenuItem>
       </Menu>
+      */}
 
       <Menu>
         <MenuItem

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -6,17 +6,20 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
   BookOpen, 
   Calendar, 
-  User, 
   History,
   Brain,
-  Eye
+  Loader2,
+  AlertCircle,
+  FileText
 } from 'lucide-react';
+import { fetchVerseAIExplanationHistory, type VerseAIExplanationHistoryResponse } from '@/services/aiExplanationsApi';
 
 interface VerseDetailModalProps {
   isOpen: boolean;
   onClose: () => void;
   verse: {
     id: string;
+    verseId?: string; // UUID verse_id for API calls
     book: string;
     chapter: number;
     verse: number;
@@ -29,6 +32,39 @@ interface VerseDetailModalProps {
 }
 
 const VerseDetailModal: React.FC<VerseDetailModalProps> = ({ isOpen, onClose, verse }) => {
+  const [aiExplanationHistory, setAIExplanationHistory] = useState<VerseAIExplanationHistoryResponse['data'] | null>(null);
+  const [loadingHistory, setLoadingHistory] = useState(false);
+  const [historyError, setHistoryError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (isOpen && verse?.verseId) {
+      loadAIExplanationHistory();
+    } else {
+      setAIExplanationHistory(null);
+      setHistoryError(null);
+    }
+  }, [isOpen, verse?.verseId]);
+
+  const loadAIExplanationHistory = async () => {
+    if (!verse?.verseId) return;
+    
+    try {
+      setLoadingHistory(true);
+      setHistoryError(null);
+      const response = await fetchVerseAIExplanationHistory(verse.verseId);
+      if (response.status === 1 && response.data) {
+        setAIExplanationHistory(response.data);
+      } else {
+        setHistoryError(response.message || 'Failed to load AI explanation history');
+      }
+    } catch (error: any) {
+      console.error('Error loading AI explanation history:', error);
+      setHistoryError(error?.response?.data?.message || error?.message || 'Failed to load AI explanation history');
+    } finally {
+      setLoadingHistory(false);
+    }
+  };
+
   if (!verse) return null;
 
   return (
@@ -97,24 +133,113 @@ const VerseDetailModal: React.FC<VerseDetailModalProps> = ({ isOpen, onClose, ve
               <CardTitle className="flex items-center gap-2">
                 <Brain className="w-5 h-5" />
                 AI Explanation History
+                {aiExplanationHistory && (
+                  <Badge variant="secondary" className="ml-2">
+                    {aiExplanationHistory.total_explanations} total
+                  </Badge>
+                )}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
-                <p className="text-sm text-gray-600">
-                  View and manage AI-generated explanations for this verse.
-                </p>
-                <Button 
-                  className="w-full justify-start" 
-                  variant="outline"
-                  onClick={() => {
-                    // Navigate to AI explanation history for this verse
-                    console.log('Navigate to AI explanation history for verse:', verse.id);
-                  }}
-                >
-                  <History className="w-4 h-4 mr-2" />
-                  View AI Explanation History
-                </Button>
+                {loadingHistory ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="w-6 h-6 animate-spin text-gray-400" />
+                    <span className="ml-2 text-sm text-gray-600">Loading AI explanation history...</span>
+                  </div>
+                ) : historyError ? (
+                  <div className="flex items-center gap-2 p-4 bg-red-50 dark:bg-red-900/20 rounded-lg border border-red-100 dark:border-red-800/30">
+                    <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400" />
+                    <p className="text-sm text-red-600 dark:text-red-400">{historyError}</p>
+                  </div>
+                ) : !verse.verseId ? (
+                  <div className="text-center py-4 text-gray-500 dark:text-gray-400">
+                    <p className="text-sm">Verse ID not available</p>
+                  </div>
+                ) : aiExplanationHistory ? (
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+                      <div>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">Total Explanations</p>
+                        <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                          {aiExplanationHistory.total_explanations}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-sm text-gray-600 dark:text-gray-400">With Content</p>
+                        <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                          {aiExplanationHistory.explanations_with_content}
+                        </p>
+                      </div>
+                    </div>
+
+                    {aiExplanationHistory.explanations && aiExplanationHistory.explanations.length > 0 ? (
+                      <div className="space-y-3">
+                        <h4 className="font-medium text-gray-900 dark:text-white">Explanations</h4>
+                        {aiExplanationHistory.explanations.map((explanation, index) => (
+                          <div
+                            key={explanation.explanation_id || index}
+                            className="p-4 border rounded-lg border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                          >
+                            <div className="flex items-start justify-between mb-2">
+                              <div className="flex items-center gap-2">
+                                <Badge variant="outline" className="text-xs">
+                                  {explanation.category || explanation.label || 'General'}
+                                </Badge>
+                                {explanation.context_type && (
+                                  <Badge variant="secondary" className="text-xs">
+                                    {explanation.context_type}
+                                  </Badge>
+                                )}
+                                {explanation.has_content ? (
+                                  <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 text-xs">
+                                    Has Content
+                                  </Badge>
+                                ) : (
+                                  <Badge variant="outline" className="text-xs">
+                                    No Content
+                                  </Badge>
+                                )}
+                              </div>
+                            </div>
+                            {explanation.content && (
+                              <div className="mt-2">
+                                <p className="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">
+                                  {explanation.content}
+                                </p>
+                              </div>
+                            )}
+                            {explanation.sources && explanation.sources.length > 0 && (
+                              <div className="mt-2 flex items-center gap-2">
+                                <FileText className="w-4 h-4 text-gray-400" />
+                                <span className="text-xs text-gray-500 dark:text-gray-400">
+                                  Sources: {explanation.sources.join(', ')}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                        <Brain className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                        <p>No AI explanations available for this verse</p>
+                      </div>
+                    )}
+                  </div>
+                ) : (
+                  <div className="text-center py-4 text-gray-500 dark:text-gray-400">
+                    <p className="text-sm">Click to load AI explanation history</p>
+                    <Button 
+                      className="mt-2" 
+                      variant="outline"
+                      onClick={loadAIExplanationHistory}
+                    >
+                      <History className="w-4 h-4 mr-2" />
+                      Load AI Explanation History
+                    </Button>
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -123,16 +248,6 @@ const VerseDetailModal: React.FC<VerseDetailModalProps> = ({ isOpen, onClose, ve
           <div className="flex justify-end gap-2">
             <Button variant="outline" onClick={onClose}>
               Close
-            </Button>
-            <Button 
-              variant="outline"
-              onClick={() => {
-                // Navigate to AI explanation history
-                console.log('Navigate to AI explanation history');
-              }}
-            >
-              <Eye className="w-4 h-4 mr-2" />
-              View AI Explanations
             </Button>
           </div>
         </div>

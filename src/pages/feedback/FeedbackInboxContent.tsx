@@ -24,7 +24,13 @@ import {
   ChevronLeft,
   ChevronRight
 } from 'lucide-react';
-import { fetchFlaggedContent, type FlaggedContentResponse } from '@/services/flaggedContentApi';
+import { 
+  fetchFlaggedContent, 
+  approveFeedback, 
+  rejectFeedback,
+  type FlaggedContentResponse 
+} from '@/services/flaggedContentApi';
+import { toast } from 'sonner';
 
 interface FeedbackItem {
   id: string;
@@ -126,6 +132,64 @@ const FeedbackInboxContent = () => {
   useEffect(() => {
     setCurrentPage(1);
   }, [filter, searchTerm]);
+
+  // Handle approve feedback
+  const handleApprove = async (id: string) => {
+    try {
+      const response = await approveFeedback(id, {});
+      if (response.status === 1) {
+        toast.success(response.message || 'Feedback approved successfully');
+        // Refresh the list
+        const updatedResponse = await fetchFlaggedContent({
+          page: currentPage,
+          limit: pageSize,
+          status: filter !== 'all' ? filter.toUpperCase() : undefined,
+          search: searchTerm || undefined
+        });
+        if (updatedResponse.status === 1 && updatedResponse.data) {
+          const transformed = updatedResponse.data.map(transformFlaggedContent);
+          setFeedbackData(transformed);
+          setTotalCount(updatedResponse.metadata.total);
+          setTotalPages(updatedResponse.metadata.totalPages);
+        }
+      } else {
+        throw new Error(response.message || 'Failed to approve feedback');
+      }
+    } catch (err: any) {
+      const errorMessage = err?.response?.data?.message || err?.message || 'Failed to approve feedback';
+      toast.error(errorMessage);
+    }
+  };
+
+  // Handle reject feedback
+  const handleReject = async (id: string) => {
+    try {
+      const response = await rejectFeedback(id, {
+        rejection_reason: 'Rejected by admin'
+      });
+      if (response.status === 1) {
+        toast.success(response.message || 'Feedback rejected successfully');
+        // Refresh the list
+        const updatedResponse = await fetchFlaggedContent({
+          page: currentPage,
+          limit: pageSize,
+          status: filter !== 'all' ? filter.toUpperCase() : undefined,
+          search: searchTerm || undefined
+        });
+        if (updatedResponse.status === 1 && updatedResponse.data) {
+          const transformed = updatedResponse.data.map(transformFlaggedContent);
+          setFeedbackData(transformed);
+          setTotalCount(updatedResponse.metadata.total);
+          setTotalPages(updatedResponse.metadata.totalPages);
+        }
+      } else {
+        throw new Error(response.message || 'Failed to reject feedback');
+      }
+    } catch (err: any) {
+      const errorMessage = err?.response?.data?.message || err?.message || 'Failed to reject feedback';
+      toast.error(errorMessage);
+    }
+  };
 
   const getTypeIcon = (type: string) => {
     switch (type) {
@@ -295,11 +359,21 @@ const FeedbackInboxContent = () => {
 
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2">
-                  <Button variant="outline" size="sm">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => handleApprove(item.id)}
+                    disabled={item.status === 'resolved'}
+                  >
                     <CheckCircle className="w-4 h-4 mr-1" />
                     Approve
                   </Button>
-                  <Button variant="outline" size="sm">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => handleReject(item.id)}
+                    disabled={item.status === 'resolved'}
+                  >
                     <XCircle className="w-4 h-4 mr-1" />
                     Reject
                   </Button>

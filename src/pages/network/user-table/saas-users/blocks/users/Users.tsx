@@ -1,4 +1,5 @@
 import { useMemo, useState } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import { toAbsoluteUrl } from '@/utils';
 import {
@@ -166,7 +167,10 @@ const Users = () => {
     []
   );
 
+  const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+
   const handleRowSelection = (state: RowSelectionState) => {
+    setRowSelection(state);
     const selectedRowIds = Object.keys(state);
 
     if (selectedRowIds.length > 0) {
@@ -174,15 +178,46 @@ const Users = () => {
         description: `Selected row IDs: ${selectedRowIds}`,
         action: {
           label: 'Undo',
-          onClick: () => console.log('Undo')
+          onClick: () => {
+            setRowSelection({});
+            // Clear selection in the table
+            const table = document.querySelector('[data-table]');
+            if (table) {
+              // Trigger table row deselection
+              const checkboxes = table.querySelectorAll('input[type="checkbox"]');
+              checkboxes.forEach((checkbox: any) => {
+                if (checkbox.checked) {
+                  checkbox.click();
+                }
+              });
+            }
+          }
         }
       });
     }
   };
 
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [sortFilter, setSortFilter] = useState<string>('latest');
+  const [searchInput, setSearchInput] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+
+  // Debounce search input
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchInput);
+    }, 500);
+
+    return () => clearTimeout(timer);
+  }, [searchInput]);
+
+  // Custom fetch function that includes search and filters
+  const customFetchData = React.useCallback(async (params: any) => {
+    return fetchUsersForDataGrid(params, debouncedSearch, statusFilter, sortFilter);
+  }, [debouncedSearch, statusFilter, sortFilter]);
+
   const Toolbar = () => {
     const { table, totalRows } = useDataGrid();
-    const [searchInput, setSearchInput] = useState('');
 
     return (
       <div className="card-header flex-wrap gap-2 border-b-0 px-5">
@@ -204,18 +239,30 @@ const Users = () => {
           </div>
 
           <div className="flex flex-wrap gap-2.5">
-            <Select defaultValue="active">
+            <Select 
+              value={statusFilter} 
+              onValueChange={(value) => {
+                setStatusFilter(value);
+              }}
+            >
               <SelectTrigger className="w-28" size="sm">
                 <SelectValue placeholder="Select" />
               </SelectTrigger>
               <SelectContent className="w-32">
+                <SelectItem value="all">All</SelectItem>
                 <SelectItem value="active">Active</SelectItem>
+                <SelectItem value="inactive">Inactive</SelectItem>
                 <SelectItem value="disabled">Disabled</SelectItem>
                 <SelectItem value="pending">Pending</SelectItem>
               </SelectContent>
             </Select>
 
-            <Select defaultValue="latest">
+            <Select 
+              value={sortFilter} 
+              onValueChange={(value) => {
+                setSortFilter(value);
+              }}
+            >
               <SelectTrigger className="w-28" size="sm">
                 <SelectValue placeholder="Select" />
               </SelectTrigger>
@@ -226,7 +273,13 @@ const Users = () => {
               </SelectContent>
             </Select>
 
-            <button className="btn btn-sm btn-outline btn-primary">
+            <button 
+              className="btn btn-sm btn-outline btn-primary"
+              onClick={() => {
+                // Additional filter options can be implemented here
+                console.log('Filter button clicked', { statusFilter, sortFilter, searchInput });
+              }}
+            >
               <KeenIcon icon="setting-4" /> Filters
             </button>
           </div>
@@ -235,8 +288,14 @@ const Users = () => {
     );
   };
 
+  // Create a unique key that changes when filters change to force remount
+  const dataGridKey = React.useMemo(() => {
+    return `users-grid-${debouncedSearch}-${statusFilter}-${sortFilter}`;
+  }, [debouncedSearch, statusFilter, sortFilter]);
+
   return (
     <DataGrid
+      key={dataGridKey}
       columns={columns}
       rowSelection={true}
       onRowSelectionChange={handleRowSelection}
@@ -245,7 +304,7 @@ const Users = () => {
       toolbar={<Toolbar />}
       layout={{ card: true }}
       serverSide={true}
-      onFetchData={fetchUsersForDataGrid}
+      onFetchData={customFetchData}
     />
   );
 };

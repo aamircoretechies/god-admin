@@ -9,9 +9,13 @@ import {
 } from '@/partials/toolbar';
 import { useLayout } from '@/providers';
 import { ViewPromptContent } from './ViewPromptContent';
+import { useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft } from 'lucide-react';
 
 const ViewPrompt = () => {
   const { currentLayout } = useLayout();
+  const navigate = useNavigate();
 
   return (
     <Fragment>
@@ -23,12 +27,19 @@ const ViewPrompt = () => {
               <ToolbarDescription>View AI prompt template details and metadata.</ToolbarDescription>
             </ToolbarHeading>
             <ToolbarActions>
-              <a href="#" className="btn btn-sm btn-light">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => navigate('/ai-prompt-management')}
+              >
+                <ArrowLeft className="w-4 h-4 mr-2" />
                 Back to List
-              </a>
-              <a href="#" className="btn btn-sm btn-primary">
-                Edit Prompt
-              </a>
+              </Button>
+              {/* View History - Commented out
+              <Button variant="outline" size="sm">
+                View History
+              </Button>
+              */}
             </ToolbarActions>
           </Toolbar>
         </Container>

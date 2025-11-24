@@ -45,10 +45,10 @@ export const MENU_SIDEBAR: TMenuConfig = [
         title: 'AI Explanations',
         path: '/bible-content/ai-explanations'
       },
-      {
-        title: 'Content Moderation',
-        path: '/bible-content/moderation'
-      }
+      // {
+      //   title: 'Content Moderation',
+      //   path: '/bible-content/moderation'
+      // }
     ]
   },
 

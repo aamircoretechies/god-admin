@@ -160,10 +160,39 @@ const ActivityLogListContent: React.FC = () => {
       const matchesUser = userFilter === 'all' || log.userRole === userFilter || log.userRole.toLowerCase() === userFilter.toLowerCase();
       const matchesActivityType = activityTypeFilter === 'all' || log.activityType === activityTypeFilter;
       const matchesStatus = statusFilter === 'all' || log.status === statusFilter;
+      
+      // Date range filter
+      let matchesDateRange = true;
+      if (dateRangeFilter !== 'all') {
+        const logDate = new Date(log.timestamp);
+        const now = new Date();
+        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        
+        switch (dateRangeFilter) {
+          case 'today':
+            matchesDateRange = logDate >= today;
+            break;
+          case 'week':
+            const weekAgo = new Date(today);
+            weekAgo.setDate(weekAgo.getDate() - 7);
+            matchesDateRange = logDate >= weekAgo;
+            break;
+          case 'month':
+            const monthAgo = new Date(today);
+            monthAgo.setMonth(monthAgo.getMonth() - 1);
+            matchesDateRange = logDate >= monthAgo;
+            break;
+          case 'year':
+            const yearAgo = new Date(today);
+            yearAgo.setFullYear(yearAgo.getFullYear() - 1);
+            matchesDateRange = logDate >= yearAgo;
+            break;
+        }
+      }
 
-      return matchesSearch && matchesUser && matchesActivityType && matchesStatus;
+      return matchesSearch && matchesUser && matchesActivityType && matchesStatus && matchesDateRange;
     });
-  }, [activityLogs, searchTerm, userFilter, activityTypeFilter, statusFilter]);
+  }, [activityLogs, searchTerm, userFilter, activityTypeFilter, statusFilter, dateRangeFilter]);
 
   const getStatusBadge = (status: string) => {
     switch (status) {

@@ -2,7 +2,7 @@ import { useFormik } from 'formik';
 import * as Yup from 'yup';
 import { Alert, KeenIcon } from '@/components';
 import { useAuthContext } from '@/auth';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import clsx from 'clsx';
 import { useNavigate } from 'react-router-dom';
 import { useLayout } from '@/providers';
@@ -19,12 +19,37 @@ const passwordSchema = Yup.object().shape({
 
 const ResetPasswordChange = () => {
   const { currentLayout } = useLayout();
-  const { changePassword } = useAuthContext();
+  const { changePassword, verifyResetToken } = useAuthContext();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [hasErrors, setHasErrors] = useState<boolean | undefined>(undefined);
   const [showNewPassword, setShowNewPassword] = useState(false);
   const [showNewPasswordConfirmation, setShowNewPasswordConfirmation] = useState(false);
+  const [tokenValid, setTokenValid] = useState<boolean | null>(null);
+
+  // Verify token on component mount
+  useEffect(() => {
+    const verifyToken = async () => {
+      const token = new URLSearchParams(window.location.search).get('token');
+      if (!token) {
+        setTokenValid(false);
+        return;
+      }
+
+      try {
+        const result = await verifyResetToken(token);
+        setTokenValid(result.valid);
+        if (!result.valid) {
+          setHasErrors(true);
+        }
+      } catch (error) {
+        setTokenValid(false);
+        setHasErrors(true);
+      }
+    };
+
+    verifyToken();
+  }, [verifyResetToken]);
 
   const formik = useFormik({
     initialValues: {
@@ -37,18 +62,17 @@ const ResetPasswordChange = () => {
       setHasErrors(undefined);
 
       const token = new URLSearchParams(window.location.search).get('token');
-      const email = new URLSearchParams(window.location.search).get('email');
 
-      if (!token || !email) {
+      if (!token) {
         setHasErrors(true);
-        setStatus('Token and email properties are required');
+        setStatus('Reset token is required');
         setLoading(false);
         setSubmitting(false);
         return;
       }
 
       try {
-        await changePassword(email, token, values.newPassword, values.confirmPassword);
+        await changePassword(token, values.newPassword, values.confirmPassword);
         setHasErrors(false);
         navigate(
           currentLayout?.name === 'auth-branded'
@@ -81,7 +105,12 @@ const ResetPasswordChange = () => {
           <span className="text-2sm text-gray-700">Enter your new password</span>
         </div>
 
-        {hasErrors && <Alert variant="danger">{formik.status}</Alert>}
+        {tokenValid === false && (
+          <Alert variant="danger">
+            Invalid or expired reset token. Please request a new password reset link.
+          </Alert>
+        )}
+        {hasErrors && tokenValid !== false && <Alert variant="danger">{formik.status}</Alert>}
 
         <div className="flex flex-col gap-1">
           <label className="form-label text-gray-900">New Password</label>
@@ -159,7 +188,7 @@ const ResetPasswordChange = () => {
         <button
           type="submit"
           className="btn btn-primary flex justify-center grow"
-          disabled={loading}
+          disabled={loading || tokenValid === false}
         >
           {loading ? 'Please wait...' : 'Submit'}
         </button>

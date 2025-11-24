@@ -61,3 +61,71 @@ export const fetchFlaggedContent = async (params: {
   return response.data;
 };
 
+// Update feedback status
+export interface UpdateFeedbackStatusRequest {
+  status: string;
+  admin_notes?: string;
+}
+
+export interface UpdateFeedbackStatusResponse {
+  status: number;
+  message: string;
+  data?: any;
+}
+
+export const updateFeedbackStatus = async (
+  id: string,
+  data: UpdateFeedbackStatusRequest
+): Promise<UpdateFeedbackStatusResponse> => {
+  const response = await axios.patch<UpdateFeedbackStatusResponse>(
+    `${API_URL}/admin/bible/feedback/${id}/status`,
+    data
+  );
+  return response.data;
+};
+
+// Approve AI response
+export interface ApproveFeedbackRequest {
+  admin_notes?: string;
+}
+
+export interface ApproveFeedbackResponse {
+  status: number;
+  message: string;
+  data?: any;
+}
+
+export const approveFeedback = async (
+  id: string,
+  data?: ApproveFeedbackRequest
+): Promise<ApproveFeedbackResponse> => {
+  const response = await axios.post<ApproveFeedbackResponse>(
+    `${API_URL}/admin/bible/feedback/${id}/approve`,
+    data || {}
+  );
+  return response.data;
+};
+
+// Reject AI response
+export interface RejectFeedbackRequest {
+  admin_notes?: string;
+  rejection_reason?: string;
+}
+
+export interface RejectFeedbackResponse {
+  status: number;
+  message: string;
+  data?: any;
+}
+
+export const rejectFeedback = async (
+  id: string,
+  data?: RejectFeedbackRequest
+): Promise<RejectFeedbackResponse> => {
+  const response = await axios.post<RejectFeedbackResponse>(
+    `${API_URL}/admin/bible/feedback/${id}/reject`,
+    data || {}
+  );
+  return response.data;
+};
+

@@ -37,6 +37,7 @@ interface Chapter {
 
 interface Verse {
   id: string;
+  verseId?: string; // UUID verse_id for API calls
   chapterId: string;
   number: number;
   text: string;
@@ -65,6 +66,7 @@ const transformChapterData = (apiData: ChapterDetailData) => {
 
   const chapterVerses: Verse[] = apiData.verses.map((verse) => ({
     id: `${apiData.chapter_id}-verse-${verse.verse_number}`,
+    verseId: verse.verse_id, // UUID verse_id from API if available
     chapterId: apiData.chapter_id,
     number: verse.verse_number,
     text: verse.text,
@@ -129,6 +131,7 @@ const ViewChapterContent: React.FC = () => {
     
     const verseData = {
       id: verse.id,
+      verseId: verse.verseId, // Pass verse_id UUID for API calls
       book: book.name,
       chapter: chapter.number,
       verse: verse.number,

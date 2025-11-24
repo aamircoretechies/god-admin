@@ -94,12 +94,20 @@ const Login = () => {
           <label className="form-label text-gray-900">Email</label>
           <label className="input">
             <input
-              placeholder="Enter username"
+              placeholder="Enter email"
+              type="email"
               autoComplete="off"
               {...formik.getFieldProps('email')}
               className={clsx('form-control', {
                 'is-invalid': formik.touched.email && formik.errors.email
               })}
+              onChange={(e) => {
+                formik.handleChange(e);
+                // Clear error status when user starts typing
+                if (formik.status) {
+                  formik.setStatus('');
+                }
+              }}
             />
           </label>
           {formik.touched.email && formik.errors.email && (
@@ -132,6 +140,13 @@ const Login = () => {
               className={clsx('form-control', {
                 'is-invalid': formik.touched.password && formik.errors.password
               })}
+              onChange={(e) => {
+                formik.handleChange(e);
+                // Clear error status when user starts typing
+                if (formik.status) {
+                  formik.setStatus('');
+                }
+              }}
             />
             <button className="btn btn-icon" onClick={togglePassword}>
               <KeenIcon icon="eye" className={clsx('text-gray-500', { hidden: showPassword })} />

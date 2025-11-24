@@ -73,9 +73,9 @@ const UserRoleAccessControl = () => {
         </h3>
       </div>
       <div className="card-body">
-        <div className="grid gap-6">
+        <div className="space-y-6">
           {/* Current Role */}
-          <div>
+          <div className="pb-4 border-b">
             <h4 className="text-sm font-medium text-gray-700 mb-3">Current Role</h4>
             <div className="flex items-center gap-3">
               <span className="inline-flex items-center px-3 py-1 rounded-full text-sm font-medium bg-primary/10 text-primary">
@@ -85,28 +85,36 @@ const UserRoleAccessControl = () => {
           </div>
 
           {/* Basic Permissions List */}
-          <div>
+          <div className="pb-4 border-b">
             <h4 className="text-sm font-medium text-gray-700 mb-3">Basic Permissions List</h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-              {roleData.basicPermissionsList.map((permission, index) => (
-                <div key={index} className="flex items-center gap-2">
-                  <KeenIcon icon="check" className="size-4 text-success" />
-                  <span className="text-sm text-gray-900">{permission}</span>
-                </div>
-              ))}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {roleData.basicPermissionsList && roleData.basicPermissionsList.length > 0 ? (
+                roleData.basicPermissionsList.map((permission, index) => (
+                  <div key={index} className="flex items-center gap-2">
+                    <KeenIcon icon="check" className="size-4 text-success flex-shrink-0" />
+                    <span className="text-sm text-gray-900">{permission}</span>
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm text-gray-500">No permissions listed</p>
+              )}
             </div>
           </div>
 
           {/* Restrictions */}
           <div>
             <h4 className="text-sm font-medium text-gray-700 mb-3">Restrictions</h4>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-              {roleData.restrictions.map((restriction, index) => (
-                <div key={index} className="flex items-center gap-2">
-                  <KeenIcon icon="cross" className="size-4 text-danger" />
-                  <span className="text-sm text-gray-600">{restriction}</span>
-                </div>
-              ))}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+              {roleData.restrictions && roleData.restrictions.length > 0 ? (
+                roleData.restrictions.map((restriction, index) => (
+                  <div key={index} className="flex items-center gap-2">
+                    <KeenIcon icon="cross" className="size-4 text-danger flex-shrink-0" />
+                    <span className="text-sm text-gray-600">{restriction}</span>
+                  </div>
+                ))
+              ) : (
+                <p className="text-sm text-gray-500">No restrictions listed</p>
+              )}
             </div>
           </div>
         </div>

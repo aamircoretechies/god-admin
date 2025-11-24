@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { 
   Edit, 
   Copy, 
-  History, 
   FileText,
   AlertCircle,
   Calendar,
@@ -17,7 +16,8 @@ import {
   XCircle,
   Trash2
 } from 'lucide-react';
-import { fetchPromptDetail, deletePrompt, type PromptDetailResponse } from '@/services/promptsApi';
+import { fetchPromptDetail, deletePrompt, createPrompt, type PromptDetailResponse, type CreatePromptRequest } from '@/services/promptsApi';
+import { toast } from 'sonner';
 
 const ViewPromptContent: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -27,6 +27,7 @@ const ViewPromptContent: React.FC = () => {
   const [promptData, setPromptData] = useState<PromptDetailResponse | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [duplicating, setDuplicating] = useState(false);
 
   // Format category: "VerseExplanation" -> "Verse Explanation"
   const formatCategory = (category: string): string => {
@@ -228,6 +229,41 @@ const ViewPromptContent: React.FC = () => {
     }
   };
 
+  const handleDuplicate = async () => {
+    if (!promptData) return;
+
+    setDuplicating(true);
+    setError(null);
+
+    try {
+      // Create a copy of the prompt with "Copy of " prefix in title
+      const duplicateData: CreatePromptRequest = {
+        title: `Copy of ${promptData.title}`,
+        description: promptData.description,
+        content: promptData.content,
+        category: promptData.category,
+        targetRole: promptData.target_role,
+        language: promptData.language,
+        tags: promptData.tags || [],
+        isPublic: promptData.is_public
+      };
+
+      const response = await createPrompt(duplicateData);
+      if (response.status === 1 && response.data) {
+        toast.success('Prompt duplicated successfully');
+        navigate(`/ai-prompt-management/view/${response.data.template_id}`);
+      } else {
+        throw new Error(response.message || 'Failed to duplicate prompt');
+      }
+    } catch (err: any) {
+      const errorMessage = err?.response?.data?.message || err?.message || 'Failed to duplicate prompt';
+      setError(errorMessage);
+      toast.error(errorMessage);
+    } finally {
+      setDuplicating(false);
+    }
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
@@ -276,16 +312,22 @@ const ViewPromptContent: React.FC = () => {
           <p className="text-gray-600 mt-1">{promptData.description}</p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline">
+          <Button 
+            variant="outline" 
+            onClick={handleDuplicate}
+            disabled={duplicating}
+          >
             <Copy className="w-4 h-4 mr-2" />
-            Duplicate
+            {duplicating ? 'Duplicating...' : 'Duplicate'}
           </Button>
+          {/* View History - Commented out
           <Button variant="outline" asChild>
             <Link to={`/ai-prompt-management/history/${promptData.template_id}`}>
               <History className="w-4 h-4 mr-2" />
               View History
             </Link>
           </Button>
+          */}
           <Button asChild>
             <Link to={`/ai-prompt-management/edit/${promptData.template_id}`}>
               <Edit className="w-4 h-4 mr-2" />
@@ -433,16 +475,23 @@ const ViewPromptContent: React.FC = () => {
                   Edit Prompt
                 </Link>
               </Button>
-              <Button variant="outline" className="w-full justify-start">
+              <Button 
+                variant="outline" 
+                className="w-full justify-start"
+                onClick={handleDuplicate}
+                disabled={duplicating}
+              >
                 <Copy className="w-4 h-4 mr-2" />
-                Duplicate Prompt
+                {duplicating ? 'Duplicating...' : 'Duplicate Prompt'}
               </Button>
+              {/* View History - Commented out
               <Button variant="outline" className="w-full justify-start" asChild>
                 <Link to={`/ai-prompt-management/history/${promptData.template_id}`}>
                   <History className="w-4 h-4 mr-2" />
                   View History
                 </Link>
               </Button>
+              */}
               <Button 
                 variant="outline" 
                 className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50"

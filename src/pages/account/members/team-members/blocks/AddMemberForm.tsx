@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -22,7 +22,7 @@ import {
   Eye, 
   EyeOff 
 } from 'lucide-react';
-import { createTeamMember } from '@/services/usersApi';
+import { createTeamMember, getAvailableRoles, type Role } from '@/services/usersApi';
 import { toast } from 'sonner';
 
 interface AddMemberFormData {
@@ -46,6 +46,33 @@ const AddMemberForm = () => {
     custom_role_id: undefined
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [availableRoles, setAvailableRoles] = useState<Role[]>([]);
+  const [isLoadingRoles, setIsLoadingRoles] = useState(false);
+
+  // Fetch available roles from API
+  useEffect(() => {
+    const fetchRoles = async () => {
+      setIsLoadingRoles(true);
+      try {
+        const response = await getAvailableRoles();
+        if (response.status === 1 && response.data) {
+          setAvailableRoles(response.data);
+        } else {
+          console.error('Failed to fetch roles:', response.message);
+        }
+      } catch (error: any) {
+        console.error('Error fetching roles:', error);
+        toast.error('Failed to load available roles');
+      } finally {
+        setIsLoadingRoles(false);
+      }
+    };
+
+    // Fetch roles when dialog opens
+    if (isOpen) {
+      fetchRoles();
+    }
+  }, [isOpen]);
 
   const handleInputChange = (field: keyof AddMemberFormData, value: string) => {
     setFormData(prev => ({
@@ -58,19 +85,51 @@ const AddMemberForm = () => {
     e.preventDefault();
     setIsSubmitting(true);
 
+    // Validation
+    const trimmedFirstName = formData.first_name.trim();
+    const trimmedLastName = formData.last_name.trim();
+    
+    // Check for white-space-only input
+    if (trimmedFirstName.length === 0) {
+      toast.error('First Name is required and cannot be only spaces');
+      setIsSubmitting(false);
+      return;
+    }
+    // Check trimmed length for character limit
+    if (trimmedFirstName.length > 50) {
+      toast.error('First Name must be 50 characters or less');
+      setIsSubmitting(false);
+      return;
+    }
+    if (trimmedLastName.length === 0) {
+      toast.error('Last Name is required and cannot be only spaces');
+      setIsSubmitting(false);
+      return;
+    }
+    // Check trimmed length for character limit
+    if (trimmedLastName.length > 50) {
+      toast.error('Last Name must be 50 characters or less');
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
-      // Prepare request data
+      // Prepare request data (using trimmed values)
       const requestData: AddMemberFormData = {
         email: formData.email,
         password: formData.password,
-        first_name: formData.first_name,
-        last_name: formData.last_name,
+        first_name: trimmedFirstName,
+        last_name: trimmedLastName,
         role: formData.role
       };
 
-      // Only include custom_role_id if it's provided
-      if (formData.custom_role_id && formData.custom_role_id.trim() !== '') {
+      // Include custom_role_id - if "None" is selected, send empty string or null
+      // The API should handle empty/null custom_role_id
+      if (formData.custom_role_id && formData.custom_role_id.trim() !== '' && formData.custom_role_id !== 'none') {
         requestData.custom_role_id = formData.custom_role_id.trim();
+      } else {
+        // Explicitly set to undefined/null when "None" is selected
+        requestData.custom_role_id = undefined;
       }
 
       const response = await createTeamMember(requestData);
@@ -90,9 +149,9 @@ const AddMemberForm = () => {
         
         setIsOpen(false);
         
-        // Reload the page to refresh the team members list
-        // You could also use a callback prop or context to refresh the list
-        window.location.reload();
+        // Trigger page refresh to show new member in list
+        // Using a custom event that the Members component can listen to
+        window.dispatchEvent(new CustomEvent('teamMemberAdded'));
       } else {
         throw new Error(response.message || 'Failed to create team member');
       }
@@ -135,7 +194,7 @@ const AddMemberForm = () => {
         </button>
       </DialogTrigger>
       
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Add New Team Member</DialogTitle>
           <DialogDescription>
@@ -143,9 +202,9 @@ const AddMemberForm = () => {
           </DialogDescription>
         </DialogHeader>
         
-        <div className="px-6 pt-4 pb-6">
+        <div className="px-1 pt-4 pb-6">
           <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="first_name">First Name</Label>
               <Input
@@ -153,9 +212,19 @@ const AddMemberForm = () => {
                 type="text"
                 placeholder="Enter first name"
                 value={formData.first_name}
-                onChange={(e) => handleInputChange('first_name', e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  // Limit to 50 characters
+                  if (value.length <= 50) {
+                    handleInputChange('first_name', value);
+                  }
+                }}
+                maxLength={50}
                 required
               />
+              <p className="text-xs text-gray-500">
+                {formData.first_name.length}/50 characters
+              </p>
             </div>
             
             <div className="space-y-2">
@@ -165,9 +234,19 @@ const AddMemberForm = () => {
                 type="text"
                 placeholder="Enter last name"
                 value={formData.last_name}
-                onChange={(e) => handleInputChange('last_name', e.target.value)}
+                onChange={(e) => {
+                  const value = e.target.value;
+                  // Limit to 50 characters
+                  if (value.length <= 50) {
+                    handleInputChange('last_name', value);
+                  }
+                }}
+                maxLength={50}
                 required
               />
+              <p className="text-xs text-gray-500">
+                {formData.last_name.length}/50 characters
+              </p>
             </div>
           </div>
 
@@ -236,16 +315,24 @@ const AddMemberForm = () => {
                 const roleId = value === 'none' ? '' : value;
                 handleInputChange('custom_role_id', roleId);
               }}
+              disabled={isLoadingRoles}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select custom role" />
+                <SelectValue placeholder={isLoadingRoles ? "Loading roles..." : "Select custom role"} />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="none">None</SelectItem>
-                <SelectItem value="40f9bc3d-5636-47e5-8196-54095d49e237">Moderator</SelectItem>
+                {availableRoles.map((role) => (
+                  <SelectItem key={role.id} value={role.id}>
+                    {role.name}
+                    {role.description && ` - ${role.description}`}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
-            <p className="text-xs text-gray-500">Select a custom role or leave as None</p>
+            <p className="text-xs text-gray-500">
+              {isLoadingRoles ? 'Loading available roles...' : 'Select a custom role or leave as None'}
+            </p>
           </div>
 
           <div className="flex justify-end space-x-2 pt-4">

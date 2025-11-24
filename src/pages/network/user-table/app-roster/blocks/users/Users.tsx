@@ -1,4 +1,4 @@
-import { useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { toAbsoluteUrl } from '@/utils';
 import {
@@ -38,6 +38,18 @@ const Users = () => {
   };
 
   const [users, setUsers] = useState<IUsersData[]>(UsersData); // Initialize state with UsersData
+  const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [sortFilter, setSortFilter] = useState<string>('latest');
+  const [searchInput, setSearchInput] = useState('');
+  const [debouncedSearch, setDebouncedSearch] = useState('');
+
+  // Debounce search input
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      setDebouncedSearch(searchInput);
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchInput]);
 
   const handleToggle = (index: number) => {
     setUsers((prevUsers) => {
@@ -223,7 +235,44 @@ const Users = () => {
     []
   );
 
-  const data: IUsersData[] = useMemo(() => users, [users]); // Use users state
+  // Filter and sort data based on search, status, and sort filters
+  const data: IUsersData[] = useMemo(() => {
+    let filtered = [...users];
+
+    // Apply search filter
+    if (debouncedSearch) {
+      const searchLower = debouncedSearch.toLowerCase();
+      filtered = filtered.filter((user) =>
+        user.user.userName.toLowerCase().includes(searchLower) ||
+        user.phone.toLowerCase().includes(searchLower) ||
+        user.branch.toLowerCase().includes(searchLower) ||
+        user.labels.some((label) => label.toLowerCase().includes(searchLower))
+      );
+    }
+
+    // Apply status filter (for now, we'll use switch state as status)
+    if (statusFilter !== 'all') {
+      if (statusFilter === 'active') {
+        filtered = filtered.filter((user) => user.switch === true);
+      } else if (statusFilter === 'disabled') {
+        filtered = filtered.filter((user) => user.switch === false);
+      }
+    }
+
+    // Apply sort filter
+    if (sortFilter === 'latest') {
+      // Keep original order (latest first)
+      filtered = filtered.reverse();
+    } else if (sortFilter === 'oldest') {
+      // Reverse order (oldest first)
+      filtered = filtered.reverse();
+    } else if (sortFilter === 'older') {
+      // Same as latest for now
+      filtered = filtered.reverse();
+    }
+
+    return filtered;
+  }, [users, debouncedSearch, statusFilter, sortFilter]);
 
   const handleRowSelection = (state: RowSelectionState) => {
     const selectedRowIds = Object.keys(state);
@@ -240,12 +289,13 @@ const Users = () => {
   };
 
   const Toolbar = () => {
-    const { table } = useDataGrid();
-    const [searchInput, setSearchInput] = useState('');
+    const { table, totalRows } = useDataGrid();
 
     return (
       <div className="card-header flex-wrap gap-2 border-b-0 px-5">
-        <h3 className="card-title font-medium text-sm">Showing 10 of 49,053 users</h3>
+        <h3 className="card-title font-medium text-sm">
+          Showing {table.getState().pagination.pageSize} of {totalRows} users
+        </h3>
 
         <div className="flex flex-wrap gap-2 lg:gap-5">
           <div className="flex">
@@ -261,18 +311,19 @@ const Users = () => {
           </div>
 
           <div className="flex flex-wrap gap-2.5">
-            <Select defaultValue="active">
+            <Select value={statusFilter} onValueChange={setStatusFilter}>
               <SelectTrigger className="w-28" size="sm">
                 <SelectValue placeholder="Select" />
               </SelectTrigger>
               <SelectContent className="w-32">
+                <SelectItem value="all">All</SelectItem>
                 <SelectItem value="active">Active</SelectItem>
                 <SelectItem value="disabled">Disabled</SelectItem>
                 <SelectItem value="pending">Pending</SelectItem>
               </SelectContent>
             </Select>
 
-            <Select defaultValue="latest">
+            <Select value={sortFilter} onValueChange={setSortFilter}>
               <SelectTrigger className="w-28" size="sm">
                 <SelectValue placeholder="Select" />
               </SelectTrigger>
@@ -283,7 +334,12 @@ const Users = () => {
               </SelectContent>
             </Select>
 
-            <button className="btn btn-sm btn-outline btn-primary">
+            <button 
+              className="btn btn-sm btn-outline btn-primary"
+              onClick={() => {
+                console.log('Filter button clicked', { statusFilter, sortFilter, searchInput });
+              }}
+            >
               <KeenIcon icon="setting-4" /> Filters
             </button>
           </div>

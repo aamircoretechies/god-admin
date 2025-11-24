@@ -21,10 +21,15 @@ const UserTechnicalDeviceInfo = () => {
         setLoading(true);
         setError(null);
         const response = await fetchUserProfile(id);
-        if (response.status === 1 && response.data?.technicalInfo) {
-          setTechnicalData(response.data.technicalInfo);
+        if (response.status === 1 && response.data) {
+          if (response.data.technicalInfo) {
+            setTechnicalData(response.data.technicalInfo);
+          } else {
+            setTechnicalData(null);
+            setError('No technical information available for this user');
+          }
         } else {
-          setError('Failed to load technical data');
+          setError(response.message || 'Failed to load technical data');
         }
       } catch (err: any) {
         console.error('Error loading technical data:', err);
@@ -64,11 +69,37 @@ const UserTechnicalDeviceInfo = () => {
     );
   }
 
-  if (error || !technicalData) {
+  if (error && !technicalData) {
     return (
       <div className="card">
+        <div className="card-header">
+          <h3 className="card-title">
+            <KeenIcon icon="smartphone" className="me-2" />
+            Technical / Device Info
+          </h3>
+        </div>
         <div className="card-body">
-          <div className="alert alert-danger">{error || 'Failed to load technical data'}</div>
+          <div className="text-center py-8">
+            <p className="text-sm text-gray-600">{error || 'No technical information available'}</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!technicalData) {
+    return (
+      <div className="card">
+        <div className="card-header">
+          <h3 className="card-title">
+            <KeenIcon icon="smartphone" className="me-2" />
+            Technical / Device Info
+          </h3>
+        </div>
+        <div className="card-body">
+          <div className="text-center py-8">
+            <p className="text-sm text-gray-600">No technical information available for this user</p>
+          </div>
         </div>
       </div>
     );
@@ -83,14 +114,34 @@ const UserTechnicalDeviceInfo = () => {
         </h3>
       </div>
       <div className="card-body">
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {/* Device Model */}
+          {technicalData.deviceModel && (
+            <div className="space-y-3">
+              <div>
+                <label className="text-sm font-medium text-gray-700">Device Model</label>
+                <p className="text-sm text-gray-900">{technicalData.deviceModel}</p>
+              </div>
+            </div>
+          )}
+
+          {/* OS Version */}
+          {technicalData.osVersion && (
+            <div className="space-y-3">
+              <div>
+                <label className="text-sm font-medium text-gray-700">OS Version</label>
+                <p className="text-sm text-gray-900">{technicalData.osVersion}</p>
+              </div>
+            </div>
+          )}
+
           {/* Platform */}
-          {technicalData.platform && (
+          {(technicalData.platform || technicalData.deviceModel) && (
             <div className="space-y-3">
               <div>
                 <label className="text-sm font-medium text-gray-700">Platform</label>
-                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getPlatformColor(technicalData.platform)}`}>
-                  {technicalData.platform}
+                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getPlatformColor(technicalData.platform || technicalData.deviceModel)}`}>
+                  {technicalData.platform || technicalData.deviceModel}
                 </span>
               </div>
             </div>
@@ -106,12 +157,48 @@ const UserTechnicalDeviceInfo = () => {
             </div>
           )}
 
+          {/* IP Address */}
+          {technicalData.ipAddress && (
+            <div className="space-y-3">
+              <div>
+                <label className="text-sm font-medium text-gray-700">IP Address</label>
+                <p className="text-sm text-gray-900">{technicalData.ipAddress}</p>
+              </div>
+            </div>
+          )}
+
+          {/* Location */}
+          {technicalData.location && (
+            <div className="space-y-3">
+              <div>
+                <label className="text-sm font-medium text-gray-700">Location</label>
+                <p className="text-sm text-gray-900">{technicalData.location}</p>
+              </div>
+            </div>
+          )}
+
           {/* Last Sync Timestamp */}
           {technicalData.lastSyncTimestamp && (
             <div className="space-y-3">
               <div>
                 <label className="text-sm font-medium text-gray-700">Last Sync Timestamp</label>
                 <p className="text-sm text-gray-900">{technicalData.lastSyncTimestamp}</p>
+              </div>
+            </div>
+          )}
+
+          {/* Devices Used */}
+          {technicalData.devicesUsed && technicalData.devicesUsed.length > 0 && (
+            <div className="space-y-3 md:col-span-2 lg:col-span-3">
+              <div>
+                <label className="text-sm font-medium text-gray-700">Devices Used</label>
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {technicalData.devicesUsed.map((device, index) => (
+                    <span key={index} className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getPlatformColor(device)}`}>
+                      {device}
+                    </span>
+                  ))}
+                </div>
               </div>
             </div>
           )}

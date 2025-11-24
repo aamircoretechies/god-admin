@@ -32,9 +32,33 @@ const NetworkSaasUsersPage = () => {
               </ToolbarDescription>
             </ToolbarHeading>
             <ToolbarActions>
-              <a href="#" className="btn btn-sm btn-light">
+              <button 
+                onClick={() => {
+                  // Trigger file input click
+                  const fileInput = document.createElement('input');
+                  fileInput.type = 'file';
+                  fileInput.accept = '.csv';
+                  fileInput.onchange = async (e) => {
+                    const file = (e.target as HTMLInputElement).files?.[0];
+                    if (file) {
+                      try {
+                        const text = await file.text();
+                        // Parse CSV and show preview or import
+                        console.log('CSV file selected:', file.name);
+                        // You can implement actual CSV import logic here
+                        alert(`CSV file "${file.name}" selected. Import functionality to be implemented.`);
+                      } catch (error) {
+                        console.error('Error reading file:', error);
+                        alert('Error reading CSV file');
+                      }
+                    }
+                  };
+                  fileInput.click();
+                }}
+                className="btn btn-sm btn-light"
+              >
                 Import CSV
-              </a>
+              </button>
             </ToolbarActions>
           </Toolbar>
         </Container>

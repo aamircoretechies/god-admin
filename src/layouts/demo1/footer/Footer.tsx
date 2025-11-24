@@ -19,14 +19,14 @@ const Footer = () => {
             </a>
           </div>
           <nav className="flex order-1 md:order-2 gap-4 font-normal text-2sm text-gray-600">
-            
-            <a href={generalSettings.faqLink} target="_blank" className="hover:text-primary">
-              FAQ
-            </a>
-            <a href="#" target="_blank" className="hover:text-primary">
+            {generalSettings.faqLink && (
+              <a href={generalSettings.faqLink} target="_blank" rel="noopener noreferrer" className="hover:text-primary">
+                FAQ
+              </a>
+            )}
+            <a href="mailto:support@growondaily.com" className="hover:text-primary">
               Support
             </a>
-          
           </nav>
         </div>
       </Container>

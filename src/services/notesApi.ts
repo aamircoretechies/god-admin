@@ -11,17 +11,13 @@ export interface NoteResponse {
   emotion_tags: string[];
   created_at: string;
   updated_at: string;
+  username: string;
 }
 
 export interface NotesListResponse {
-  success: boolean;
+  status: number;
+  message: string;
   data: NoteResponse[];
-  metadata: {
-    total: number;
-    page: number;
-    limit: number;
-    totalPages: number;
-  };
 }
 
 // Fetch notes

@@ -1,5 +1,5 @@
 import { Fragment } from 'react';
-
+import { useNavigate } from 'react-router-dom';
 import { Container } from '@/components/container';
 import {
   Toolbar,
@@ -8,12 +8,12 @@ import {
   ToolbarHeading,
   ToolbarPageTitle
 } from '@/partials/toolbar';
-
 import { ViewTranslationContent } from './ViewTranslationContent';
 import { useLayout } from '@/providers';
 
 const ViewTranslationPage = () => {
   const { currentLayout } = useLayout();
+  const navigate = useNavigate();
 
   return (
     <Fragment>
@@ -25,9 +25,12 @@ const ViewTranslationPage = () => {
               <ToolbarDescription>View translation details and information.</ToolbarDescription>
             </ToolbarHeading>
             <ToolbarActions>
-              <a href="#" className="btn btn-sm btn-light">
+              <button 
+                onClick={() => navigate('/bible-content/translations')}
+                className="btn btn-sm btn-light"
+              >
                 Back to List
-              </a>
+              </button>
             </ToolbarActions>
           </Toolbar>
         </Container>

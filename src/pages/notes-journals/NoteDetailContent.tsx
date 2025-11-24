@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { toast } from 'sonner';
 import { 
   Dialog, 
   DialogContent, 
@@ -166,8 +167,74 @@ const NoteDetailContent: React.FC = () => {
   };
 
   const handleExport = (format: 'pdf' | 'csv') => {
-    console.log(`Exporting note ${note.id} as ${format}`);
-    // Implement export functionality
+    if (format === 'csv') {
+      // Prepare CSV data
+      const csvHeaders = [
+        'Note ID',
+        'User ID',
+        'User Name',
+        'User Email',
+        'Title',
+        'Content',
+        'Linked Verses',
+        'Tags',
+        'Status',
+        'Created At',
+        'Updated At',
+        'Word Count',
+        'Language',
+        'Source'
+      ];
+
+      const csvRows = [
+        [
+          note.id,
+          note.userId,
+          note.userName,
+          note.userEmail,
+          note.title,
+          note.content.replace(/\n/g, ' ').replace(/,/g, ';'), // Replace newlines and commas
+          note.linkedVerses.join('; '),
+          note.tags.join('; '),
+          note.status,
+          note.createdAt,
+          note.updatedAt,
+          note.wordCount.toString(),
+          note.language,
+          note.source
+        ]
+      ];
+
+      // Escape CSV values
+      const escapeCsvValue = (value: string): string => {
+        if (value.includes(',') || value.includes('"') || value.includes('\n')) {
+          return `"${value.replace(/"/g, '""')}"`;
+        }
+        return value;
+      };
+
+      // Build CSV content
+      const csvContent = [
+        csvHeaders.map(escapeCsvValue).join(','),
+        ...csvRows.map(row => row.map(cell => escapeCsvValue(String(cell || ''))).join(','))
+      ].join('\n');
+
+      // Create and download CSV file
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      link.setAttribute('href', url);
+      link.setAttribute('download', `note_${note.id}_${new Date().toISOString().split('T')[0]}.csv`);
+      link.style.visibility = 'hidden';
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      URL.revokeObjectURL(url);
+      toast.success('Note exported to CSV successfully');
+    } else {
+      console.log(`Exporting note ${note.id} as ${format}`);
+      // PDF export not implemented
+    }
   };
 
   return (
@@ -187,10 +254,12 @@ const NoteDetailContent: React.FC = () => {
           </div>
         </div>
         <div className="flex gap-2">
+          {/* Export PDF - Commented out
           <Button variant="outline" onClick={() => handleExport('pdf')}>
             <Download className="w-4 h-4 mr-2" />
             Export PDF
           </Button>
+          */}
           <Button variant="outline" onClick={() => handleExport('csv')}>
             <Download className="w-4 h-4 mr-2" />
             Export CSV
@@ -301,7 +370,7 @@ const NoteDetailContent: React.FC = () => {
             </CardContent>
           </Card>
 
-          {/* Attachments */}
+          {/* Attachments - Commented out
           {note.hasAttachments && note.attachments && (
             <Card>
               <CardHeader>
@@ -334,8 +403,9 @@ const NoteDetailContent: React.FC = () => {
               </CardContent>
             </Card>
           )}
+          */}
 
-          {/* Audio */}
+          {/* Audio Recording - Commented out
           {note.hasAudio && note.audioUrl && (
             <Card>
               <CardHeader>
@@ -352,6 +422,7 @@ const NoteDetailContent: React.FC = () => {
               </CardContent>
             </Card>
           )}
+          */}
         </div>
 
         {/* Sidebar */}
@@ -375,11 +446,13 @@ const NoteDetailContent: React.FC = () => {
                   <p className="text-sm text-gray-500">{note.userEmail}</p>
                 </div>
               </div>
+              {/* View User Profile - Commented out
               <Link to={`/network/user-table/saas-users/${note.userId}`}>
                 <Button variant="outline" size="sm" className="w-full">
                   View User Profile
                 </Button>
               </Link>
+              */}
             </CardContent>
           </Card>
 
@@ -422,7 +495,7 @@ const NoteDetailContent: React.FC = () => {
             </CardContent>
           </Card>
 
-          {/* Moderation Actions */}
+          {/* Moderation Actions - Commented out
           <Card>
             <CardHeader>
               <CardTitle>Moderation Actions</CardTitle>
@@ -468,6 +541,7 @@ const NoteDetailContent: React.FC = () => {
               </Dialog>
             </CardContent>
           </Card>
+          */}
         </div>
       </div>
     </div>

@@ -32,6 +32,36 @@ export interface AIExplanationsListResponse {
   data: AIExplanationResponse[];
 }
 
+// Interfaces for verse AI explanation history
+export interface VerseExplanation {
+  explanation_id: string;
+  context_type: string;
+  category: string;
+  label: string;
+  content: string;
+  sources: string[];
+  has_content: boolean;
+  created_at?: string;
+  updated_at?: string;
+  [key: string]: any; // For additional fields
+}
+
+export interface VerseAIExplanationHistoryResponse {
+  status: number;
+  message: string;
+  data: {
+    verse_id: string;
+    verse_reference: string;
+    verse_text: string;
+    total_explanations: number;
+    explanations_with_content: number;
+    explanations: VerseExplanation[];
+    metadata?: {
+      [key: string]: any;
+    };
+  };
+}
+
 // API call
 export const fetchAIExplanations = async (params: {
   page: number;
@@ -49,6 +79,19 @@ export const fetchAIExplanations = async (params: {
 
   const response = await axios.get<AIExplanationsListResponse>(
     `${API_URL}/admin/bible/ai-explanations?${queryParams.toString()}`
+  );
+  return response.data;
+};
+
+/**
+ * Fetch AI explanation history for a specific verse
+ * GET /api/v1/admin/bible/ai-explanations/verse/:verse_id
+ */
+export const fetchVerseAIExplanationHistory = async (
+  verseId: string
+): Promise<VerseAIExplanationHistoryResponse> => {
+  const response = await axios.get<VerseAIExplanationHistoryResponse>(
+    `${API_URL}/admin/bible/ai-explanations/verse/${verseId}`
   );
   return response.data;
 };

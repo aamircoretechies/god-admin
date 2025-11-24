@@ -67,6 +67,7 @@ export const fetchBibleBookDetail = async (bookId: string): Promise<BibleBookDet
 };
 
 export interface Verse {
+  verse_id?: string;
   verse_number: number;
   version: string;
   text: string;

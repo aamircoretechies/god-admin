@@ -129,7 +129,7 @@ const transformNote = (apiData: NoteResponse): Note => {
   return {
     id: apiData.note_id,
     userId: apiData.user_id,
-    userName: `User ${apiData.user_id.slice(0, 8)}`, // Fallback since API doesn't provide name
+    userName: apiData.username || `User ${apiData.user_id.slice(0, 8)}`, // Use username from API
     userEmail: `user-${apiData.user_id.slice(0, 8)}@example.com`, // Fallback
     userAvatar: undefined,
     title: title,
@@ -165,20 +165,23 @@ const NotesOverviewContent: React.FC = () => {
       setLoading(true);
       setError(null);
       try {
+        // Fetch with a larger limit when filters are active to allow client-side filtering
+        const limit = (statusFilter !== 'all' || languageFilter !== 'all') ? 10000 : pageSize;
         const response = await fetchNotes({
           page: currentPage,
-          limit: pageSize,
+          limit: limit,
           search: searchTerm || undefined,
           user_id: userFilter !== 'all' ? userFilter : undefined
         });
 
-        if (response.success && response.data) {
+        if (response.status === 1 && response.data) {
           const transformed = response.data.map(transformNote);
           setNotes(transformed);
-          setTotalCount(response.metadata.total);
-          setTotalPages(response.metadata.totalPages);
+          // Calculate pagination from data length (API doesn't provide metadata in new structure)
+          setTotalCount(response.data.length);
+          setTotalPages(Math.ceil(response.data.length / pageSize));
         } else {
-          throw new Error('Failed to fetch notes');
+          throw new Error(response.message || 'Failed to fetch notes');
         }
       } catch (err: any) {
         setError(err?.message || 'Failed to load notes');
@@ -193,7 +196,7 @@ const NotesOverviewContent: React.FC = () => {
     }, searchTerm ? 500 : 0);
 
     return () => clearTimeout(debounceTimer);
-  }, [currentPage, searchTerm, userFilter]);
+  }, [currentPage, searchTerm, userFilter, statusFilter, languageFilter]);
 
   // Reset to page 1 when filters change
   useEffect(() => {
@@ -206,23 +209,38 @@ const NotesOverviewContent: React.FC = () => {
     return Array.from(userIds);
   }, [notes]);
 
-  // Filter notes (client-side filtering as fallback, but API should handle it)
+  // Filter notes (client-side filtering for status and language since API may not support them)
   const filteredNotes = useMemo(() => {
-    return notes.filter(note => {
-      const matchesSearch = 
+    let filtered = notes;
+    
+    // Apply status filter
+    if (statusFilter !== 'all') {
+      filtered = filtered.filter(note => note.status === statusFilter);
+    }
+    
+    // Apply language filter
+    if (languageFilter !== 'all') {
+      filtered = filtered.filter(note => note.language === languageFilter);
+    }
+    
+    // Apply search filter (if not already handled by API)
+    if (searchTerm) {
+      filtered = filtered.filter(note => 
         note.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         note.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
         note.userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         note.userEmail.toLowerCase().includes(searchTerm.toLowerCase()) ||
         note.linkedVerses.some(verse => verse.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        note.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()));
-
-      const matchesStatus = statusFilter === 'all' || note.status === statusFilter;
-      const matchesUser = userFilter === 'all' || note.userId === userFilter;
-      const matchesLanguage = languageFilter === 'all' || note.language === languageFilter;
-
-      return matchesSearch && matchesStatus && matchesUser && matchesLanguage;
-    });
+        note.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
+      );
+    }
+    
+    // Apply user filter (if not already handled by API)
+    if (userFilter !== 'all') {
+      filtered = filtered.filter(note => note.userId === userFilter);
+    }
+    
+    return filtered;
   }, [notes, searchTerm, statusFilter, userFilter, languageFilter]);
 
   const getStatusBadge = (status: string) => {

@@ -3,11 +3,11 @@ import { useEffect, useMemo, useState } from 'react';
 import { useLanguage } from '@/i18n';
 import { toAbsoluteUrl } from '@/utils';
 import { Column, ColumnDef, RowSelectionState } from '@tanstack/react-table';
-import { DataGrid, DataGridColumnHeader, DataGridColumnVisibility, DataGridRowSelect, DataGridRowSelectAll, KeenIcon, useDataGrid, Menu, MenuItem, MenuToggle  } from '@/components';
+import { DataGrid, DataGridColumnHeader, DataGridColumnVisibility, DataGridRowSelect, DataGridRowSelectAll, KeenIcon, useDataGrid } from '@/components';
 import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
-import { DropdownCard1 } from '@/partials/dropdowns/general';
-import { fetchAdminCreatedUsers, type TeamMember } from '@/services/usersApi';
+// import { DropdownCard1 } from '@/partials/dropdowns/general'; // Commented out - menu column is hidden
+import { fetchAdminCreatedUsers, deleteMultipleTeamMembers, deleteTeamMember, type TeamMember } from '@/services/usersApi';
 import { IMembersData } from '.';
 
 interface IColumnFilterProps<TData, TValue> {
@@ -137,7 +137,8 @@ const Members = () => {
           cellClassName: 'text-gray-700 font-normal'
         },
       },
-      {
+      // Three dots menu column - commented out to hide from UI
+      /* {
         id: 'click',
         header: () => '',
         enableSorting: false,
@@ -168,7 +169,7 @@ const Members = () => {
         meta: {
           headerClassName: 'w-[60px]',
         },
-      },
+      }, */
     ],
     [isRTL]
   );
@@ -178,6 +179,8 @@ const Members = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [pagination, setPagination] = useState({ page: 1, limit: 10, total: 0 });
   const [currentPage, setCurrentPage] = useState(1);
+  const [rowSelection, setRowSelection] = useState<RowSelectionState>({});
+  const [refreshTrigger, setRefreshTrigger] = useState(0);
 
   // Initialize search term from localStorage if available
   const [searchTerm, setSearchTerm] = useState(() => {
@@ -198,7 +201,7 @@ const Members = () => {
 
     // Get role names from custom_roles (with safety check)
     const roles: string[] = [];
-    if (member.custom_roles && Array.isArray(member.custom_roles)) {
+    if (member.custom_roles && Array.isArray(member.custom_roles) && member.custom_roles.length > 0) {
       member.custom_roles.forEach(cr => {
         if (cr && cr.role_name) {
           roles.push(cr.role_name);
@@ -208,6 +211,10 @@ const Members = () => {
     // If no custom roles, use the base role
     if (roles.length === 0 && member.role) {
       roles.push(member.role);
+    }
+    // If no roles at all (no custom roles and no base role), show "None"
+    if (roles.length === 0) {
+      roles.push('None');
     }
 
     // Format recent activity
@@ -256,47 +263,55 @@ const Members = () => {
   };
 
   // Fetch team members from API
-  useEffect(() => {
-    const loadTeamMembers = async () => {
-      setIsLoading(true);
-      try {
-        const response = await fetchAdminCreatedUsers({
-          page: currentPage,
-          limit: 10
-        });
-        
-        // Safety check: ensure users array exists and is valid
-        if (!response.data || !response.data.users || !Array.isArray(response.data.users)) {
-          console.error('Invalid API response structure:', response);
-          toast.error('Invalid response from server');
-          setTeamMembers([]);
-          return;
-        }
-        
-        const transformedData = response.data.users.map(transformTeamMember);
-        
-        // Log for debugging
-        console.log('API Response - Total users:', response.data.users.length);
-        console.log('Transformed data count:', transformedData.length);
-        console.log('Transformed data:', transformedData);
-        
-        setTeamMembers(transformedData);
-        setPagination({
-          page: response.data.pagination.page,
-          limit: response.data.pagination.limit,
-          total: response.data.pagination.total
-        });
-      } catch (error) {
-        console.error('Error fetching team members:', error);
-        toast.error('Failed to load team members');
+  const loadTeamMembers = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetchAdminCreatedUsers({
+        page: currentPage,
+        limit: 10
+      });
+      
+      // Safety check: ensure users array exists and is valid
+      if (!response.data || !response.data.users || !Array.isArray(response.data.users)) {
+        console.error('Invalid API response structure:', response);
+        toast.error('Invalid response from server');
         setTeamMembers([]);
-      } finally {
-        setIsLoading(false);
+        return;
       }
-    };
+      
+      const transformedData = response.data.users.map(transformTeamMember);
+      
+      setTeamMembers(transformedData);
+      setPagination({
+        page: response.data.pagination.page,
+        limit: response.data.pagination.limit,
+        total: response.data.pagination.total
+      });
+    } catch (error) {
+      console.error('Error fetching team members:', error);
+      toast.error('Failed to load team members');
+      setTeamMembers([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
+  useEffect(() => {
     loadTeamMembers();
-  }, [currentPage]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentPage, refreshTrigger]);
+
+  // Listen for team member added event to refresh list
+  useEffect(() => {
+    const handleMemberAdded = () => {
+      setRefreshTrigger(prev => prev + 1);
+    };
+    
+    window.addEventListener('teamMemberAdded', handleMemberAdded);
+    return () => {
+      window.removeEventListener('teamMemberAdded', handleMemberAdded);
+    };
+  }, []);
 
   // Filtered data based on search term
   const filteredData = useMemo(() => {
@@ -309,22 +324,85 @@ const Members = () => {
     );
   }, [searchTerm, teamMembers]);
 
-  const handleRowSelection = (state: RowSelectionState) => {
-    const selectedRowIds = Object.keys(state);
+  const handleRowSelection = (state: RowSelectionState, table?: any) => {
+    setRowSelection(state);
+    const selectedRowIds = Object.keys(state).filter(id => id && id !== '');
 
     if (selectedRowIds.length > 0) {
-      toast(`Total ${selectedRowIds.length} are selected.`, {
-        description: `Selected row IDs: ${selectedRowIds}`,
+      const toastId = toast(`Total ${selectedRowIds.length} are selected.`, {
+        description: `Selected row IDs: ${selectedRowIds.join(', ')}`,
         action: {
           label: 'Undo',
-          onClick: () => console.log('Undo')
+          onClick: () => {
+            // Clear selection using table API
+            if (table) {
+              table.resetRowSelection();
+            }
+            setRowSelection({});
+            toast.dismiss(toastId);
+          }
         }
       });
+    } else {
+      setRowSelection({});
+    }
+  };
+
+  const handleDeleteSelected = async () => {
+    const selectedRowIds = Object.keys(rowSelection).filter(id => id !== undefined && id !== null && id !== '');
+    
+    if (selectedRowIds.length === 0) {
+      toast.error('No members selected for deletion');
+      return;
+    }
+
+    // Ensure we have a valid array with at least one ID
+    if (!Array.isArray(selectedRowIds) || selectedRowIds.length === 0) {
+      toast.error('Invalid selection. Please select at least one member to delete.');
+      return;
+    }
+
+    const confirmed = window.confirm(`Are you sure you want to delete ${selectedRowIds.length} selected member(s)? This action cannot be undone.`);
+    if (!confirmed) return;
+
+    try {
+      setIsLoading(true);
+      
+      // If only one member, use single delete endpoint
+      if (selectedRowIds.length === 1) {
+        const response = await deleteTeamMember(selectedRowIds[0]);
+        
+        if (response.status === 1) {
+          toast.success(response.message || 'Successfully deleted member');
+          setRowSelection({});
+          setRefreshTrigger(prev => prev + 1);
+        } else {
+          toast.error(response.message || 'Failed to delete member');
+        }
+      } else {
+        // Multiple members - use delete multiple endpoint
+        const response = await deleteMultipleTeamMembers(selectedRowIds);
+        
+        if (response.status === 1) {
+          toast.success(response.message || `Successfully deleted ${selectedRowIds.length} member(s)`);
+          setRowSelection({});
+          setRefreshTrigger(prev => prev + 1);
+        } else {
+          toast.error(response.message || 'Failed to delete members');
+        }
+      }
+    } catch (error: any) {
+      console.error('Error deleting members:', error);
+      const errorMessage = error?.response?.data?.message || error?.message || 'Failed to delete members';
+      toast.error(errorMessage);
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const Toolbar = () => {
     const { table } = useDataGrid();
+    const selectedCount = Object.keys(rowSelection).length;
 
     return (
       <div className="card-header px-5 py-5 border-b-0 flex-wrap gap-2">
@@ -341,14 +419,26 @@ const Members = () => {
               placeholder="Search Members"
               className="input input-sm ps-8"
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)} // Update search term
+              onChange={(e) => setSearchTerm(e.target.value)}
             />
           </div>
+          {selectedCount > 0 && (
+            <button
+              onClick={handleDeleteSelected}
+              className="btn btn-sm btn-danger"
+              disabled={isLoading}
+            >
+              <KeenIcon icon="trash" className="me-1" />
+              Delete ({selectedCount})
+            </button>
+          )}
           <DataGridColumnVisibility table={table}/>
+          {/* Active Users toggle - commented out
           <label className="switch switch-sm">
             <input name="check" type="checkbox" value="1" className="order-2" readOnly />
             <span className="switch-label order-1">Active Users</span>
           </label>
+          */}
         </div>
       </div>
     );
@@ -375,6 +465,7 @@ const Members = () => {
       data={filteredData} 
       rowSelection={true} 
       onRowSelectionChange={handleRowSelection}
+      getRowId={(row) => row.id || String(Math.random())}
       pagination={{ size: 10 }} 
       sorting={[{ id: 'member', desc: false }]} 
       toolbar={<Toolbar />}

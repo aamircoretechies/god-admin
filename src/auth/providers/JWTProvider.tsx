@@ -17,6 +17,7 @@ export const LOGIN_URL = `${API_URL}/admin/auth/login`;
 export const REGISTER_URL = `${API_URL}/admin/auth/register`;
 export const FORGOT_PASSWORD_URL = `${API_URL}/admin/auth/forgot-password`;
 export const RESET_PASSWORD_URL = `${API_URL}/admin/auth/reset-password`;
+export const VERIFY_RESET_TOKEN_URL = `${API_URL}/admin/auth/verify-reset-token`;
 export const GET_USER_URL = `${API_URL}/admin/user`;
 
 interface AuthContextProps {
@@ -33,11 +34,11 @@ interface AuthContextProps {
   register: (email: string, password: string, password_confirmation: string) => Promise<void>;
   requestPasswordResetLink: (email: string) => Promise<void>;
   changePassword: (
-    email: string,
     token: string,
-    password: string,
-    password_confirmation: string
+    new_password: string,
+    confirm_password: string
   ) => Promise<void>;
+  verifyResetToken: (token: string) => Promise<{ valid: boolean; expiresAt?: string }>;
   getUser: () => Promise<AxiosResponse<any>>;
   logout: () => void;
   verify: () => Promise<void>;
@@ -220,23 +221,46 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
   };
 
   const requestPasswordResetLink = async (email: string) => {
-    await axios.post(FORGOT_PASSWORD_URL, {
+    const response = await axios.post(FORGOT_PASSWORD_URL, {
       email
     });
+    // Check response status
+    if (response.data && response.data.status === 0) {
+      throw new Error(response.data.message || 'Failed to send password reset email');
+    }
+    return response.data;
   };
 
   const changePassword = async (
-    email: string,
     token: string,
-    password: string,
-    password_confirmation: string
+    new_password: string,
+    confirm_password: string
   ) => {
-    await axios.post(RESET_PASSWORD_URL, {
-      email,
+    const response = await axios.post(RESET_PASSWORD_URL, {
       token,
-      password,
-      password_confirmation
+      new_password,
+      confirm_password
     });
+    // Check response status
+    if (response.data && response.data.status === 0) {
+      throw new Error(response.data.message || 'Failed to reset password');
+    }
+    return response.data;
+  };
+
+  const verifyResetToken = async (token: string): Promise<{ valid: boolean; expiresAt?: string }> => {
+    try {
+      const response = await axios.get(`${VERIFY_RESET_TOKEN_URL}/${token}`);
+      if (response.data && response.data.status === 1) {
+        return {
+          valid: true,
+          expiresAt: response.data.data?.expiresAt
+        };
+      }
+      return { valid: false };
+    } catch (error: any) {
+      return { valid: false };
+    }
   };
 
   const getUser = async () => {
@@ -284,6 +308,7 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
         register,
         requestPasswordResetLink,
         changePassword,
+        verifyResetToken,
         getUser,
         logout,
         verify

@@ -19,6 +19,7 @@ import {
 } from 'lucide-react';
 import { fetchBibleDashboard, getLanguageName, type BibleDashboardResponse } from '@/services/bibleContentApi';
 import { DummyDataIndicator } from '@/components/dummy-data-indicator';
+import { toast } from 'sonner';
 
 interface Translation {
   id: string;
@@ -150,7 +151,10 @@ const BibleContentDashboardContent = () => {
     <div className="space-y-6">
       {/* Key Stats */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card>
+        <Card 
+          className="cursor-pointer hover:shadow-md transition-shadow"
+          onClick={() => navigate('/bible-content/translations')}
+        >
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -172,7 +176,10 @@ const BibleContentDashboardContent = () => {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card 
+          className="cursor-pointer hover:shadow-md transition-shadow"
+          onClick={() => navigate('/bible-content/books-chapters')}
+        >
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -191,7 +198,10 @@ const BibleContentDashboardContent = () => {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card 
+          className="cursor-pointer hover:shadow-md transition-shadow"
+          onClick={() => navigate('/bible-content/ai-explanations')}
+        >
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -214,7 +224,10 @@ const BibleContentDashboardContent = () => {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card 
+          className="cursor-pointer hover:shadow-md transition-shadow"
+          onClick={() => navigate('/bible-content/moderation')}
+        >
           <CardContent className="p-6">
             <div className="flex items-center justify-between">
               <div>
@@ -241,22 +254,29 @@ const BibleContentDashboardContent = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {translations.filter(t => t.status === 'active').map((translation) => (
-                <div key={translation.id} className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-100 dark:border-green-800/30">
-                  <div>
-                    <h3 className="font-medium text-gray-900 dark:text-white">{translation.name}</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">{translation.language} • {translation.verseCount.toLocaleString()} verses</p>
+              {translations.filter(t => t.status === 'active').length > 0 ? (
+                translations.filter(t => t.status === 'active').map((translation) => (
+                  <div key={translation.id} className="flex items-center justify-between p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-100 dark:border-green-800/30">
+                    <div>
+                      <h3 className="font-medium text-gray-900 dark:text-white">{translation.name}</h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">{translation.language} • {translation.verseCount.toLocaleString()} verses</p>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Badge className="bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300">Active</Badge>
+                      <Link to={`/bible-content/translations/view/${translation.id}`}>
+                        <Button variant="outline" size="sm">
+                          <Eye className="w-4 h-4" />
+                        </Button>
+                      </Link>
+                    </div>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <Badge className="bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300">Active</Badge>
-                    <Link to={`/bible-content/translations/view/${translation.id}`}>
-                      <Button variant="outline" size="sm">
-                        <Eye className="w-4 h-4" />
-                      </Button>
-                    </Link>
-                  </div>
+                ))
+              ) : (
+                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                  <CheckCircle className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                  <p>No data available</p>
                 </div>
-              ))}
+              )}
             </div>
           </CardContent>
         </Card>
@@ -265,27 +285,34 @@ const BibleContentDashboardContent = () => {
           <CardHeader>
             <CardTitle className="flex items-center">
               <Clock className="w-5 h-5 mr-2 text-yellow-600 dark:text-yellow-400" />
-              Pending Updates ({contentStats.pendingUpdates})
+              Pending Updates {contentStats.pendingUpdates > 0 && `(${contentStats.pendingUpdates})`}
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {translations.filter(t => t.status === 'pending').map((translation) => (
-                <div key={translation.id} className="flex items-center justify-between p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-100 dark:border-yellow-800/30">
-                  <div>
-                    <h3 className="font-medium text-gray-900 dark:text-white">{translation.name}</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">{translation.language} • {translation.verseCount.toLocaleString()} verses</p>
+              {translations.filter(t => t.status === 'pending').length > 0 ? (
+                translations.filter(t => t.status === 'pending').map((translation) => (
+                  <div key={translation.id} className="flex items-center justify-between p-3 bg-yellow-50 dark:bg-yellow-900/20 rounded-lg border border-yellow-100 dark:border-yellow-800/30">
+                    <div>
+                      <h3 className="font-medium text-gray-900 dark:text-white">{translation.name}</h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">{translation.language} • {translation.verseCount.toLocaleString()} verses</p>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Badge className="bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300">Pending</Badge>
+                      <Link to={`/bible-content/translations?edit=${translation.id}`}>
+                        <Button variant="outline" size="sm">
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                      </Link>
+                    </div>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <Badge className="bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300">Pending</Badge>
-                    <Link to={`/bible-content/translations?edit=${translation.id}`}>
-                      <Button variant="outline" size="sm">
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                    </Link>
-                  </div>
+                ))
+              ) : (
+                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                  <Clock className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                  <p>No data available</p>
                 </div>
-              ))}
+              )}
             </div>
           </CardContent>
         </Card>
@@ -299,22 +326,29 @@ const BibleContentDashboardContent = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {translations.filter(t => t.status === 'inactive').map((translation) => (
-                <div key={translation.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-coal-100 rounded-lg ">
-                  <div>
-                    <h3 className="font-medium text-gray-900 dark:text-white">{translation.name}</h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400">{translation.language} • {translation.verseCount.toLocaleString()} verses</p>
+              {translations.filter(t => t.status === 'inactive').length > 0 ? (
+                translations.filter(t => t.status === 'inactive').map((translation) => (
+                  <div key={translation.id} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-coal-100 rounded-lg ">
+                    <div>
+                      <h3 className="font-medium text-gray-900 dark:text-white">{translation.name}</h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-400">{translation.language} • {translation.verseCount.toLocaleString()} verses</p>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Badge className="bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300">Inactive</Badge>
+                      <Link to={`/bible-content/translations?edit=${translation.id}`}>
+                        <Button variant="outline" size="sm" className="dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                      </Link>
+                    </div>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <Badge className="bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300">Inactive</Badge>
-                    <Link to={`/bible-content/translations?edit=${translation.id}`}>
-                      <Button variant="outline" size="sm" className="dark:border-gray-600 dark:text-gray-300 dark:hover:bg-gray-700">
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                    </Link>
-                  </div>
+                ))
+              ) : (
+                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                  <AlertCircle className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                  <p>No data available</p>
                 </div>
-              ))}
+              )}
             </div>
           </CardContent>
         </Card>
@@ -339,12 +373,20 @@ const BibleContentDashboardContent = () => {
                 </tr>
               </thead>
               <tbody>
-                {translations.map((translation) => (
-                  <tr 
-                    key={translation.id} 
-                    className="cursor-pointer border-b border-gray-200 dark:border-gray-200 hover:bg-gray-200 dark:hover:bg-coal-100 transition-colors"
-                    onClick={() => navigate(`/bible-content/translations/view/${translation.id}`)}
-                  >
+                {translations.length > 0 ? (
+                  translations.map((translation) => (
+                    <tr 
+                      key={translation.id} 
+                      className="cursor-pointer border-b border-gray-200 dark:border-gray-200 hover:bg-gray-200 dark:hover:bg-coal-100 transition-colors"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        if (translation.id) {
+                          navigate(`/bible-content/translations/view/${translation.id}`);
+                        } else {
+                          toast.error('Translation ID is missing');
+                        }
+                      }}
+                    >
                     <td className="py-3 px-4">
                       <div>
                         <h3 className="font-medium text-gray-900 dark:text-white">{translation.name}</h3>
@@ -363,12 +405,22 @@ const BibleContentDashboardContent = () => {
                     </td>
                     <td className="py-3 px-4">
                       <div className="flex items-center gap-2">
-                        <span className="text-xs text-gray-400 italic">N/A</span>
+                        {/* File size not available - hidden instead of showing N/A */}
                         <DummyDataIndicator text="File size" />
                       </div>
                     </td>
+                    </tr>
+                  ))
+                ) : (
+                  <tr>
+                    <td colSpan={3} className="py-8 text-center text-gray-500 dark:text-gray-400">
+                      <div className="flex flex-col items-center">
+                        <BookOpen className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                        <p>No data available</p>
+                      </div>
+                    </td>
                   </tr>
-                ))}
+                )}
               </tbody>
             </table>
           </div>
@@ -386,27 +438,31 @@ const BibleContentDashboardContent = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {dashboardData.recentActivity.reports.slice(0, 5).map((report) => (
-                <div key={report.report_id} className="flex items-center justify-between p-3 bg-red-50 rounded-lg">
-                  <div>
-                    <h3 className="font-medium text-gray-900">
-                      {report.book} {report.chapter}:{report.verse}
-                    </h3>
-                    <p className="text-sm text-gray-600">
-                      {report.version} • {new Date(report.created_at).toLocaleDateString()}
-                    </p>
+              {dashboardData.recentActivity.reports.length > 0 ? (
+                dashboardData.recentActivity.reports.slice(0, 5).map((report) => (
+                  <div key={report.report_id} className="flex items-center justify-between p-3 bg-red-50 rounded-lg">
+                    <div>
+                      <h3 className="font-medium text-gray-900">
+                        {report.book} {report.chapter}:{report.verse}
+                      </h3>
+                      <p className="text-sm text-gray-600">
+                        {report.version} • {new Date(report.created_at).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <Badge className={`${
+                      report.status === 'PENDING' 
+                        ? 'bg-yellow-100 text-yellow-800' 
+                        : 'bg-gray-100 text-gray-800'
+                    }`}>
+                      {report.status}
+                    </Badge>
                   </div>
-                  <Badge className={`${
-                    report.status === 'PENDING' 
-                      ? 'bg-yellow-100 text-yellow-800' 
-                      : 'bg-gray-100 text-gray-800'
-                  }`}>
-                    {report.status}
-                  </Badge>
+                ))
+              ) : (
+                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                  <AlertCircle className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                  <p>No data available</p>
                 </div>
-              ))}
-              {dashboardData.recentActivity.reports.length === 0 && (
-                <p className="text-sm text-gray-500 text-center py-4">No recent reports</p>
               )}
             </div>
           </CardContent>
@@ -421,23 +477,35 @@ const BibleContentDashboardContent = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              {dashboardData.recentActivity.aiExplanations.slice(0, 5).map((explanation) => (
-                <div key={explanation.verse_id} className="flex items-center justify-between p-3 bg-purple-50 rounded-lg">
-                  <div>
-                    <h3 className="font-medium text-gray-900">
-                      {explanation.book.long_name} {explanation.chapter_number}:{explanation.verse_number}
-                    </h3>
-                    <p className="text-sm text-gray-600">
-                      {new Date(explanation.created_at).toLocaleDateString()}
-                    </p>
+              {dashboardData.recentActivity.aiExplanations.length > 0 ? (
+                dashboardData.recentActivity.aiExplanations.slice(0, 5).map((explanation) => (
+                  <div key={explanation.verse_id} className="flex items-center justify-between p-3 bg-purple-50 rounded-lg">
+                    <div>
+                      <h3 className="font-medium text-gray-900">
+                        {explanation.book.long_name} {explanation.chapter_number}:{explanation.verse_number}
+                      </h3>
+                      <p className="text-sm text-gray-600">
+                        {new Date(explanation.created_at).toLocaleDateString()}
+                      </p>
+                    </div>
+                    <Button 
+                      variant="outline" 
+                      size="sm"
+                      onClick={() => {
+                        // Note: book_id and chapter_id are not available in the API response
+                        // Only verse_id, book (with long_name/short_name), chapter_number, and verse_number are available
+                        toast.info('Verse navigation not available - book and chapter IDs are not provided in the API response');
+                      }}
+                    >
+                      <Eye className="w-4 h-4" />
+                    </Button>
                   </div>
-                  <Button variant="outline" size="sm">
-                    <Eye className="w-4 h-4" />
-                  </Button>
+                ))
+              ) : (
+                <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                  <Brain className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                  <p>No data available</p>
                 </div>
-              ))}
-              {dashboardData.recentActivity.aiExplanations.length === 0 && (
-                <p className="text-sm text-gray-500 text-center py-4">No recent AI explanations</p>
               )}
             </div>
           </CardContent>
@@ -455,15 +523,28 @@ const BibleContentDashboardContent = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              <Button className="w-full justify-start" variant="outline">
+              <Button 
+                className="w-full justify-start" 
+                variant="outline"
+                onClick={() => navigate('/bible-content/ai-explanations')}
+              >
                 <Brain className="w-4 h-4 mr-2" />
                 Review AI Explanations
               </Button>
-              <Button className="w-full justify-start" variant="outline" disabled title="AI generation not available in Phase 1">
+              <Button 
+                className="w-full justify-start" 
+                variant="outline" 
+                disabled 
+                title="AI generation not available in Phase 1"
+              >
                 <TrendingUp className="w-4 h-4 mr-2" />
                 Generate New Explanations (Phase 2)
               </Button>
-              <Button className="w-full justify-start" variant="outline">
+              <Button 
+                className="w-full justify-start" 
+                variant="outline"
+                onClick={() => navigate('/bible-content/moderation')}
+              >
                 <AlertCircle className="w-4 h-4 mr-2" />
                 View Flagged Content
               </Button>

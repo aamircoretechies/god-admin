@@ -6,6 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { 
   Brain, 
   Plus, 
@@ -171,6 +172,24 @@ const AIExplanationManagementContent = () => {
     });
   };
 
+  const handleEdit = (id: string) => {
+    const explanation = explanations.find(e => e.id === id);
+    if (explanation) {
+      setIsEditing(id);
+      setFormData({
+        book: explanation.book,
+        chapter: explanation.chapter,
+        verse: explanation.verse,
+        verseText: explanation.verseText,
+        explanation: explanation.explanation,
+        status: explanation.status,
+        category: explanation.category,
+        theologicalAccuracy: explanation.theologicalAccuracy,
+        clarity: explanation.clarity
+      });
+    }
+  };
+
   const handleSave = () => {
     if (isEditing) {
       setExplanations(explanations.map(e => e.id === isEditing ? { ...formData, id: isEditing } as AIExplanation : e));
@@ -215,6 +234,14 @@ const AIExplanationManagementContent = () => {
 
   const handleDelete = (id: string) => {
     setExplanations(explanations.filter(e => e.id !== id));
+    // Also clear selected explanation if it was deleted
+    if (selectedExplanation?.id === id) {
+      setSelectedExplanation(null);
+    }
+    // Clear editing state if the deleted item was being edited
+    if (isEditing === id) {
+      setIsEditing(null);
+    }
   };
 
   const getStatusColor = (status: string) => {
@@ -374,6 +401,7 @@ const AIExplanationManagementContent = () => {
                       value={formData.book}
                       onChange={(e) => setFormData({ ...formData, book: e.target.value })}
                       placeholder="e.g., Genesis"
+                      maxLength={50}
                     />
                   </div>
                   <div>
@@ -404,12 +432,14 @@ const AIExplanationManagementContent = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Verse Text
                   </label>
-                  <Textarea
-                    value={formData.verseText}
-                    onChange={(e) => setFormData({ ...formData, verseText: e.target.value })}
-                    placeholder="Enter the Bible verse text..."
-                    rows={3}
-                  />
+                    <Textarea
+                      value={formData.verseText}
+                      onChange={(e) => setFormData({ ...formData, verseText: e.target.value })}
+                      placeholder="Enter the Bible verse text..."
+                      rows={3}
+                      maxLength={500}
+                      className="resize-none"
+                    />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -465,6 +495,8 @@ const AIExplanationManagementContent = () => {
                     onChange={(e) => setFormData({ ...formData, explanation: e.target.value })}
                     placeholder="Enter the explanation..."
                     rows={8}
+                    maxLength={5000}
+                    className="resize-none"
                   />
                 </div>
 
@@ -584,7 +616,7 @@ const AIExplanationManagementContent = () => {
           ) : (
             <div className="space-y-4">
               {filteredExplanations.map((explanation) => (
-              <div key={explanation.id} className="p-4 border rounded-lg">
+              <div key={explanation.id} className="p-4 border rounded-lg min-w-[600px]">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center space-x-3">
                     <div className="p-2 bg-purple-100 rounded-lg">
@@ -660,7 +692,7 @@ const AIExplanationManagementContent = () => {
                       <Eye className="w-4 h-4 mr-1" />
                       View Details
                     </Button>
-                    <Button variant="outline" size="sm" onClick={() => setIsEditing(explanation.id)}>
+                    <Button variant="outline" size="sm" onClick={() => handleEdit(explanation.id)}>
                       <Edit className="w-4 h-4 mr-1" />
                       Edit
                     </Button>
@@ -719,6 +751,79 @@ const AIExplanationManagementContent = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* View Details Modal */}
+      <Dialog open={!!selectedExplanation} onOpenChange={() => setSelectedExplanation(null)}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle className="flex items-center gap-2">
+              <Brain className="w-5 h-5 text-purple-600" />
+              AI Explanation Details
+            </DialogTitle>
+            <DialogDescription>
+              {selectedExplanation && `${selectedExplanation.book} ${selectedExplanation.chapter}:${selectedExplanation.verse}`}
+            </DialogDescription>
+          </DialogHeader>
+          {selectedExplanation && (
+            <div className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-sm font-medium text-gray-600">Book</label>
+                  <p className="text-sm text-gray-900">{selectedExplanation.book}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-600">Chapter</label>
+                  <p className="text-sm text-gray-900">{selectedExplanation.chapter}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-600">Verse</label>
+                  <p className="text-sm text-gray-900">{selectedExplanation.verse}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-600">Status</label>
+                  <Badge className={getStatusColor(selectedExplanation.status)}>
+                    {selectedExplanation.status.replace('_', ' ').charAt(0).toUpperCase() + selectedExplanation.status.slice(1).replace('_', ' ')}
+                  </Badge>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-600">Category</label>
+                  <Badge className="bg-purple-100 text-purple-800">
+                    {selectedExplanation.category.charAt(0).toUpperCase() + selectedExplanation.category.slice(1)}
+                  </Badge>
+                </div>
+                {selectedExplanation.translation && (
+                  <div>
+                    <label className="text-sm font-medium text-gray-600">Translation</label>
+                    <p className="text-sm text-gray-900">{selectedExplanation.translation.full_name} ({selectedExplanation.translation.abbreviation})</p>
+                  </div>
+                )}
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-600">Verse Text</label>
+                <p className="text-sm text-gray-700 italic mt-1">
+                  {selectedExplanation.verseText || 'Verse text not available'}
+                </p>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-gray-600">Explanation</label>
+                <p className="text-sm text-gray-700 mt-1 whitespace-pre-wrap">
+                  {selectedExplanation.explanation}
+                </p>
+              </div>
+              <div className="grid grid-cols-2 gap-4 pt-4 border-t">
+                <div>
+                  <label className="text-sm font-medium text-gray-600">Created At</label>
+                  <p className="text-sm text-gray-900">{selectedExplanation.createdAt}</p>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-gray-600">Updated At</label>
+                  <p className="text-sm text-gray-900">{selectedExplanation.updatedAt}</p>
+                </div>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

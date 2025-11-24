@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { 
   Users, 
@@ -21,9 +22,24 @@ interface KPICardProps {
   period?: string;
 }
 
-const KPICard: React.FC<KPICardProps> = ({ title, value, change, changeType, icon, description, period }) => {
+interface KPICardWithNavigation extends KPICardProps {
+  navigationPath?: string;
+}
+
+const KPICard: React.FC<KPICardWithNavigation> = ({ title, value, change, changeType, icon, description, period, navigationPath }) => {
+  const navigate = useNavigate();
+  
+  const handleClick = () => {
+    if (navigationPath) {
+      navigate(navigationPath);
+    }
+  };
+
   return (
-    <Card>
+    <Card 
+      className={navigationPath ? "cursor-pointer hover:shadow-md transition-shadow" : ""}
+      onClick={handleClick}
+    >
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
         <CardTitle className="text-sm font-medium text-gray-600">
           {title}
@@ -64,7 +80,7 @@ const BibleKPICards = () => {
         if (response.status === 1 && response.data) {
           const { mainKPIs } = response.data;
           
-          const transformedData: KPICardProps[] = [
+          const transformedData: KPICardWithNavigation[] = [
             {
               title: mainKPIs.totalUsers.label,
               value: mainKPIs.totalUsers.value,
@@ -72,7 +88,8 @@ const BibleKPICards = () => {
               changeType: mainKPIs.totalUsers.trend === 'up' ? 'increase' : 'decrease',
               icon: <Users className="h-4 w-4 text-amber-500" />,
               description: mainKPIs.totalUsers.description,
-              period: mainKPIs.totalUsers.period
+              period: mainKPIs.totalUsers.period,
+              navigationPath: '/network/user-table/saas-users'
             },
             {
               title: mainKPIs.dailyAIQueries.label,
@@ -81,7 +98,8 @@ const BibleKPICards = () => {
               changeType: mainKPIs.dailyAIQueries.trend === 'up' ? 'increase' : 'decrease',
               icon: <MessageSquare className="h-4 w-4 text-green-500" />,
               description: mainKPIs.dailyAIQueries.description,
-              period: mainKPIs.dailyAIQueries.period
+              period: mainKPIs.dailyAIQueries.period,
+              navigationPath: '/bible-content/ai-explanations'
             },
             {
               title: mainKPIs.flaggedResponses.label,
@@ -90,7 +108,8 @@ const BibleKPICards = () => {
               changeType: mainKPIs.flaggedResponses.trend === 'up' ? 'increase' : 'decrease',
               icon: <Flag className="h-4 w-4 text-red-500" />,
               description: mainKPIs.flaggedResponses.description,
-              period: mainKPIs.flaggedResponses.period
+              period: mainKPIs.flaggedResponses.period,
+              // navigationPath: '/bible-content/moderation'
             },
             {
               title: mainKPIs.activeTranslations.label,
@@ -99,7 +118,8 @@ const BibleKPICards = () => {
               changeType: mainKPIs.activeTranslations.trend === 'up' ? 'increase' : 'decrease',
               icon: <BookOpen className="h-4 w-4 text-purple-500" />,
               description: mainKPIs.activeTranslations.description,
-              period: mainKPIs.activeTranslations.period
+              period: mainKPIs.activeTranslations.period,
+              navigationPath: '/bible-content/translations'
             }
           ];
           

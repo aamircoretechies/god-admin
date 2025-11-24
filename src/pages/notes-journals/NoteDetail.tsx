@@ -2,7 +2,7 @@ import { Fragment } from 'react';
 import { Container } from '@/components/container';
 import {
   Toolbar,
-  ToolbarActions,
+  // ToolbarActions, // Commented out - not used
   ToolbarDescription,
   ToolbarHeading,
   ToolbarPageTitle
@@ -22,6 +22,7 @@ const NoteDetail = () => {
               <ToolbarPageTitle />
               <ToolbarDescription>Review and moderate individual notes and journal entries.</ToolbarDescription>
             </ToolbarHeading>
+            {/* ToolbarActions - Commented out (Export PDF and Approve Note buttons removed)
             <ToolbarActions>
               <a href="#" className="btn btn-sm btn-light">
                 Export PDF
@@ -30,6 +31,7 @@ const NoteDetail = () => {
                 Approve Note
               </a>
             </ToolbarActions>
+            */}
           </Toolbar>
         </Container>
       )}

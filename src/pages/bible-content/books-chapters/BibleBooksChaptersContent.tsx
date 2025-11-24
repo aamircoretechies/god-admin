@@ -468,7 +468,7 @@ const BibleBooksChaptersContent = () => {
             {filteredBooks.map((book) => (
               <div key={book.id} className="border rounded-lg">
                 <div 
-                  className="flex items-center justify-between p-4 cursor-pointer hover:bg-coal-100"
+                  className="flex items-center justify-between p-4 cursor-pointer"
                   onClick={() => toggleBookExpansion(book.id)}
                 >
                   <div className="flex items-center space-x-3">
@@ -494,7 +494,7 @@ const BibleBooksChaptersContent = () => {
                         {book.status.charAt(0).toUpperCase() + book.status.slice(1)}
                       </Badge>
                       <span className="text-sm text-gray-500">
-                        {book.chapters} chapters, {book.verses.toLocaleString()} verses
+                        {book.chapters} chapters
                       </span>
                     </div>
                   </div>
@@ -537,7 +537,7 @@ const BibleBooksChaptersContent = () => {
                               </Badge>
                               <DummyDataIndicator text="Status" />
                             </div>
-                            <p className="text-sm text-gray-600 mb-2">{chapter.verses} verses</p>
+                            {/* Verse count removed - not available from API */}
                             <div className="flex space-x-2">
                               <Link to={`/bible-content/books-chapters/view/${book.id}/${chapter.id}`}>
                                 <Button variant="outline" size="sm">
