@@ -329,8 +329,27 @@ const Members = () => {
     const selectedRowIds = Object.keys(state).filter(id => id && id !== '');
 
     if (selectedRowIds.length > 0) {
-      const toastId = toast(`Total ${selectedRowIds.length} are selected.`, {
-        description: `Selected row IDs: ${selectedRowIds.join(', ')}`,
+      // Get selected member names from filteredData by matching row IDs
+      const selectedMembers = selectedRowIds
+        .map(id => {
+          const member = filteredData.find(row => row.id === id);
+          return member?.member?.name;
+        })
+        .filter(Boolean);
+
+      // Create user-friendly message
+      const memberCount = selectedRowIds.length;
+      const message = memberCount === 1 
+        ? '1 member selected' 
+        : `${memberCount} members selected`;
+      
+      // Show member names only if 3 or fewer, otherwise just show count
+      const description = selectedMembers.length <= 3 && selectedMembers.length > 0
+        ? selectedMembers.join(', ')
+        : undefined;
+
+      const toastId = toast(message, {
+        ...(description && { description }),
         action: {
           label: 'Undo',
           onClick: () => {

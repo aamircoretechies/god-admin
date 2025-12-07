@@ -144,3 +144,27 @@ export const deletePrompt = async (templateId: string): Promise<DeletePromptApiR
   return response.data;
 };
 
+// Update prompt status interface
+export interface UpdatePromptStatusRequest {
+  status: string;
+}
+
+// Update prompt status response interface
+export interface UpdatePromptStatusResponse {
+  status: number;
+  message: string;
+  data?: PromptResponse;
+}
+
+// Update prompt status (for activate/deactivate)
+export const updatePromptStatus = async (
+  templateId: string,
+  status: 'Active' | 'Inactive'
+): Promise<UpdatePromptStatusResponse> => {
+  const response = await axios.patch<UpdatePromptStatusResponse>(
+    `${API_URL}/admin/prompts/${templateId}`,
+    { status }
+  );
+  return response.data;
+};
+

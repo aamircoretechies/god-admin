@@ -246,7 +246,7 @@ const NotesAnalyticsContent: React.FC = () => {
               {mockChartData.topTags.slice(0, 8).map((tag, index) => (
                 <div key={index} className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Badge variant="secondary">{tag.name}</Badge>
+                    <Badge variant="secondary" className="bg-gray-100 text-gray-800 border border-gray-300">{tag.name}</Badge>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-medium">{tag.count}</span>

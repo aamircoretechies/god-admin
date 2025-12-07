@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { ColumnDef } from '@tanstack/react-table';
-import { DataGrid, DataGridColumnHeader, DataGridRowSelect, DataGridRowSelectAll } from '@/components/data-grid';
+import { DataGrid, DataGridColumnHeader } from '@/components/data-grid';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -185,16 +185,6 @@ const ModerationQueueContent: React.FC = () => {
   const columns = useMemo<ColumnDef<FlaggedNote>[]>(
     () => [
       {
-        accessorKey: 'id',
-        header: () => <DataGridRowSelectAll />,
-        cell: ({ row }) => <DataGridRowSelect row={row} />,
-        enableSorting: false,
-        enableHiding: false,
-        meta: {
-          headerClassName: 'w-12'
-        }
-      },
-      {
         accessorFn: (row: FlaggedNote) => row.priority,
         id: 'priority',
         header: ({ column }) => <DataGridColumnHeader title="Priority" column={column} />,
@@ -360,11 +350,6 @@ const ModerationQueueContent: React.FC = () => {
     []
   );
 
-  const handleRowSelection = (state: any) => {
-    const selectedRowIds = Object.keys(state);
-    console.log(`Selected ${selectedRowIds.length} flagged notes:`, selectedRowIds);
-  };
-
   const Toolbar = () => (
     <div className="flex flex-col gap-4 p-5">
       {/* Alert Banner */}
@@ -410,8 +395,6 @@ const ModerationQueueContent: React.FC = () => {
     <DataGrid
       columns={columns}
       data={filteredNotes}
-      rowSelection={true}
-      onRowSelectionChange={handleRowSelection}
       pagination={{ size: 10 }}
       sorting={[{ id: 'priority', desc: true }]}
       toolbar={<Toolbar />}

@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ColumnDef } from '@tanstack/react-table';
-import { DataGrid, DataGridColumnHeader, DataGridRowSelect, DataGridRowSelectAll } from '@/components/data-grid';
+import { DataGrid, DataGridColumnHeader } from '@/components/data-grid';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -280,16 +280,6 @@ const NotesOverviewContent: React.FC = () => {
   const columns = useMemo<ColumnDef<Note>[]>(
     () => [
       {
-        accessorKey: 'id',
-        header: () => <DataGridRowSelectAll />,
-        cell: ({ row }) => <DataGridRowSelect row={row} />,
-        enableSorting: false,
-        enableHiding: false,
-        meta: {
-          headerClassName: 'w-12'
-        }
-      },
-      {
         accessorFn: (row: Note) => row,
         id: 'user',
         header: ({ column }) => (
@@ -384,7 +374,7 @@ const NotesOverviewContent: React.FC = () => {
         cell: ({ row }) => (
           <div className="flex flex-wrap gap-1">
             {row.original.tags.map((tag, index) => (
-              <Badge key={index} variant="secondary" className="text-xs">
+              <Badge key={index} variant="secondary" className="text-xs bg-gray-100 text-gray-800 border border-gray-300">
                 {tag}
               </Badge>
             ))}
@@ -467,11 +457,6 @@ const NotesOverviewContent: React.FC = () => {
     ],
     []
   );
-
-  const handleRowSelection = (state: any) => {
-    const selectedRowIds = Object.keys(state);
-    console.log(`Selected ${selectedRowIds.length} notes:`, selectedRowIds);
-  };
 
   const Toolbar = () => (
     <div className="flex flex-col gap-4 p-5">
@@ -560,8 +545,6 @@ const NotesOverviewContent: React.FC = () => {
       <DataGrid
         columns={columns}
         data={filteredNotes}
-        rowSelection={true}
-        onRowSelectionChange={handleRowSelection}
         pagination={{ size: 10 }}
         sorting={[{ id: 'createdAt', desc: true }]}
         toolbar={<Toolbar />}

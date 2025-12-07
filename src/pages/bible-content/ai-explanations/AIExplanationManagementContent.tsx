@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -154,8 +154,32 @@ const AIExplanationManagementContent = () => {
     clarity: 0
   });
 
-  // Filtering is now done server-side, but we can still do client-side filtering if needed
-  const filteredExplanations = explanations;
+  // Apply client-side filtering as fallback to ensure filters work correctly
+  const filteredExplanations = useMemo(() => {
+    let filtered = [...explanations];
+
+    // Filter by status
+    if (statusFilter !== 'all') {
+      filtered = filtered.filter(e => e.status.toLowerCase() === statusFilter.toLowerCase());
+    }
+
+    // Filter by category
+    if (categoryFilter !== 'all') {
+      filtered = filtered.filter(e => e.category === categoryFilter);
+    }
+
+    // Filter by search term
+    if (searchTerm) {
+      const searchLower = searchTerm.toLowerCase();
+      filtered = filtered.filter(e => 
+        e.book.toLowerCase().includes(searchLower) ||
+        e.explanation.toLowerCase().includes(searchLower) ||
+        `${e.book} ${e.chapter}:${e.verse}`.toLowerCase().includes(searchLower)
+      );
+    }
+
+    return filtered;
+  }, [explanations, statusFilter, categoryFilter, searchTerm]);
 
   const handleCreateNew = () => {
     setIsCreating(true);
@@ -500,6 +524,7 @@ const AIExplanationManagementContent = () => {
                   />
                 </div>
 
+                {/* Theological Accuracy (%) and Clarity (%) fields commented out
                 <div className="grid grid-cols-2 gap-4">
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -508,7 +533,11 @@ const AIExplanationManagementContent = () => {
                     <Input
                       type="number"
                       value={formData.theologicalAccuracy}
-                      onChange={(e) => setFormData({ ...formData, theologicalAccuracy: parseInt(e.target.value) })}
+                      onChange={(e) => {
+                        const value = parseInt(e.target.value) || 0;
+                        const clampedValue = Math.max(0, Math.min(100, value));
+                        setFormData({ ...formData, theologicalAccuracy: clampedValue });
+                      }}
                       min="0"
                       max="100"
                     />
@@ -520,12 +549,17 @@ const AIExplanationManagementContent = () => {
                     <Input
                       type="number"
                       value={formData.clarity}
-                      onChange={(e) => setFormData({ ...formData, clarity: parseInt(e.target.value) })}
+                      onChange={(e) => {
+                        const value = parseInt(e.target.value) || 0;
+                        const clampedValue = Math.max(0, Math.min(100, value));
+                        setFormData({ ...formData, clarity: clampedValue });
+                      }}
                       min="0"
                       max="100"
                     />
                   </div>
                 </div>
+                */}
               </div>
             </div>
 
@@ -654,6 +688,7 @@ const AIExplanationManagementContent = () => {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-3 text-sm">
+                  {/* Theological Accuracy and Clarity display commented out
                   <div className="flex items-center space-x-2">
                     <ThumbsUp className="w-4 h-4 text-gray-500" />
                     <span className="font-medium text-gray-600 flex items-center gap-1">
@@ -668,6 +703,7 @@ const AIExplanationManagementContent = () => {
                       <DummyDataIndicator text="Clarity score is not available in the API" />
                     </span>
                   </div>
+                  */}
                   <div className="flex items-center space-x-2">
                     <Clock className="w-4 h-4 text-gray-500" />
                     <span className="text-gray-600">Created: {explanation.createdAt}</span>

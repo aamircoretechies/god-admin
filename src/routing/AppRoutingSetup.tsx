@@ -150,7 +150,7 @@ const AppRoutingSetup = (): ReactElement => {
           <Route path="/bible-content/books-chapters/view/:bookId/:chapterId" element={<ViewChapterPage />} />
           <Route path="/bible-content/ai-explanations" element={<AIExplanationManagementPage />} />
           <Route path="/bible-content/theological-insights" element={<TheologicalInsightsPage />} />
-          <Route path="/bible-content/moderation" element={<ContentModerationPage />} />
+          {/* <Route path="/bible-content/moderation" element={<ContentModerationPage />} /> */}
           <Route path="/bible-content/search-analytics" element={<ContentSearchAnalyticsPage />} />
           
           {/* Notes & Journals Routes */}

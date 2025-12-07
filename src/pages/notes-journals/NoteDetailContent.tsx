@@ -362,7 +362,7 @@ const NoteDetailContent: React.FC = () => {
             <CardContent>
               <div className="flex flex-wrap gap-2">
                 {note.tags.map((tag, index) => (
-                  <Badge key={index} variant="secondary">
+                  <Badge key={index} variant="secondary" className="bg-gray-100 text-gray-800 border border-gray-300">
                     {tag}
                   </Badge>
                 ))}

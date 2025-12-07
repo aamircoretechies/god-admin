@@ -31,6 +31,7 @@ const NetworkSaasUsersPage = () => {
                 </div>
               </ToolbarDescription>
             </ToolbarHeading>
+            {/* ToolbarActions - Import CSV button commented out
             <ToolbarActions>
               <button 
                 onClick={() => {
@@ -60,6 +61,7 @@ const NetworkSaasUsersPage = () => {
                 Import CSV
               </button>
             </ToolbarActions>
+            */}
           </Toolbar>
         </Container>
       )}

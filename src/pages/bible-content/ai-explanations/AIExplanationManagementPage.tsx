@@ -24,6 +24,7 @@ const AIExplanationManagementPage = () => {
               <ToolbarPageTitle />
               <ToolbarDescription>Review and manage AI-generated Bible explanations.</ToolbarDescription>
             </ToolbarHeading>
+            {/* ToolbarActions - Review Guidelines and Create Explanation buttons commented out
             <ToolbarActions>
               <a href="#" className="btn btn-sm btn-light">
                 Review Guidelines
@@ -32,6 +33,7 @@ const AIExplanationManagementPage = () => {
                 Create Explanation
               </a>
             </ToolbarActions>
+            */}
           </Toolbar>
         </Container>
       )}

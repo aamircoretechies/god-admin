@@ -1,7 +1,7 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ColumnDef } from '@tanstack/react-table';
-import { DataGrid, DataGridColumnHeader, DataGridRowSelect, DataGridRowSelectAll } from '@/components/data-grid';
+import { DataGrid, DataGridColumnHeader } from '@/components/data-grid';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -23,7 +23,7 @@ import {
   XCircle,
   AlertCircle
 } from 'lucide-react';
-import { fetchPrompts, fetchPromptDetail, createPrompt, type PromptResponse, type CreatePromptRequest } from '@/services/promptsApi';
+import { fetchPrompts, fetchPromptDetail, createPrompt, updatePromptStatus, type PromptResponse, type CreatePromptRequest } from '@/services/promptsApi';
 import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 
@@ -179,6 +179,31 @@ const PromptListContent: React.FC = () => {
     }
   };
 
+  const handleToggleStatus = async (promptId: string, currentStatus: string) => {
+    const newStatus = currentStatus === 'Active' ? 'Inactive' : 'Active';
+    
+    try {
+      const response = await updatePromptStatus(promptId, newStatus as 'Active' | 'Inactive');
+      
+      if (response.status === 1) {
+        // Update the prompt in the local state
+        setPrompts(prevPrompts =>
+          prevPrompts.map(prompt =>
+            prompt.id === promptId
+              ? { ...prompt, status: newStatus }
+              : prompt
+          )
+        );
+        toast.success(`Prompt ${newStatus === 'Active' ? 'activated' : 'deactivated'} successfully`);
+      } else {
+        throw new Error(response.message || 'Failed to update prompt status');
+      }
+    } catch (err: any) {
+      const errorMessage = err?.response?.data?.message || err?.message || 'Failed to update prompt status';
+      toast.error(errorMessage);
+    }
+  };
+
   // Filter prompts (client-side filtering as fallback, but API should handle it)
   const filteredPrompts = useMemo(() => {
     return prompts.filter(prompt => {
@@ -260,16 +285,6 @@ const PromptListContent: React.FC = () => {
 
   const columns = useMemo<ColumnDef<AIPrompt>[]>(
     () => [
-      {
-        accessorKey: 'id',
-        header: () => <DataGridRowSelectAll />,
-        cell: ({ row }) => <DataGridRowSelect row={row} />,
-        enableSorting: false,
-        enableHiding: false,
-        meta: {
-          headerClassName: 'w-12'
-        }
-      },
       {
         accessorFn: (row: AIPrompt) => row,
         id: 'title',
@@ -382,7 +397,9 @@ const PromptListContent: React.FC = () => {
                 <Copy className="w-4 h-4 mr-2" />
                 {duplicatingId === row.original.id ? 'Duplicating...' : 'Duplicate Prompt'}
               </DropdownMenuItem>
-              <DropdownMenuItem>
+              <DropdownMenuItem
+                onClick={() => handleToggleStatus(row.original.id, row.original.status)}
+              >
                 {row.original.status === 'Active' ? (
                   <>
                     <XCircle className="w-4 h-4 mr-2" />
@@ -395,10 +412,12 @@ const PromptListContent: React.FC = () => {
                   </>
                 )}
               </DropdownMenuItem>
+              {/* Delete Prompt option commented out
               <DropdownMenuItem className="text-red-600">
                 <Trash2 className="w-4 h-4 mr-2" />
                 Delete Prompt
               </DropdownMenuItem>
+              */}
             </DropdownMenuContent>
           </DropdownMenu>
         ),
@@ -410,11 +429,6 @@ const PromptListContent: React.FC = () => {
     ],
     []
   );
-
-  const handleRowSelection = (state: any) => {
-    const selectedRowIds = Object.keys(state);
-    console.log(`Selected ${selectedRowIds.length} prompts:`, selectedRowIds);
-  };
 
   // Get unique categories from prompts
   const uniqueCategories = useMemo(() => {
@@ -492,8 +506,6 @@ const PromptListContent: React.FC = () => {
     <DataGrid
       columns={columns}
       data={filteredPrompts}
-      rowSelection={true}
-      onRowSelectionChange={handleRowSelection}
       pagination={{ size: 10 }}
       sorting={[{ id: 'title', desc: false }]}
       toolbar={<Toolbar />}
