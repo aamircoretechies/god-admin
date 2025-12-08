@@ -27,7 +27,7 @@ import {
   ChevronLeft,
   ChevronRight
 } from 'lucide-react';
-import { fetchAIExplanations, type AIExplanationResponse } from '@/services/aiExplanationsApi';
+import { fetchAIExplanations, fetchVerseAIExplanationHistory, type AIExplanationResponse } from '@/services/aiExplanationsApi';
 import { DummyDataIndicator } from '@/components/dummy-data-indicator';
 
 interface AIExplanation {
@@ -93,6 +93,7 @@ const AIExplanationManagementContent = () => {
   const [totalCount, setTotalCount] = useState(0);
   const pageSize = 10;
   const [selectedExplanation, setSelectedExplanation] = useState<AIExplanation | null>(null);
+  const [loadingVerseText, setLoadingVerseText] = useState(false);
   const [isCreating, setIsCreating] = useState(false);
   const [isEditing, setIsEditing] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
@@ -142,6 +143,43 @@ const AIExplanationManagementContent = () => {
 
     return () => clearTimeout(debounceTimer);
   }, [currentPage, statusFilter, categoryFilter, searchTerm]);
+
+  // Fetch verse text when modal opens
+  useEffect(() => {
+    const fetchVerseText = async () => {
+      if (!selectedExplanation || !selectedExplanation.verseId) {
+        return;
+      }
+
+      // If verse text is already available, skip
+      if (selectedExplanation.verseText) {
+        return;
+      }
+
+      try {
+        setLoadingVerseText(true);
+        const response = await fetchVerseAIExplanationHistory(selectedExplanation.verseId);
+        
+        if (response.status === 1 && response.data && response.data.verse_text) {
+          setSelectedExplanation(prev => {
+            if (!prev) return null;
+            return {
+              ...prev,
+              verseText: response.data.verse_text
+            };
+          });
+        }
+      } catch (err: any) {
+        console.error('Error fetching verse text:', err);
+        // Silently fail - verse text is optional
+      } finally {
+        setLoadingVerseText(false);
+      }
+    };
+
+    fetchVerseText();
+  }, [selectedExplanation?.verseId]);
+
   const [formData, setFormData] = useState<Partial<AIExplanation>>({
     book: '',
     chapter: 1,
@@ -790,69 +828,96 @@ const AIExplanationManagementContent = () => {
 
       {/* View Details Modal */}
       <Dialog open={!!selectedExplanation} onOpenChange={() => setSelectedExplanation(null)}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto p-0">
+          <DialogHeader className="px-6 pt-6 pb-4 border-b border-gray-200">
+            <DialogTitle className="flex items-center gap-2 text-xl font-semibold">
               <Brain className="w-5 h-5 text-purple-600" />
               AI Explanation Details
             </DialogTitle>
-            <DialogDescription>
-              {selectedExplanation && `${selectedExplanation.book} ${selectedExplanation.chapter}:${selectedExplanation.verse}`}
+            <DialogDescription className="text-sm text-gray-600 mt-1.5">
+              {selectedExplanation && `${selectedExplanation.book} ${selectedExplanation.chapter}:${selectedExplanation.verse || 'no'}`}
             </DialogDescription>
           </DialogHeader>
           {selectedExplanation && (
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm font-medium text-gray-600">Book</label>
-                  <p className="text-sm text-gray-900">{selectedExplanation.book}</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-gray-600">Chapter</label>
-                  <p className="text-sm text-gray-900">{selectedExplanation.chapter}</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-gray-600">Verse</label>
-                  <p className="text-sm text-gray-900">{selectedExplanation.verse}</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-gray-600">Status</label>
-                  <Badge className={getStatusColor(selectedExplanation.status)}>
-                    {selectedExplanation.status.replace('_', ' ').charAt(0).toUpperCase() + selectedExplanation.status.slice(1).replace('_', ' ')}
-                  </Badge>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-gray-600">Category</label>
-                  <Badge className="bg-purple-100 text-purple-800">
-                    {selectedExplanation.category.charAt(0).toUpperCase() + selectedExplanation.category.slice(1)}
-                  </Badge>
-                </div>
-                {selectedExplanation.translation && (
-                  <div>
-                    <label className="text-sm font-medium text-gray-600">Translation</label>
-                    <p className="text-sm text-gray-900">{selectedExplanation.translation.full_name} ({selectedExplanation.translation.abbreviation})</p>
+            <div className="px-6 pb-6 pt-4 space-y-6">
+              {/* Metadata Section */}
+              <div className="space-y-4">
+                <h3 className="text-sm font-semibold text-gray-900 uppercase tracking-wide">Metadata</h3>
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Book</label>
+                    <p className="text-sm text-gray-900 font-medium">{selectedExplanation.book}</p>
                   </div>
-                )}
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Chapter</label>
+                    <p className="text-sm text-gray-900 font-medium">{selectedExplanation.chapter}</p>
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Verse</label>
+                    <p className="text-sm text-gray-900 font-medium">{selectedExplanation.verse || '-'}</p>
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Status</label>
+                    <div>
+                      <Badge className={getStatusColor(selectedExplanation.status)}>
+                        {selectedExplanation.status.replace('_', ' ').charAt(0).toUpperCase() + selectedExplanation.status.slice(1).replace('_', ' ')}
+                      </Badge>
+                    </div>
+                  </div>
+                  <div className="space-y-1.5">
+                    <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Category</label>
+                    <div>
+                      <Badge className="bg-purple-100 text-purple-800 hover:bg-purple-200">
+                        {selectedExplanation.category.charAt(0).toUpperCase() + selectedExplanation.category.slice(1)}
+                      </Badge>
+                    </div>
+                  </div>
+                  {selectedExplanation.translation && (
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Translation</label>
+                      <p className="text-sm text-gray-900 font-medium">
+                        {selectedExplanation.translation.full_name} ({selectedExplanation.translation.abbreviation})
+                      </p>
+                    </div>
+                  )}
+                </div>
               </div>
-              <div>
-                <label className="text-sm font-medium text-gray-600">Verse Text</label>
-                <p className="text-sm text-gray-700 italic mt-1">
-                  {selectedExplanation.verseText || 'Verse text not available'}
-                </p>
+
+              {/* Verse Text Section */}
+              <div className="space-y-2 pt-2 border-t border-gray-200">
+                <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Verse Text</label>
+                <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                  {loadingVerseText ? (
+                    <div className="flex items-center gap-2 text-sm text-gray-500">
+                      <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-500"></div>
+                      Loading verse text...
+                    </div>
+                  ) : (
+                    <p className="text-sm text-gray-700 italic leading-relaxed">
+                      {selectedExplanation.verseText || 'Verse text not available'}
+                    </p>
+                  )}
+                </div>
               </div>
-              <div>
-                <label className="text-sm font-medium text-gray-600">Explanation</label>
-                <p className="text-sm text-gray-700 mt-1 whitespace-pre-wrap">
-                  {selectedExplanation.explanation}
-                </p>
+
+              {/* Explanation Section */}
+              <div className="space-y-2 pt-2 border-t border-gray-200">
+                <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Explanation</label>
+                <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                  <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
+                    {selectedExplanation.explanation}
+                  </p>
+                </div>
               </div>
-              <div className="grid grid-cols-2 gap-4 pt-4 border-t">
-                <div>
-                  <label className="text-sm font-medium text-gray-600">Created At</label>
+
+              {/* Timestamps Section */}
+              <div className="grid grid-cols-2 gap-4 pt-2 border-t border-gray-200">
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Created At</label>
                   <p className="text-sm text-gray-900">{selectedExplanation.createdAt}</p>
                 </div>
-                <div>
-                  <label className="text-sm font-medium text-gray-600">Updated At</label>
+                <div className="space-y-1.5">
+                  <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Updated At</label>
                   <p className="text-sm text-gray-900">{selectedExplanation.updatedAt}</p>
                 </div>
               </div>

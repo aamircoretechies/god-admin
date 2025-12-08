@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { toAbsoluteUrl } from '@/utils';
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -126,12 +127,16 @@ const transformNote = (apiData: NoteResponse): Note => {
   const tags = cleanTags(apiData.emotion_tags);
   const title = extractTitle(apiData.content);
 
+  // Generate avatar from user ID (same logic as UserBasicInfo)
+  const avatarNumber = (parseInt(apiData.user_id.replace(/-/g, ''), 16) % 34) + 1;
+  const userAvatar = toAbsoluteUrl(`/media/avatars/300-${avatarNumber}.png`);
+
   return {
     id: apiData.note_id,
     userId: apiData.user_id,
     userName: apiData.username || `User ${apiData.user_id.slice(0, 8)}`, // Use username from API
     userEmail: `user-${apiData.user_id.slice(0, 8)}@example.com`, // Fallback
-    userAvatar: undefined,
+    userAvatar: userAvatar,
     title: title,
     content: apiData.content,
     linkedVerses: linkedVerses,

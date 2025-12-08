@@ -88,68 +88,65 @@ const UserBasicInfo = () => {
   const memberSince = userData.basicUserInfo.memberSince || 'N/A';
 
   return (
-    <div className="card">
+    <div className="card overflow-hidden">
       <div className="card-header">
         <h3 className="card-title">
           <KeenIcon icon="user" className="me-2" />
           Basic User Information
         </h3>
       </div>
-      <div className="card-body">
-        <div className="flex flex-col lg:flex-row gap-6">
+      <div className="card-body overflow-hidden">
+        <div className="flex flex-col lg:flex-row gap-6 overflow-hidden w-full">
           {/* User Avatar and Basic Info */}
-          <div className="flex flex-col items-center lg:items-start gap-4">
-            <div className="relative">
+          <div className="flex flex-col items-center lg:items-start gap-4 flex-shrink-0 lg:max-w-[280px] w-full lg:w-auto overflow-hidden">
+            <div className="relative flex-shrink-0">
               <img
                 src={toAbsoluteUrl(`/media/avatars/300-${avatarNumber}.png`)}
                 className="size-20 rounded-full"
                 alt={userData.basicUserInfo.fullName}
               />
-              <div className="absolute -bottom-1 -right-1 size-6 bg-success rounded-full border-2 border-white flex items-center justify-center">
-                <KeenIcon icon="check" className="size-3 text-white" />
-              </div>
             </div>
-            <div className="text-center lg:text-left">
-              <h4 className="text-lg font-semibold text-gray-900">{userData.basicUserInfo.fullName}</h4>
-              <p className="text-sm text-gray-600">Member since {memberSince}</p>
+            <div className="text-center lg:text-left w-full overflow-hidden" style={{ maxWidth: '100%' }}>
+              <h4 className="text-lg font-semibold text-gray-900 break-words overflow-hidden" style={{ wordBreak: 'break-word', overflowWrap: 'break-word', maxWidth: '100%', width: '100%' }}>{userData.basicUserInfo.fullName}</h4>
+              <p className="text-sm text-gray-600 break-words overflow-hidden">{memberSince}</p>
             </div>
           </div>
 
           {/* User Details */}
-          <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-3">
-              <div>
-                <label className="text-sm font-medium text-gray-700">User ID</label>
-                <p className="text-sm text-gray-900 font-mono bg-gray-50 px-2 py-1 rounded">
+          <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 min-w-0 overflow-hidden" style={{ width: '100%', maxWidth: '100%' }}>
+            <div className="space-y-3 min-w-0 overflow-hidden" style={{ width: '100%', maxWidth: '100%' }}>
+              <div className="min-w-0 overflow-hidden">
+                <label className="text-sm font-medium text-gray-700 block mb-1">User ID</label>
+                <p className="text-sm text-gray-900 font-mono bg-gray-50 px-2 py-1 rounded break-all overflow-hidden" style={{ wordBreak: 'break-all', overflowWrap: 'break-word', maxWidth: '100%' }}>
                   {userData.basicUserInfo.userId}
                 </p>
               </div>
-              <div>
-                <label className="text-sm font-medium text-gray-700">Full Name</label>
-                <p className="text-sm text-gray-900">{userData.basicUserInfo.fullName}</p>
+              <div className="min-w-0 overflow-hidden">
+                <label className="text-sm font-medium text-gray-700 block mb-1">Full Name</label>
+                <p className="text-sm text-gray-900 break-words overflow-hidden" style={{ wordBreak: 'break-word', overflowWrap: 'break-word', maxWidth: '100%' }}>{userData.basicUserInfo.fullName}</p>
               </div>
-              <div>
-                <label className="text-sm font-medium text-gray-700">Email / Login ID</label>
-                <p className="text-sm text-gray-900">{userData.basicUserInfo.email}</p>
+              <div className="min-w-0 overflow-hidden">
+                <label className="text-sm font-medium text-gray-700 block mb-1">Email / Login ID</label>
+                <p className="text-sm text-gray-900 break-all overflow-hidden" style={{ wordBreak: 'break-all', overflowWrap: 'break-word', maxWidth: '100%' }}>{userData.basicUserInfo.email}</p>
               </div>
-              <div>
-                <label className="text-sm font-medium text-gray-700">Member Since</label>
-                <p className="text-sm text-gray-900">{memberSince}</p>
+              <div className="min-w-0 overflow-hidden">
+                <label className="text-sm font-medium text-gray-700 block mb-1">Member Since</label>
+                <p className="text-sm text-gray-900 break-words overflow-hidden">{memberSince}</p>
               </div>
             </div>
-            <div className="space-y-3">
-              <div>
-                <label className="text-sm font-medium text-gray-700">Account Type</label>
-                <div className="flex items-center gap-2">
-                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary">
+            <div className="space-y-3 min-w-0 overflow-hidden" style={{ width: '100%', maxWidth: '100%' }}>
+              <div className="min-w-0 overflow-hidden">
+                <label className="text-sm font-medium text-gray-700 block mb-1">Account Type</label>
+                <div className="flex items-center gap-2 overflow-hidden">
+                  <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary break-words max-w-full">
                     {userData.basicUserInfo.accountType}
                   </span>
                 </div>
               </div>
-              <div>
-                <label className="text-sm font-medium text-gray-700">Status</label>
-                <div className="flex items-center gap-2">
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+              <div className="min-w-0 overflow-hidden">
+                <label className="text-sm font-medium text-gray-700 block mb-1">Status</label>
+                <div className="flex items-center gap-2 overflow-hidden">
+                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium break-words max-w-full ${
                     userData.basicUserInfo.status === 'active' 
                       ? 'bg-success/10 text-success' 
                       : 'bg-gray-100 text-gray-700'
@@ -159,15 +156,15 @@ const UserBasicInfo = () => {
                 </div>
               </div>
               {userData.basicUserInfo.phoneNumber && (
-                <div>
-                  <label className="text-sm font-medium text-gray-700">Phone Number</label>
-                  <p className="text-sm text-gray-900">{userData.basicUserInfo.phoneNumber}</p>
+                <div className="min-w-0 overflow-hidden">
+                  <label className="text-sm font-medium text-gray-700 block mb-1">Phone Number</label>
+                  <p className="text-sm text-gray-900 break-words overflow-hidden">{userData.basicUserInfo.phoneNumber}</p>
                 </div>
               )}
               {userData.basicUserInfo.address && (
-                <div>
-                  <label className="text-sm font-medium text-gray-700">Address</label>
-                  <p className="text-sm text-gray-900">{userData.basicUserInfo.address}</p>
+                <div className="min-w-0 overflow-hidden">
+                  <label className="text-sm font-medium text-gray-700 block mb-1">Address</label>
+                  <p className="text-sm text-gray-900 break-words overflow-hidden">{userData.basicUserInfo.address}</p>
                 </div>
               )}
             </div>

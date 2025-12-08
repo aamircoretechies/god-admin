@@ -227,16 +227,6 @@ const ViewTranslationContent: React.FC = () => {
             <p className="text-gray-600 mt-1">{translation.version} • {translation.language}</p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <Button variant="outline" disabled={true}>
-            <Copy className="w-4 h-4 mr-2" />
-            Duplicate
-          </Button>
-          <Button variant="outline" disabled={true}>
-            <Download className="w-4 h-4 mr-2" />
-            Download
-          </Button>
-        </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

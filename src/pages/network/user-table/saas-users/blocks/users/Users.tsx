@@ -276,16 +276,6 @@ const Users = ({ hideRowsPerPage = false }: UsersProps) => {
                 <SelectItem value="oldest">Oldest</SelectItem>
               </SelectContent>
             </Select>
-
-            <button 
-              className="btn btn-sm btn-outline btn-primary"
-              onClick={() => {
-                // Additional filter options can be implemented here
-                console.log('Filter button clicked', { statusFilter, sortFilter, searchInput });
-              }}
-            >
-              <KeenIcon icon="setting-4" /> Filters
-            </button>
           </div>
         </div>
       </div>
