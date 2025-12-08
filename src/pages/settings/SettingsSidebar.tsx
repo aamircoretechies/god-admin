@@ -34,6 +34,15 @@ const SettingsSidebar = () => {
           target: 'notifications_email'
         }
       ]
+    },
+    {
+      title: 'Security',
+      children: [
+        {
+          title: 'Change Password',
+          target: 'change_password'
+        }
+      ]
     }
   ];
 

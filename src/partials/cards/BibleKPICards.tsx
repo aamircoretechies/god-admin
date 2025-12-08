@@ -68,7 +68,7 @@ const KPICard: React.FC<KPICardWithNavigation> = ({ title, value, change, change
 const BibleKPICards = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [kpiData, setKpiData] = useState<KPICardProps[]>([]);
+  const [kpiData, setKpiData] = useState<KPICardWithNavigation[]>([]);
 
   useEffect(() => {
     const loadAnalytics = async () => {
@@ -109,7 +109,7 @@ const BibleKPICards = () => {
               icon: <Flag className="h-4 w-4 text-red-500" />,
               description: mainKPIs.flaggedResponses.description,
               period: mainKPIs.flaggedResponses.period,
-              // navigationPath: '/bible-content/moderation'
+              navigationPath: '/feedback/ai-flags'
             },
             {
               title: mainKPIs.activeTranslations.label,
@@ -184,6 +184,7 @@ const BibleKPICards = () => {
           icon={kpi.icon}
           description={kpi.description}
           period={kpi.period}
+          navigationPath={kpi.navigationPath}
         />
       ))}
     </div>

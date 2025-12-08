@@ -36,7 +36,11 @@ const EnforceSwitch = ({ enforce }: { enforce: boolean }) => {
   );
 };
 
-const Users = () => {
+interface UsersProps {
+  hideRowsPerPage?: boolean;
+}
+
+const Users = ({ hideRowsPerPage = false }: UsersProps) => {
   const ColumnInputFilter = <TData, TValue>({ column }: IColumnFilterProps<TData, TValue>) => {
     return (
       <Input
@@ -299,7 +303,7 @@ const Users = () => {
       columns={columns}
       rowSelection={true}
       onRowSelectionChange={handleRowSelection}
-      pagination={{ size: 10 }}
+      pagination={{ size: 5, hideRowsPerPage }}
       sorting={[{ id: 'joinDate', desc: true }]}
       toolbar={<Toolbar />}
       layout={{ card: true }}

@@ -23,7 +23,7 @@ interface IDropdownUserProps {
 
 const DropdownUser = ({ menuItemRef }: IDropdownUserProps) => {
   const { settings, storeSettings } = useSettings();
-  const { logout } = useAuthContext();
+  const { logout, currentUser } = useAuthContext();
   const { isRTL } = useLanguage();
 
   const handleThemeMode = (event: ChangeEvent<HTMLInputElement>) => {
@@ -35,30 +35,42 @@ const DropdownUser = ({ menuItemRef }: IDropdownUserProps) => {
   };
 
   const buildHeader = () => {
+    const userName = currentUser?.fullname || 
+                     (currentUser?.first_name && currentUser?.last_name 
+                       ? `${currentUser.first_name} ${currentUser.last_name}` 
+                       : currentUser?.first_name || 'User');
+    const userEmail = currentUser?.email || '';
+    const userRole = currentUser?.role || 'USER';
+    const userAvatar = currentUser?.profile_picture || currentUser?.pic || '/media/avatars/300-2.png';
+
     return (
       <div className="flex items-center justify-between px-5 py-1.5 gap-1.5">
         <div className="flex items-center gap-2">
           <img
             className="size-9 rounded-full border-2 border-success"
-            src={toAbsoluteUrl('/media/avatars/300-2.png')}
-            alt=""
+            src={toAbsoluteUrl(userAvatar)}
+            alt={userName}
           />
           <div className="flex flex-col gap-1.5">
             <Link
               to="/account"
               className="text-sm text-gray-800 hover:text-primary font-semibold leading-none"
             >
-              Cody Fisher
+              {userName}
             </Link>
-            <a
-              href="mailto:c.fisher@gmail.com"
-              className="text-xs text-gray-600 hover:text-primary font-medium leading-none"
-            >
-              c.fisher@gmail.com
-            </a>
+            {userEmail && (
+              <a
+                href={`mailto:${userEmail}`}
+                className="text-xs text-gray-600 hover:text-primary font-medium leading-none"
+              >
+                {userEmail}
+              </a>
+            )}
           </div>
         </div>
-        <span className="badge badge-xs badge-primary badge-outline">Admin</span>
+       {/*  <span className="badge badge-xs badge-primary badge-outline">
+          {userRole}
+        </span> */}
       </div>
     );
   };
@@ -84,7 +96,7 @@ const DropdownUser = ({ menuItemRef }: IDropdownUserProps) => {
               ]
             }}
           >
-            <MenuLink>
+           {/*  <MenuLink>
               <MenuIcon>
                 <KeenIcon icon="setting-2" />
               </MenuIcon>
@@ -134,7 +146,7 @@ const DropdownUser = ({ menuItemRef }: IDropdownUserProps) => {
                   </label>
                 </MenuLink>
               </MenuItem>
-            </MenuSub>
+            </MenuSub> */}
           </MenuItem>
  
           <DropdownUserLanguages menuItemRef={menuItemRef} />

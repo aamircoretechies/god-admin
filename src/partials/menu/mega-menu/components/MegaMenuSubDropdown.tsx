@@ -50,9 +50,14 @@ const MegaMenuSubDropdown = (items: TMenuConfig) => {
           </MenuItem>
         );
       } else {
+        const isExternal = item.path?.startsWith('http://') || item.path?.startsWith('https://') || item.path?.startsWith('//');
         return (
           <MenuItem key={index}>
-            <MenuLink path={item.path}>
+            <MenuLink 
+              path={item.path}
+              externalLink={isExternal}
+              newTab={isExternal}
+            >
               {item.icon && (
                 <MenuIcon>
                   <KeenIcon icon={item.icon} />

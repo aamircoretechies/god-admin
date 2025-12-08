@@ -1,4 +1,5 @@
 export * from './GeneralSettings';
+export * from './ChangePassword';
 export * from './SystemApiConfig';
 export * from './CacheOfflineControl';
 export * from './NotificationsEmail';

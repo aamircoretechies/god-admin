@@ -1044,30 +1044,30 @@ export const MENU_MEGA: TMenuConfig = [
         icon: 'information',
         children: [
           {
-            title: 'All Questions',
+            title: 'Contact Us',
             icon: 'questionnaire-tablet',
-            path: 'https://devs.keenthemes.com'
+            path: 'https://growondaily.com/#contact'
           },
           {
-            title: 'Popular Questions',
+            title: 'FAQ',
             icon: 'star',
-            path: 'https://devs.keenthemes.com/popular'
+            path: 'https://growondaily.com/#faq'
           },
           {
-            title: 'Ask Question',
+            title: 'About Us',
             icon: 'message-question',
-            path: 'https://devs.keenthemes.com/question/create'
+            path: 'https://growondaily.com/#about'
           }
         ]
       },
       {
         title: 'Licenses & FAQ',
         tooltip: {
-          title: 'Learn more about licenses',
+          title: 'Frequently asked questions',
           placement: 'right'
         },
         icon: 'subtitle',
-        path: 'https://keenthemes.com/metronic/tailwind/docs/getting-started/license'
+        path: 'https://growondaily.com/#faq'
       },
       {
         title: 'Documentation',
@@ -1078,7 +1078,7 @@ export const MENU_MEGA: TMenuConfig = [
       {
         title: 'Contact Us',
         icon: 'share',
-        path: 'https://keenthemes.com/contact'
+        path: 'https://growondaily.com/#contact'
       }
     ]
   }

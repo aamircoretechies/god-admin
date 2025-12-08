@@ -21,7 +21,7 @@ const Demo1LightSidebarContent = () => {
         </div>
 
         <div className="lg:col-span-2">
-          <NetworkSaasUsersContent />
+          <NetworkSaasUsersContent hideRowsPerPage={true} />
         </div>
       </div>
 

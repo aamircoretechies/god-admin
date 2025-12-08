@@ -50,7 +50,12 @@ const MegaMenuInner = () => {
     return (
       <Fragment>
         <MenuItem key="home">
-          <MenuLink path={homeItem.path} className={linkClass}>
+          <MenuLink 
+            path={homeItem.path} 
+            className={linkClass}
+            externalLink={homeItem.path?.startsWith('http://') || homeItem.path?.startsWith('https://') || homeItem.path?.startsWith('//')}
+            newTab={homeItem.path?.startsWith('http://') || homeItem.path?.startsWith('https://') || homeItem.path?.startsWith('//')}
+          >
             <MenuTitle className={titleClass}>{homeItem.title}</MenuTitle>
           </MenuLink>
         </MenuItem>

@@ -3,7 +3,8 @@ import {
   GeneralSettings,
   SystemApiConfig,
   NotificationsEmail,
-  CacheOfflineControl
+  CacheOfflineControl,
+  ChangePassword
 } from './blocks';
 import clsx from 'clsx';
 import { useEffect, useRef, useState } from 'react';
@@ -73,6 +74,8 @@ const SettingsSidebarContent = () => {
         <CacheOfflineControl />
 
         <NotificationsEmail />
+
+        <ChangePassword />
       </div>
     </div>
   );

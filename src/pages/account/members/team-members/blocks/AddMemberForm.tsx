@@ -194,165 +194,182 @@ const AddMemberForm = () => {
         </button>
       </DialogTrigger>
       
-      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Add New Team Member</DialogTitle>
-          <DialogDescription>
+      <DialogContent className="sm:max-w-[540px] max-h-[90vh] overflow-y-auto p-0">
+        <DialogHeader className="px-6 pt-6 pb-4">
+          <DialogTitle className="text-xl font-semibold">Add New Team Member</DialogTitle>
+          <DialogDescription className="text-sm text-gray-600 mt-1.5">
             Create a new team member account with admin or moderator role.
           </DialogDescription>
         </DialogHeader>
         
-        <div className="px-1 pt-4 pb-6">
-          <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="first_name">First Name</Label>
+        <div className="px-6 pb-6">
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <Label htmlFor="first_name" className="text-sm font-medium text-gray-700">
+                  First Name
+                </Label>
+                <Input
+                  id="first_name"
+                  type="text"
+                  placeholder="Enter first name"
+                  value={formData.first_name}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    // Limit to 50 characters
+                    if (value.length <= 50) {
+                      handleInputChange('first_name', value);
+                    }
+                  }}
+                  maxLength={50}
+                  required
+                  className="h-10"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  {formData.first_name.length}/50 characters
+                </p>
+              </div>
+              
+              <div className="space-y-1.5">
+                <Label htmlFor="last_name" className="text-sm font-medium text-gray-700">
+                  Last Name
+                </Label>
+                <Input
+                  id="last_name"
+                  type="text"
+                  placeholder="Enter last name"
+                  value={formData.last_name}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    // Limit to 50 characters
+                    if (value.length <= 50) {
+                      handleInputChange('last_name', value);
+                    }
+                  }}
+                  maxLength={50}
+                  required
+                  className="h-10"
+                />
+                <p className="text-xs text-gray-500 mt-1">
+                  {formData.last_name.length}/50 characters
+                </p>
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="email" className="text-sm font-medium text-gray-700">
+                Email
+              </Label>
               <Input
-                id="first_name"
-                type="text"
-                placeholder="Enter first name"
-                value={formData.first_name}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  // Limit to 50 characters
-                  if (value.length <= 50) {
-                    handleInputChange('first_name', value);
-                  }
-                }}
-                maxLength={50}
+                id="email"
+                type="email"
+                placeholder="Enter email address"
+                value={formData.email}
+                onChange={(e) => handleInputChange('email', e.target.value)}
                 required
+                className="h-10"
               />
-              <p className="text-xs text-gray-500">
-                {formData.first_name.length}/50 characters
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="password" className="text-sm font-medium text-gray-700">
+                Password
+              </Label>
+              <div className="relative">
+                <Input
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  placeholder="Enter password"
+                  value={formData.password}
+                  onChange={(e) => handleInputChange('password', e.target.value)}
+                  required
+                  minLength={6}
+                  className="h-10 pr-10"
+                />
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="sm"
+                  className="absolute right-1 top-1/2 -translate-y-1/2 h-8 w-8 p-0 hover:bg-gray-100"
+                  onClick={() => setShowPassword(!showPassword)}
+                >
+                  {showPassword ? (
+                    <EyeOff className="h-4 w-4 text-gray-500" />
+                  ) : (
+                    <Eye className="h-4 w-4 text-gray-500" />
+                  )}
+                </Button>
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="role" className="text-sm font-medium text-gray-700">
+                Role
+              </Label>
+              <Select 
+                value={formData.role} 
+                onValueChange={(value: string) => handleInputChange('role', value)}
+              >
+                <SelectTrigger className="h-10">
+                  <SelectValue placeholder="Select role" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="FREE">FREE</SelectItem>
+                  <SelectItem value="PREMIUM">PREMIUM</SelectItem>
+                  <SelectItem value="ADMIN">ADMIN</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label htmlFor="custom_role_id" className="text-sm font-medium text-gray-700">
+                Custom Role (Optional)
+              </Label>
+              <Select 
+                value={formData.custom_role_id || 'none'} 
+                onValueChange={(value: string) => {
+                  const roleId = value === 'none' ? '' : value;
+                  handleInputChange('custom_role_id', roleId);
+                }}
+                disabled={isLoadingRoles}
+              >
+                <SelectTrigger className="h-10">
+                  <SelectValue placeholder={isLoadingRoles ? "Loading roles..." : "Select custom role"} />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">None</SelectItem>
+                  {availableRoles.map((role) => (
+                    <SelectItem key={role.id} value={role.id}>
+                      {role.name}
+                      {role.description && ` - ${role.description}`}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-gray-500 mt-1">
+                {isLoadingRoles ? 'Loading available roles...' : 'Select a custom role or leave as None'}
               </p>
             </div>
-            
-            <div className="space-y-2">
-              <Label htmlFor="last_name">Last Name</Label>
-              <Input
-                id="last_name"
-                type="text"
-                placeholder="Enter last name"
-                value={formData.last_name}
-                onChange={(e) => {
-                  const value = e.target.value;
-                  // Limit to 50 characters
-                  if (value.length <= 50) {
-                    handleInputChange('last_name', value);
-                  }
-                }}
-                maxLength={50}
-                required
-              />
-              <p className="text-xs text-gray-500">
-                {formData.last_name.length}/50 characters
-              </p>
-            </div>
-          </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              placeholder="Enter email address"
-              value={formData.email}
-              onChange={(e) => handleInputChange('email', e.target.value)}
-              required
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="password">Password</Label>
-            <div className="relative">
-              <Input
-                id="password"
-                type={showPassword ? 'text' : 'password'}
-                placeholder="Enter password"
-                value={formData.password}
-                onChange={(e) => handleInputChange('password', e.target.value)}
-                required
-                minLength={6}
-              />
+            <div className="flex justify-end gap-3 pt-2 border-t border-gray-200">
               <Button
                 type="button"
-                variant="ghost"
-                size="sm"
-                className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                onClick={() => setShowPassword(!showPassword)}
+                variant="outline"
+                onClick={handleClose}
+                disabled={isSubmitting}
+                className="min-w-[100px] h-10"
               >
-                {showPassword ? (
-                  <EyeOff className="h-4 w-4" />
-                ) : (
-                  <Eye className="h-4 w-4" />
-                )}
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                disabled={isSubmitting}
+                className="min-w-[120px] h-10 bg-primary hover:bg-primary/90 text-white"
+              >
+                {isSubmitting ? 'Adding...' : 'Add Member'}
               </Button>
             </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="role">Role</Label>
-            <Select 
-              value={formData.role} 
-              onValueChange={(value: string) => handleInputChange('role', value)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select role" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="FREE">FREE</SelectItem>
-                <SelectItem value="PREMIUM">PREMIUM</SelectItem>
-                <SelectItem value="ADMIN">ADMIN</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="custom_role_id">Custom Role (Optional)</Label>
-            <Select 
-              value={formData.custom_role_id || 'none'} 
-              onValueChange={(value: string) => {
-                const roleId = value === 'none' ? '' : value;
-                handleInputChange('custom_role_id', roleId);
-              }}
-              disabled={isLoadingRoles}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder={isLoadingRoles ? "Loading roles..." : "Select custom role"} />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">None</SelectItem>
-                {availableRoles.map((role) => (
-                  <SelectItem key={role.id} value={role.id}>
-                    {role.name}
-                    {role.description && ` - ${role.description}`}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <p className="text-xs text-gray-500">
-              {isLoadingRoles ? 'Loading available roles...' : 'Select a custom role or leave as None'}
-            </p>
-          </div>
-
-          <div className="flex justify-end space-x-2 pt-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleClose}
-              disabled={isSubmitting}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              disabled={isSubmitting}
-              className="bg-primary hover:bg-primary/90"
-            >
-              {isSubmitting ? 'Adding...' : 'Add Member'}
-            </Button>
-          </div>
-        </form>
+          </form>
         </div>
       </DialogContent>
     </Dialog>

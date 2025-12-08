@@ -1,8 +1,8 @@
 const generalSettings: any = {
   purchaseLink: '#',
   devsLink: '#',
-  faqLink: '#',
-  aboutLink: '#'
+  faqLink: 'https://growondaily.com/#faq',
+  aboutLink: 'https://growondaily.com/#about'
 };
 
 export { generalSettings };
