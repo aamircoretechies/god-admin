@@ -666,8 +666,8 @@ const AIExplanationManagementContent = () => {
                         )}
                       </h3>
                       <p className="text-sm text-gray-600 italic flex items-center gap-1">
-                        {explanation.verseText || 'Verse text not available'}
-                        {!explanation.verseText && <DummyDataIndicator text="Verse text is not available in the API" />}
+                        {explanation.verseText || ''}
+                        {/* {!explanation.verseText && <DummyDataIndicator text="Verse text is not available in the API" />} */}
                       </p>
                     </div>
                   </div>
@@ -837,7 +837,8 @@ const AIExplanationManagementContent = () => {
               <div>
                 <label className="text-sm font-medium text-gray-600">Verse Text</label>
                 <p className="text-sm text-gray-700 italic mt-1">
-                  {selectedExplanation.verseText || 'Verse text not available'}
+                  {selectedExplanation.verseText || ''}
+                  {/* {selectedExplanation.verseText || 'Verse text not available'} */}
                 </p>
               </div>
               <div>
