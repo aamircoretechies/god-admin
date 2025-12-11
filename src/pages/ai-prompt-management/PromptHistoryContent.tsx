@@ -112,13 +112,13 @@ const PromptHistoryContent: React.FC = () => {
                   className={`p-3 rounded-lg border cursor-pointer transition-colors ${
                     selectedVersion === version.id
                       ? 'border-amber-500 bg-amber-50'
-                      : 'border-gray-200 hover:border-gray-300'
+                      : 'border-gray-200 hover:border-gray-300 '
                   }`}
                   onClick={() => setSelectedVersion(version.id)}
                 >
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
-                      <Badge variant={version.isCurrent ? "default" : "secondary"}>
+                      <Badge variant={version.isCurrent ? "default" : "default"}>
                         v{version.version}
                       </Badge>
                       {version.isCurrent && (
@@ -235,10 +235,10 @@ const PromptHistoryContent: React.FC = () => {
                       <CardTitle>Changes Made</CardTitle>
                     </CardHeader>
                     <CardContent>
-                      <ul className="space-y-2">
+                      <ul className="space-y-2 ">
                         {selectedVersionData.changes.map((change, index) => (
-                          <li key={index} className="flex items-start gap-2">
-                            <span className="text-amber-500 mt-1">•</span>
+                          <li key={index} className="flex items-start gap-1">
+                            <span className="text-amber-500 -translate-y-0.5">•</span>
                             <span className="text-sm text-gray-700">{change}</span>
                           </li>
                         ))}

@@ -407,7 +407,7 @@ const SystemAlertsContent: React.FC = () => {
             <select
               value={selectedFilter}
               onChange={(e) => setSelectedFilter(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+              className="px-3 py-2 border border-gray-300 rounded-md text-sm bg-card"
             >
               <option value="all">All Alerts</option>
               <option value="new">New Alerts</option>

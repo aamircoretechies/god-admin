@@ -29,6 +29,8 @@ import {
 } from 'lucide-react';
 import { fetchAIExplanations, fetchVerseAIExplanationHistory, type AIExplanationResponse } from '@/services/aiExplanationsApi';
 import { DummyDataIndicator } from '@/components/dummy-data-indicator';
+import { toast } from "sonner";
+
 
 interface AIExplanation {
   id: string;
@@ -304,6 +306,7 @@ const AIExplanationManagementContent = () => {
     if (isEditing === id) {
       setIsEditing(null);
     }
+    toast.success("Deleted successfully!");
   };
 
   const getStatusColor = (status: string) => {

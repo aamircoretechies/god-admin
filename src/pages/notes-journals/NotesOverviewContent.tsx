@@ -479,7 +479,7 @@ const NotesOverviewContent: React.FC = () => {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+            className="px-3 py-2 border border-gray-300 rounded-md text-sm dark:bg-card dark:text-white"
           >
             <option value="all">All Status</option>
             <option value="active">Active</option>
@@ -489,7 +489,7 @@ const NotesOverviewContent: React.FC = () => {
           <select
             value={userFilter}
             onChange={(e) => setUserFilter(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+            className="px-3 py-2 border border-gray-300 rounded-md text-sm dark:bg-card dark:text-white"
           >
             <option value="all">All Users</option>
             {uniqueUserIds.map((userId) => {
@@ -504,7 +504,7 @@ const NotesOverviewContent: React.FC = () => {
           <select
             value={languageFilter}
             onChange={(e) => setLanguageFilter(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+            className="px-3 py-2 border border-gray-300 rounded-md text-sm dark:bg-card dark:text-white"
           >
             <option value="all">All Languages</option>
             <option value="English">English</option>

@@ -442,7 +442,7 @@ const BibleContentDashboardContent = () => {
                 dashboardData.recentActivity.reports.slice(0, 5).map((report) => (
                   <div key={report.report_id} className="flex items-center justify-between p-3 bg-red-50 rounded-lg">
                     <div>
-                      <h3 className="font-medium text-gray-900">
+                      <h3 className="font-medium text-black">
                         {report.book} {report.chapter}:{report.verse}
                       </h3>
                       <p className="text-sm text-gray-600">
@@ -481,7 +481,7 @@ const BibleContentDashboardContent = () => {
                 dashboardData.recentActivity.aiExplanations.slice(0, 5).map((explanation) => (
                   <div key={explanation.verse_id} className="flex items-center justify-between p-3 bg-purple-50 rounded-lg">
                     <div>
-                      <h3 className="font-medium text-gray-900">
+                      <h3 className="font-medium text-black">
                         {explanation.book.long_name} {explanation.chapter_number}:{explanation.verse_number}
                       </h3>
                       <p className="text-sm text-gray-600">

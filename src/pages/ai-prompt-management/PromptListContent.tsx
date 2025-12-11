@@ -252,7 +252,7 @@ const PromptListContent: React.FC = () => {
   const getRoleBadge = (role: string) => {
     switch (role) {
       case 'All Users':
-        return <Badge variant="secondary">All Users</Badge>;
+        return <Badge variant="outline">All Users</Badge>;
       case 'Premium Only':
         return <Badge variant="default" className="bg-purple-100 text-purple-800">Premium Only</Badge>;
       case 'Admin Only':
@@ -452,7 +452,7 @@ const PromptListContent: React.FC = () => {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+            className="px-3 py-2 border border-gray-300 rounded-md text-sm dark:bg-card dark:text-white"
           >
             <option value="all">All Status</option>
             <option value="Active">Active</option>
@@ -461,7 +461,7 @@ const PromptListContent: React.FC = () => {
           <select
             value={categoryFilter}
             onChange={(e) => setCategoryFilter(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+            className="px-3 py-2 border border-gray-300 rounded-md text-sm dark:bg-card dark:text-white"
           >
             <option value="all">All Categories</option>
             {uniqueCategories.map(category => (

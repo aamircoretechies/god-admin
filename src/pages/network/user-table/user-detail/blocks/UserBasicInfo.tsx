@@ -107,8 +107,8 @@ const UserBasicInfo = () => {
               />
             </div>
             <div className="text-center lg:text-left w-full overflow-hidden" style={{ maxWidth: '100%' }}>
-              <h4 className="text-lg font-semibold text-gray-900 break-words overflow-hidden" style={{ wordBreak: 'break-word', overflowWrap: 'break-word', maxWidth: '100%', width: '100%' }}>{userData.basicUserInfo.fullName}</h4>
-              <p className="text-sm text-gray-600 break-words overflow-hidden">{memberSince}</p>
+              {/* <h4 className="text-lg font-semibold text-gray-900 break-words overflow-hidden" style={{ wordBreak: 'break-word', overflowWrap: 'break-word', maxWidth: '100%', width: '100%' }}>{userData.basicUserInfo.fullName}</h4> */}
+              {/* <p className="text-sm text-gray-600 break-words overflow-hidden">{memberSince}</p> */}
             </div>
           </div>
 
@@ -117,7 +117,7 @@ const UserBasicInfo = () => {
             <div className="space-y-3 min-w-0 overflow-hidden" style={{ width: '100%', maxWidth: '100%' }}>
               <div className="min-w-0 overflow-hidden">
                 <label className="text-sm font-medium text-gray-700 block mb-1">User ID</label>
-                <p className="text-sm text-gray-900 font-mono bg-gray-50 px-2 py-1 rounded break-all overflow-hidden" style={{ wordBreak: 'break-all', overflowWrap: 'break-word', maxWidth: '100%' }}>
+                <p className="text-sm text-gray-900 font-mono bg-gray-50 dark:bg-card dark:text-white px-2 py-1 rounded break-all overflow-hidden" style={{ wordBreak: 'break-all', overflowWrap: 'break-word', maxWidth: '100%' }}>
                   {userData.basicUserInfo.userId}
                 </p>
               </div>
@@ -136,7 +136,7 @@ const UserBasicInfo = () => {
             </div>
             <div className="space-y-3 min-w-0 overflow-hidden" style={{ width: '100%', maxWidth: '100%' }}>
               <div className="min-w-0 overflow-hidden">
-                <label className="text-sm font-medium text-gray-700 block mb-1">Account Type</label>
+                <label className="text-sm font-medium text-gray-700 block mb-1 ml-2">Account Type</label>
                 <div className="flex items-center gap-2 overflow-hidden">
                   <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary break-words max-w-full">
                     {userData.basicUserInfo.accountType}
@@ -144,7 +144,7 @@ const UserBasicInfo = () => {
                 </div>
               </div>
               <div className="min-w-0 overflow-hidden">
-                <label className="text-sm font-medium text-gray-700 block mb-1">Status</label>
+                <label className="text-sm font-medium text-gray-700 block mb-1 ml-2">Status</label>
                 <div className="flex items-center gap-2 overflow-hidden">
                   <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium break-words max-w-full ${
                     userData.basicUserInfo.status === 'active' 

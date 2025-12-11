@@ -8,10 +8,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
-import { 
-  Languages, 
-  Edit, 
-  Trash2, 
+import {
+  Languages,
+  Edit,
+  Trash2,
   Save,
   X,
   Upload,
@@ -57,7 +57,7 @@ const transformTranslation = (apiTranslation: TranslationResponse): Translation 
     description: '', // API doesn't provide description
     status: (apiTranslation.status?.toLowerCase() || 'draft') as 'active' | 'inactive' | 'pending' | 'draft',
     verseCount: apiTranslation.total_verses || 0, // Map total_verses to verseCount
-    lastUpdated: apiTranslation.last_updated 
+    lastUpdated: apiTranslation.last_updated
       ? new Date(apiTranslation.last_updated).toISOString().split('T')[0]
       : new Date().toISOString().split('T')[0],
     fileSize: formatFileSize(apiTranslation.file_size_mb), // Map file_size_mb to fileSize
@@ -159,7 +159,7 @@ const BibleTranslationsContent = () => {
         if (response.success && response.data && Array.isArray(response.data)) {
           const transformedTranslations = response.data.map(transformTranslation);
           setTranslations(transformedTranslations);
-          
+
           // Use metadata if available
           if (response.metadata) {
             setTotalPages(response.metadata.totalPages || 1);
@@ -183,12 +183,12 @@ const BibleTranslationsContent = () => {
           status: err?.response?.status,
           data: err?.response?.data
         });
-        
-        const errorMessage = err?.response?.data?.message 
+
+        const errorMessage = err?.response?.data?.message
           || err?.response?.data?.error
-          || err?.message 
+          || err?.message
           || 'Failed to load translations';
-        
+
         setError(errorMessage);
         setTranslations([]);
       } finally {
@@ -242,11 +242,11 @@ const BibleTranslationsContent = () => {
       try {
         setSaving(true);
         setError(null);
-        
+
         // Prepare API request data
         // Convert language display name back to code
         const languageCode = getLanguageCode(formData.language || '');
-        
+
         const updateData = {
           name: formData.name || '',
           abbreviation: formData.version || '', // version maps to abbreviation
@@ -256,7 +256,7 @@ const BibleTranslationsContent = () => {
         };
 
         const response = await updateTranslation(editingTranslation.id, updateData);
-        
+
         if (response.success) {
           // Reload translations to get updated data
           const updatedResponse = await fetchTranslations({
@@ -270,13 +270,13 @@ const BibleTranslationsContent = () => {
           if (updatedResponse.success && updatedResponse.data) {
             const transformedTranslations = updatedResponse.data.map(transformTranslation);
             setTranslations(transformedTranslations);
-            
+
             if (updatedResponse.metadata) {
               setTotalPages(updatedResponse.metadata.totalPages || 1);
               setTotalCount(updatedResponse.metadata.total || transformedTranslations.length);
             }
           }
-          
+
           setEditingTranslation(null);
           setFormData({
             name: '',
@@ -565,7 +565,21 @@ const BibleTranslationsContent = () => {
                 <div className="p-4 bg-gray-50 dark:bg-coal-100 rounded-lg ">
                   <h4 className="font-medium text-gray-900 dark:text-white mb-2">Upload Translation File</h4>
                   <div className="space-y-2">
-                    <Button variant="outline" className="w-full dark:border-gray-600 dark:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-white">
+                    {/* <Button variant="outline" className="w-full dark:border-gray-600 dark:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-white">
+                      <Upload className="w-4 h-4 mr-2" />
+                      Choose File
+                    </Button> */}
+                    <input
+                      type="file"
+                      accept=".json,.xml,.txt"
+                      id="translation-file"
+                      className="hidden"
+                    />
+                    <Button
+                      variant="outline"
+                      className="w-full dark:border-gray-600 dark:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-white"
+                      onClick={() => document.getElementById("translation-file")?.click()}
+                    >
                       <Upload className="w-4 h-4 mr-2" />
                       Choose File
                     </Button>
@@ -581,8 +595,8 @@ const BibleTranslationsContent = () => {
               <Button variant="outline" onClick={handleCancel}>
                 Cancel
               </Button>
-              <Button 
-                onClick={handleSave} 
+              <Button
+                onClick={handleSave}
                 className="bg-primary hover:bg-primary-dark"
                 disabled={saving}
               >
@@ -682,81 +696,81 @@ const BibleTranslationsContent = () => {
               </div>
             ) : (
               filteredTranslations.map((translation) => (
-              <div key={translation.id} className="p-4 border rounded-lg">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center space-x-3">
-                    <div className="p-2 bg-blue-100 rounded-lg">
-                      <Languages className="w-5 h-5 text-blue-600" />
+                <div key={translation.id} className="p-4 border rounded-lg">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center space-x-3">
+                      <div className="p-2 bg-blue-100 rounded-lg">
+                        <Languages className="w-5 h-5 text-blue-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-gray-900">{translation.name}</h3>
+                        <p className="text-sm text-gray-600">{translation.description}</p>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="font-semibold text-gray-900">{translation.name}</h3>
-                      <p className="text-sm text-gray-600">{translation.description}</p>
+                    <div className="flex items-center space-x-2">
+                      <Badge className={getStatusColor(translation.status)}>
+                        {translation.status.charAt(0).toUpperCase() + translation.status.slice(1)}
+                      </Badge>
+                      {!translation.isPublic && (
+                        <Badge className="bg-gray-100 text-gray-800">Private</Badge>
+                      )}
                     </div>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <Badge className={getStatusColor(translation.status)}>
-                      {translation.status.charAt(0).toUpperCase() + translation.status.slice(1)}
-                    </Badge>
-                    {!translation.isPublic && (
-                      <Badge className="bg-gray-100 text-gray-800">Private</Badge>
-                    )}
-                  </div>
-                </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-3 text-sm">
-                  <div className="flex items-center space-x-2">
-                    <Globe className="w-4 h-4 text-gray-500" />
-                    <span className="text-gray-600">{getLanguageName(translation.language) || translation.language}</span>
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-3 text-sm">
+                    <div className="flex items-center space-x-2">
+                      <Globe className="w-4 h-4 text-gray-500" />
+                      <span className="text-gray-600">{getLanguageName(translation.language) || translation.language}</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <FileText className="w-4 h-4 text-gray-500" />
+                      <span className="text-gray-600">{translation.verseCount.toLocaleString()} verses</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Clock className="w-4 h-4 text-gray-500" />
+                      <span className="text-gray-600">Updated: {translation.lastUpdated}</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <FileText className="w-4 h-4 text-gray-500" />
+                      <span className="text-gray-600">{translation.fileSize}</span>
+                    </div>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <FileText className="w-4 h-4 text-gray-500" />
-                    <span className="text-gray-600">{translation.verseCount.toLocaleString()} verses</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Clock className="w-4 h-4 text-gray-500" />
-                    <span className="text-gray-600">Updated: {translation.lastUpdated}</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <FileText className="w-4 h-4 text-gray-500" />
-                    <span className="text-gray-600">{translation.fileSize}</span>
-                  </div>
-                </div>
 
-                <div className="flex justify-between items-center pt-3 border-t">
-                  <div className="text-sm text-gray-500">
-                    {translation.publisher} • {translation.year} • {translation.license}
-                  </div>
-                  <div className="flex space-x-2">
-                    <Link to={`/bible-content/translations/view/${translation.id}`}>
-                      <Button variant="outline" size="sm">
-                        <Eye className="w-4 h-4 mr-1" />
-                        View
+                  <div className="flex justify-between items-center pt-3 border-t">
+                    <div className="text-sm text-gray-500">
+                      {translation.publisher} • {translation.year} • {translation.license}
+                    </div>
+                    <div className="flex space-x-2">
+                      <Link to={`/bible-content/translations/view/${translation.id}`}>
+                        <Button variant="outline" size="sm">
+                          <Eye className="w-4 h-4 mr-1" />
+                          View
+                        </Button>
+                      </Link>
+                      <Button variant="outline" size="sm" onClick={() => handleEdit(translation)}>
+                        <Edit className="w-4 h-4 mr-1" />
+                        Edit
                       </Button>
-                    </Link>
-                    <Button variant="outline" size="sm" onClick={() => handleEdit(translation)}>
-                      <Edit className="w-4 h-4 mr-1" />
-                      Edit
-                    </Button>
-                    <Button variant="outline" size="sm" disabled={true}>
-                      <Download className="w-4 h-4 mr-1" />
-                      Download
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => handleDelete(translation.id)}
-                      disabled={true}
-                    >
-                      <Trash2 className="w-4 h-4 mr-1" />
-                      Delete
-                    </Button>
+                      <Button variant="outline" size="sm" disabled={true}>
+                        <Download className="w-4 h-4 mr-1" />
+                        Download
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleDelete(translation.id)}
+                        disabled={true}
+                      >
+                        <Trash2 className="w-4 h-4 mr-1" />
+                        Delete
+                      </Button>
+                    </div>
                   </div>
                 </div>
-              </div>
               ))
             )}
           </div>
-          
+
           {/* Pagination */}
           {totalPages > 1 && (
             <div className="flex items-center justify-between mt-6 pt-6 border-t">

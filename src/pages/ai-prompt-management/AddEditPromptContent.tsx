@@ -1,25 +1,26 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect,forwardRef, useImperativeHandle  } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
-import { 
-  Save, 
-  X, 
-  Eye, 
+import {
+  Save,
+  X,
+  Eye,
   AlertCircle,
   CheckCircle
 } from 'lucide-react';
 import { fetchPromptDetail, updatePrompt, createPrompt, type UpdatePromptRequest, type CreatePromptRequest } from '@/services/promptsApi';
+import { toast } from "sonner";
 
 // Category options mapped to backend values
 const CATEGORY_OPTIONS = [
@@ -47,7 +48,8 @@ const TARGET_ROLE_OPTIONS = [
   { value: 'AdminOnly', label: 'Admin Only' }
 ];
 
-const AddEditPromptContent: React.FC = () => {
+// const AddEditPromptContent: React.FC = () => {
+const AddEditPromptContent = forwardRef((props, ref) => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const isEditMode = !!id;
@@ -104,6 +106,26 @@ const AddEditPromptContent: React.FC = () => {
   }, [id, isEditMode]);
 
   const handleInputChange = (field: string, value: string | boolean) => {
+    if (typeof value === "string") {
+      if (field === "title") {
+        const words = value.trim().split(/\s+/);
+        const limit = 50;
+
+        if (words.length > limit) {
+          toast.error(`Title cannot exceed ${limit} words!`);
+          return; // stop typing
+        }
+      }
+      if (field === "description") {
+        const words = value.trim().split(/\s+/);
+        const limit = 200;
+
+        if (words.length > limit) {
+          toast.error(`Description cannot exceed ${limit} words!`);
+          return; // stop typing
+        }
+      }
+    }
     setFormData(prev => ({
       ...prev,
       [field]: value
@@ -164,6 +186,13 @@ const AddEditPromptContent: React.FC = () => {
       setSaving(false);
     }
   };
+
+  useImperativeHandle(ref, () => ({
+  submit: handleSave,
+  cancel: handleCancel
+
+}));
+
 
   const handleCancel = () => {
     if (isEditMode && id) {
@@ -237,7 +266,7 @@ const AddEditPromptContent: React.FC = () => {
                   onChange={(e) => handleInputChange('title', e.target.value)}
                 />
               </div>
-              
+
               <div className="space-y-2">
                 <Label htmlFor="description">Description *</Label>
                 <Textarea
@@ -246,6 +275,7 @@ const AddEditPromptContent: React.FC = () => {
                   value={formData.description}
                   onChange={(e) => handleInputChange('description', e.target.value)}
                   rows={3}
+                  className="h-32 resize-none overflow-auto"
                 />
               </div>
             </CardContent>
@@ -268,7 +298,7 @@ const AddEditPromptContent: React.FC = () => {
                   value={formData.content}
                   onChange={(e) => handleInputChange('content', e.target.value)}
                   rows={8}
-                  className="font-mono text-sm"
+                  className="font-mono text-sm resize-none overflow-auto"
                 />
                 <p className="text-xs text-gray-500">
                   Available placeholders: {'{verse}'}, {'{chapter}'}, {'{book}'}, {'{user_name}'}, {'{date}'}
@@ -284,10 +314,11 @@ const AddEditPromptContent: React.FC = () => {
                 <CardTitle>Preview</CardTitle>
               </CardHeader>
               <CardContent>
-                <div className="bg-gray-50 p-4 rounded-lg">
+                
+                <div className="bg-card p-4 rounded-lg  border border-gray-300">
                   <h3 className="font-semibold mb-2">{formData.title || 'Prompt Title'}</h3>
                   <p className="text-sm text-gray-600 mb-3">{formData.description || 'Description'}</p>
-                  <div className="bg-white p-3 rounded border">
+                  <div className=" p-3 rounded border border-gray-900 bg-card">
                     <p className="text-sm font-mono">{formData.content || 'Prompt content will appear here...'}</p>
                   </div>
                 </div>
@@ -370,17 +401,17 @@ const AddEditPromptContent: React.FC = () => {
               <CardTitle>Actions</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              <Button 
-                onClick={handleSave} 
+              <Button
+                onClick={handleSave}
                 className="w-full"
                 disabled={saving}
               >
                 <Save className="w-4 h-4 mr-2" />
                 {saving ? 'Saving...' : isEditMode ? 'Update Prompt' : 'Save Prompt'}
               </Button>
-              <Button 
-                variant="outline" 
-                onClick={handleCancel} 
+              <Button
+                variant="outline"
+                onClick={handleCancel}
                 className="w-full"
                 disabled={saving}
               >
@@ -431,8 +462,11 @@ const AddEditPromptContent: React.FC = () => {
         </div>
       </div>
     </div>
+  
   );
-};
+});
 
-export { AddEditPromptContent };
+// export { AddEditPromptContent };
+export default AddEditPromptContent;
+
 

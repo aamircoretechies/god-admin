@@ -138,9 +138,9 @@ const UserTechnicalDeviceInfo = () => {
           {/* Platform */}
           {(technicalData.platform || technicalData.deviceModel) && (
             <div className="space-y-3">
-              <div>
-                <label className="text-sm font-medium text-gray-700">Platform</label>
-                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getPlatformColor(technicalData.platform || technicalData.deviceModel)}`}>
+              <div className="flex flex-col space-y-1">
+                <label className="text-sm font-medium text-gray-700 ml-2">Platform</label>
+                <span className={`inline-flex w-fit items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getPlatformColor(technicalData.platform || technicalData.deviceModel)}`}>
                   {technicalData.platform || technicalData.deviceModel}
                 </span>
               </div>
@@ -169,7 +169,7 @@ const UserTechnicalDeviceInfo = () => {
 
           {/* Location */}
           {technicalData.location && (
-            <div className="space-y-3">
+            <div className="space-y-3 ml-3">
               <div>
                 <label className="text-sm font-medium text-gray-700">Location</label>
                 <p className="text-sm text-gray-900">{technicalData.location}</p>
@@ -192,9 +192,9 @@ const UserTechnicalDeviceInfo = () => {
             <div className="space-y-3 md:col-span-2 lg:col-span-3">
               <div>
                 <label className="text-sm font-medium text-gray-700">Devices Used</label>
-                <div className="flex flex-wrap gap-2 mt-2">
+                <div className="flex flex-wrap gap-2 mt-1">
                   {technicalData.devicesUsed.map((device, index) => (
-                    <span key={index} className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getPlatformColor(device)}`}>
+                    <span key={index} className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs -ml-2 font-medium ${getPlatformColor(device)}`}>
                       {device}
                     </span>
                   ))}

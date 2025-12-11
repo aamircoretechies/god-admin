@@ -470,7 +470,7 @@ const ActivityLogListContent: React.FC = () => {
           <select
             value={userFilter}
             onChange={(e) => setUserFilter(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+            className="px-3 py-2 border border-gray-300 rounded-md text-sm bg-card"
           >
             <option value="all">All Users</option>
             <option value="Free">Free</option>
@@ -481,7 +481,7 @@ const ActivityLogListContent: React.FC = () => {
           <select
             value={activityTypeFilter}
             onChange={(e) => setActivityTypeFilter(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+            className="px-3 py-2 border border-gray-300 rounded-md text-sm bg-card"
           >
             <option value="all">All Activities</option>
             <option value="Verse Read">Verse Read</option>
@@ -495,7 +495,7 @@ const ActivityLogListContent: React.FC = () => {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+            className="px-3 py-2 border border-gray-300 rounded-md text-sm bg-card"
           >
             <option value="all">All Status</option>
             <option value="Success">Success</option>
@@ -505,7 +505,7 @@ const ActivityLogListContent: React.FC = () => {
           <select
             value={dateRangeFilter}
             onChange={(e) => setDateRangeFilter(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+            className="px-3 py-2 border border-gray-300 rounded-md text-sm bg-card"
           >
             <option value="all">All Time</option>
             <option value="today">Today</option>

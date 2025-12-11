@@ -507,7 +507,7 @@ const BibleBooksChaptersContent = () => {
                       <Button 
                         size="sm" 
                         onClick={() => handleCreateChapter(book.id)}
-                        className="bg-gray-300 hover:bg-gray-300 dark:bg-coal-100 dark:hover:bg-coal-100 cursor-not-allowed"
+                        className="bg-gray-300 text-gray-900 hover:bg-gray-300 dark:bg-coal-100 dark:hover:bg-coal-100 cursor-not-allowed"
                         disabled
                         title="Content creation not available in Phase 1"
                       >
@@ -529,9 +529,9 @@ const BibleBooksChaptersContent = () => {
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
                       {(chapters[book.id] || [])
                         .map((chapter) => (
-                          <div key={chapter.id} className="border rounded-lg p-3 bg-white">
+                          <div key={chapter.id} className="border rounded-lg p-3 bg-card">
                             <div className="flex items-center justify-between mb-2">
-                              <h5 className="font-medium text-gray-900">Chapter {chapter.number}</h5>
+                              <h5 className="font-medium text-gray-900 dark:text-white">Chapter {chapter.number}</h5>
                               <Badge className={getStatusColor(chapter.status)}>
                                 {chapter.status.charAt(0).toUpperCase() + chapter.status.slice(1)}
                               </Badge>

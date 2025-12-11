@@ -9,9 +9,13 @@ import {
 } from '@/partials/toolbar';
 import { useLayout } from '@/providers';
 import { UserActivityDetailContent } from './UserActivityDetailContent';
+import { useNavigate } from "react-router-dom";
+
 
 const UserActivityDetail = () => {
   const { currentLayout } = useLayout();
+  const navigate = useNavigate();
+
 
   return (
     <Fragment>
@@ -23,9 +27,16 @@ const UserActivityDetail = () => {
               <ToolbarDescription>View complete activity history for a specific user.</ToolbarDescription>
             </ToolbarHeading>
             <ToolbarActions>
-              <a href="#" className="btn btn-sm btn-light">
+              {/* <a href="#" className="btn btn-sm btn-light">
                 Back to Logs
-              </a>
+              </a> */}
+              <button
+                onClick={() => navigate('/system-log')}
+                className="btn btn-sm btn-light"
+              >
+                Back to Logs
+              </button>
+
               <a href="#" className="btn btn-sm btn-warning">
                 Suspend User
               </a>

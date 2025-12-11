@@ -21,7 +21,7 @@ const Header = () => {
   return (
     <header
       className={clsx(
-        'header fixed top-0 z-10 start-0 end-0 flex items-stretch shrink-0 bg-white/20 dark:bg-[--tw-page-bg-dark]',
+        'header fixed top-0 z-10 start-0 end-0 flex items-stretch shrink-0 bg-white/95 dark:bg-[--tw-page-bg-dark]',
         headerSticky && 'shadow-sm'
       )}
     >

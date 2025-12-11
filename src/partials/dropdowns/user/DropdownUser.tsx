@@ -16,6 +16,8 @@ import {
   MenuArrow,
   MenuIcon
 } from '@/components/menu';
+import { useEffect } from 'react';
+
 
 interface IDropdownUserProps {
   menuItemRef: any;
@@ -33,6 +35,30 @@ const DropdownUser = ({ menuItemRef }: IDropdownUserProps) => {
       themeMode: newThemeMode
     });
   };
+
+
+  useEffect(() => {
+  const handleScroll = () => {
+    if (!menuItemRef?.current) return;
+
+    // Remove "show" class from the dropdown root
+    menuItemRef.current.classList.remove("show");
+
+    // Submenu open ho to wo bhi close hona chahiye
+    const submenus = menuItemRef.current.querySelectorAll(".show");
+    submenus.forEach((el: any) => el.classList.remove("show"));
+  };
+
+  // window.addEventListener("scroll", handleScroll, { passive: true });
+  window.addEventListener("scroll", handleScroll, { passive: true, capture: true });
+
+
+  return () => {
+    window.removeEventListener("scroll", handleScroll);
+  };
+}, [menuItemRef]);
+
+
 
   const buildHeader = () => {
     const userName = currentUser?.fullname || 
@@ -53,7 +79,8 @@ const DropdownUser = ({ menuItemRef }: IDropdownUserProps) => {
           />
           <div className="flex flex-col gap-1.5">
             <Link
-              to="/account"
+              // to="/account"
+              to="#"
               className="text-sm text-gray-800 hover:text-primary font-semibold leading-none"
             >
               {userName}

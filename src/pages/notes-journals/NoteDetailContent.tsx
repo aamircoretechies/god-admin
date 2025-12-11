@@ -249,7 +249,7 @@ const NoteDetailContent: React.FC = () => {
             </Button>
           </Link>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Note Detail</h1>
+            <h1 className="text-2xl font-bold text-gray-900">Note Details</h1>
             <p className="text-gray-600">Review and moderate note #{note.id}</p>
           </div>
         </div>
@@ -307,7 +307,7 @@ const NoteDetailContent: React.FC = () => {
                       type="text"
                       value={editedTags}
                       onChange={(e) => setEditedTags(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 bg-card rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                       placeholder="Faith, Trust, Comfort"
                     />
                   </div>

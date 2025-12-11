@@ -152,6 +152,7 @@ const Users = ({ hideRowsPerPage = false }: UsersProps) => {
         id: 'actions',
         header: ({ column }) => <DataGridColumnHeader title="Actions" column={column} />,
         enableSorting: false,
+        enableHiding: false, 
         cell: (info: any) => (
           <div className="flex gap-2">
             <Link 
