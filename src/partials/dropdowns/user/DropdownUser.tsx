@@ -38,33 +38,26 @@ const DropdownUser = ({ menuItemRef }: IDropdownUserProps) => {
 
 
   useEffect(() => {
-  const handleScroll = () => {
-    if (!menuItemRef?.current) return;
+    const handleScroll = () => {
+      if (menuItemRef.current && menuItemRef.current.isOpen()) {
+        menuItemRef.current.hide();
+      }
+    };
 
-    // Remove "show" class from the dropdown root
-    menuItemRef.current.classList.remove("show");
+    window.addEventListener('scroll', handleScroll, { passive: true });
 
-    // Submenu open ho to wo bhi close hona chahiye
-    const submenus = menuItemRef.current.querySelectorAll(".show");
-    submenus.forEach((el: any) => el.classList.remove("show"));
-  };
-
-  // window.addEventListener("scroll", handleScroll, { passive: true });
-  window.addEventListener("scroll", handleScroll, { passive: true, capture: true });
-
-
-  return () => {
-    window.removeEventListener("scroll", handleScroll);
-  };
-}, [menuItemRef]);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+    };
+  }, [menuItemRef]);
 
 
 
   const buildHeader = () => {
-    const userName = currentUser?.fullname || 
-                     (currentUser?.first_name && currentUser?.last_name 
-                       ? `${currentUser.first_name} ${currentUser.last_name}` 
-                       : currentUser?.first_name || 'User');
+    const userName = currentUser?.fullname ||
+      (currentUser?.first_name && currentUser?.last_name
+        ? `${currentUser.first_name} ${currentUser.last_name}`
+        : currentUser?.first_name || 'User');
     const userEmail = currentUser?.email || '';
     const userRole = currentUser?.role || 'USER';
     const userAvatar = currentUser?.profile_picture || currentUser?.pic || '/media/avatars/300-2.png';
@@ -95,7 +88,7 @@ const DropdownUser = ({ menuItemRef }: IDropdownUserProps) => {
             )}
           </div>
         </div>
-       {/*  <span className="badge badge-xs badge-primary badge-outline">
+        {/*  <span className="badge badge-xs badge-primary badge-outline">
           {userRole}
         </span> */}
       </div>
@@ -107,7 +100,7 @@ const DropdownUser = ({ menuItemRef }: IDropdownUserProps) => {
       <Fragment>
         <MenuSeparator />
         <div className="flex flex-col">
-         
+
           <MenuItem
             toggle="dropdown"
             trigger="hover"
@@ -123,7 +116,7 @@ const DropdownUser = ({ menuItemRef }: IDropdownUserProps) => {
               ]
             }}
           >
-           {/*  <MenuLink>
+            {/*  <MenuLink>
               <MenuIcon>
                 <KeenIcon icon="setting-2" />
               </MenuIcon>
@@ -175,7 +168,7 @@ const DropdownUser = ({ menuItemRef }: IDropdownUserProps) => {
               </MenuItem>
             </MenuSub> */}
           </MenuItem>
- 
+
           <DropdownUserLanguages menuItemRef={menuItemRef} />
           <MenuSeparator />
         </div>
