@@ -39,3 +39,36 @@ export const fetchNotes = async (params: {
   return response.data;
 };
 
+
+
+export const deleteNote = async (id: string): Promise<any> => {
+  const response = await axios.delete(`${API_URL}/admin/notes/${id}`);
+  return response.data;
+};
+
+
+
+// FLAG note
+export const flagNote = async (id: string, reason: string) => {
+  const response = await axios.post(`${API_URL}/notes/${id}/flag`,
+    { reason }
+  );
+  return response.data;
+};
+
+// EXPORT notes
+export const exportNotes = async (format: "json" | "csv", status?: string, userEmail?: string) => {
+  const query = new URLSearchParams();
+
+  query.append("format", format);
+  if (status) query.append("status", status);
+  if (userEmail) query.append("userEmail", userEmail);
+
+  // important: responseType = "blob" for file download
+  const response = await axios.get(`${API_URL}/notes/export?${query.toString()}`, {
+    responseType: "blob"
+  });
+
+  return response;
+};
+

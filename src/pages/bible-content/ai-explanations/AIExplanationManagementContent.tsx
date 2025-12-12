@@ -7,11 +7,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { 
-  Brain, 
-  Plus, 
-  Edit, 
-  Trash2, 
+import {
+  Brain,
+  Plus,
+  Edit,
+  Trash2,
   Save,
   X,
   CheckCircle,
@@ -27,7 +27,7 @@ import {
   ChevronLeft,
   ChevronRight
 } from 'lucide-react';
-import { fetchAIExplanations, fetchVerseAIExplanationHistory, type AIExplanationResponse } from '@/services/aiExplanationsApi';
+import { fetchAIExplanations, fetchVerseAIExplanationHistory, updateAIExplanation, type AIExplanationResponse } from '@/services/aiExplanationsApi';
 import { DummyDataIndicator } from '@/components/dummy-data-indicator';
 import { toast } from "sonner";
 
@@ -53,6 +53,7 @@ interface AIExplanation {
     full_name: string;
     abbreviation: string;
   };
+  fieldName: string;
 }
 
 // Transform API response to component format
@@ -82,7 +83,8 @@ const transformExplanation = (apiData: AIExplanationResponse): AIExplanation => 
     reviewer: apiData.reviewed_by || undefined,
     feedback: undefined, // Dummy - not in API
     category: (apiData.category.toLowerCase() as any) || 'general',
-    translation: apiData.translation
+    translation: apiData.translation,
+    fieldName: apiData.field_name
   };
 };
 
@@ -101,6 +103,11 @@ const AIExplanationManagementContent = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
+
+
+
+
+
 
   // Reset to page 1 when filters change
   useEffect(() => {
@@ -161,7 +168,7 @@ const AIExplanationManagementContent = () => {
       try {
         setLoadingVerseText(true);
         const response = await fetchVerseAIExplanationHistory(selectedExplanation.verseId);
-        
+
         if (response.status === 1 && response.data && response.data.verse_text) {
           setSelectedExplanation(prev => {
             if (!prev) return null;
@@ -211,7 +218,7 @@ const AIExplanationManagementContent = () => {
     // Filter by search term
     if (searchTerm) {
       const searchLower = searchTerm.toLowerCase();
-      filtered = filtered.filter(e => 
+      filtered = filtered.filter(e =>
         e.book.toLowerCase().includes(searchLower) ||
         e.explanation.toLowerCase().includes(searchLower) ||
         `${e.book} ${e.chapter}:${e.verse}`.toLowerCase().includes(searchLower)
@@ -254,10 +261,32 @@ const AIExplanationManagementContent = () => {
     }
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (isEditing) {
-      setExplanations(explanations.map(e => e.id === isEditing ? { ...formData, id: isEditing } as AIExplanation : e));
-      setIsEditing(null);
+      const explanationToUpdate = explanations.find(e => e.id === isEditing);
+      if (!explanationToUpdate) return;
+
+      // const updatePromise = updateAIExplanation(`${explanationToUpdate.verseId}_${explanationToUpdate.fieldName}`, {
+      const updatePromise = updateAIExplanation(explanationToUpdate.id, {
+        verse_text: formData.verseText || '',
+        explanation: formData.explanation || '',
+        status: formData.status === 'needs_review' ? 'Pending' : (formData.status?.charAt(0).toUpperCase() + formData.status!.slice(1)) || 'Pending'
+      });
+
+      toast.promise(updatePromise, {
+        loading: 'Updating explanation...',
+        success: (data) => {
+          console.log(data);
+          // setExplanations(explanations.map(e => e.id === isEditing ? { ...e, ...formData } as AIExplanation : e));
+          setExplanations(explanations.map(e => e.id === isEditing ? { ...e, ...formData, updatedAt:new Date().toLocaleDateString("en-us",{year:"numeric", month:"short",day:"numeric",}) } as AIExplanation : e));
+          // loadExplanations();
+          setIsEditing(null);
+          return 'Explanation updated successfully';
+        },
+        error: (err) => {
+          return err?.response?.data?.message || err.message || 'Failed to update explanation';
+        }
+      });
     } else {
       const newExplanation: AIExplanation = {
         ...formData,
@@ -289,8 +318,8 @@ const AIExplanationManagementContent = () => {
   };
 
   const handleStatusChange = (id: string, newStatus: string) => {
-    setExplanations(explanations.map(e => 
-      e.id === id 
+    setExplanations(explanations.map(e =>
+      e.id === id
         ? { ...e, status: newStatus as any, updatedAt: new Date().toISOString().split('T')[0] }
         : e
     ));
@@ -497,14 +526,14 @@ const AIExplanationManagementContent = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Verse Text
                   </label>
-                    <Textarea
-                      value={formData.verseText}
-                      onChange={(e) => setFormData({ ...formData, verseText: e.target.value })}
-                      placeholder="Enter the Bible verse text..."
-                      rows={3}
-                      maxLength={500}
-                      className="resize-none"
-                    />
+                  <Textarea
+                    value={formData.verseText}
+                    onChange={(e) => setFormData({ ...formData, verseText: e.target.value })}
+                    placeholder="Enter the Bible verse text..."
+                    rows={3}
+                    maxLength={500}
+                    className="resize-none"
+                  />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
@@ -691,45 +720,45 @@ const AIExplanationManagementContent = () => {
           ) : (
             <div className="space-y-4">
               {filteredExplanations.map((explanation) => (
-              <div key={explanation.id} className="p-4 border rounded-lg min-w-[600px]">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center space-x-3">
-                    <div className="p-2 bg-purple-100 rounded-lg">
-                      <Brain className="w-5 h-5 text-purple-600" />
+                <div key={explanation.id} className="p-4 border rounded-lg min-w-[600px]">
+                  <div className="flex items-center justify-between mb-3">
+                    <div className="flex items-center space-x-3">
+                      <div className="p-2 bg-purple-100 rounded-lg">
+                        <Brain className="w-5 h-5 text-purple-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-gray-900">
+                          {explanation.book} {explanation.chapter}:{explanation.verse}
+                          {explanation.translation && (
+                            <span className="text-sm font-normal text-gray-500 ml-2">
+                              ({explanation.translation.abbreviation})
+                            </span>
+                          )}
+                        </h3>
+                        <p className="text-sm text-gray-600 italic flex items-center gap-1">
+                          {explanation.verseText || 'Verse text not available'}
+                          {!explanation.verseText && <DummyDataIndicator text="Verse text is not available in the API" />}
+                        </p>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="font-semibold text-gray-900">
-                        {explanation.book} {explanation.chapter}:{explanation.verse}
-                        {explanation.translation && (
-                          <span className="text-sm font-normal text-gray-500 ml-2">
-                            ({explanation.translation.abbreviation})
-                          </span>
-                        )}
-                      </h3>
-                      <p className="text-sm text-gray-600 italic flex items-center gap-1">
-                        {explanation.verseText || 'Verse text not available'}
-                        {!explanation.verseText && <DummyDataIndicator text="Verse text is not available in the API" />}
-                      </p>
+                    <div className="flex items-center space-x-2">
+                      <Badge className={getStatusColor(explanation.status)}>
+                        {explanation.status.replace('_', ' ').charAt(0).toUpperCase() + explanation.status.slice(1).replace('_', ' ')}
+                      </Badge>
+                      <Badge className="bg-purple-100 text-purple-800">
+                        {explanation.category.charAt(0).toUpperCase() + explanation.category.slice(1)}
+                      </Badge>
                     </div>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <Badge className={getStatusColor(explanation.status)}>
-                      {explanation.status.replace('_', ' ').charAt(0).toUpperCase() + explanation.status.slice(1).replace('_', ' ')}
-                    </Badge>
-                    <Badge className="bg-purple-100 text-purple-800">
-                      {explanation.category.charAt(0).toUpperCase() + explanation.category.slice(1)}
-                    </Badge>
+
+                  <div className="mb-3">
+                    <p className="text-sm text-gray-700 line-clamp-3">
+                      {explanation.explanation}
+                    </p>
                   </div>
-                </div>
 
-                <div className="mb-3">
-                  <p className="text-sm text-gray-700 line-clamp-3">
-                    {explanation.explanation}
-                  </p>
-                </div>
-
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-3 text-sm">
-                  {/* Theological Accuracy and Clarity display commented out
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-3 text-sm">
+                    {/* Theological Accuracy and Clarity display commented out
                   <div className="flex items-center space-x-2">
                     <ThumbsUp className="w-4 h-4 text-gray-500" />
                     <span className="font-medium text-gray-600 flex items-center gap-1">
@@ -745,55 +774,55 @@ const AIExplanationManagementContent = () => {
                     </span>
                   </div>
                   */}
-                  <div className="flex items-center space-x-2">
-                    <Clock className="w-4 h-4 text-gray-500" />
-                    <span className="text-gray-600">Created: {explanation.createdAt}</span>
+                    <div className="flex items-center space-x-2">
+                      <Clock className="w-4 h-4 text-gray-500" />
+                      <span className="text-gray-600">Created: {explanation.createdAt}</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <FileText className="w-4 h-4 text-gray-500" />
+                      <span className="text-gray-600">
+                        {explanation.aiGenerated ? 'AI Generated' : 'Manual'}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <FileText className="w-4 h-4 text-gray-500" />
-                    <span className="text-gray-600">
-                      {explanation.aiGenerated ? 'AI Generated' : 'Manual'}
-                    </span>
-                  </div>
-                </div>
 
-                <div className="flex justify-between items-center pt-3 border-t">
-                  <div className="flex items-center space-x-2">
-                    {getStatusIcon(explanation.status)}
-                    <span className="text-sm text-gray-600">
-                      {explanation.reviewer ? `Reviewed by ${explanation.reviewer}` : 'Not reviewed'}
-                    </span>
-                  </div>
-                  <div className="flex space-x-2">
-                    <Button variant="outline" size="sm" onClick={() => setSelectedExplanation(explanation)}>
-                      <Eye className="w-4 h-4 mr-1" />
-                      View Details
-                    </Button>
-                    <Button variant="outline" size="sm" onClick={() => handleEdit(explanation.id)}>
-                      <Edit className="w-4 h-4 mr-1" />
-                      Edit
-                    </Button>
-                    {explanation.status === 'pending' && (
-                      <Button 
-                        variant="outline" 
-                        size="sm"
-                        onClick={() => handleStatusChange(explanation.id, 'approved')}
-                      >
-                        <CheckCircle className="w-4 h-4 mr-1" />
-                        Approve
+                  <div className="flex justify-between items-center pt-3 border-t">
+                    <div className="flex items-center space-x-2">
+                      {getStatusIcon(explanation.status)}
+                      <span className="text-sm text-gray-600">
+                        {explanation.reviewer ? `Reviewed by ${explanation.reviewer}` : 'Not reviewed'}
+                      </span>
+                    </div>
+                    <div className="flex space-x-2">
+                      <Button variant="outline" size="sm" onClick={() => setSelectedExplanation(explanation)}>
+                        <Eye className="w-4 h-4 mr-1" />
+                        View Details
                       </Button>
-                    )}
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => handleDelete(explanation.id)}
-                    >
-                      <Trash2 className="w-4 h-4 mr-1" />
-                      Delete
-                    </Button>
+                      <Button variant="outline" size="sm" onClick={() => handleEdit(explanation.id)}>
+                        <Edit className="w-4 h-4 mr-1" />
+                        Edit
+                      </Button>
+                      {explanation.status === 'pending' && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => handleStatusChange(explanation.id, 'approved')}
+                        >
+                          <CheckCircle className="w-4 h-4 mr-1" />
+                          Approve
+                        </Button>
+                      )}
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleDelete(explanation.id)}
+                      >
+                        <Trash2 className="w-4 h-4 mr-1" />
+                        Delete
+                      </Button>
+                    </div>
                   </div>
                 </div>
-              </div>
               ))}
             </div>
           )}

@@ -1,3 +1,4 @@
+
 import axios from 'axios';
 import { API_URL } from '@/utils/Api';
 
@@ -93,6 +94,27 @@ export const fetchVerseAIExplanationHistory = async (
   const response = await axios.get<VerseAIExplanationHistoryResponse>(
     `${API_URL}/admin/bible/ai-explanations/verse/${verseId}`
   );
+  return response.data;
+};
+
+/**
+ * Update AI explanation
+ * PATCH /api/v1/admin/bible/ai-explanations/{id}
+ */
+export const updateAIExplanation = async (
+  id: string,
+  data: { verse_text: string; explanation: string; status: string; }
+) => {
+  const response = await axios.patch(`${API_URL}/admin/bible/ai-explanations/${id}`, data);
+  return response.data;
+};
+
+/**
+ * Delete AI explanation
+ * DELETE /api/v1/admin/bible/ai-explanations/{id}
+ */
+export const deleteAIExplanation = async (id: string) => {
+  const response = await axios.delete(`${API_URL}/admin/bible/ai-explanations/${id}`);
   return response.data;
 };
 

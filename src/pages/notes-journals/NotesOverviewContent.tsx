@@ -7,27 +7,30 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { toAbsoluteUrl } from '@/utils';
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
-import { 
-  Search, 
-  MoreVertical, 
-  Eye, 
-  Edit, 
-  Trash2, 
-  Download, 
-  Flag, 
+import {
+  Search,
+  MoreVertical,
+  Eye,
+  Edit,
+  Trash2,
+  Download,
+  Flag,
   Volume2,
   Paperclip,
   AlertCircle,
   ChevronLeft,
   ChevronRight
 } from 'lucide-react';
-import { fetchNotes, type NoteResponse } from '@/services/notesApi';
+import { deleteNote, exportNotes, fetchNotes, flagNote, type NoteResponse } from '@/services/notesApi';
+import { toast } from "sonner";
+
+
 
 // Types
 interface Note {
@@ -54,7 +57,7 @@ const transformNote = (apiData: NoteResponse): Note => {
   // Parse verse_id to extract verse reference
   const parseVerseId = (verseId: string | null): string[] => {
     if (!verseId) return [];
-    
+
     // Handle different verse_id formats:
     // "Genesis_1_3_SV" -> "Genesis 1:3 (SV)"
     // "Gen_1_1_SV" -> "Gen 1:1 (SV)"
@@ -62,17 +65,17 @@ const transformNote = (apiData: NoteResponse): Note => {
     // "Jude_23_1_SV" -> "Jude 23:1 (SV)"
     // "Jude_1_SV" -> "Jude 1 (SV)"
     // "Gen_1_2" -> "Gen 1:2"
-    
+
     try {
       const parts = verseId.split('_');
       if (parts.length >= 2) {
         const book = parts[0];
         const chapter = parts[1];
-        
+
         // Check if last part is a version (2-3 letter code like SV, KJV)
         const lastPart = parts[parts.length - 1];
         const isVersion = lastPart.length <= 3 && /^[A-Z]+$/.test(lastPart);
-        
+
         if (parts.length >= 4 && isVersion) {
           // Format: Book_Chapter_Verse_Version
           const verse = parts[2];
@@ -93,7 +96,7 @@ const transformNote = (apiData: NoteResponse): Note => {
       // If parsing fails, return the original verse_id
       return [verseId];
     }
-    
+
     return [verseId];
   };
 
@@ -130,6 +133,8 @@ const transformNote = (apiData: NoteResponse): Note => {
   // Generate avatar from user ID (same logic as UserBasicInfo)
   const avatarNumber = (parseInt(apiData.user_id.replace(/-/g, ''), 16) % 34) + 1;
   const userAvatar = toAbsoluteUrl(`/media/avatars/300-${avatarNumber}.png`);
+
+
 
   return {
     id: apiData.note_id,
@@ -217,20 +222,20 @@ const NotesOverviewContent: React.FC = () => {
   // Filter notes (client-side filtering for status and language since API may not support them)
   const filteredNotes = useMemo(() => {
     let filtered = notes;
-    
+
     // Apply status filter
     if (statusFilter !== 'all') {
       filtered = filtered.filter(note => note.status === statusFilter);
     }
-    
+
     // Apply language filter
     if (languageFilter !== 'all') {
       filtered = filtered.filter(note => note.language === languageFilter);
     }
-    
+
     // Apply search filter (if not already handled by API)
     if (searchTerm) {
-      filtered = filtered.filter(note => 
+      filtered = filtered.filter(note =>
         note.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         note.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
         note.userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -239,12 +244,12 @@ const NotesOverviewContent: React.FC = () => {
         note.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
       );
     }
-    
+
     // Apply user filter (if not already handled by API)
     if (userFilter !== 'all') {
       filtered = filtered.filter(note => note.userId === userFilter);
     }
-    
+
     return filtered;
   }, [notes, searchTerm, statusFilter, userFilter, languageFilter]);
 
@@ -302,7 +307,7 @@ const NotesOverviewContent: React.FC = () => {
               <AvatarFallback>{row.original.userName.charAt(0)}</AvatarFallback>
             </Avatar>
             <div className="flex flex-col">
-              <Link 
+              <Link
                 to={`/notes-journals/detail/${row.original.id}`}
                 className="text-sm font-medium text-gray-900 hover:text-primary-active mb-px"
               >
@@ -311,7 +316,7 @@ const NotesOverviewContent: React.FC = () => {
               <span className="text-2sm text-gray-700 font-normal">
                 {row.original.userEmail}
               </span>
-              <Link 
+              <Link
                 to={`/notes-journals/detail/${row.original.id}`}
                 className="text-xs text-primary hover:text-primary-active mt-1"
               >
@@ -439,15 +444,15 @@ const NotesOverviewContent: React.FC = () => {
                 <Edit className="w-4 h-4 mr-2" />
                 Edit
               </DropdownMenuItem>
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleExport(row.original)}>
                 <Download className="w-4 h-4 mr-2" />
                 Export
               </DropdownMenuItem>
-              <DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handleFlag(row.original.id)}>
                 <Flag className="w-4 h-4 mr-2" />
                 {row.original.status === 'flagged' ? 'Unflag' : 'Flag'}
               </DropdownMenuItem>
-              <DropdownMenuItem className="text-red-600">
+              <DropdownMenuItem className="text-red-600" onClick={() => handleDelete(row.original.id)}>
                 <Trash2 className="w-4 h-4 mr-2" />
                 Delete
               </DropdownMenuItem>
@@ -462,6 +467,98 @@ const NotesOverviewContent: React.FC = () => {
     ],
     []
   );
+
+  const handleFlag = async (id: string) => {
+    // console.log("FLAG REQUEST TRIGGERED");
+    // console.log("Note ID to flag:", id);
+    // console.log("Sending reason:", "Inappropriate content");
+
+    try {
+      const res = await flagNote(id, "Inappropriate content");
+
+      // Log full backend response
+      // console.log("FLAG API SUCCESS RESPONSE:", res);
+
+      if (res.status === 1) {
+        // console.log("Flagging successful. Updating UI...");
+
+        // Update UI instantly
+        setNotes(prev =>
+          prev.map(n =>
+            n.id === id ? { ...n, status: "flagged" } : n
+          )
+        );
+
+        // console.log(" Updated notes state:", notes);
+
+        toast.success("Note flagged successfully!");
+      } else {
+        // console.warn(" FLAG API returned status 0:", res);
+        toast.error(res.message || "Failed to flag note");
+      }
+    } catch (error: any) {
+      // console.error(" FLAG API ERROR:", error);
+
+      console.error("FLAG API ERROR RESPONSE:",
+        error?.response?.data || "No backend response"
+      );
+
+      toast.error(error?.response?.data?.message || "Error flagging note");
+    }
+  };
+
+
+
+
+  const handleDelete = async (id: string) => {
+    try {
+      //  Direct delete on click (no confirm)
+      const res = await deleteNote(id);
+
+      if (res.status === 1) {
+        setNotes(prev => prev.filter(n => n.id !== id));
+
+        // Backend success message toast
+        toast.success(res.message || "Note deleted successfully!");
+      } else {
+        //  Backend error message toast
+        toast.error(res.message || "Failed to delete note");
+      }
+
+    } catch (error: any) {
+      //  API error toast
+      toast.error(error?.response?.data?.message || "Error deleting note");
+    }
+  };
+
+  const handleExport = async (note: Note) => {
+    try {
+      const res = await exportNotes(
+        "json",                 // format: json OR csv
+        note.status || "Active", // status filter
+        note.userEmail           // export only this user's notes
+      );
+
+      // Create file URL
+      const blobUrl = window.URL.createObjectURL(new Blob([res.data]));
+
+      // Create temp link to download
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = `notes-export.${"json"}`; // or csv based on format
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      toast.success("Notes exported successfully!");
+    } catch (error: any) {
+      toast.error(
+        error?.response?.data?.message || "Failed to export notes"
+      );
+    }
+  };
+
+
 
   const Toolbar = () => (
     <div className="flex flex-col gap-4 p-5">
@@ -555,7 +652,7 @@ const NotesOverviewContent: React.FC = () => {
         toolbar={<Toolbar />}
         layout={{ card: true }}
       />
-      
+
       {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between p-4 border-t">
