@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { fetchTranslations, updateTranslation, type TranslationResponse } from '@/services/translationsApi';
+import { fetchTranslations, updateTranslation, uploadTranslation, type TranslationResponse } from '@/services/translationsApi';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -23,6 +23,9 @@ import {
   AlertCircle,
   Clock
 } from 'lucide-react';
+import { toast } from "sonner";
+
+
 
 interface Translation {
   id: string;
@@ -134,6 +137,9 @@ const BibleTranslationsContent = () => {
     isPublic: true
   });
 
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
+
   // Fetch translations from API
   useEffect(() => {
     const loadTranslations = async () => {
@@ -237,83 +243,229 @@ const BibleTranslationsContent = () => {
     });
   };
 
-  const handleSave = async () => {
-    if (editingTranslation) {
-      try {
-        setSaving(true);
-        setError(null);
+  //   const handleSave = async () => {
+  //     if (editingTranslation) {
+  //       try {
+  //         setSaving(true);
+  //         setError(null);
 
-        // Prepare API request data
-        // Convert language display name back to code
-        const languageCode = getLanguageCode(formData.language || '');
+  //         // Prepare API request data
+  //         // Convert language display name back to code
+  //         const languageCode = getLanguageCode(formData.language || '');
 
-        const updateData = {
-          name: formData.name || '',
-          abbreviation: formData.version || '', // version maps to abbreviation
-          language: languageCode,
-          license: formData.license || '',
-          is_public: formData.isPublic ?? true
-        };
+  //         const updateData = {
+  //           name: formData.name || '',
+  //           abbreviation: formData.version || '', // version maps to abbreviation
+  //           language: languageCode,
+  //           license: formData.license || '',
+  //           is_public: formData.isPublic ?? true
+  //         };
 
-        const response = await updateTranslation(editingTranslation.id, updateData);
+  //         const response = await updateTranslation(editingTranslation.id, updateData);
 
-        if (response.success) {
-          // Reload translations to get updated data
-          const updatedResponse = await fetchTranslations({
-            page: currentPage,
-            limit: 10,
-            search: searchTerm || undefined,
-            language: languageFilter !== 'all' ? languageFilter : undefined,
-            status: statusFilter !== 'all' ? statusFilter : undefined
-          });
+  //         if (response.success) {
+  //           // Reload translations to get updated data
+  //           const updatedResponse = await fetchTranslations({
+  //             page: currentPage,
+  //             limit: 10,
+  //             search: searchTerm || undefined,
+  //             language: languageFilter !== 'all' ? languageFilter : undefined,
+  //             status: statusFilter !== 'all' ? statusFilter : undefined
+  //           });
 
-          if (updatedResponse.success && updatedResponse.data) {
-            const transformedTranslations = updatedResponse.data.map(transformTranslation);
-            setTranslations(transformedTranslations);
+  //           if (updatedResponse.success && updatedResponse.data) {
+  //             const transformedTranslations = updatedResponse.data.map(transformTranslation);
+  //             setTranslations(transformedTranslations);
 
-            if (updatedResponse.metadata) {
-              setTotalPages(updatedResponse.metadata.totalPages || 1);
-              setTotalCount(updatedResponse.metadata.total || transformedTranslations.length);
-            }
-          }
+  //             if (updatedResponse.metadata) {
+  //               setTotalPages(updatedResponse.metadata.totalPages || 1);
+  //               setTotalCount(updatedResponse.metadata.total || transformedTranslations.length);
+  //             }
+  //           }
 
-          setEditingTranslation(null);
-          setFormData({
-            name: '',
-            version: '',
-            language: '',
-            description: '',
-            status: 'draft',
-            publisher: '',
-            year: '',
-            license: '',
-            isPublic: true
-          });
-        } else {
-          setError(response.message || 'Failed to update translation');
-        }
-      } catch (err: any) {
-        console.error('Error updating translation:', err);
-        setError(err?.response?.data?.message || err?.message || 'Failed to update translation');
-      } finally {
-        setSaving(false);
-      }
-    } else {
-      // Create new translation - not implemented yet
-      setIsCreating(false);
-      setFormData({
-        name: '',
-        version: '',
-        language: '',
-        description: '',
-        status: 'draft',
-        publisher: '',
-        year: '',
-        license: '',
-        isPublic: true
-      });
+  //           setEditingTranslation(null);
+  //           setFormData({
+  //             name: '',
+  //             version: '',
+  //             language: '',
+  //             description: '',
+  //             status: 'draft',
+  //             publisher: '',
+  //             year: '',
+  //             license: '',
+  //             isPublic: true
+  //           });
+  //         } else {
+  //           setError(response.message || 'Failed to update translation');
+  //         }
+  //       } catch (err: any) {
+  //         console.error('Error updating translation:', err);
+  //         setError(err?.response?.data?.message || err?.message || 'Failed to update translation');
+  //       } finally {
+  //         setSaving(false);
+  //       }
+  //     } else {
+  //       // Create new translation - not implemented yet
+  //       setIsCreating(false);
+  //       setFormData({
+  //         name: '',
+  //         version: '',
+  //         language: '',
+  //         description: '',
+  //         status: 'draft',
+  //         publisher: '',
+  //         year: '',
+  //         license: '',
+  //         isPublic: true
+  //       });
+
+  //     }
+  //     if (isCreating) {
+  //   if (!selectedFile) {
+  //     setError("Please select a file to upload");
+  //     return;
+  //   }
+
+  //   try {
+  //     setSaving(true);
+  //     setError(null);
+
+  //     const languageCode = getLanguageCode(formData.language || "");
+
+  //     const payload = {
+  //       name: formData.name || "",
+  //       abbreviation: formData.version || "",
+  //       language: languageCode,
+  //       license: formData.license || "",
+  //       file: selectedFile,
+  //     };
+
+  //     console.log("UPLOAD PAYLOAD:", payload);
+
+  //     const uploadRes = await uploadTranslation(payload);
+  //     console.log("UPLOAD RESPONSE:", uploadRes);
+
+  //     if (uploadRes.success) {
+  //       // Refresh list
+  //       const updated = await fetchTranslations({ page: currentPage, limit: 10 });
+  //       if (updated.success && updated.data) {
+  //         setTranslations(updated.data.map(transformTranslation));
+  //       }
+  //       setIsCreating(false);
+  //       setSelectedFile(null);
+  //       setFormData({
+  //         name: "",
+  //         version: "",
+  //         language: "",
+  //         description: "",
+  //         status: "draft",
+  //         publisher: "",
+  //         year: "",
+  //         license: "",
+  //         isPublic: true,
+  //       });
+  //     } else {
+  //       setError(uploadRes.message || "Upload failed");
+  //     }
+  //   } catch (err: any) {
+  //     console.error("UPLOAD ERROR:", err);
+  //     setError(err?.response?.data?.message || "Upload failed");
+  //   } finally {
+  //     setSaving(false);
+  //   }
+
+  //   return;
+  // }
+
+  //   };
+
+ const handleSave = async () => {
+  try {
+    setSaving(true);
+    setError(null);
+
+    const languageCode = getLanguageCode(formData.language || "");
+
+    // CASE 1: Edit + File Upload
+    if (editingTranslation && selectedFile) {
+      const payload = {
+        name: formData.name || "",
+        abbreviation: formData.version || "",
+        language: languageCode,
+        license: formData.license || "",
+        file: selectedFile,
+      };
+
+      const uploadRes = await uploadTranslation(payload);
+
+      toast.success(uploadRes.message || "File uploaded successfully ✅");
     }
-  };
+
+    //  CASE 2: Edit without File
+    else if (editingTranslation) {
+      const updateData = {
+        name: formData.name || "",
+        abbreviation: formData.version || "",
+        language: languageCode,
+        license: formData.license || "",
+        is_public: formData.isPublic ?? true,
+      };
+
+      const res = await updateTranslation(editingTranslation.id, updateData);
+
+      toast.success(res.message || "Translation updated successfully ✅");
+    }
+
+    //  CASE 3: Create New Translation
+    else {
+      if (!selectedFile) {
+        toast.error("Please select a file to upload");
+        return;
+      }
+
+      const payload = {
+        name: formData.name || "",
+        abbreviation: formData.version || "",
+        language: languageCode,
+        license: formData.license || "",
+        file: selectedFile,
+      };
+
+      const uploadRes = await uploadTranslation(payload);
+
+      toast.success(uploadRes.message || "Translation created successfully ✅");
+    }
+
+    //  Refresh list
+    const updated = await fetchTranslations({ page: currentPage, limit: 10 });
+    if (updated.success && updated.data) {
+      setTranslations(updated.data.map(transformTranslation));
+    }
+
+    //  Reset
+    setEditingTranslation(null);
+    setIsCreating(false);
+    setSelectedFile(null);
+    setFormData({
+      name: "",
+      version: "",
+      language: "",
+      description: "",
+      status: "draft",
+      publisher: "",
+      year: "",
+      license: "",
+      isPublic: true,
+    });
+
+  } catch (err: any) {
+    toast.error(err?.response?.data?.message || "Something went wrong ❌");
+  } finally {
+    setSaving(false);
+  }
+};
+
+
 
   const handleCancel = () => {
     setIsCreating(false);
@@ -574,7 +726,14 @@ const BibleTranslationsContent = () => {
                       accept=".json,.xml,.txt"
                       id="translation-file"
                       className="hidden"
+                      onChange={(e) => {
+                        if (e.target.files && e.target.files.length > 0) {
+                          setSelectedFile(e.target.files[0]);
+                          console.log("Selected File:", e.target.files[0]);
+                        }
+                      }}
                     />
+
                     <Button
                       variant="outline"
                       className="w-full dark:border-gray-600 dark:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-white"
@@ -583,6 +742,12 @@ const BibleTranslationsContent = () => {
                       <Upload className="w-4 h-4 mr-2" />
                       Choose File
                     </Button>
+
+                    {selectedFile && (
+                      <p className="text-xs text-green-600 mt-1">
+                        Selected: {selectedFile.name}
+                      </p>
+                    )}
                     <p className="text-xs text-gray-500 dark:text-gray-400">
                       Supported formats: JSON, XML, TXT (Max 10MB)
                     </p>

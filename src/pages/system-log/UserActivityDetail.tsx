@@ -60,25 +60,25 @@ const UserActivityDetail = () => {
 
   const handleSuspendUser = async () => {
     try {
-      console.log("🚀 SUSPEND USER API TRIGGERED");
-      console.log("➡️ User ID:", currentUserId);
-      console.log("➡️ Reason:", suspendReason);
-      console.log("➡️ Duration:", suspendDuration);
+      console.log(" SUSPEND USER API TRIGGERED");
+      console.log("User ID:", currentUserId);
+      console.log(" Reason:", suspendReason);
+      console.log(" Duration:", suspendDuration);
 
       const res = await suspendUser(currentUserId, suspendReason, suspendDuration);
 
-      console.log("✅ SUSPEND USER API RESPONSE:", res);
+      console.log(" SUSPEND USER API RESPONSE:", res);
 
       if (res.status === 1) {
         toast.success("User suspended successfully!");
         setShowSuspendModal(false);
       } else {
-        console.log("❌ BACKEND ERROR RESPONSE:", res);
+        console.log(" BACKEND ERROR RESPONSE:", res);
         toast.error(res.message || "Failed to suspend user");
       }
     } catch (err: any) {
-      console.log("🔥 SUSPEND USER API ERROR:", err);
-      console.log("🔥 ERROR RESPONSE:", err?.response?.data);
+      console.log(" SUSPEND USER API ERROR:", err);
+      console.log(" ERROR RESPONSE:", err?.response?.data);
 
       toast.error(err?.response?.data?.message || "Error suspending user");
     }

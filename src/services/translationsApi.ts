@@ -102,6 +102,22 @@ export const fetchTranslations = async (
   }
 };
 
+export interface UploadTranslationRequest {
+  name: string;
+  abbreviation: string;
+  language: string;
+  license: string;
+  file: File;
+}
+
+export interface UploadTranslationResponse {
+  success: boolean;
+  message: string;
+  data?: TranslationResponse;
+}
+
+
+
 export interface TranslationDetailData {
   overview: {
     description: string;
@@ -210,4 +226,43 @@ export const updateTranslation = async (
     throw error;
   }
 };
+
+
+
+export const uploadTranslation = async (
+  payload: UploadTranslationRequest
+): Promise<UploadTranslationResponse> => {
+  try {
+    const formData = new FormData();
+    formData.append('name', payload.name);
+    formData.append('abbreviation', payload.abbreviation);
+    formData.append('language', payload.language);
+    formData.append('license', payload.license);
+    formData.append('file', payload.file);
+
+    const response = await axios.post<UploadTranslationResponse>(
+      `${API_URL}/admin/bible/translations/upload`,
+      formData,
+      {
+        headers: {
+          'Content-Type': 'multipart/form-data',
+        },
+      }
+    );
+
+    console.log('Upload translation response:', response);
+
+    if (!response.data || !response.data.success) {
+      throw new Error(response.data?.message || 'Upload failed');
+    }
+
+    return response.data;
+  } catch (error: any) {
+    console.error('Error uploading translation:', error);
+    console.error('Response data:', error?.response?.data);
+    console.error('Response status:', error?.response?.status);
+    throw error;
+  }
+};
+
 

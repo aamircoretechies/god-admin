@@ -158,8 +158,7 @@ export const blockUser = async (
   reason: string,
   duration: string
 ) => {
-  const response = await axios.post(
-    `${API_URL}/activity/${userId}/block`,
+  const response = await axios.post(`${API_URL}/activity/${userId}/block`,
     { reason, duration }
   );
   return response.data;
@@ -174,8 +173,7 @@ export const suspendUser = async (
 ) => {
   console.log(" SUSPEND USER API CALL:", { userId, reason, duration });
 
-  const response = await axios.post(
-    `${API_URL}/activity/${userId}/suspend`,
+  const response = await axios.post(`${API_URL}/activity/${userId}/suspend`,
     { reason, duration }
   );
 

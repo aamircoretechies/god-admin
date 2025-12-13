@@ -101,7 +101,9 @@ const FeedbackInboxContent = () => {
         const response = await fetchFlaggedContent({
           page: currentPage,
           limit: pageSize,
-          status: filter !== 'all' ? filter.toUpperCase() : undefined,
+          // status: filter !== 'all' ? filter.toUpperCase() : undefined,
+          status: filter === "unresolved" ? "REJECTED" : filter !== "all" ? filter.toUpperCase() : undefined,
+
           search: searchTerm || undefined
         });
 
@@ -143,7 +145,9 @@ const FeedbackInboxContent = () => {
         const updatedResponse = await fetchFlaggedContent({
           page: currentPage,
           limit: pageSize,
-          status: filter !== 'all' ? filter.toUpperCase() : undefined,
+          // status: filter !== 'all' ? filter.toUpperCase() : undefined,
+          status: filter === "unresolved" ? "REJECTED" : filter !== "all" ? filter.toUpperCase() : undefined,
+
           search: searchTerm || undefined
         });
         if (updatedResponse.status === 1 && updatedResponse.data) {
@@ -173,7 +177,9 @@ const FeedbackInboxContent = () => {
         const updatedResponse = await fetchFlaggedContent({
           page: currentPage,
           limit: pageSize,
-          status: filter !== 'all' ? filter.toUpperCase() : undefined,
+          // status: filter !== 'all' ? filter.toUpperCase() : undefined,
+          status: filter === "unresolved" ? "REJECTED" : filter !== "all" ? filter.toUpperCase() : undefined,
+
           search: searchTerm || undefined
         });
         if (updatedResponse.status === 1 && updatedResponse.data) {
