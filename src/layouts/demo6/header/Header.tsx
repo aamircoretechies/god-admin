@@ -17,11 +17,11 @@ const Header = () => {
         <Link to="/">
           <img
             src={toAbsoluteUrl('/media/app/mini-logo-gray.svg')}
-            className="dark:hidden min-h-[30px]"
+            className="dark:hidden h-[30px]"
           />
           <img
             src={toAbsoluteUrl('/media/app/mini-logo-gray-dark.svg')}
-            className="hidden dark:block min-h-[30px]"
+            className="hidden dark:block h-[30px]"
           />
         </Link>
 

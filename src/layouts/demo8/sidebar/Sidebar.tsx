@@ -64,11 +64,11 @@ const Sidebar = () => {
             <Link to="/">
               <img
                 src={toAbsoluteUrl('/media/app/mini-logo-square-gray.svg')}
-                className="dark:hidden min-h-[42px]"
+                className="dark:hidden h-[42px]"
               />
               <img
                 src={toAbsoluteUrl('/media/app/mini-logo-square-gray-dark.svg')}
-                className="hidden dark:block min-h-[42px]"
+                className="hidden dark:block h-[42px]"
               />
             </Link>
           </div>

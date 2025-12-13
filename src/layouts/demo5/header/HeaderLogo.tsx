@@ -22,19 +22,19 @@ interface IHeaderLogoTeam {
   urlPartial: string;
   path: string;
 }
-interface IHeaderLogoTeams extends Array<IHeaderLogoTeam> {}
+interface IHeaderLogoTeams extends Array<IHeaderLogoTeam> { }
 
 interface IHeaderLogoItem {
   title: string;
   icon: string;
 }
-interface IHeaderLogoItems extends Array<IHeaderLogoItem> {}
+interface IHeaderLogoItems extends Array<IHeaderLogoItem> { }
 
 interface IHeaderLogoStaging {
   title: string;
   icon: string;
 }
-interface IHeaderLogoStagings extends Array<IHeaderLogoStaging> {}
+interface IHeaderLogoStagings extends Array<IHeaderLogoStaging> { }
 
 const HeaderLogo = () => {
   const desktopMode = useResponsive('up', 'lg');
@@ -103,12 +103,12 @@ const HeaderLogo = () => {
       <Link to="/">
         <img
           src={toAbsoluteUrl('/media/app/mini-logo-circle.svg')}
-          className="dark:hidden min-h-[34px]"
+          className="dark:hidden h-[34px]"
           alt="logo"
         />
         <img
           src={toAbsoluteUrl('/media/app/mini-logo-circle-dark.svg')}
-          className="hidden dark:inline-block min-h-[34px]"
+          className="hidden dark:inline-block h-[34px]"
           alt="logo"
         />
       </Link>

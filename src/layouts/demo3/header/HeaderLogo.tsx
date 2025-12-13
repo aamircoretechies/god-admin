@@ -48,12 +48,12 @@ const HeaderLogo = () => {
         <Link to="/" className="mx-1">
           <img
             src={toAbsoluteUrl('/media/app/mini-logo-primary.svg')}
-            className="dark:hidden min-h-[24px]"
+            className="dark:hidden h-[24px]"
             alt="logo"
           />
           <img
             src={toAbsoluteUrl('/media/app/mini-logo-primary-dark.svg')}
-            className="hidden dark:inline-block min-h-[24px]"
+            className="hidden dark:inline-block h-[24px]"
             alt="logo"
           />
         </Link>
