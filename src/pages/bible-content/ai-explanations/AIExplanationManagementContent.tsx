@@ -798,10 +798,10 @@ const AIExplanationManagementContent = () => {
                         <Eye className="w-4 h-4 mr-1" />
                         View Details
                       </Button>
-                      <Button variant="outline" size="sm" onClick={() => handleEdit(explanation.id)}>
+                      {/* <Button variant="outline" size="sm" onClick={() => handleEdit(explanation.id)}>
                         <Edit className="w-4 h-4 mr-1" />
                         Edit
-                      </Button>
+                      </Button> */}
                       {explanation.status === 'pending' && (
                         <Button
                           variant="outline"
