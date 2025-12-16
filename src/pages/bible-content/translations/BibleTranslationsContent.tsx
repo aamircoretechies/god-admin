@@ -714,13 +714,10 @@ const BibleTranslationsContent = () => {
                   </label>
                 </div>
 
-                <div className="p-4 bg-gray-50 dark:bg-coal-100 rounded-lg ">
-                  <h4 className="font-medium text-gray-900 dark:text-white mb-2">Upload Translation File</h4>
+                <div className="p-4  rounded-lg ">
+                  {/* if upload file appleaer then class for this dic :bg-gray-50 dark:bg-coal-100 */}
+                  {/* <h4 className="font-medium text-gray-900 dark:text-white mb-2">Upload Translation File</h4> */}
                   <div className="space-y-2">
-                    {/* <Button variant="outline" className="w-full dark:border-gray-600 dark:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-white">
-                      <Upload className="w-4 h-4 mr-2" />
-                      Choose File
-                    </Button> */}
                     <input
                       type="file"
                       accept=".json,.xml,.txt"
@@ -734,23 +731,23 @@ const BibleTranslationsContent = () => {
                       }}
                     />
 
-                    <Button
+                    {/* <Button
                       variant="outline"
                       className="w-full dark:border-gray-600 dark:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-white"
                       onClick={() => document.getElementById("translation-file")?.click()}
                     >
                       <Upload className="w-4 h-4 mr-2" />
                       Choose File
-                    </Button>
+                    </Button> */}
 
-                    {selectedFile && (
+                    {/* {selectedFile && (
                       <p className="text-xs text-green-600 mt-1">
                         Selected: {selectedFile.name}
                       </p>
-                    )}
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                    )} */}
+                    {/* <p className="text-xs text-gray-500 dark:text-gray-400">
                       Supported formats: JSON, XML, TXT (Max 10MB)
-                    </p>
+                    </p> */}
                   </div>
                 </div>
               </div>

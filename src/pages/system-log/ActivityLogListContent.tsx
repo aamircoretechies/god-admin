@@ -294,16 +294,16 @@ const ActivityLogListContent: React.FC = () => {
 
   const columns = useMemo<ColumnDef<UserActivityLog>[]>(
     () => [
-      {
-        accessorKey: 'id',
-        header: () => <DataGridRowSelectAll />,
-        cell: ({ row }) => <DataGridRowSelect row={row} />,
-        enableSorting: false,
-        enableHiding: false,
-        meta: {
-          headerClassName: 'w-12'
-        }
-      },
+      // {
+      //   accessorKey: 'id',
+      //   header: () => <DataGridRowSelectAll />,
+      //   cell: ({ row }) => <DataGridRowSelect row={row} />,
+      //   enableSorting: false,
+      //   enableHiding: false,
+      //   meta: {
+      //     headerClassName: 'w-12'
+      //   }
+      // },
       {
         accessorFn: (row: UserActivityLog) => row,
         id: 'user',
