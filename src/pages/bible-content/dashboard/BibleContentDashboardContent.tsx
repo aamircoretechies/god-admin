@@ -488,17 +488,15 @@ const BibleContentDashboardContent = () => {
                         {new Date(explanation.created_at).toLocaleDateString()}
                       </p>
                     </div>
-                    <Button 
+                    {/* <Button 
                       variant="outline" 
                       size="sm"
                       onClick={() => {
-                        // Note: book_id and chapter_id are not available in the API response
-                        // Only verse_id, book (with long_name/short_name), chapter_number, and verse_number are available
                         toast.info('Verse navigation not available - book and chapter IDs are not provided in the API response');
                       }}
                     >
                       <Eye className="w-4 h-4" />
-                    </Button>
+                    </Button> */}
                   </div>
                 ))
               ) : (

@@ -81,7 +81,7 @@ const SystemApiConfig = () => {
     try {
       setSaving(true);
       setError(null);
-      
+
       const requestData = {
         openai_api_key: localValues.openai_api_key,
         bible_api_key: localValues.bible_api_key,
@@ -91,7 +91,7 @@ const SystemApiConfig = () => {
       };
 
       const response = await updateApiConfiguration(requestData);
-      
+
       if (response.status === 1) {
         // Reload configuration
         const updatedResponse = await fetchApiConfiguration();
@@ -169,8 +169,8 @@ const SystemApiConfig = () => {
           {/* API Rate Limit */}
           <div className="space-y-2">
             <Label htmlFor="api_rate_limit">API Rate Limit (per hour)</Label>
-            <Input 
-              id="api_rate_limit" 
+            <Input
+              id="api_rate_limit"
               type="number"
               placeholder="1000"
               value={localValues.api_rate_limit}
@@ -184,8 +184,8 @@ const SystemApiConfig = () => {
           {/* API Timeout */}
           <div className="space-y-2">
             <Label htmlFor="api_timeout">API Timeout (milliseconds)</Label>
-            <Input 
-              id="api_timeout" 
+            <Input
+              id="api_timeout"
               type="number"
               placeholder="30000"
               value={localValues.api_timeout}
@@ -199,7 +199,7 @@ const SystemApiConfig = () => {
           {/* OpenAI API */}
           <div className="space-y-2">
             <Label htmlFor="openai_api_key">OpenAI API Key</Label>
-            <div className="flex items-center gap-2">
+            {/* <div className="flex items-center gap-2">
               <Input 
                 id="openai_api_key" 
                 type={showOpenAIKey ? "text" : "password"}
@@ -215,18 +215,39 @@ const SystemApiConfig = () => {
               >
                 {showOpenAIKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </Button>
+            </div> */}
+            <div className="relative">
+              <Input
+                id="openai_api_key"
+                type={showOpenAIKey ? "text" : "password"}
+                placeholder="sk-..."
+                value={localValues.openai_api_key}
+                onChange={(e) =>
+                  handleValueChange("openai_api_key", e.target.value)
+                }
+                className="pr-10"
+              />
+
+              <button
+                type="button"
+                onClick={() => setShowOpenAIKey(!showOpenAIKey)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+              >
+                {showOpenAIKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+              </button>
             </div>
+
             <p className="text-xs text-gray-500">
               OpenAI API key for AI content generation
             </p>
           </div>
-          
+
           {/* Bible API */}
           <div className="space-y-2">
             <Label htmlFor="bible_api_key">Bible API Key</Label>
-            <div className="flex items-center gap-2">
-              <Input 
-                id="bible_api_key" 
+            {/* <div className="flex items-center gap-2">
+              <Input
+                id="bible_api_key"
                 type={showBibleAPIKey ? "text" : "password"}
                 placeholder="Enter Bible API key"
                 className="flex-1"
@@ -240,18 +261,43 @@ const SystemApiConfig = () => {
               >
                 {showBibleAPIKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </Button>
+            </div> */}
+            <div className="relative">
+              <Input
+                id="bible_api_key"
+                type={showBibleAPIKey ? "text" : "password"}
+                placeholder="Enter Bible API key"
+                value={localValues.bible_api_key}
+                onChange={(e) =>
+                  handleValueChange("bible_api_key", e.target.value)
+                }
+                className="pr-10"
+              />
+
+              <button
+                type="button"
+                onClick={() => setShowBibleAPIKey(!showBibleAPIKey)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+              >
+                {showBibleAPIKey ? (
+                  <EyeOff className="w-4 h-4" />
+                ) : (
+                  <Eye className="w-4 h-4" />
+                )}
+              </button>
             </div>
+
             <p className="text-xs text-gray-500">
               Bible API key for verse retrieval
             </p>
           </div>
-          
+
           {/* TTS API */}
           <div className="space-y-2">
             <Label htmlFor="tts_api_key">TTS API Key</Label>
-            <div className="flex items-center gap-2">
-              <Input 
-                id="tts_api_key" 
+            {/* <div className="flex items-center gap-2">
+              <Input
+                id="tts_api_key"
                 type={showTTSAPIKey ? "text" : "password"}
                 placeholder="Enter TTS API key"
                 className="flex-1"
@@ -265,15 +311,40 @@ const SystemApiConfig = () => {
               >
                 {showTTSAPIKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </Button>
+            </div> */}
+            <div className="relative">
+              <Input
+                id="tts_api_key"
+                type={showTTSAPIKey ? "text" : "password"}
+                placeholder="Enter TTS API key"
+                value={localValues.tts_api_key}
+                onChange={(e) =>
+                  handleValueChange("tts_api_key", e.target.value)
+                }
+                className="pr-10"
+              />
+
+              <button
+                type="button"
+                onClick={() => setShowTTSAPIKey(!showTTSAPIKey)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+              >
+                {showTTSAPIKey ? (
+                  <EyeOff className="w-4 h-4" />
+                ) : (
+                  <Eye className="w-4 h-4" />
+                )}
+              </button>
             </div>
+
             <p className="text-xs text-gray-500">
               Text-to-Speech API key
             </p>
           </div>
         </div>
-        
+
         <div className="flex items-center gap-3 pt-4">
-          <Button 
+          <Button
             className="flex items-center gap-2"
             onClick={handleSave}
             disabled={saving}

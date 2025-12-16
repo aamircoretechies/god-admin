@@ -276,16 +276,16 @@ const NotesOverviewContent: React.FC = () => {
     });
   };
 
-  const ColumnInputFilter = <TData, TValue>({ column }: any) => {
-    return (
-      <Input
-        placeholder="Filter..."
-        value={(column.getFilterValue() as string) ?? ''}
-        onChange={(event) => column.setFilterValue(event.target.value)}
-        className="h-9 w-full max-w-40"
-      />
-    );
-  };
+  // const ColumnInputFilter = <TData, TValue>({ column }: any) => {
+  //   return (
+  //     <Input
+  //       placeholder="Filter..."
+  //       value={(column.getFilterValue() as string) ?? ''}
+  //       onChange={(event) => column.setFilterValue(event.target.value)}
+  //       className="h-9 w-full max-w-40"
+  //     />
+  //   );
+  // };
 
   const columns = useMemo<ColumnDef<Note>[]>(
     () => [
@@ -295,7 +295,7 @@ const NotesOverviewContent: React.FC = () => {
         header: ({ column }) => (
           <DataGridColumnHeader
             title="User"
-            filter={<ColumnInputFilter column={column} />}
+            // filter={<ColumnInputFilter column={column} />}
             column={column}
           />
         ),
@@ -336,7 +336,7 @@ const NotesOverviewContent: React.FC = () => {
         header: ({ column }) => (
           <DataGridColumnHeader
             title="Title / Content"
-            filter={<ColumnInputFilter column={column} />}
+            // filter={<ColumnInputFilter column={column} />}
             column={column}
           />
         ),
@@ -424,7 +424,12 @@ const NotesOverviewContent: React.FC = () => {
       },
       {
         id: 'actions',
-        header: ({ column }) => <DataGridColumnHeader title="Actions" column={column} />,
+        // header: ({ column }) => <DataGridColumnHeader title="Actions" column={column} />,
+         header: () => (
+    <span className="text-sm font-medium select-none cursor-default">
+      Actions
+    </span>
+  ),
         enableSorting: false,
         cell: ({ row }) => (
           <DropdownMenu>
@@ -440,10 +445,17 @@ const NotesOverviewContent: React.FC = () => {
                   View Details
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem>
+              {/* <DropdownMenuItem>
                 <Edit className="w-4 h-4 mr-2" />
                 Edit
+              </DropdownMenuItem> */}
+              <DropdownMenuItem asChild>
+                <Link to={`/notes-journals/detail/${row.original.id}?edit=true`}>
+                  <Edit className="w-4 h-4 mr-2" />
+                  Edit
+                </Link>
               </DropdownMenuItem>
+
               <DropdownMenuItem onClick={() => handleExport(row.original)}>
                 <Download className="w-4 h-4 mr-2" />
                 Export

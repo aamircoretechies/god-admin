@@ -184,7 +184,7 @@ const PromptHistoryContent: React.FC = () => {
                           </Badge>
                         )}
                       </CardTitle>
-                      <div className="flex items-center gap-2">
+                      {/* <div className="flex items-center gap-2">
                         {!selectedVersionData.isCurrent && (
                           <>
                             <Button variant="outline" size="sm" onClick={() => handleViewDiff(selectedVersionData.id)}>
@@ -197,7 +197,7 @@ const PromptHistoryContent: React.FC = () => {
                             </Button>
                           </>
                         )}
-                      </div>
+                      </div> */}
                     </div>
                   </CardHeader>
                   <CardContent>

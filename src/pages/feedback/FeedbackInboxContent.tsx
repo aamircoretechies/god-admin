@@ -343,7 +343,7 @@ const FeedbackInboxContent = () => {
                   <BookOpen className="w-4 h-4 text-gray-500" />
                   <span className="font-medium">{item.verse}</span>
                 </div>
-                <p className="text-gray-700 mb-3">{item.comment}</p>
+                <p className="text-gray-700 mb-3 break-all">{item.comment}</p>
                 
                 {item.tags && item.tags.length > 0 && (
                   <div className="flex flex-wrap gap-2 mb-3">

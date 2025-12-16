@@ -178,7 +178,7 @@ const ViewPromptContent: React.FC = () => {
   const getRoleBadge = (role: string) => {
     switch (role) {
       case 'All Users':
-        return <Badge variant="secondary">All Users</Badge>;
+        return <Badge variant="outline">All Users</Badge>;
       case 'Premium Only':
         return <Badge variant="default" className="bg-purple-100 text-purple-800">Premium Only</Badge>;
       case 'Admin Only':

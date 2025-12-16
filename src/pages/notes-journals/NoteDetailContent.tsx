@@ -37,6 +37,8 @@ import {
 } from 'lucide-react';
 import { fetchLinkedVerses, fetchNoteById, fetchNotes, updateNote } from '@/services/notesApi';
 import { fetchUserProfile } from '@/services/usersApi';
+import { useSearchParams } from 'react-router-dom';
+
 
 // Types
 interface Note {
@@ -198,6 +200,16 @@ const NoteDetailContent: React.FC = () => {
   const [editedContent, setEditedContent] = useState(note.content);
   const [editedTags, setEditedTags] = useState(note.tags.join(', '));
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [searchParams] = useSearchParams();
+  const autoEdit = searchParams.get('edit') === 'true';
+
+  useEffect(() => {
+    if (autoEdit) {
+      setIsEditing(true);
+    }
+  }, [autoEdit]);
+
+
 
   useEffect(() => {
     setLoading(true);
