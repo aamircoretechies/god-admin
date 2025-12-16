@@ -735,10 +735,10 @@ const AIExplanationManagementContent = () => {
                             </span>
                           )}
                         </h3>
-                        <p className="text-sm text-gray-600 italic flex items-center gap-1">
+                        {/* <p className="text-sm text-gray-600 italic flex items-center gap-1">
                           {explanation.verseText || 'Verse text not available'}
                           {!explanation.verseText && <DummyDataIndicator text="Verse text is not available in the API" />}
-                        </p>
+                        </p> */}
                       </div>
                     </div>
                     <div className="flex items-center space-x-2">

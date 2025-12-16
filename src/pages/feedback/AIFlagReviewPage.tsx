@@ -22,14 +22,14 @@ const AIFlagReviewPage = () => {
               <ToolbarPageTitle />
               <ToolbarDescription>Review and moderate flagged AI responses.</ToolbarDescription>
             </ToolbarHeading>
-            <ToolbarActions>
+            {/* <ToolbarActions>
               <a href="#" className="btn btn-sm btn-light">
                 Export Flags
               </a>
               <a href="#" className="btn btn-sm btn-primary">
                 Bulk Actions
               </a>
-            </ToolbarActions>
+            </ToolbarActions> */}
           </Toolbar>
         </Container>
       )}

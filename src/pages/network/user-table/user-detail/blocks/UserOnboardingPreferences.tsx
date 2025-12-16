@@ -185,7 +185,7 @@ const UserOnboardingPreferences = () => {
                 {preferences.preferences.bibleTranslation && (
               <div>
                 <label className="text-sm font-medium text-gray-700">Bible Translation</label>
-                    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getBadgeColor(preferences.preferences.bibleTranslation)}`}>
+                    <span className={`text-sand dark:text-white inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getBadgeColor(preferences.preferences.bibleTranslation)}`}>
                       {preferences.preferences.bibleTranslation}
                 </span>
               </div>
