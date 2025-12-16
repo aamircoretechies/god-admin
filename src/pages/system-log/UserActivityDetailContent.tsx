@@ -338,14 +338,14 @@ const UserActivityDetailContent: React.FC = () => {
               </div>
             </div>
             <div className="flex flex-col gap-2">
-              <Button variant="outline" size="sm">
+              {/* <Button variant="outline" size="sm">
                 <Shield className="w-4 h-4 mr-2" />
                 Reset Role
               </Button>
               <Button variant="outline" size="sm" className="text-orange-600">
                 <AlertTriangle className="w-4 h-4 mr-2" />
                 Flag User
-              </Button>
+              </Button> */}
             </div>
           </div>
         </CardContent>

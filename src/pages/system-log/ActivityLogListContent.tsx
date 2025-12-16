@@ -438,10 +438,10 @@ const ActivityLogListContent: React.FC = () => {
                   View User Activity
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem>
+              {/* <DropdownMenuItem>
                 <AlertTriangle className="w-4 h-4 mr-2" />
                 Flag Activity
-              </DropdownMenuItem>
+              </DropdownMenuItem> */}
               {/* <DropdownMenuItem>
                 <Shield className="w-4 h-4 mr-2" />
                 Block User

@@ -448,10 +448,10 @@ const NotesOverviewContent: React.FC = () => {
                 <Download className="w-4 h-4 mr-2" />
                 Export
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleFlag(row.original.id)}>
+              {/* <DropdownMenuItem onClick={() => handleFlag(row.original.id)}>
                 <Flag className="w-4 h-4 mr-2" />
                 {row.original.status === 'flagged' ? 'Unflag' : 'Flag'}
-              </DropdownMenuItem>
+              </DropdownMenuItem> */}
               <DropdownMenuItem className="text-red-600" onClick={() => handleDelete(row.original.id)}>
                 <Trash2 className="w-4 h-4 mr-2" />
                 Delete
