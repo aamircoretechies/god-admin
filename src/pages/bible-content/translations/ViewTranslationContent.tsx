@@ -285,14 +285,14 @@ const ViewTranslationContent: React.FC = () => {
                 <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-100 dark:border-blue-800/30">
                   <div className="flex items-center space-x-2 mb-2">
                     <FileText className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                    <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">Total Verses</h4>
+                    <h4 className="text-sm font-medium text-gray-700 dark:text-white">Total Verses</h4>
                   </div>
                   <p className="text-2xl font-bold text-gray-900 dark:text-white">{translation.verseCount.toLocaleString()}</p>
                 </div>
                 <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-100 dark:border-green-800/30">
                   <div className="flex items-center space-x-2 mb-2">
                     <FileText className="w-5 h-5 text-green-600 dark:text-green-400" />
-                    <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">File Size</h4>
+                    <h4 className="text-sm font-medium text-gray-700 dark:text-white">File Size</h4>
                   </div>
                   <p className="text-2xl font-bold text-gray-900 dark:text-white">{translation.fileSize}</p>
                 </div>
