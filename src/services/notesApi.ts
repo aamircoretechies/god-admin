@@ -20,6 +20,25 @@ export interface NotesListResponse {
   data: NoteResponse[];
 }
 
+export interface SingleNoteResponse {
+  success: boolean;
+  data: NoteResponse & {
+    user_email?: string;
+  };
+}
+
+export interface LinkedVersesData {
+  linked_verses: string[];
+  total_linked_verses: number;
+  message?: string;
+}
+
+export interface LinkedVersesResponse {
+  status: number;
+  message: string;
+  data: LinkedVersesData;
+}
+
 // Fetch notes
 export const fetchNotes = async (params: {
   page: number;
@@ -35,6 +54,34 @@ export const fetchNotes = async (params: {
 
   const response = await axios.get<NotesListResponse>(
     `${API_URL}/admin/notes?${queryParams.toString()}`
+  );
+  return response.data;
+};
+
+// Update note content
+export const updateNote = async (
+  id: string,
+  payload: { content: string }
+): Promise<any> => {
+  const response = await axios.patch(`${API_URL}/notes/${id}`, payload);
+  return response.data;
+};
+
+// Fetch single note by ID
+export const fetchNoteById = async (id: string): Promise<SingleNoteResponse> => {
+  const response = await axios.get<SingleNoteResponse>(`${API_URL}/notes/${id}`);
+  return response.data;
+};
+
+// Fetch linked verses for today's reflection
+export const fetchLinkedVerses = async (
+  timezone: string
+): Promise<LinkedVersesResponse> => {
+  const response = await axios.get<LinkedVersesResponse>(
+    `${API_URL}/reflections/daily/linked-verses`,
+    {
+      params: { timezone }
+    }
   );
   return response.data;
 };
