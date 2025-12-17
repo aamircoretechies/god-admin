@@ -5,18 +5,18 @@ import { DataGrid, DataGridColumnHeader } from '@/components/data-grid';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
-import { 
-  Search, 
-  MoreVertical, 
-  Eye, 
-  Edit, 
-  Trash2, 
+import {
+  Search,
+  MoreVertical,
+  Eye,
+  Edit,
+  Trash2,
   History,
   Copy,
   CheckCircle,
@@ -148,7 +148,7 @@ const PromptListContent: React.FC = () => {
       const detailResponse = await fetchPromptDetail(promptId);
       if (detailResponse.status === 1 && detailResponse.data) {
         const promptData = detailResponse.data;
-        
+
         // Create duplicate with "Copy of " prefix
         const duplicateData: CreatePromptRequest = {
           title: `Copy of ${promptData.title}`,
@@ -181,10 +181,10 @@ const PromptListContent: React.FC = () => {
 
   const handleToggleStatus = async (promptId: string, currentStatus: string) => {
     const newStatus = currentStatus === 'Active' ? 'Inactive' : 'Active';
-    
+
     try {
       const response = await updatePromptStatus(promptId, newStatus as 'Active' | 'Inactive');
-      
+
       if (response.status === 1) {
         // Update the prompt in the local state
         setPrompts(prevPrompts =>
@@ -207,7 +207,7 @@ const PromptListContent: React.FC = () => {
   // Filter prompts (client-side filtering as fallback, but API should handle it)
   const filteredPrompts = useMemo(() => {
     return prompts.filter(prompt => {
-      const matchesSearch = 
+      const matchesSearch =
         prompt.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         prompt.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
         prompt.category.toLowerCase().includes(searchTerm.toLowerCase());
@@ -241,7 +241,7 @@ const PromptListContent: React.FC = () => {
       'Chapter Context': 'bg-indigo-100 text-indigo-800',
       'Other': 'bg-gray-100 text-gray-800'
     };
-    
+
     return (
       <Badge variant="default" className={colors[category] || 'bg-gray-100 text-gray-800'}>
         {category}
@@ -298,7 +298,7 @@ const PromptListContent: React.FC = () => {
         enableSorting: true,
         cell: ({ row }) => (
           <div className="flex flex-col">
-            <Link 
+            <Link
               to={`/ai-prompt-management/view/${row.original.id}`}
               className="text-sm font-medium text-gray-900 hover:text-primary-active mb-1"
             >
@@ -390,7 +390,7 @@ const PromptListContent: React.FC = () => {
                   View History
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem 
+              <DropdownMenuItem
                 onClick={() => handleDuplicate(row.original.id)}
                 disabled={duplicatingId === row.original.id}
               >
@@ -436,7 +436,7 @@ const PromptListContent: React.FC = () => {
     return Array.from(categories).sort();
   }, [prompts]);
 
-  const Toolbar = () => (
+  const toolbar = (
     <div className="flex flex-col gap-4 p-5">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
@@ -508,7 +508,7 @@ const PromptListContent: React.FC = () => {
       data={filteredPrompts}
       pagination={{ size: 10 }}
       sorting={[{ id: 'title', desc: false }]}
-      toolbar={<Toolbar />}
+      toolbar={toolbar}
       layout={{ card: true }}
     />
   );

@@ -11,7 +11,29 @@ interface IColumnFilterProps<TData, TValue> {
   column: Column<TData, TValue>;
 }
 
-const Backup= () => {
+const BackupToolbar = () => {
+  const { table } = useDataGrid();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const isFiltered = table.getState().columnFilters.length > 0;
+
+  return (
+    <div className="card-header px-5 py-5 border-b-0 flex-wrap">
+      <h3 className="card-title">Backups</h3>
+
+      <div className="flex flex-wrap items-center gap-2.5">
+        <DataGridColumnVisibility table={table} />
+        <label className="switch switch-sm">
+          <span className="switch-label">
+            Cloud Sync
+          </span>
+          <input type="checkbox" value="1" name="check" defaultChecked readOnly />
+        </label>
+      </div>
+    </div>
+  );
+};
+
+const Backup = () => {
   const ColumnInputFilter = <TData, TValue>({ column }: IColumnFilterProps<TData, TValue>) => {
     return (
       <Input
@@ -21,8 +43,8 @@ const Backup= () => {
         className="h-9 w-full max-w-40"
       />
     );
-  }; 
-  
+  };
+
   const columns = useMemo<ColumnDef<IBackupData>[]>(
     () => [
       {
@@ -38,9 +60,9 @@ const Backup= () => {
       {
         accessorFn: (row) => row.when,
         id: 'when',
-        header: ({ column }) => <DataGridColumnHeader title="When" filter={<ColumnInputFilter column={column}/>} column={column} />,
+        header: ({ column }) => <DataGridColumnHeader title="When" filter={<ColumnInputFilter column={column} />} column={column} />,
         enableSorting: true,
-        cell: ({ row }) => { 
+        cell: ({ row }) => {
           return (
             <div className="flex items-center gap-4">
 
@@ -89,12 +111,12 @@ const Backup= () => {
           headerClassName: 'min-w-[260px]',
         }
       },
-  
+
       {
         id: 'edit',
         header: () => '',
         enableSorting: false,
-        cell: () => {                    
+        cell: () => {
           return (
             <Link to="#" className="btn btn-sm btn-clear btn-light">
               Preview
@@ -104,22 +126,22 @@ const Backup= () => {
         meta: {
           headerClassName: 'w-[70px]'
         }
-      },      
+      },
       {
         id: 'trash',
         header: () => '',
         enableSorting: false,
-        cell: () => {                    
+        cell: () => {
           return (
             <Link to="#" className="btn btn-sm btn-light btn-outline">
-							Restore
-						</Link>
+              Restore
+            </Link>
           );
         },
         meta: {
           headerClassName: 'w-[70px]'
         }
-      },      
+      },
     ],
     []
   );
@@ -140,36 +162,17 @@ const Backup= () => {
     }
   };
 
-  const Toolbar = () => {
-    const { table } = useDataGrid();
-    const isFiltered = table.getState().columnFilters.length > 0
-
-    return (
-      <div className="card-header px-5 py-5 border-b-0 flex-wrap">
-        <h3 className="card-title">Backups</h3>
-
-        <div className="flex flex-wrap items-center gap-2.5">
-          <DataGridColumnVisibility table={table}/>
-          <label className="switch switch-sm">
-            <span className="switch-label">
-              Cloud Sync
-            </span>
-            <input type="checkbox" value="1" name="check" defaultChecked readOnly />
-          </label>
-        </div>
-      </div>
-    );
-  };
+  // BackupToolbar extracted to top level
 
   return (
-    <DataGrid 
-      columns={columns} 
-      data={data} 
-      rowSelection={true} 
+    <DataGrid
+      columns={columns}
+      data={data}
+      rowSelection={true}
       onRowSelectionChange={handleRowSelection}
       pagination={{ size: 10 }}
-      sorting={[{ id: 'when', desc: false }]} 
-      toolbar={<Toolbar />}
+      sorting={[{ id: 'when', desc: false }]}
+      toolbar={<BackupToolbar />}
       layout={{ card: true }}
     />
   );

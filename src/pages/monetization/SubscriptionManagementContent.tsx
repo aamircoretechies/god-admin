@@ -6,19 +6,19 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
-import { 
-  Search, 
-  MoreVertical, 
-  Eye, 
-  Edit, 
-  Crown, 
-  Users, 
+import {
+  Search,
+  MoreVertical,
+  Eye,
+  Edit,
+  Crown,
+  Users,
   Calendar,
   CreditCard,
   TrendingUp,
@@ -138,7 +138,7 @@ const SubscriptionManagementContent: React.FC = () => {
   // Filter subscriptions
   const filteredSubscriptions = useMemo(() => {
     return mockUserSubscriptions.filter(subscription => {
-      const matchesSearch = 
+      const matchesSearch =
         subscription.userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         subscription.userEmail.toLowerCase().includes(searchTerm.toLowerCase()) ||
         subscription.planType.toLowerCase().includes(searchTerm.toLowerCase());
@@ -233,7 +233,7 @@ const SubscriptionManagementContent: React.FC = () => {
               <AvatarFallback>{row.original.userName.charAt(0)}</AvatarFallback>
             </Avatar>
             <div className="flex flex-col">
-              <Link 
+              <Link
                 to={`/network/user-table/user-detail/${row.original.userId}`}
                 className="text-sm font-medium text-gray-900 hover:text-primary-active mb-px"
               >
@@ -242,7 +242,7 @@ const SubscriptionManagementContent: React.FC = () => {
               <span className="text-2sm text-gray-700 font-normal">
                 {row.original.userEmail}
               </span>
-              <Link 
+              <Link
                 to={`/network/user-table/user-detail/${row.original.userId}`}
                 className="text-xs text-primary hover:text-primary-active mt-1"
               >
@@ -403,7 +403,7 @@ const SubscriptionManagementContent: React.FC = () => {
     console.log(`Selected ${selectedRowIds.length} subscriptions:`, selectedRowIds);
   };
 
-  const Toolbar = () => (
+  const toolbar = (
     <div className="flex flex-col gap-4 p-5">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
@@ -454,7 +454,7 @@ const SubscriptionManagementContent: React.FC = () => {
       onRowSelectionChange={handleRowSelection}
       pagination={{ size: 10 }}
       sorting={[{ id: 'user', desc: false }]}
-      toolbar={<Toolbar />}
+      toolbar={toolbar}
       layout={{ card: true }}
     />
   );

@@ -10,6 +10,26 @@ interface IColumnFilterProps<TData, TValue> {
   column: Column<TData, TValue>;
 }
 
+const InvoicingToolbar = () => {
+  const { table } = useDataGrid();
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const isFiltered = table.getState().columnFilters.length > 0;
+
+  return (
+    <div className="card-header border-b-0 px-5 flex-wrap">
+      <h3 className="card-title">Billing and Invoicing</h3>
+
+      <div className="flex flex-wrap items-center gap-2.5">
+        <button className="btn btn-light btn-sm">
+          <KeenIcon icon="exit-down" />
+          Download PDF
+        </button>
+        <DataGridColumnVisibility table={table} />
+      </div>
+    </div>
+  );
+};
+
 const Invoicing = () => {
   const ColumnInputFilter = <TData, TValue>({ column }: IColumnFilterProps<TData, TValue>) => {
     return (
@@ -20,7 +40,7 @@ const Invoicing = () => {
         className="h-9 w-full max-w-40"
       />
     );
-  };  
+  };
 
   const columns = useMemo<ColumnDef<IInvoicingData>[]>(
     () => [
@@ -37,7 +57,7 @@ const Invoicing = () => {
       {
         accessorFn: (row) => row.invoice,
         id: 'invoice',
-        header: ({ column }) => <DataGridColumnHeader title="Member" filter={<ColumnInputFilter column={column}/>} column={column} />,
+        header: ({ column }) => <DataGridColumnHeader title="Member" filter={<ColumnInputFilter column={column} />} column={column} />,
         enableSorting: true,
         cell: (info) => {
           return info.row.original.invoice;
@@ -50,9 +70,9 @@ const Invoicing = () => {
       {
         accessorFn: (row) => row.label,
         id: 'label',
-        header: ({ column }) => <DataGridColumnHeader title="Status" column={column}/>,
+        header: ({ column }) => <DataGridColumnHeader title="Status" column={column} />,
         enableSorting: true,
-        cell: (info) => {                    
+        cell: (info) => {
           return (
             <div className={`badge badge-sm badge-outline ${info.row.original.color}`}>
               {info.row.original.label}
@@ -62,13 +82,13 @@ const Invoicing = () => {
         meta: {
           headerClassName: 'w-[170px]',
         }
-      },   
+      },
       {
         accessorFn: (row) => row.date,
         id: 'date',
-        header: ({ column }) => <DataGridColumnHeader title="Date" column={column}/>,
+        header: ({ column }) => <DataGridColumnHeader title="Date" column={column} />,
         enableSorting: true,
-        cell: (info) => {                    
+        cell: (info) => {
           return info.row.original.date;
         },
         meta: {
@@ -79,22 +99,22 @@ const Invoicing = () => {
       {
         accessorFn: (row) => row.dueDate,
         id: 'dueDate',
-        header: ({ column }) => <DataGridColumnHeader title="Due Date" column={column}/>,
+        header: ({ column }) => <DataGridColumnHeader title="Due Date" column={column} />,
         enableSorting: true,
-        cell: (info) => {                    
+        cell: (info) => {
           return info.row.original.dueDate;
         },
         meta: {
           headerClassName: 'min-w-[170px]',
           cellClassName: 'text-gray-800 font-normal',
         }
-      },    
+      },
       {
         accessorFn: (row) => row.amount,
         id: 'amount',
-        header: ({ column }) => <DataGridColumnHeader title="Amount" column={column}/>,
+        header: ({ column }) => <DataGridColumnHeader title="Amount" column={column} />,
         enableSorting: true,
-        cell: (info) => {                    
+        cell: (info) => {
           return info.row.original.amount;
         },
         meta: {
@@ -106,7 +126,7 @@ const Invoicing = () => {
         id: 'actions',
         header: () => '',
         enableSorting: false,
-        cell: () => {                    
+        cell: () => {
           return (
             <button className="btn btn-link">Download</button>
           );
@@ -114,7 +134,7 @@ const Invoicing = () => {
         meta: {
           headerClassName: 'w-[100px]'
         }
-      },      
+      },
     ],
     []
   );
@@ -135,34 +155,17 @@ const Invoicing = () => {
     }
   };
 
-  const Toolbar = () => {
-    const { table } = useDataGrid();
-    const isFiltered = table.getState().columnFilters.length > 0
-
-    return (
-      <div className="card-header border-b-0 px-5 flex-wrap">
-        <h3 className="card-title">Billing and Invoicing</h3>
-
-        <div className="flex flex-wrap items-center gap-2.5">
-          <button className="btn btn-light btn-sm">
-            <KeenIcon icon="exit-down" />
-            Download PDF
-          </button>
-          <DataGridColumnVisibility table={table}/>
-        </div>
-      </div>
-    );
-  };
+  // InvoicingToolbar extracted to top level
 
   return (
-    <DataGrid 
-      columns={columns} 
-      data={data} 
-      rowSelection={true} 
+    <DataGrid
+      columns={columns}
+      data={data}
+      rowSelection={true}
       onRowSelectionChange={handleRowSelection}
       pagination={{ size: 5 }}
-      sorting={[{ id: 'invoice', desc: false }]} 
-      toolbar={<Toolbar />}
+      sorting={[{ id: 'invoice', desc: false }]}
+      toolbar={<InvoicingToolbar />}
       layout={{ card: true }}
     />
   );

@@ -18,6 +18,55 @@ interface IColumnFilterProps<TData, TValue> {
   column: Column<TData, TValue>;
 }
 
+const CurrentSessionsToolbar = () => {
+  const { table } = useDataGrid();
+
+  return (
+    <div className="card-header flex-wrap px-5 py-5 border-b-0">
+      <h3 className="card-title">Current Sessions</h3>
+
+      <div className="flex items-center flex-wrap gap-2.5">
+        <label className="switch switch-sm">
+          <span className="switch-label">
+            Only Active Users
+          </span>
+          <input name="check" type="checkbox" value="1" readOnly />
+        </label>
+
+        <div className="flex gap-3">
+          <Select defaultValue="1">
+            <SelectTrigger className="min-w-32" size="sm">
+              <SelectValue placeholder="Select" />
+            </SelectTrigger>
+            <SelectContent className="min-w-32">
+              <SelectItem value="1">All Browsers</SelectItem>
+              <SelectItem value="2">Chrome</SelectItem>
+              <SelectItem value="3">Firefox</SelectItem>
+              <SelectItem value="4">Edge</SelectItem>
+              <SelectItem value="5">Safari</SelectItem>
+              <SelectItem value="6">Brave</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select defaultValue="3">
+            <SelectTrigger className="min-w-32" size="sm">
+              <SelectValue placeholder="Select" />
+            </SelectTrigger>
+            <SelectContent className="min-w-32">
+              <SelectItem value="1">All Locations</SelectItem>
+              <SelectItem value="2">London</SelectItem>
+              <SelectItem value="3">USA</SelectItem>
+              <SelectItem value="4">Japan</SelectItem>
+              <SelectItem value="5">Malaysia</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        <DataGridColumnVisibility table={table} />
+      </div>
+    </div>
+  );
+};
+
 const CurrentSessions = () => {
   const ColumnInputFilter = <TData, TValue>({ column }: IColumnFilterProps<TData, TValue>) => {
     return (
@@ -115,8 +164,8 @@ const CurrentSessions = () => {
         header: () => '',
         enableSorting: false,
         cell: ({ row }) => (
-          <button 
-            className="btn btn-icon btn-light btn-clear btn-sm" 
+          <button
+            className="btn btn-icon btn-light btn-clear btn-sm"
             onClick={() => alert(`Clicked on action button for row ${row.original.user.name}`)}
           >
             <KeenIcon icon="dots-vertical" />
@@ -146,64 +195,17 @@ const CurrentSessions = () => {
     }
   };
 
-  const Toolbar = () => {
-    const { table } = useDataGrid();
-
-    return (
-      <div className="card-header flex-wrap px-5 py-5 border-b-0">
-        <h3 className="card-title">Current Sessions</h3>
-
-        <div className="flex items-center flex-wrap gap-2.5">
-          <label className="switch switch-sm">
-            <span className="switch-label">
-              Only Active Users
-            </span>
-            <input name="check" type="checkbox" value="1" readOnly />
-          </label>
-
-          <div className="flex gap-3">
-            <Select defaultValue="1">
-              <SelectTrigger className="min-w-32" size="sm">
-                <SelectValue placeholder="Select" />
-              </SelectTrigger>
-              <SelectContent className="min-w-32">
-                <SelectItem value="1">All Browsers</SelectItem>
-                <SelectItem value="2">Chrome</SelectItem>
-                <SelectItem value="3">Firefox</SelectItem>
-                <SelectItem value="4">Edge</SelectItem>
-                <SelectItem value="5">Safari</SelectItem>
-                <SelectItem value="6">Brave</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Select defaultValue="3">
-              <SelectTrigger className="min-w-32" size="sm">
-                <SelectValue placeholder="Select" />
-              </SelectTrigger>
-              <SelectContent className="min-w-32">
-                <SelectItem value="1">All Locations</SelectItem>
-                <SelectItem value="2">London</SelectItem>
-                <SelectItem value="3">USA</SelectItem>
-                <SelectItem value="4">Japan</SelectItem>
-                <SelectItem value="5">Malaysia</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <DataGridColumnVisibility table={table}/>
-        </div>
-      </div>
-    );
-  };
+  // CurrentSessionsToolbar extracted to top level
 
   return (
-    <DataGrid 
-      columns={columns} 
-      data={data} 
-      rowSelection={true} 
+    <DataGrid
+      columns={columns}
+      data={data}
+      rowSelection={true}
       onRowSelectionChange={handleRowSelection}
       pagination={{ size: 10 }}
-      sorting={[{ id: 'user', desc: false }]} 
-      toolbar={<Toolbar />}
+      sorting={[{ id: 'user', desc: false }]}
+      toolbar={<CurrentSessionsToolbar />}
       layout={{ card: true }}
     />
   );

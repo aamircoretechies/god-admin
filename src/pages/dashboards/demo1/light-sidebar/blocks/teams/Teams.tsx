@@ -25,6 +25,54 @@ interface IColumnFilterProps<TData, TValue> {
   column: Column<TData, TValue>;
 }
 
+interface TeamsToolbarProps {
+  setSearchQuery: (query: string) => void;
+  searchQuery: string;
+}
+
+const TeamsToolbar = ({ setSearchQuery, searchQuery }: TeamsToolbarProps) => {
+  const [inputValue, setInputValue] = useState(searchQuery);
+  const { table } = useDataGrid();
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      setSearchQuery(inputValue);
+      if (inputValue.trim() === '') {
+        // Remove the 'query' filter if input is empty
+        table.setColumnFilters(
+          table.getState().columnFilters.filter((filter) => filter.id !== 'query') // Exclude the filter with id 'query'
+        );
+      } else {
+        // Add or update the 'query' filter
+        table.setColumnFilters([
+          ...table.getState().columnFilters.filter((filter) => filter.id !== 'query'), // Remove existing 'query' filter
+          { id: 'query', value: inputValue }, // Add the new filter
+        ]);
+      }
+    }
+  };
+
+  const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setInputValue(event.target.value); // Update local state
+  };
+
+  return (
+    <div className="card-header border-b-0 px-5">
+      <h3 className="card-title">Teams</h3>
+      <div className="input input-sm max-w-48">
+        <KeenIcon icon="magnifier" />
+        <input
+          type="text"
+          placeholder="Search Teams"
+          value={inputValue}
+          onChange={handleChange}
+          onKeyDown={handleKeyDown}
+        />
+      </div>
+    </div>
+  );
+};
+
 const Teams = () => {
   const ColumnFilter = <TData, TValue>({ column }: IColumnFilterProps<TData, TValue>) => {
     const [inputValue, setInputValue] = useState((column.getFilterValue() as string) ?? '');
@@ -197,48 +245,7 @@ const Teams = () => {
     }
   };
 
-  const Toolbar = ({ setSearchQuery }: { setSearchQuery: (query: string) => void }) => {
-    const [inputValue, setInputValue] = useState(searchQuery);
-    const { table } = useDataGrid();
-
-    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-      if (e.key === 'Enter') {
-        setSearchQuery(inputValue);
-        if (inputValue.trim() === '') {
-          // Remove the 'query' filter if input is empty
-          table.setColumnFilters(
-            table.getState().columnFilters.filter((filter) => filter.id !== 'query') // Exclude the filter with id 'query'
-          );
-        } else {
-          // Add or update the 'query' filter
-          table.setColumnFilters([
-            ...table.getState().columnFilters.filter((filter) => filter.id !== 'query'), // Remove existing 'query' filter
-            { id: 'query', value: inputValue }, // Add the new filter
-          ]);
-        }
-      }
-    };
-
-    const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-      setInputValue(event.target.value); // Update local state
-    };
-
-    return (
-      <div className="card-header border-b-0 px-5">
-        <h3 className="card-title">Teams</h3>
-        <div className="input input-sm max-w-48">
-          <KeenIcon icon="magnifier" />
-          <input
-            type="text"
-            placeholder="Search Teams"
-            value={inputValue}
-            onChange={handleChange}
-            onKeyDown={handleKeyDown}
-          />
-        </div>
-      </div>
-    );
-  };
+  // TeamsToolbar extracted to top level
 
   return (
     <DataGrid
@@ -249,7 +256,7 @@ const Teams = () => {
       getRowId={(row: any) => row.id}
       onRowSelectionChange={handleRowSelection}
       pagination={{ size: 5 }}
-      toolbar={<Toolbar setSearchQuery={setSearchQuery} />}
+      toolbar={<TeamsToolbar setSearchQuery={setSearchQuery} searchQuery={searchQuery} />}
       layout={{ card: true }}
     />
   );

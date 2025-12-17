@@ -10,6 +10,21 @@ interface IColumnFilterProps<TData, TValue> {
   column: Column<TData, TValue>;
 }
 
+const DeviceToolbar = () => {
+  const { table } = useDataGrid();
+
+  return (
+    <div className="card-header px-5 py-5 border-b-0 flex-wrap">
+      <h3 className="card-title">Devices</h3>
+
+      <div className="flex flex-wrap items-center gap-2.5">
+        <a href="#" className="btn btn-sm btn-primary">Add Device</a>
+        <DataGridColumnVisibility table={table} />
+      </div>
+    </div>
+  );
+};
+
 const Device = () => {
   const ColumnInputFilter = <TData, TValue>({ column }: IColumnFilterProps<TData, TValue>) => {
     return (
@@ -20,7 +35,7 @@ const Device = () => {
         className="h-9 w-full max-w-40"
       />
     );
-  }; 
+  };
 
   const columns = useMemo<ColumnDef<IDeviceData>[]>(
     () => [
@@ -73,20 +88,20 @@ const Device = () => {
           headerClassName: 'min-w-[165px]',
           cellClassName: 'text-sm text-gray-800 font-normal'
         }
-      },   
+      },
       {
         accessorFn: (row) => row.location,
         id: 'location',
         header: ({ column }) => <DataGridColumnHeader title="Location" column={column} />,
         enableSorting: true,
-        cell: (info) => {                    
+        cell: (info) => {
           return info.row.original.location;
         },
         meta: {
           headerClassName: 'min-w-[165px]',
           cellClassName: 'text-sm text-gray-800 font-normal'
         }
-      },  
+      },
       {
         accessorFn: (row) => row.added,
         id: 'added',
@@ -96,20 +111,20 @@ const Device = () => {
               <KeenIcon icon="information-2" className="text-lg leading-none me-1 mb-0.5" />
             </DefaultTooltip>
             <DataGridColumnHeader title="Added" column={column} />
-          </div> 
+          </div>
         ),
         enableSorting: true,
         meta: {
           headerClassName: 'min-w-[165px]',
           cellClassName: 'text-sm text-gray-800 font-normal'
         }
-      },  
+      },
       {
         accessorFn: (row) => row.lastSession,
         id: 'lastSession',
         header: ({ column }) => <DataGridColumnHeader title="Last Session" column={column} />,
         enableSorting: true,
-        cell: (info) => {                    
+        cell: (info) => {
           return info.row.original.lastSession;
         },
         meta: {
@@ -122,24 +137,24 @@ const Device = () => {
         id: 'edit',
         header: () => '',
         enableSorting: false,
-        cell: () => {                    
+        cell: () => {
           return (
             <button className="btn btn-sm btn-icon btn-clear btn-light">
-              <KeenIcon icon="notepad-edit" /> 
+              <KeenIcon icon="notepad-edit" />
             </button>
           );
         },
         meta: {
           headerClassName: 'w-[60px]'
         }
-      },      
+      },
       {
         id: 'trash',
         header: () => '',
         enableSorting: false,
-        cell: () => {                    
+        cell: () => {
           return (
-            <button className="btn btn-sm btn-icon btn-clear btn-light"> 
+            <button className="btn btn-sm btn-icon btn-clear btn-light">
               <KeenIcon icon="trash" />
             </button>
           );
@@ -147,7 +162,7 @@ const Device = () => {
         meta: {
           headerClassName: 'w-[60px]'
         }
-      },      
+      },
     ],
     []
   );
@@ -168,30 +183,17 @@ const Device = () => {
     }
   };
 
-  const Toolbar = () => {
-    const { table } = useDataGrid();
-
-    return (
-      <div className="card-header px-5 py-5 border-b-0 flex-wrap">
-        <h3 className="card-title">Devices</h3>
-
-        <div className="flex flex-wrap items-center gap-2.5">
-          <a href="#" className="btn btn-sm btn-primary">Add Device</a>
-          <DataGridColumnVisibility table={table}/>
-        </div>
-      </div>
-    );
-  };
+  // DeviceToolbar extracted to top level
 
   return (
-    <DataGrid 
-      columns={columns} 
-      data={data} 
-      rowSelection={true} 
+    <DataGrid
+      columns={columns}
+      data={data}
+      rowSelection={true}
       onRowSelectionChange={handleRowSelection}
       pagination={{ size: 10 }}
-      sorting={[{ id: 'device', desc: false }]} 
-      toolbar={<Toolbar />}
+      sorting={[{ id: 'device', desc: false }]}
+      toolbar={<DeviceToolbar />}
       layout={{ card: true }}
     />
   )

@@ -5,20 +5,20 @@ import { DataGrid, DataGridColumnHeader } from '@/components/data-grid';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
-import { 
-  AlertTriangle, 
-  MoreVertical, 
-  Eye, 
-  Check, 
-  X, 
-  Trash2, 
-  Download, 
+import {
+  AlertTriangle,
+  MoreVertical,
+  Eye,
+  Check,
+  X,
+  Trash2,
+  Download,
   Flag,
   Clock,
   User,
@@ -160,7 +160,7 @@ const ModerationQueueContent: React.FC = () => {
     const now = new Date();
     const flagged = new Date(flaggedAt);
     const diffInHours = Math.floor((now.getTime() - flagged.getTime()) / (1000 * 60 * 60));
-    
+
     if (diffInHours < 1) return 'Just flagged';
     if (diffInHours < 24) return `${diffInHours}h ago`;
     const diffInDays = Math.floor(diffInHours / 24);
@@ -207,7 +207,7 @@ const ModerationQueueContent: React.FC = () => {
               <AvatarFallback>{row.original.userName.charAt(0)}</AvatarFallback>
             </Avatar>
             <div className="flex flex-col">
-              <Link 
+              <Link
                 to={`/notes-journals/detail/${row.original.id}`}
                 className="text-sm font-medium text-gray-900 hover:text-primary-active mb-px"
               >
@@ -350,7 +350,7 @@ const ModerationQueueContent: React.FC = () => {
     []
   );
 
-  const Toolbar = () => (
+  const toolbar = (
     <div className="flex flex-col gap-4 p-5">
       {/* Alert Banner */}
       <div className="flex items-center gap-3 p-4 bg-red-50 border border-red-200 rounded-lg">
@@ -397,7 +397,7 @@ const ModerationQueueContent: React.FC = () => {
       data={filteredNotes}
       pagination={{ size: 10 }}
       sorting={[{ id: 'priority', desc: true }]}
-      toolbar={<Toolbar />}
+      toolbar={toolbar}
       layout={{ card: true }}
     />
   );

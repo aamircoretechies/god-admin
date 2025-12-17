@@ -522,7 +522,7 @@ const ActivityLogListContent: React.FC = () => {
 
 
 
-  const Toolbar = () => (
+  const toolbar = (
     <div className="flex flex-col gap-4 p-5">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
@@ -711,7 +711,7 @@ const ActivityLogListContent: React.FC = () => {
         onRowSelectionChange={handleRowSelection}
         pagination={{ size: 10 }}
         sorting={[{ id: 'timestamp', desc: true }]}
-        toolbar={<Toolbar />}
+        toolbar={toolbar}
         layout={{ card: true }}
       />
     </>

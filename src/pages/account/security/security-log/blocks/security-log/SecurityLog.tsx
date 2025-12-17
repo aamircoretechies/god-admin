@@ -10,6 +10,26 @@ interface IColumnFilterProps<TData, TValue> {
   column: Column<TData, TValue>;
 }
 
+const SecurityLogToolbar = () => {
+  const { table } = useDataGrid();
+
+  return (
+    <div className="card-header flex-wrap px-5 py-4 border-b-0">
+      <h3 className="card-title">Security Log</h3>
+
+      <div className="flex flex-wrap items-center gap-2.5">
+        <DataGridColumnVisibility table={table} />
+        <label className="switch switch-sm">
+          <input name="check" type="checkbox" value="1" defaultChecked className="order-2" readOnly />
+          <span className="switch-label order-1">
+            Push Alerts
+          </span>
+        </label>
+      </div>
+    </div>
+  );
+};
+
 const SecurityLog = () => {
   const ColumnInputFilter = <TData, TValue>({ column }: IColumnFilterProps<TData, TValue>) => {
     return (
@@ -117,8 +137,8 @@ const SecurityLog = () => {
         header: () => '',
         enableSorting: false,
         cell: () => (
-          <button 
-            className="btn btn-icon btn-light btn-clear btn-sm" 
+          <button
+            className="btn btn-icon btn-light btn-clear btn-sm"
           >
             <KeenIcon icon="notepad" />
           </button>
@@ -147,35 +167,17 @@ const SecurityLog = () => {
     }
   };
 
-  const Toolbar = () => {
-    const { table } = useDataGrid();
-
-    return (
-      <div className="card-header flex-wrap px-5 py-4 border-b-0">
-        <h3 className="card-title">Security Log</h3>
-
-        <div className="flex flex-wrap items-center gap-2.5">
-          <DataGridColumnVisibility table={table}/>
-          <label className="switch switch-sm">
-            <input name="check" type="checkbox" value="1" defaultChecked className="order-2" readOnly />
-            <span className="switch-label order-1">
-              Push Alerts
-            </span>
-          </label>
-        </div>
-      </div>
-    );
-  };
+  // SecurityLogToolbar extracted to top level
 
   return (
-    <DataGrid 
-      columns={columns} 
-      data={data} 
-      rowSelection={true} 
+    <DataGrid
+      columns={columns}
+      data={data}
+      rowSelection={true}
       onRowSelectionChange={handleRowSelection}
       pagination={{ size: 10 }}
-      sorting={[{ id: 'timestamp', desc: false }]} 
-      toolbar={<Toolbar />}
+      sorting={[{ id: 'timestamp', desc: false }]}
+      toolbar={<SecurityLogToolbar />}
       layout={{ card: true }}
     />
   );

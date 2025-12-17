@@ -14,6 +14,57 @@ interface IColumnFilterProps<TData, TValue> {
   column: Column<TData, TValue>;
 }
 
+interface ITeamMembersToolbarProps {
+  searchTerm: string;
+  setSearchTerm: (value: string) => void;
+  selectedCount: number;
+  handleDeleteSelected: () => void;
+  isLoading: boolean;
+}
+
+const TeamMembersToolbar = ({ searchTerm, setSearchTerm, selectedCount, handleDeleteSelected, isLoading }: ITeamMembersToolbarProps) => {
+  const { table } = useDataGrid();
+
+  return (
+    <div className="card-header px-5 py-5 border-b-0 flex-wrap gap-2">
+      <h3 className="card-title">Team Members</h3>
+
+      <div className="flex flex-wrap items-center gap-2.5">
+        <div className="relative">
+          <KeenIcon
+            icon="magnifier"
+            className="leading-none text-md text-gray-500 absolute top-1/2 start-0 -translate-y-1/2 ms-3"
+          />
+          <input
+            type="text"
+            placeholder="Search Members"
+            className="input input-sm ps-8"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+        {selectedCount > 0 && (
+          <button
+            onClick={handleDeleteSelected}
+            className="btn btn-sm btn-danger"
+            disabled={isLoading}
+          >
+            <KeenIcon icon="trash" className="me-1" />
+            Delete ({selectedCount})
+          </button>
+        )}
+        <DataGridColumnVisibility table={table} />
+        {/* Active Users toggle - commented out
+        <label className="switch switch-sm">
+          <input name="check" type="checkbox" value="1" className="order-2" readOnly />
+          <span className="switch-label order-1">Active Users</span>
+        </label>
+        */}
+      </div>
+    </div>
+  );
+};
+
 const Members = () => {
   const { isRTL } = useLanguage();
   const storageFilterId = 'members-filter';
@@ -88,28 +139,28 @@ const Members = () => {
           headerClassName: 'min-w-[165px]'
         },
       },
-     /*  {
-        accessorFn: (row) => row.location,
-        id: 'location',
-        header: ({ column }) => <DataGridColumnHeader title='Location' column={column} />,
-        enableSorting: true,
-        cell: (info) => (
-          <div className="flex items-center gap-1.5">
-            <img
-              src={toAbsoluteUrl(`/media/flags/${info.row.original.location.flag}`)}
-              className="h-4 rounded-full"
-              alt=""
-            />
-            <span className="leading-none text-gray-800 font-normal">
-              {info.row.original.location.name}
-            </span>
-          </div>
-        ),
-        meta: {
-          headerClassName: 'min-w-[165px]',
-          cellClassName: 'text-gray-700 font-normal'
-        },
-      }, */
+      /*  {
+         accessorFn: (row) => row.location,
+         id: 'location',
+         header: ({ column }) => <DataGridColumnHeader title='Location' column={column} />,
+         enableSorting: true,
+         cell: (info) => (
+           <div className="flex items-center gap-1.5">
+             <img
+               src={toAbsoluteUrl(`/media/flags/${info.row.original.location.flag}`)}
+               className="h-4 rounded-full"
+               alt=""
+             />
+             <span className="leading-none text-gray-800 font-normal">
+               {info.row.original.location.name}
+             </span>
+           </div>
+         ),
+         meta: {
+           headerClassName: 'min-w-[165px]',
+           cellClassName: 'text-gray-700 font-normal'
+         },
+       }, */
       {
         accessorFn: (row) => row.status,
         id: 'status',
@@ -270,7 +321,7 @@ const Members = () => {
         page: currentPage,
         limit: 10
       });
-      
+
       // Safety check: ensure users array exists and is valid
       if (!response.data || !response.data.users || !Array.isArray(response.data.users)) {
         console.error('Invalid API response structure:', response);
@@ -278,9 +329,9 @@ const Members = () => {
         setTeamMembers([]);
         return;
       }
-      
+
       const transformedData = response.data.users.map(transformTeamMember);
-      
+
       setTeamMembers(transformedData);
       setPagination({
         page: response.data.pagination.page,
@@ -306,7 +357,7 @@ const Members = () => {
     const handleMemberAdded = () => {
       setRefreshTrigger(prev => prev + 1);
     };
-    
+
     window.addEventListener('teamMemberAdded', handleMemberAdded);
     return () => {
       window.removeEventListener('teamMemberAdded', handleMemberAdded);
@@ -339,10 +390,10 @@ const Members = () => {
 
       // Create user-friendly message
       const memberCount = selectedRowIds.length;
-      const message = memberCount === 1 
-        ? '1 member selected' 
+      const message = memberCount === 1
+        ? '1 member selected'
         : `${memberCount} members selected`;
-      
+
       // Show member names only if 3 or fewer, otherwise just show count
       const description = selectedMembers.length <= 3 && selectedMembers.length > 0
         ? selectedMembers.join(', ')
@@ -369,7 +420,7 @@ const Members = () => {
 
   const handleDeleteSelected = async () => {
     const selectedRowIds = Object.keys(rowSelection).filter(id => id !== undefined && id !== null && id !== '');
-    
+
     if (selectedRowIds.length === 0) {
       toast.error('No members selected for deletion');
       return;
@@ -386,11 +437,11 @@ const Members = () => {
 
     try {
       setIsLoading(true);
-      
+
       // If only one member, use single delete endpoint
       if (selectedRowIds.length === 1) {
         const response = await deleteTeamMember(selectedRowIds[0]);
-        
+
         if (response.status === 1) {
           toast.success(response.message || 'Successfully deleted member');
           setRowSelection({});
@@ -401,7 +452,7 @@ const Members = () => {
       } else {
         // Multiple members - use delete multiple endpoint
         const response = await deleteMultipleTeamMembers(selectedRowIds);
-        
+
         if (response.status === 1) {
           toast.success(response.message || `Successfully deleted ${selectedRowIds.length} member(s)`);
           setRowSelection({});
@@ -419,49 +470,7 @@ const Members = () => {
     }
   };
 
-  const Toolbar = () => {
-    const { table } = useDataGrid();
-    const selectedCount = Object.keys(rowSelection).length;
-
-    return (
-      <div className="card-header px-5 py-5 border-b-0 flex-wrap gap-2">
-        <h3 className="card-title">Team Members</h3>
-
-        <div className="flex flex-wrap items-center gap-2.5">
-          <div className="relative">
-            <KeenIcon
-              icon="magnifier"
-              className="leading-none text-md text-gray-500 absolute top-1/2 start-0 -translate-y-1/2 ms-3"
-            />
-            <input
-              type="text"
-              placeholder="Search Members"
-              className="input input-sm ps-8"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-            />
-          </div>
-          {selectedCount > 0 && (
-            <button
-              onClick={handleDeleteSelected}
-              className="btn btn-sm btn-danger"
-              disabled={isLoading}
-            >
-              <KeenIcon icon="trash" className="me-1" />
-              Delete ({selectedCount})
-            </button>
-          )}
-          <DataGridColumnVisibility table={table}/>
-          {/* Active Users toggle - commented out
-          <label className="switch switch-sm">
-            <input name="check" type="checkbox" value="1" className="order-2" readOnly />
-            <span className="switch-label order-1">Active Users</span>
-          </label>
-          */}
-        </div>
-      </div>
-    );
-  };
+  // TeamMembersToolbar extracted to top level
 
   if (isLoading) {
     return (
@@ -479,15 +488,15 @@ const Members = () => {
   }
 
   return (
-    <DataGrid 
-      columns={columns} 
-      data={filteredData} 
-      rowSelection={true} 
+    <DataGrid
+      columns={columns}
+      data={filteredData}
+      rowSelection={true}
       onRowSelectionChange={handleRowSelection}
       getRowId={(row) => row.id || String(Math.random())}
-      pagination={{ size: 10 }} 
-      sorting={[{ id: 'member', desc: false }]} 
-      toolbar={<Toolbar />}
+      pagination={{ size: 10 }}
+      sorting={[{ id: 'member', desc: false }]}
+      toolbar={<TeamMembersToolbar searchTerm={searchTerm} setSearchTerm={setSearchTerm} selectedCount={Object.keys(rowSelection).length} handleDeleteSelected={handleDeleteSelected} isLoading={isLoading} />}
       layout={{ card: true }}
     />
   );

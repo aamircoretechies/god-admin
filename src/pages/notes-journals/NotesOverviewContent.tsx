@@ -425,11 +425,11 @@ const NotesOverviewContent: React.FC = () => {
       {
         id: 'actions',
         // header: ({ column }) => <DataGridColumnHeader title="Actions" column={column} />,
-         header: () => (
-    <span className="text-sm font-medium select-none cursor-default">
-      Actions
-    </span>
-  ),
+        header: () => (
+          <span className="text-sm font-medium select-none cursor-default">
+            Actions
+          </span>
+        ),
         enableSorting: false,
         cell: ({ row }) => (
           <DropdownMenu>
@@ -572,7 +572,7 @@ const NotesOverviewContent: React.FC = () => {
 
 
 
-  const Toolbar = () => (
+  const toolbar = (
     <div className="flex flex-col gap-4 p-5">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
@@ -661,7 +661,7 @@ const NotesOverviewContent: React.FC = () => {
         data={filteredNotes}
         pagination={{ size: 10 }}
         sorting={[{ id: 'createdAt', desc: true }]}
-        toolbar={<Toolbar />}
+        toolbar={toolbar}
         layout={{ card: true }}
       />
 

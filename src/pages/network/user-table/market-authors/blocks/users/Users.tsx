@@ -20,6 +20,82 @@ interface IColumnFilterProps<TData, TValue> {
   column: Column<TData, TValue>;
 }
 
+interface MarketAuthorsToolbarProps {
+  statusFilter: string;
+  setStatusFilter: (value: string) => void;
+  sortFilter: string;
+  setSortFilter: (value: string) => void;
+  searchInput: string;
+  setSearchInput: (value: string) => void;
+}
+
+const MarketAuthorsToolbar = ({
+  statusFilter,
+  setStatusFilter,
+  sortFilter,
+  setSortFilter,
+  searchInput,
+  setSearchInput
+}: MarketAuthorsToolbarProps) => {
+  const { table, totalRows } = useDataGrid();
+
+  return (
+    <div className="card-header flex-wrap gap-2 border-b-0 px-5">
+      <h3 className="card-title font-medium text-sm">
+        Showing {table.getState().pagination.pageSize} of {totalRows} users
+      </h3>
+
+      <div className="flex flex-wrap gap-2 lg:gap-5">
+        <div className="flex">
+          <label className="input input-sm">
+            <KeenIcon icon="magnifier" />
+            <input
+              type="text"
+              placeholder="Search users"
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+            />
+          </label>
+        </div>
+
+        <div className="flex flex-wrap gap-2.5">
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-28" size="sm">
+              <SelectValue placeholder="Select" />
+            </SelectTrigger>
+            <SelectContent className="w-32">
+              <SelectItem value="all">All</SelectItem>
+              <SelectItem value="active">Active</SelectItem>
+              <SelectItem value="disabled">Disabled</SelectItem>
+              <SelectItem value="pending">Pending</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select value={sortFilter} onValueChange={setSortFilter}>
+            <SelectTrigger className="w-28" size="sm">
+              <SelectValue placeholder="Select" />
+            </SelectTrigger>
+            <SelectContent className="w-32">
+              <SelectItem value="latest">Latest</SelectItem>
+              <SelectItem value="older">Older</SelectItem>
+              <SelectItem value="oldest">Oldest</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <button
+            className="btn btn-sm btn-outline btn-primary"
+            onClick={() => {
+              console.log('Filter button clicked', { statusFilter, sortFilter, searchInput });
+            }}
+          >
+            <KeenIcon icon="setting-4" /> Filters
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const Users = () => {
   const ColumnInputFilter = <TData, TValue>({ column }: IColumnFilterProps<TData, TValue>) => {
     return (
@@ -30,7 +106,7 @@ const Users = () => {
         className="h-9 w-full max-w-40"
       />
     );
-  }; 
+  };
 
   const columns = useMemo<ColumnDef<IUsersData>[]>(
     () => [
@@ -47,7 +123,7 @@ const Users = () => {
       {
         accessorFn: (row: IUsersData) => row.user,
         id: 'users',
-        header: ({ column }) => <DataGridColumnHeader title="Author" filter={<ColumnInputFilter column={column}/>} column={column} />,  
+        header: ({ column }) => <DataGridColumnHeader title="Author" filter={<ColumnInputFilter column={column} />} column={column} />,
         enableSorting: true,
         cell: ({ row }) => {  // 'row' argumentini cell funksiyasiga qo'shdik
           return (
@@ -62,13 +138,13 @@ const Users = () => {
                 <Link to="/network/user-table/user-detail" className="text-sm font-medium text-gray-900 hover:text-primary-active mb-px">
                   {row.original.user.userName}
                 </Link>
-                
+
                 <span className="text-2sm text-gray-700 font-normal">
                   {row.original.user.description}
                 </span>
-                
-                <Link 
-                  to="/network/user-table/user-detail" 
+
+                <Link
+                  to="/network/user-table/user-detail"
                   className="text-xs text-primary hover:text-primary-active mt-1"
                 >
                   View Details →
@@ -85,7 +161,7 @@ const Users = () => {
       {
         accessorFn: (row) => row.total,
         id: 'total',
-        header: ({ column }) => <DataGridColumnHeader title="Earnings" column={column}/>,   
+        header: ({ column }) => <DataGridColumnHeader title="Earnings" column={column} />,
         enableSorting: true,
         cell: (info) => {
           return info.row.original.total;
@@ -94,33 +170,33 @@ const Users = () => {
           headerClassName: 'w-[150px]',
           cellClassName: 'font-normal text-gray-800'
         }
-      },   
+      },
       {
         accessorFn: (row) => row.team,
         id: 'team',
-        header: ({ column }) => <DataGridColumnHeader title="Team" column={column}/>,  
+        header: ({ column }) => <DataGridColumnHeader title="Team" column={column} />,
         enableSorting: true,
-        cell: (info) => {                    
+        cell: (info) => {
           return (
-            
+
             <div className="flex items-center text-gray-800 font-normal gap-1.5">
-              <img 
-                src={toAbsoluteUrl(`/media/brand-logos/${info.row.original.team.logo}`)} 
+              <img
+                src={toAbsoluteUrl(`/media/brand-logos/${info.row.original.team.logo}`)}
                 className="w-5 shrinc-0"
                 alt={``}
               />
               {info.row.original.team.label}
             </div>
           );
-        }, 
+        },
         meta: {
-          headerClassName: 'min-w-[175px]' 
+          headerClassName: 'min-w-[175px]'
         }
-      },   
+      },
       {
         accessorFn: (row) => row.products,
         id: 'products',
-        header: ({ column }) => <DataGridColumnHeader title="Products" column={column}/>,   
+        header: ({ column }) => <DataGridColumnHeader title="Products" column={column} />,
         enableSorting: true,
         cell: (info) => {
           return info.row.original.products;
@@ -129,11 +205,11 @@ const Users = () => {
           headerClassName: 'min-w-[150px]',
           cellClassName: 'font-normal text-gray-800'
         }
-      },    
+      },
       {
         accessorFn: (row) => row.rating.value,
         id: 'rating',
-        header: ({ column }) => <DataGridColumnHeader title="Rating" column={column}/>,    
+        header: ({ column }) => <DataGridColumnHeader title="Rating" column={column} />,
         enableSorting: true,
         cell: (info) => (
           <CommonRating
@@ -144,48 +220,48 @@ const Users = () => {
         meta: {
           headerClassName: 'w-[150px]',
           cellClassName: 'text-gray-700 font-normal'
-        } 
+        }
       },
       {
         id: 'social',
-        header: ({ column }) => <DataGridColumnHeader title="Social Profiles" column={column}/>,   
+        header: ({ column }) => <DataGridColumnHeader title="Social Profiles" column={column} />,
         enableSorting: false,
-        cell: () => {                    
+        cell: () => {
           return (
             <div className="flex items-center gap-2.5">
               <Link to="#">
-                <KeenIcon icon="facebook" className='text-gray-500 text-lg'/> 
+                <KeenIcon icon="facebook" className='text-gray-500 text-lg' />
               </Link>
 
               <Link to="#">
-                <KeenIcon icon="dribbble" className='text-gray-500 text-lg'/> 
+                <KeenIcon icon="dribbble" className='text-gray-500 text-lg' />
               </Link>
 
               <Link to="#">
-                <KeenIcon icon="tiktok" className='text-gray-500 text-lg'/> 
-              </Link> 
+                <KeenIcon icon="tiktok" className='text-gray-500 text-lg' />
+              </Link>
             </div>
           );
         },
         meta: {
           headerClassName: 'w-[150px]'
         }
-      },      
+      },
       {
         id: 'edit',
         header: () => '',
         enableSorting: false,
-        cell: () => {                    
+        cell: () => {
           return (
             <div className="flex gap-2">
-              <Link 
-                to="/network/user-table/user-detail" 
+              <Link
+                to="/network/user-table/user-detail"
                 className="btn btn-sm btn-outline btn-primary"
               >
                 View Details
               </Link>
               <button className="btn btn-sm btn-icon btn-clear btn-light">
-                <KeenIcon icon="dots-vertical" /> 
+                <KeenIcon icon="dots-vertical" />
               </button>
             </div>
           );
@@ -193,8 +269,8 @@ const Users = () => {
         meta: {
           headerClassName: 'w-[140px]'
         }
-      },      
-        
+      },
+
     ],
     []
   );
@@ -256,79 +332,30 @@ const Users = () => {
         }
       });
     }
-  }; 
+  };
 
-  const Toolbar = () => {
-    const { table, totalRows } = useDataGrid();
-  
-    return (
-      <div className="card-header flex-wrap gap-2 border-b-0 px-5">
-        <h3 className="card-title font-medium text-sm">
-          Showing {table.getState().pagination.pageSize} of {totalRows} users
-        </h3>
+  // MarketAuthorsToolbar extracted to top level 
 
-        <div className="flex flex-wrap gap-2 lg:gap-5">
-          <div className="flex">
-            <label className="input input-sm">
-              <KeenIcon icon="magnifier" />
-              <input
-                type="text"
-                placeholder="Search users"
-                value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
-              />
-            </label>
-          </div>
-
-          <div className="flex flex-wrap gap-2.5">
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-28" size="sm">
-                <SelectValue placeholder="Select" />
-              </SelectTrigger>
-              <SelectContent className="w-32">
-                <SelectItem value="all">All</SelectItem>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="disabled">Disabled</SelectItem>
-                <SelectItem value="pending">Pending</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Select value={sortFilter} onValueChange={setSortFilter}>
-              <SelectTrigger className="w-28" size="sm">
-                <SelectValue placeholder="Select" />
-              </SelectTrigger>
-              <SelectContent className="w-32">
-                <SelectItem value="latest">Latest</SelectItem>
-                <SelectItem value="older">Older</SelectItem>
-                <SelectItem value="oldest">Oldest</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <button 
-              className="btn btn-sm btn-outline btn-primary"
-              onClick={() => {
-                console.log('Filter button clicked', { statusFilter, sortFilter, searchInput });
-              }}
-            >
-              <KeenIcon icon="setting-4" /> Filters
-            </button>
-          </div> 
-        </div>
-      </div>
-    );
-  }; 
-
-  return ( 
-    <DataGrid 
-      columns={columns} 
-      data={data} 
-      rowSelection={true} 
+  return (
+    <DataGrid
+      columns={columns}
+      data={data}
+      rowSelection={true}
       onRowSelectionChange={handleRowSelection}
       pagination={{ size: 5 }}
-      sorting={[{ id: 'team', desc: false }]} 
-      toolbar={<Toolbar />}
+      sorting={[{ id: 'team', desc: false }]}
+      toolbar={
+        <MarketAuthorsToolbar
+          statusFilter={statusFilter}
+          setStatusFilter={setStatusFilter}
+          sortFilter={sortFilter}
+          setSortFilter={setSortFilter}
+          searchInput={searchInput}
+          setSearchInput={setSearchInput}
+        />
+      }
       layout={{ card: true }}
-    />  
+    />
   );
 };
 
