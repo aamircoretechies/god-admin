@@ -344,14 +344,23 @@ const SystemApiConfig = () => {
         </div>
 
         <div className="flex items-center gap-3 pt-4">
-          <Button
+          {/* <Button
             className="flex items-center gap-2"
             onClick={handleSave}
             disabled={saving}
           >
             <Save className="w-4 h-4" />
             {saving ? 'Saving...' : 'Save Configuration'}
+          </Button> */}
+          <Button
+            className="flex items-center gap-2"
+            onClick={handleSave}
+            disabled
+          >
+            <Save className="w-4 h-4" />
+            Save Configuration
           </Button>
+
           {/* <Button variant="outline" className="flex items-center gap-2">
             <TestTube className="w-4 h-4" />
             Test API

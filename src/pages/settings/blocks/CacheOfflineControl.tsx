@@ -7,9 +7,9 @@ import { Input } from '@/components/ui/input';
 import { Save } from 'lucide-react';
 import { AlertCircle } from 'lucide-react';
 import { fetchCacheConfiguration, updateCacheConfiguration } from '@/services/settingsApi';
-import { 
-  Database, 
-  Download, 
+import {
+  Database,
+  Download,
   Trash2,
   AlertTriangle
 } from 'lucide-react';
@@ -74,7 +74,7 @@ const CacheOfflineControl = () => {
     try {
       setSaving(true);
       setError(null);
-      
+
       const requestData = {
         cache_enabled: localValues.cache_enabled,
         cache_ttl: parseInt(localValues.cache_ttl) || 0,
@@ -83,7 +83,7 @@ const CacheOfflineControl = () => {
       };
 
       const response = await updateCacheConfiguration(requestData);
-      
+
       if (response.status === 1) {
         // Reload configuration
         const updatedResponse = await fetchCacheConfiguration();
@@ -181,11 +181,11 @@ const CacheOfflineControl = () => {
               Manage system cache and offline content. These actions may take a few moments.
             </p>
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-3">
               <h4 className="font-medium text-gray-900">Cache Management</h4>
-              <Button 
+              <Button
                 onClick={handleClearCache}
                 disabled={isClearingCache}
                 className="w-full justify-start"
@@ -198,10 +198,10 @@ const CacheOfflineControl = () => {
                 Remove all cached data to free up space and resolve issues
               </p>
             </div>
-            
+
             <div className="space-y-3">
               <h4 className="font-medium text-gray-900">Offline Content</h4>
-              <Button 
+              <Button
                 onClick={handlePreloadTranslations}
                 disabled={isPreloading}
                 className="w-full justify-start"
@@ -227,7 +227,7 @@ const CacheOfflineControl = () => {
                     Enable caching system
                   </p>
                 </div>
-                <Switch 
+                <Switch
                   id="cache_enabled"
                   checked={localValues.cache_enabled}
                   onCheckedChange={(checked) => handleValueChange('cache_enabled', checked)}
@@ -236,8 +236,8 @@ const CacheOfflineControl = () => {
 
               <div className="space-y-2">
                 <Label htmlFor="cache_ttl">Cache TTL (seconds)</Label>
-                <Input 
-                  id="cache_ttl" 
+                <Input
+                  id="cache_ttl"
                   type="number"
                   placeholder="3600"
                   value={localValues.cache_ttl}
@@ -247,8 +247,8 @@ const CacheOfflineControl = () => {
 
               <div className="space-y-2">
                 <Label htmlFor="max_cache_size">Max Cache Size</Label>
-                <Input 
-                  id="max_cache_size" 
+                <Input
+                  id="max_cache_size"
                   placeholder="100MB"
                   value={localValues.max_cache_size}
                   onChange={(e) => handleValueChange('max_cache_size', e.target.value)}
@@ -262,7 +262,7 @@ const CacheOfflineControl = () => {
                     Enable offline mode
                   </p>
                 </div>
-                <Switch 
+                <Switch
                   id="offline_mode"
                   checked={localValues.offline_mode}
                   onCheckedChange={(checked) => handleValueChange('offline_mode', checked)}
@@ -273,14 +273,23 @@ const CacheOfflineControl = () => {
         </div>
 
         <div className="flex items-center gap-3 pt-4">
-          <Button 
+          {/* <Button 
             className="flex items-center gap-2"
             onClick={handleSave}
             disabled={saving}
           >
             <Save className="w-4 h-4" />
             {saving ? 'Saving...' : 'Save Settings'}
+          </Button> */}
+          <Button
+            className="flex items-center gap-2"
+            onClick={handleSave}
+            disabled={true}
+          >
+            <Save className="w-4 h-4" />
+            Save Settings
           </Button>
+
           {/* <Button 
             variant="outline" 
             className="flex items-center gap-2"

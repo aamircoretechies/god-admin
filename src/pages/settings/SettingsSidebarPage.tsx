@@ -24,12 +24,28 @@ const SettingsSidebarPage = () => {
               <ToolbarDescription>System Configuration and Administration Settings</ToolbarDescription>
             </ToolbarHeading>
             <ToolbarActions>
-              <a href="#" className="btn btn-sm btn-light">
+              {/* <a href="#" className="btn btn-sm btn-light">
                 Export Settings
               </a>
               <a href="#" className="btn btn-sm btn-primary">
                 Save Changes
+              </a> */}
+
+
+              <a
+                href="#"
+                className="btn btn-sm btn-light pointer-events-none opacity-50"
+              >
+                Export Settings
               </a>
+
+              <a
+                href="#"
+                className="btn btn-sm btn-primary pointer-events-none opacity-50"
+              >
+                Save Changes
+              </a>
+
             </ToolbarActions>
           </Toolbar>
         </Container>
