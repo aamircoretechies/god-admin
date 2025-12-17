@@ -71,3 +71,38 @@ export const fetchDashboardAnalytics = async (period: string = '30d'): Promise<D
   return response.data;
 };
 
+
+
+
+
+
+// ===== Team Members API =====
+
+export interface TeamMember {
+  id: string;
+  name: string;
+  email: string;
+  role: string;
+  status: string;
+}
+
+export interface TeamMembersResponse {
+  status: number;
+  message: string;
+  data: TeamMember[];
+}
+
+// export const fetchTeamMembers = async (): Promise<TeamMembersResponse> => {
+//   const response = await axios.get<TeamMembersResponse>(
+//     `${API_URL}/api/v1/users/team`
+//   );
+//   return response.data;
+// };
+
+export const fetchTeamMembers = async (): Promise<TeamMembersResponse> => {
+  const response = await axios.get<TeamMembersResponse>(
+    `${API_URL}/users/team`
+  );
+  return response.data;
+};
+
