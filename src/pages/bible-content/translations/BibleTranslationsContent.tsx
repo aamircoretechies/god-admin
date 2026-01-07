@@ -379,91 +379,91 @@ const BibleTranslationsContent = () => {
 
   //   };
 
- const handleSave = async () => {
-  try {
-    setSaving(true);
-    setError(null);
+  const handleSave = async () => {
+    try {
+      setSaving(true);
+      setError(null);
 
-    const languageCode = getLanguageCode(formData.language || "");
+      const languageCode = getLanguageCode(formData.language || "");
 
-    // CASE 1: Edit + File Upload
-    if (editingTranslation && selectedFile) {
-      const payload = {
-        name: formData.name || "",
-        abbreviation: formData.version || "",
-        language: languageCode,
-        license: formData.license || "",
-        file: selectedFile,
-      };
+      // CASE 1: Edit + File Upload
+      if (editingTranslation && selectedFile) {
+        const payload = {
+          name: formData.name || "",
+          abbreviation: formData.version || "",
+          language: languageCode,
+          license: formData.license || "",
+          file: selectedFile,
+        };
 
-      const uploadRes = await uploadTranslation(payload);
+        const uploadRes = await uploadTranslation(payload);
 
-      toast.success(uploadRes.message || "File uploaded successfully ✅");
-    }
-
-    //  CASE 2: Edit without File
-    else if (editingTranslation) {
-      const updateData = {
-        name: formData.name || "",
-        abbreviation: formData.version || "",
-        language: languageCode,
-        license: formData.license || "",
-        is_public: formData.isPublic ?? true,
-      };
-
-      const res = await updateTranslation(editingTranslation.id, updateData);
-
-      toast.success(res.message || "Translation updated successfully ✅");
-    }
-
-    //  CASE 3: Create New Translation
-    else {
-      if (!selectedFile) {
-        toast.error("Please select a file to upload");
-        return;
+        toast.success(uploadRes.message || "File uploaded successfully ✅");
       }
 
-      const payload = {
-        name: formData.name || "",
-        abbreviation: formData.version || "",
-        language: languageCode,
-        license: formData.license || "",
-        file: selectedFile,
-      };
+      //  CASE 2: Edit without File
+      else if (editingTranslation) {
+        const updateData = {
+          name: formData.name || "",
+          abbreviation: formData.version || "",
+          language: languageCode,
+          license: formData.license || "",
+          is_public: formData.isPublic ?? true,
+        };
 
-      const uploadRes = await uploadTranslation(payload);
+        const res = await updateTranslation(editingTranslation.id, updateData);
 
-      toast.success(uploadRes.message || "Translation created successfully ✅");
+        toast.success(res.message || "Translation updated successfully ✅");
+      }
+
+      //  CASE 3: Create New Translation
+      else {
+        if (!selectedFile) {
+          toast.error("Please select a file to upload");
+          return;
+        }
+
+        const payload = {
+          name: formData.name || "",
+          abbreviation: formData.version || "",
+          language: languageCode,
+          license: formData.license || "",
+          file: selectedFile,
+        };
+
+        const uploadRes = await uploadTranslation(payload);
+
+        toast.success(uploadRes.message || "Translation created successfully ✅");
+      }
+
+      //  Refresh list
+      const updated = await fetchTranslations({ page: currentPage, limit: 10 });
+      if (updated.success && updated.data) {
+        setTranslations(updated.data.map(transformTranslation));
+      }
+
+      //  Reset
+      setEditingTranslation(null);
+      setIsCreating(false);
+      setSelectedFile(null);
+      setFormData({
+        name: "",
+        version: "",
+        language: "",
+        description: "",
+        status: "draft",
+        publisher: "",
+        year: "",
+        license: "",
+        isPublic: true,
+      });
+
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || "Something went wrong ❌");
+    } finally {
+      setSaving(false);
     }
-
-    //  Refresh list
-    const updated = await fetchTranslations({ page: currentPage, limit: 10 });
-    if (updated.success && updated.data) {
-      setTranslations(updated.data.map(transformTranslation));
-    }
-
-    //  Reset
-    setEditingTranslation(null);
-    setIsCreating(false);
-    setSelectedFile(null);
-    setFormData({
-      name: "",
-      version: "",
-      language: "",
-      description: "",
-      status: "draft",
-      publisher: "",
-      year: "",
-      license: "",
-      isPublic: true,
-    });
-
-  } catch (err: any) {
-    toast.error(err?.response?.data?.message || "Something went wrong ❌");
-  } finally {
-    setSaving(false);
-  }
-};
+  };
 
 
 
@@ -622,7 +622,8 @@ const BibleTranslationsContent = () => {
                       value={formData.language}
                       onValueChange={(value) => setFormData({ ...formData, language: value })}
                     >
-                      <SelectTrigger>
+                      {/*                       <SelectTrigger> */}
+                      <SelectTrigger className="w-full">
                         <SelectValue placeholder="Select language" />
                       </SelectTrigger>
                       <SelectContent>
@@ -681,7 +682,8 @@ const BibleTranslationsContent = () => {
                     value={formData.status}
                     onValueChange={(value) => setFormData({ ...formData, status: value as any })}
                   >
-                    <SelectTrigger>
+                    {/*                   <SelectTrigger> */}
+                    <SelectTrigger className="w-full">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -773,19 +775,22 @@ const BibleTranslationsContent = () => {
       {/* Filters */}
       <Card>
         <CardContent className="p-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          {/* <div className="grid grid-cols-1 md:grid-cols-4 gap-4"> */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="relative">
               <Languages className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <Input
                 placeholder="Search translations..."
                 value={searchTerm}
                 onChange={(e) => handleSearchChange(e.target.value)}
-                className="pl-10"
+                /* className="pl-10" */
+                className="pl-10 w-full"
               />
             </div>
             <div>
               <Select value={languageFilter} onValueChange={handleLanguageFilterChange}>
-                <SelectTrigger>
+                {/* <SelectTrigger> */}
+                <SelectTrigger className="w-full">
                   <SelectValue placeholder="Filter by language" />
                 </SelectTrigger>
                 <SelectContent>
@@ -808,7 +813,8 @@ const BibleTranslationsContent = () => {
             </div>
             <div>
               <Select value={statusFilter} onValueChange={handleStatusFilterChange}>
-                <SelectTrigger>
+                {/* <SelectTrigger> */}
+                <SelectTrigger className="w-full">
                   <SelectValue placeholder="Filter by status" />
                 </SelectTrigger>
                 <SelectContent>
@@ -859,17 +865,19 @@ const BibleTranslationsContent = () => {
             ) : (
               filteredTranslations.map((translation) => (
                 <div key={translation.id} className="p-4 border rounded-lg">
-                  <div className="flex items-center justify-between mb-3">
+                  {/* <div className="flex items-center justify-between mb-3"> */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-3 gap-3">
                     <div className="flex items-center space-x-3">
-                      <div className="p-2 bg-blue-100 rounded-lg">
+                      <div className="p-2 bg-blue-100 rounded-lg shrink-0">
                         <Languages className="w-5 h-5 text-blue-600" />
                       </div>
                       <div>
                         <h3 className="font-semibold text-gray-900">{translation.name}</h3>
-                        <p className="text-sm text-gray-600">{translation.description}</p>
+                        <p className="text-sm text-gray-600 line-clamp-1">{translation.description}</p>
                       </div>
                     </div>
-                    <div className="flex items-center space-x-2">
+                    {/* <div className="flex items-center space-x-2"> */}
+                    <div className="flex items-center space-x-2 pl-11 sm:pl-0">
                       <Badge className={getStatusColor(translation.status)}>
                         {translation.status.charAt(0).toUpperCase() + translation.status.slice(1)}
                       </Badge>
@@ -898,22 +906,24 @@ const BibleTranslationsContent = () => {
                     </div>
                   </div>
 
-                  <div className="flex justify-between items-center pt-3 border-t">
+                  {/* <div className="flex justify-between items-center pt-3 border-t"> */}
+                  <div className="flex flex-col sm:flex-row justify-between sm:items-center pt-3 border-t gap-4">
                     <div className="text-sm text-gray-500">
                       {translation.publisher} • {translation.year} • {translation.license}
                     </div>
-                    <div className="flex space-x-2">
-                      <Link to={`/bible-content/translations/view/${translation.id}`}>
-                        <Button variant="outline" size="sm">
+                    {/* <div className="flex space-x-2"> */}
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Link to={`/bible-content/translations/view/${translation.id}`} className="flex-1 sm:flex-none">
+                        <Button variant="outline" size="sm" className="w-full">
                           <Eye className="w-4 h-4 mr-1" />
                           View
                         </Button>
                       </Link>
-                      <Button variant="outline" size="sm" onClick={() => handleEdit(translation)}>
+                      <Button variant="outline" size="sm" onClick={() => handleEdit(translation)} className="flex-1 sm:flex-none">
                         <Edit className="w-4 h-4 mr-1" />
                         Edit
                       </Button>
-                      <Button variant="outline" size="sm" disabled={true}>
+                      <Button variant="outline" size="sm" disabled={true} className="flex-1 sm:flex-none">
                         <Download className="w-4 h-4 mr-1" />
                         Download
                       </Button>
@@ -922,6 +932,7 @@ const BibleTranslationsContent = () => {
                         size="sm"
                         onClick={() => handleDelete(translation.id)}
                         disabled={true}
+                        className="flex-1 sm:flex-none"
                       >
                         <Trash2 className="w-4 h-4 mr-1" />
                         Delete
@@ -934,17 +945,21 @@ const BibleTranslationsContent = () => {
           </div>
 
           {/* Pagination */}
+          {/* {totalPages > 1 && (
+            <div className="flex items-center justify-between mt-6 pt-6 border-t"> */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-between mt-6 pt-6 border-t">
+            <div className="flex flex-col sm:flex-row items-center justify-between mt-6 pt-6 border-t gap-4">
               <div className="text-sm text-gray-600">
                 Page {currentPage} of {totalPages}
               </div>
-              <div className="flex gap-2">
+              {/* <div className="flex gap-2"> */}
+              <div className="flex items-center gap-2 w-full sm:w-auto">
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                   disabled={currentPage === 1 || loading}
+                  className="flex-1 sm:flex-none"
                 >
                   Previous
                 </Button>
@@ -953,6 +968,7 @@ const BibleTranslationsContent = () => {
                   size="sm"
                   onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                   disabled={currentPage === totalPages || loading}
+                  className="flex-1 sm:flex-none"
                 >
                   Next
                 </Button>
@@ -965,4 +981,4 @@ const BibleTranslationsContent = () => {
   );
 };
 
-export { BibleTranslationsContent }; 
+export { BibleTranslationsContent };
