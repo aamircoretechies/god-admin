@@ -1,4 +1,4 @@
-import React, { useState, useEffect,forwardRef, useImperativeHandle  } from 'react';
+import React, { useState, useEffect, forwardRef, useImperativeHandle } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -188,10 +188,10 @@ const AddEditPromptContent = forwardRef((props, ref) => {
   };
 
   useImperativeHandle(ref, () => ({
-  submit: handleSave,
-  cancel: handleCancel
+    submit: handleSave,
+    cancel: handleCancel
 
-}));
+  }));
 
 
   const handleCancel = () => {
@@ -222,12 +222,21 @@ const AddEditPromptContent = forwardRef((props, ref) => {
       {/* Form Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">
+          {/* <h2 className="text-2xl font-bold text-gray-900">
+            {isEditMode ? 'Edit AI Prompt' : 'Create New AI Prompt'}
+          </h2> */}
+          <h2 className="text-xl md:text-2xl font-bold text-gray-900">
             {isEditMode ? 'Edit AI Prompt' : 'Create New AI Prompt'}
           </h2>
-          <p className="text-gray-600 mt-1">
+          {/* <p className="text-gray-600 mt-1">
             {isEditMode ? 'Update AI prompt template' : 'Design AI prompt templates for biblical content generation'}
+          </p> */}
+          <p className="text-sm md:text-base text-gray-600 mt-1">
+            {isEditMode
+              ? 'Update AI prompt template'
+              : 'Design AI prompt templates for biblical content generation'}
           </p>
+
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" onClick={handlePreview}>
@@ -314,7 +323,7 @@ const AddEditPromptContent = forwardRef((props, ref) => {
                 <CardTitle>Preview</CardTitle>
               </CardHeader>
               <CardContent>
-                
+
                 <div className="bg-card p-4 rounded-lg  border border-gray-300">
                   <h3 className="font-semibold mb-2">{formData.title || 'Prompt Title'}</h3>
                   <p className="text-sm text-gray-600 mb-3">{formData.description || 'Description'}</p>
@@ -462,7 +471,7 @@ const AddEditPromptContent = forwardRef((props, ref) => {
         </div>
       </div>
     </div>
-  
+
   );
 });
 
