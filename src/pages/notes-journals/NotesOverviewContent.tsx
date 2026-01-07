@@ -573,32 +573,47 @@ const NotesOverviewContent: React.FC = () => {
 
 
   const toolbar = (
-    <div className="flex flex-col gap-4 p-5">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <div className="flex-1 relative">
+    // <div className="flex flex-col gap-4 p-5">
+    <div className="flex flex-col gap-4 p-3 md:p-5">
+      {/* <div className="flex items-center justify-between"> */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        {/* <div className="flex items-center gap-4"> */}
+        <div className="flex flex-col md:flex-row items-stretch md:items-center gap-4 flex-1">
+          {/* <div className="flex-1 relative"> */}
+          <div className="relative w-full md:max-w-md">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <Input
               placeholder="Search by user, keyword, verse, tag..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 max-w-md"
+              // className="pl-10 max-w-md"
+              className="pl-10 w-full"
             />
           </div>
-          <select
+          {/* <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
             className="px-3 py-2 border border-gray-300 rounded-md text-sm dark:bg-card dark:text-white"
+          > */}
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="px-3 py-2 border border-gray-300 rounded-md text-sm dark:bg-card dark:text-white w-full md:w-auto"
           >
             <option value="all">All Status</option>
             <option value="active">Active</option>
             <option value="flagged">Flagged</option>
             <option value="deleted">Deleted</option>
           </select>
-          <select
+          {/* <select
             value={userFilter}
             onChange={(e) => setUserFilter(e.target.value)}
             className="px-3 py-2 border border-gray-300 rounded-md text-sm dark:bg-card dark:text-white"
+          > */}
+          <select
+            value={userFilter}
+            onChange={(e) => setUserFilter(e.target.value)}
+            className="px-3 py-2 border border-gray-300 rounded-md text-sm dark:bg-card dark:text-white w-full md:w-auto"
           >
             <option value="all">All Users</option>
             {uniqueUserIds.map((userId) => {
@@ -610,10 +625,15 @@ const NotesOverviewContent: React.FC = () => {
               );
             })}
           </select>
-          <select
+          {/* <select
             value={languageFilter}
             onChange={(e) => setLanguageFilter(e.target.value)}
             className="px-3 py-2 border border-gray-300 rounded-md text-sm dark:bg-card dark:text-white"
+          > */}
+          <select
+            value={languageFilter}
+            onChange={(e) => setLanguageFilter(e.target.value)}
+            className="px-3 py-2 border border-gray-300 rounded-md text-sm dark:bg-card dark:text-white w-full md:w-auto"
           >
             <option value="all">All Languages</option>
             <option value="English">English</option>
@@ -621,7 +641,8 @@ const NotesOverviewContent: React.FC = () => {
             <option value="French">French</option>
           </select>
         </div>
-        <div className="flex items-center gap-2">
+        {/* <div className="flex items-center gap-2"> */}
+        <div className="flex items-center gap-2 justify-end">
           <span className="text-sm text-gray-600">
             Showing {filteredNotes.length} of {totalCount || notes.length} notes
           </span>

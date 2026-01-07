@@ -278,7 +278,7 @@ const AIExplanationManagementContent = () => {
         success: (data) => {
           console.log(data);
           // setExplanations(explanations.map(e => e.id === isEditing ? { ...e, ...formData } as AIExplanation : e));
-          setExplanations(explanations.map(e => e.id === isEditing ? { ...e, ...formData, updatedAt:new Date().toLocaleDateString("en-us",{year:"numeric", month:"short",day:"numeric",}) } as AIExplanation : e));
+          setExplanations(explanations.map(e => e.id === isEditing ? { ...e, ...formData, updatedAt: new Date().toLocaleDateString("en-us", { year: "numeric", month: "short", day: "numeric", }) } as AIExplanation : e));
           // loadExplanations();
           setIsEditing(null);
           return 'Explanation updated successfully';
@@ -649,7 +649,8 @@ const AIExplanationManagementContent = () => {
       {/* Filters */}
       <Card>
         <CardContent className="p-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          {/* <div className="grid grid-cols-1 md:grid-cols-4 gap-4"> */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <Input
@@ -720,7 +721,8 @@ const AIExplanationManagementContent = () => {
           ) : (
             <div className="space-y-4">
               {filteredExplanations.map((explanation) => (
-                <div key={explanation.id} className="p-4 border rounded-lg min-w-[600px]">
+                // <div key={explanation.id} className="p-4 border rounded-lg min-w-[600px]">
+                <div key={explanation.id} className="p-4 border rounded-lg min-w-full lg:min-w-[600px]">
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center space-x-3">
                       <div className="p-2 bg-purple-100 rounded-lg">
