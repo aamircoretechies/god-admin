@@ -523,22 +523,28 @@ const ActivityLogListContent: React.FC = () => {
 
 
   const toolbar = (
-    <div className="flex flex-col gap-4 p-5">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <div className="flex-1 relative">
+    // <div className="flex flex-col gap-4 p-5">
+    <div className="flex flex-col gap-4 p-3 md:p-5">
+      {/* <div className="flex items-center justify-between"> */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        {/* <div className="flex items-center gap-4"> */}
+        <div className="flex flex-col md:flex-row items-stretch md:items-center gap-4 flex-1">
+          {/* <div className="flex-1 relative"> */}
+          <div className="relative w-full md:max-w-md">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <Input
               placeholder="Search by user, activity, verse reference, query..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 max-w-md"
+              // className="pl-10 max-w-md"
+              className="pl-10 w-full"
             />
           </div>
           <select
             value={userFilter}
             onChange={(e) => setUserFilter(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-md text-sm bg-card"
+            // className="px-3 py-2 border border-gray-300 rounded-md text-sm bg-card"
+            className="px-3 py-2 border border-gray-300 rounded-md text-sm bg-card w-full md:w-auto"
           >
             <option value="all">All Users</option>
             <option value="Free">Free</option>
@@ -549,7 +555,8 @@ const ActivityLogListContent: React.FC = () => {
           <select
             value={activityTypeFilter}
             onChange={(e) => setActivityTypeFilter(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-md text-sm bg-card"
+            // className="px-3 py-2 border border-gray-300 rounded-md text-sm bg-card"
+            className="px-3 py-2 border border-gray-300 rounded-md text-sm bg-card w-full md:w-auto"
           >
             <option value="all">All Activities</option>
             <option value="Verse Read">Verse Read</option>
@@ -563,7 +570,8 @@ const ActivityLogListContent: React.FC = () => {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-md text-sm bg-card"
+            // className="px-3 py-2 border border-gray-300 rounded-md text-sm bg-card"
+            className="px-3 py-2 border border-gray-300 rounded-md text-sm bg-card w-full md:w-auto"
           >
             <option value="all">All Status</option>
             <option value="Success">Success</option>
@@ -573,7 +581,8 @@ const ActivityLogListContent: React.FC = () => {
           <select
             value={dateRangeFilter}
             onChange={(e) => setDateRangeFilter(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-md text-sm bg-card"
+            // className="px-3 py-2 border border-gray-300 rounded-md text-sm bg-card"
+            className="px-3 py-2 border border-gray-300 rounded-md text-sm bg-card w-full md:w-auto"
           >
             <option value="all">All Time</option>
             <option value="today">Today</option>
@@ -582,7 +591,8 @@ const ActivityLogListContent: React.FC = () => {
             <option value="year">This Year</option>
           </select>
         </div>
-        <div className="flex items-center gap-2">
+        {/* <div className="flex items-center gap-2"> */}
+        <div className="flex items-center gap-2 justify-end">
           <span className="text-sm text-gray-600">
             Showing {filteredLogs.length} of {activityLogs.length} activities
           </span>
@@ -623,7 +633,8 @@ const ActivityLogListContent: React.FC = () => {
       {
         showBlockModal && (
           <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-            <div className="bg-white p-6 rounded-lg w-[400px] space-y-4">
+            {/* <div className="bg-white p-6 rounded-lg w-[400px] space-y-4"> */}
+            <div className="bg-white p-6 rounded-lg w-full max-w-[400px] mx-4 space-y-4">
               <h2 className="text-lg font-semibold">Block User</h2>
 
               <input
@@ -665,7 +676,8 @@ const ActivityLogListContent: React.FC = () => {
       {
         showSuspendModal && (
           <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-            <div className="bg-white p-6 rounded-lg w-[400px] space-y-4">
+            {/* <div className="bg-white p-6 rounded-lg w-[400px] space-y-4"> */}
+            <div className="bg-white p-6 rounded-lg w-full max-w-[400px] mx-4 space-y-4">
               <h2 className="text-lg font-semibold">Suspend User</h2>
 
               <input
