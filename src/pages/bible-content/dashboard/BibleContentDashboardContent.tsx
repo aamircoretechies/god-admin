@@ -3,10 +3,10 @@ import { Link, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { 
-  BookOpen, 
-  Languages, 
-  FileText, 
+import {
+  BookOpen,
+  Languages,
+  FileText,
   Brain,
   AlertCircle,
   CheckCircle,
@@ -108,7 +108,7 @@ const BibleContentDashboardContent = () => {
     // For now, assume top translations are active
     // If needed, we can enhance this by matching with recentActivity.versions
     const status: 'active' | 'inactive' | 'pending' = 'active';
-    
+
     return {
       id: translation.version_id,
       name: translation.name,
@@ -150,21 +150,22 @@ const BibleContentDashboardContent = () => {
   return (
     <div className="space-y-6">
       {/* Key Stats */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        <Card 
+      {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6"> */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6">
+        <Card
           className="cursor-pointer hover:shadow-md transition-shadow"
           onClick={() => navigate('/bible-content/translations')}
         >
-          <CardContent className="p-6">
+          {/* <CardContent className="p-6"> */}
+          <CardContent className="p-4 md:p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Total Translations</p>
                 <p className="text-2xl font-bold text-gray-900">{contentStats.totalTranslations}</p>
-                <p className={`text-sm ${
-                  dashboardData.monthlyStats.translations.change >= 0 
-                    ? 'text-green-600' 
-                    : 'text-red-600'
-                }`}>
+                <p className={`text-sm ${dashboardData.monthlyStats.translations.change >= 0
+                  ? 'text-green-600'
+                  : 'text-red-600'
+                  }`}>
                   {dashboardData.monthlyStats.translations.change >= 0 ? '+' : ''}
                   {dashboardData.monthlyStats.translations.change} this month
                 </p>
@@ -176,17 +177,18 @@ const BibleContentDashboardContent = () => {
           </CardContent>
         </Card>
 
-        <Card 
+        <Card
           className="cursor-pointer hover:shadow-md transition-shadow"
           onClick={() => navigate('/bible-content/books-chapters')}
         >
-          <CardContent className="p-6">
+          {/* <CardContent className="p-6"> */}
+          <CardContent className="p-4 md:p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">Total Verses</p>
                 <p className="text-2xl font-bold text-gray-900">{contentStats.totalVerses.toLocaleString()}</p>
                 <p className="text-sm text-green-600">
-                  {dashboardData.monthlyStats.verses.thisMonth > 0 
+                  {dashboardData.monthlyStats.verses.thisMonth > 0
                     ? `+${dashboardData.monthlyStats.verses.thisMonth.toLocaleString()} this month`
                     : 'Across all translations'}
                 </p>
@@ -198,21 +200,21 @@ const BibleContentDashboardContent = () => {
           </CardContent>
         </Card>
 
-        <Card 
+        <Card
           className="cursor-pointer hover:shadow-md transition-shadow"
           onClick={() => navigate('/bible-content/ai-explanations')}
         >
-          <CardContent className="p-6">
+          {/* <CardContent className="p-6"> */}
+          <CardContent className="p-4 md:p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600">AI Explanations</p>
                 <p className="text-2xl font-bold text-gray-900">{contentStats.aiExplanations.toLocaleString()}</p>
-                <p className={`text-sm ${
-                  dashboardData.monthlyStats.aiExplanations.thisMonth > 0 
-                    ? 'text-green-600' 
-                    : 'text-gray-600'
-                }`}>
-                  {dashboardData.monthlyStats.aiExplanations.thisMonth > 0 
+                <p className={`text-sm ${dashboardData.monthlyStats.aiExplanations.thisMonth > 0
+                  ? 'text-green-600'
+                  : 'text-gray-600'
+                  }`}>
+                  {dashboardData.monthlyStats.aiExplanations.thisMonth > 0
                     ? `+${dashboardData.monthlyStats.aiExplanations.thisMonth.toLocaleString()} this month`
                     : 'No new this month'}
                 </p>
@@ -224,11 +226,12 @@ const BibleContentDashboardContent = () => {
           </CardContent>
         </Card>
 
-        <Card 
+        <Card
           className="cursor-pointer hover:shadow-md transition-shadow"
           onClick={() => navigate('/bible-content/moderation')}
         >
-          <CardContent className="p-6">
+          {/* <CardContent className="p-6"> */}
+          <CardContent className="p-4 md:p-6">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-400">Flagged Content</p>
@@ -244,7 +247,8 @@ const BibleContentDashboardContent = () => {
       </div>
 
       {/* Translation Status Overview */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      {/* <div className="grid grid-cols-1 lg:grid-cols-3 gap-6"> */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
@@ -363,8 +367,10 @@ const BibleContentDashboardContent = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="overflow-x-auto">
-            <table className="w-full">
+          {/* <div className="overflow-x-auto"> */}
+          <div className="overflow-x-auto -mx-4 md:mx-0">
+            {/* <table className="w-full"> */}
+            <table className="w-full min-w-[600px] md:min-w-full">
               <thead>
                 <tr className="border-b">
                   <th className="text-left py-3 px-4 font-medium text-gray-900">Name</th>
@@ -375,8 +381,8 @@ const BibleContentDashboardContent = () => {
               <tbody>
                 {translations.length > 0 ? (
                   translations.map((translation) => (
-                    <tr 
-                      key={translation.id} 
+                    <tr
+                      key={translation.id}
                       className="cursor-pointer border-b border-gray-200 dark:border-gray-200 hover:bg-gray-200 dark:hover:bg-coal-100 transition-colors"
                       onClick={(e) => {
                         e.preventDefault();
@@ -387,33 +393,34 @@ const BibleContentDashboardContent = () => {
                         }
                       }}
                     >
-                    <td className="py-3 px-4">
-                      <div>
-                        <h3 className="font-medium text-gray-900 dark:text-white">{translation.name}</h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">{translation.version}</p>
-                      </div>
-                    </td>
-                    <td className="py-3 px-4">
-                      <div className="flex items-center gap-2">
-                        <span className="text-gray-600">{translation.language}</span>
-                        {translation.verseCount > 0 && (
-                          <span className="text-xs text-gray-500">
-                            ({translation.verseCount.toLocaleString()} verses)
-                          </span>
-                        )}
-                      </div>
-                    </td>
-                    <td className="py-3 px-4">
-                      <div className="flex items-center gap-2">
-                        {/* File size not available - hidden instead of showing N/A */}
-                        <DummyDataIndicator text="File size" />
-                      </div>
-                    </td>
+                      <td className="py-3 px-4">
+                        <div>
+                          <h3 className="font-medium text-gray-900 dark:text-white">{translation.name}</h3>
+                          <p className="text-sm text-gray-600 dark:text-gray-400">{translation.version}</p>
+                        </div>
+                      </td>
+                      <td className="py-3 px-4">
+                        <div className="flex items-center gap-2">
+                          <span className="text-gray-600">{translation.language}</span>
+                          {translation.verseCount > 0 && (
+                            <span className="text-xs text-gray-500">
+                              ({translation.verseCount.toLocaleString()} verses)
+                            </span>
+                          )}
+                        </div>
+                      </td>
+                      <td className="py-3 px-4">
+                        <div className="flex items-center gap-2">
+                          {/* File size not available - hidden instead of showing N/A */}
+                          <DummyDataIndicator text="File size" />
+                        </div>
+                      </td>
                     </tr>
                   ))
                 ) : (
                   <tr>
-                    <td colSpan={3} className="py-8 text-center text-gray-500 dark:text-gray-400">
+                    {/* <td colSpan={3} className="py-8 text-center text-gray-500 dark:text-gray-400"> */}
+                    <td colSpan={3} className="py-6 md:py-8 text-center text-gray-500 dark:text-gray-400">
                       <div className="flex flex-col items-center">
                         <BookOpen className="w-12 h-12 mx-auto mb-4 opacity-50" />
                         <p>No data available</p>
@@ -428,7 +435,8 @@ const BibleContentDashboardContent = () => {
       </Card>
 
       {/* Recent Activity */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      {/* <div className="grid grid-cols-1 lg:grid-cols-2 gap-6"> */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
@@ -449,11 +457,10 @@ const BibleContentDashboardContent = () => {
                         {report.version} • {new Date(report.created_at).toLocaleDateString()}
                       </p>
                     </div>
-                    <Badge className={`${
-                      report.status === 'PENDING' 
-                        ? 'bg-yellow-100 text-yellow-800' 
-                        : 'bg-gray-100 text-gray-800'
-                    }`}>
+                    <Badge className={`${report.status === 'PENDING'
+                      ? 'bg-yellow-100 text-yellow-800'
+                      : 'bg-gray-100 text-gray-800'
+                      }`}>
                       {report.status}
                     </Badge>
                   </div>
@@ -511,7 +518,8 @@ const BibleContentDashboardContent = () => {
       </div>
 
       {/* Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      {/* <div className="grid grid-cols-1 md:grid-cols-3 gap-6"> */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
@@ -521,25 +529,25 @@ const BibleContentDashboardContent = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-3">
-              <Button 
-                className="w-full justify-start" 
+              <Button
+                className="w-full justify-start"
                 variant="outline"
                 onClick={() => navigate('/bible-content/ai-explanations')}
               >
                 <Brain className="w-4 h-4 mr-2" />
                 Review AI Explanations
               </Button>
-              <Button 
-                className="w-full justify-start" 
-                variant="outline" 
-                disabled 
+              <Button
+                className="w-full justify-start"
+                variant="outline"
+                disabled
                 title="AI generation not available in Phase 1"
               >
                 <TrendingUp className="w-4 h-4 mr-2" />
                 Generate New Explanations (Phase 2)
               </Button>
-              <Button 
-                className="w-full justify-start" 
+              <Button
+                className="w-full justify-start"
                 variant="outline"
                 onClick={() => navigate('/bible-content/moderation')}
               >
@@ -574,7 +582,6 @@ const BibleContentDashboardContent = () => {
             </div>
           </CardContent>
         </Card>
-
       </div>
     </div>
   );
