@@ -21,7 +21,9 @@ import {
   Copy,
   CheckCircle,
   XCircle,
-  AlertCircle
+  AlertCircle,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import { fetchPrompts, fetchPromptDetail, createPrompt, updatePromptStatus, type PromptResponse, type CreatePromptRequest } from '@/services/promptsApi';
 import { toast } from 'sonner';
@@ -437,22 +439,22 @@ const PromptListContent: React.FC = () => {
   }, [prompts]);
 
   const toolbar = (
-    <div className="flex flex-col gap-4 p-5">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <div className="flex-1 relative">
+    <div className="flex flex-col gap-4 p-3 md:p-5">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        <div className="flex flex-col md:flex-row items-stretch md:items-center gap-4 flex-1">
+          <div className="relative w-full md:max-w-md">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <Input
               placeholder="Search by prompt name, description, category..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 max-w-md"
+              className="pl-10 w-full"
             />
           </div>
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-md text-sm dark:bg-card dark:text-white"
+            className="px-3 py-2 border border-gray-300 rounded-md text-sm dark:bg-card dark:text-white w-full md:w-auto"
           >
             <option value="all">All Status</option>
             <option value="Active">Active</option>
@@ -461,7 +463,7 @@ const PromptListContent: React.FC = () => {
           <select
             value={categoryFilter}
             onChange={(e) => setCategoryFilter(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-md text-sm dark:bg-card dark:text-white"
+            className="px-3 py-2 border border-gray-300 rounded-md text-sm dark:bg-card dark:text-white w-full md:w-auto"
           >
             <option value="all">All Categories</option>
             {uniqueCategories.map(category => (
@@ -469,7 +471,7 @@ const PromptListContent: React.FC = () => {
             ))}
           </select>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 justify-end">
           <span className="text-sm text-gray-600">
             Showing {filteredPrompts.length} of {totalCount || prompts.length} prompts
           </span>
@@ -503,14 +505,45 @@ const PromptListContent: React.FC = () => {
   }
 
   return (
-    <DataGrid
-      columns={columns}
-      data={filteredPrompts}
-      pagination={{ size: 10 }}
-      sorting={[{ id: 'title', desc: false }]}
-      toolbar={toolbar}
-      layout={{ card: true }}
-    />
+    <div className="space-y-4">
+      <DataGrid
+        columns={columns}
+        data={filteredPrompts}
+        pagination={{ size: 10 }}
+        sorting={[{ id: 'title', desc: false }]}
+        toolbar={toolbar}
+        layout={{ card: true }}
+      />
+
+      {/* Pagination */}
+      {Math.ceil(totalCount / pageSize) > 1 && (
+        <div className="flex items-center justify-between p-4 border-t">
+          <div className="text-sm text-gray-600">
+            Showing page {currentPage} of {Math.ceil(totalCount / pageSize)} ({totalCount} total prompts)
+          </div>
+          <div className="flex items-center space-x-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+              disabled={currentPage === 1}
+            >
+              <ChevronLeft className="w-4 h-4" />
+              Previous
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(prev => Math.min(Math.ceil(totalCount / pageSize), prev + 1))}
+              disabled={currentPage === Math.ceil(totalCount / pageSize)}
+            >
+              Next
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
 

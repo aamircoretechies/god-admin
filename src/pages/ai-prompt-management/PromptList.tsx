@@ -91,19 +91,22 @@ const PromptList = () => {
               <ToolbarPageTitle />
               <ToolbarDescription>Manage AI prompt templates for verse explanations, summaries, and reflections.</ToolbarDescription>
             </ToolbarHeading>
+            {/* <ToolbarActions> */}
             <ToolbarActions>
-              <button 
-                onClick={handleExportPrompts}
-                className="btn btn-sm btn-light"
-              >
-                Export Prompts
-              </button>
-              <button 
-                onClick={handleAddNewPrompt}
-                className="btn btn-sm btn-primary"
-              >
-                Add New Prompt
-              </button>
+              <div className="flex flex-wrap justify-center sm:justify-end gap-2">
+                <button
+                  onClick={handleExportPrompts}
+                  className="btn btn-sm btn-light"
+                >
+                  Export Prompts
+                </button>
+                <button
+                  onClick={handleAddNewPrompt}
+                  className="btn btn-sm btn-primary"
+                >
+                  Add New Prompt
+                </button>
+              </div>
             </ToolbarActions>
           </Toolbar>
         </Container>
