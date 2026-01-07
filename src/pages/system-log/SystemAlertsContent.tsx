@@ -3,10 +3,10 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { fetchAlerts, resolveAlert, dismissAlert, acknowledgeAlert, type AlertResponse } from '@/services/alertsApi';
-import { 
-  AlertTriangle, 
-  AlertCircle, 
-  CheckCircle, 
+import {
+  AlertTriangle,
+  AlertCircle,
+  CheckCircle,
   XCircle,
   Shield,
   UserX,
@@ -132,7 +132,7 @@ const SystemAlertsContent: React.FC = () => {
       setSuccessMessage(null);
       const response = await resolveAlert(alertId);
       console.log('Resolve alert response:', response);
-      
+
       if (response.status === 1) {
         setSuccessMessage(response.message || 'Alert resolved successfully');
         // Reload alerts to reflect the updated status
@@ -159,7 +159,7 @@ const SystemAlertsContent: React.FC = () => {
       setSuccessMessage(null);
       const response = await dismissAlert(alertId);
       console.log('Dismiss alert response:', response);
-      
+
       if (response.status === 1) {
         setSuccessMessage(response.message || 'Alert dismissed successfully');
         // Reload alerts to reflect the updated status
@@ -186,7 +186,7 @@ const SystemAlertsContent: React.FC = () => {
       setSuccessMessage(null);
       const response = await acknowledgeAlert(alertId);
       console.log('Acknowledge alert response:', response);
-      
+
       if (response.status === 1) {
         setSuccessMessage(response.message || 'Alert acknowledged successfully');
         // Reload alerts to reflect the updated status
@@ -258,9 +258,9 @@ const SystemAlertsContent: React.FC = () => {
       'performance': 'bg-amber-100 text-amber-800',
       'user_behavior': 'bg-pink-100 text-pink-800'
     };
-    
+
     const displayName = category.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-    
+
     return (
       <Badge variant="default" className={colors[category as keyof typeof colors] || 'bg-gray-100 text-gray-800'}>
         {displayName}
@@ -280,21 +280,21 @@ const SystemAlertsContent: React.FC = () => {
 
   const filteredAlerts = useMemo(() => {
     return alerts.filter(alert => {
-    if (selectedFilter === 'all') return true;
-    if (selectedFilter === 'new') return alert.status === 'new';
-    if (selectedFilter === 'critical') return alert.severity === 'critical';
-    if (selectedFilter === 'action_required') return alert.actionRequired;
-    return true;
-  });
+      if (selectedFilter === 'all') return true;
+      if (selectedFilter === 'new') return alert.status === 'new';
+      if (selectedFilter === 'critical') return alert.severity === 'critical';
+      if (selectedFilter === 'action_required') return alert.actionRequired;
+      return true;
+    });
   }, [alerts, selectedFilter]);
 
   const stats = useMemo(() => {
     return {
-    total: alerts.length,
-    new: alerts.filter(a => a.status === 'new').length,
-    critical: alerts.filter(a => a.severity === 'critical').length,
-    actionRequired: alerts.filter(a => a.actionRequired).length
-  };
+      total: alerts.length,
+      new: alerts.filter(a => a.status === 'new').length,
+      critical: alerts.filter(a => a.severity === 'critical').length,
+      actionRequired: alerts.filter(a => a.actionRequired).length
+    };
   }, [alerts]);
 
   if (loading) {
@@ -344,7 +344,8 @@ const SystemAlertsContent: React.FC = () => {
       )}
 
       {/* Alert Statistics */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      {/* <div className="grid grid-cols-1 md:grid-cols-4 gap-4"> */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card>
           <CardContent className="p-4">
             <div className="flex items-center gap-3">
@@ -402,23 +403,26 @@ const SystemAlertsContent: React.FC = () => {
       {/* Filter Controls */}
       <Card>
         <CardContent className="p-4">
-          <div className="flex items-center gap-4">
-            <span className="text-sm font-medium text-gray-700">Filter:</span>
-            <select
-              value={selectedFilter}
-              onChange={(e) => setSelectedFilter(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-md text-sm bg-card"
-            >
-              <option value="all">All Alerts</option>
-              <option value="new">New Alerts</option>
-              <option value="critical">Critical Only</option>
-              <option value="action_required">Action Required</option>
-            </select>
-            <span className="text-sm text-gray-600">
-              Showing {filteredAlerts.length} of {alerts.length} alerts
-            </span>
+          {/* <div className="flex items-center gap-4"> */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="flex flex-wrap items-center gap-4">
+              <span className="text-sm font-medium text-gray-700">Filter:</span>
+              <select
+                value={selectedFilter}
+                onChange={(e) => setSelectedFilter(e.target.value)}
+                className="px-3 py-2 border border-gray-300 rounded-md text-sm bg-card"
+              >
+                <option value="all">All Alerts</option>
+                <option value="new">New Alerts</option>
+                <option value="critical">Critical Only</option>
+                <option value="action_required">Action Required</option>
+              </select>
+              <span className="text-sm text-gray-600">
+                Showing {filteredAlerts.length} of {alerts.length} alerts
+              </span>
+            </div>
             {totalPages > 1 && (
-              <div className="flex items-center gap-2 ml-auto">
+              <div className="flex items-center gap-2 ml-auto flex-wrap justify-end">
                 <Button
                   variant="outline"
                   size="sm"
@@ -447,33 +451,35 @@ const SystemAlertsContent: React.FC = () => {
       {/* Alerts List */}
       <div className="space-y-4">
         {filteredAlerts.map((alert) => (
-          <Card key={alert.id} className={`border-l-4 ${
-            alert.severity === 'critical' ? 'border-l-red-500' :
+          <Card key={alert.id} className={`border-l-4 ${alert.severity === 'critical' ? 'border-l-red-500' :
             alert.severity === 'high' ? 'border-l-orange-500' :
-            alert.severity === 'medium' ? 'border-l-yellow-500' :
-            'border-l-amber-500'
-          }`}>
+              alert.severity === 'medium' ? 'border-l-yellow-500' :
+                'border-l-amber-500'
+            }`}>
             <CardContent className="p-6">
               <div className="flex items-start gap-4">
                 <div className="flex-shrink-0 mt-1">
                   {getTypeIcon(alert.type)}
                 </div>
-                <div className="flex-1">
-                  <div className="flex items-start justify-between mb-3">
-                    <div className="flex items-center gap-3">
-                      <h3 className="text-lg font-semibold text-gray-900">{alert.title}</h3>
+                <div className="flex-1 min-w-0">
+                  {/* <div className="flex items-start justify-between mb-3"> */}
+                  <div className="flex flex-col xl:flex-row xl:items-start justify-between gap-4 mb-3">
+                    {/* <div className="flex items-center gap-3"> */}
+                    <div className="flex flex-wrap items-center gap-2 md:gap-3">
+                      <h3 className="text-lg font-semibold text-gray-900 truncate">{alert.title}</h3>
                       {getSeverityBadge(alert.severity)}
                       {getStatusBadge(alert.status)}
                       {getCategoryBadge(alert.category)}
                     </div>
-                    <div className="flex items-center gap-2">
+                    {/* <div className="flex items-center gap-2"> */}
+                    <div className="flex items-center gap-2 justify-end">
                       {alert.actionRequired && (
                         <Badge variant="default" className="bg-red-100 text-red-800">
                           Action Required
                         </Badge>
                       )}
-                      <Button 
-                        variant="ghost" 
+                      <Button
+                        variant="ghost"
                         size="sm"
                         onClick={() => handleAcknowledge(alert.id)}
                         disabled={processingAlert === alert.id || alert.status === 'acknowledged' || alert.status === 'resolved'}
@@ -481,8 +487,8 @@ const SystemAlertsContent: React.FC = () => {
                       >
                         <Eye className="w-4 h-4" />
                       </Button>
-                      <Button 
-                        variant="ghost" 
+                      <Button
+                        variant="ghost"
                         size="sm"
                         onClick={() => handleDismiss(alert.id)}
                         disabled={processingAlert === alert.id || alert.status === 'resolved'}
@@ -492,10 +498,11 @@ const SystemAlertsContent: React.FC = () => {
                       </Button>
                     </div>
                   </div>
-                  
+
                   <p className="text-gray-600 mb-4">{alert.description}</p>
-                  
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
+
+                  {/* <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm"> */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
                     <div className="flex items-center gap-2">
                       <Clock className="w-4 h-4 text-gray-400" />
                       <span className="text-gray-600">{formatDate(alert.timestamp)}</span>
@@ -519,20 +526,21 @@ const SystemAlertsContent: React.FC = () => {
                       </div>
                     )}
                   </div>
-                  
+
                   {alert.actionRequired && (
                     <div className="mt-4 p-3 bg-red-50 border border-red-200 rounded-lg">
                       <div className="flex items-center gap-2">
                         <Shield className="w-4 h-4 text-red-600" />
                         <span className="text-sm font-medium text-red-800">Action Required</span>
                       </div>
-                      <div className="flex items-center gap-2 mt-2">
+                      {/* <div className="flex items-center gap-2 mt-2"> */}
+                      <div className="flex flex-wrap items-center gap-2 mt-2">
                         <Button size="sm" variant="outline" className="text-red-600">
                           <UserX className="w-4 h-4 mr-2" />
                           Block User
                         </Button>
-                        <Button 
-                          size="sm" 
+                        <Button
+                          size="sm"
                           variant="outline"
                           onClick={() => handleAcknowledge(alert.id)}
                           disabled={processingAlert === alert.id || alert.status === 'acknowledged' || alert.status === 'resolved'}
@@ -540,8 +548,8 @@ const SystemAlertsContent: React.FC = () => {
                           <Shield className="w-4 h-4 mr-2" />
                           Acknowledge
                         </Button>
-                        <Button 
-                          size="sm" 
+                        <Button
+                          size="sm"
                           variant="outline"
                           onClick={() => handleResolve(alert.id)}
                           disabled={processingAlert === alert.id || alert.status === 'resolved'}
