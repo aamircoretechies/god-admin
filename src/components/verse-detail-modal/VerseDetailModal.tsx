@@ -253,7 +253,8 @@ const VerseDetailModal: React.FC<VerseDetailModalProps> = ({ isOpen, onClose, ve
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="text-sm text-gray-600">Language:</span>
-                  <Badge variant="secondary">{verse.language}</Badge>
+                  {/* <Badge variant="secondary">{verse.language}</Badge> */}
+                  <Badge variant="outline">{verse.language}</Badge>
                 </div>
                 <div className="flex items-center gap-2">
                   <Calendar className="w-4 h-4 text-gray-500" />
@@ -298,13 +299,13 @@ const VerseDetailModal: React.FC<VerseDetailModalProps> = ({ isOpen, onClose, ve
                     <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
                       <div>
                         <p className="text-sm text-gray-600 dark:text-gray-400">Total Explanations</p>
-                        <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                        <p className="text-2xl font-bold text-gray-900 dark:text-black">
                           {aiExplanationHistory.total_explanations}
                         </p>
                       </div>
                       <div>
                         <p className="text-sm text-gray-600 dark:text-gray-400">With Content</p>
-                        <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                        <p className="text-2xl font-bold text-gray-900 dark:text-black">
                           {aiExplanationHistory.explanations_with_content}
                         </p>
                       </div>
@@ -330,12 +331,17 @@ const VerseDetailModal: React.FC<VerseDetailModalProps> = ({ isOpen, onClose, ve
                             className="p-4 border rounded-lg border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50"
                           >
                             <div className="flex items-start justify-between mb-2">
+<<<<<<< HEAD
                               <div className="flex items-center gap-2 flex-wrap">
                                 <Badge variant="outline" className="text-xs">
+=======
+                              <div className="flex items-center gap-2">
+                                <Badge variant="secondary" className="text-xs text-gray-900">
+>>>>>>> 31602d218e4ab452376b6a9e0190698e73c36512
                                   {explanation.category || explanation.label || 'General'}
                                 </Badge>
                                 {explanation.context_type && (
-                                  <Badge variant="secondary" className="text-xs">
+                                  <Badge variant="secondary" className="text-xs text-gray-900">
                                     {explanation.context_type}
                                   </Badge>
                                 )}
@@ -345,7 +351,7 @@ const VerseDetailModal: React.FC<VerseDetailModalProps> = ({ isOpen, onClose, ve
                                   </Badge>
                                 )}
                                 {explanation.has_content ? (
-                                  <Badge className="bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 text-xs">
+                                  <Badge  className="bg-green-100 text-green-800 dark:bg-black dark:text-green-300 text-xs">
                                     Has Content
                                   </Badge>
                                 ) : (

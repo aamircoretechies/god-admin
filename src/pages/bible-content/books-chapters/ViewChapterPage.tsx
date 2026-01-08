@@ -11,9 +11,13 @@ import {
 
 import { ViewChapterContent } from './ViewChapterContent';
 import { useLayout } from '@/providers';
+import { useNavigate } from "react-router-dom";
+
 
 const ViewChapterPage = () => {
   const { currentLayout } = useLayout();
+  const navigate = useNavigate();
+
 
   return (
     <Fragment>
@@ -25,9 +29,17 @@ const ViewChapterPage = () => {
               <ToolbarDescription>View chapter details and verses.</ToolbarDescription>
             </ToolbarHeading>
             <ToolbarActions>
-              <a href="#" className="btn btn-sm btn-light">
+              {/* <a href="#" className="btn btn-sm btn-light">
                 Back to List
-              </a>
+              </a> */}
+
+              <button
+                className="btn btn-sm btn-light"
+                onClick={() => navigate('/bible-content/books-chapters')}
+              >
+                Back to List
+              </button>
+
             </ToolbarActions>
           </Toolbar>
         </Container>

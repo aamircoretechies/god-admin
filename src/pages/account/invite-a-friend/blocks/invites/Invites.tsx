@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import React, { useEffect, useMemo, useState } from 'react';import { Link } from 'react-router-dom';
+import React, { useEffect, useMemo, useState } from 'react'; import { Link } from 'react-router-dom';
 import { useLanguage } from '@/i18n';
 import { toAbsoluteUrl } from '@/utils';
 import { Column, ColumnDef, RowSelectionState } from '@tanstack/react-table';
@@ -12,6 +12,42 @@ import { InvitesData, IInvitesData } from '.';
 interface IColumnFilterProps<TData, TValue> {
   column: Column<TData, TValue>;
 }
+
+interface IInvitesToolbarProps {
+  searchTerm: string;
+  setSearchTerm: (value: string) => void;
+}
+
+const InvitesToolbar = ({ searchTerm, setSearchTerm }: IInvitesToolbarProps) => {
+  const { table } = useDataGrid();
+
+  return (
+    <div className="card-header flex-wrap px-5 py-5 border-b-0 gap-2">
+      <h3 className="card-title">Invites</h3>
+
+      <div className="flex flex-wrap items-center gap-2.5">
+        <div className="relative">
+          <KeenIcon
+            icon="magnifier"
+            className="leading-none text-md text-gray-500 absolute top-1/2 start-0 -translate-y-1/2 ms-3"
+          />
+          <input
+            type="text"
+            className="input input-sm ps-8"
+            placeholder="Search Members"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)} // Update search term
+          />
+        </div>
+        <DataGridColumnVisibility table={table} />
+        <label className="switch switch-sm">
+          <input name="check" type="checkbox" value="1" className="order-2" readOnly />
+          <span className="switch-label order-1">Active Users</span>
+        </label>
+      </div>
+    </div>
+  );
+};
 
 const Invites = () => {
   const { isRTL } = useLanguage();
@@ -202,46 +238,17 @@ const Invites = () => {
     }
   };
 
-  const Toolbar = () => {
-    const { table } = useDataGrid();
-
-    return (
-      <div className="card-header flex-wrap px-5 py-5 border-b-0 gap-2">
-        <h3 className="card-title">Invites</h3>
-
-        <div className="flex flex-wrap items-center gap-2.5">
-          <div className="relative">
-            <KeenIcon
-              icon="magnifier"
-              className="leading-none text-md text-gray-500 absolute top-1/2 start-0 -translate-y-1/2 ms-3"
-            />
-            <input
-              type="text"
-              className="input input-sm ps-8"
-              placeholder="Search Members"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)} // Update search term
-            />
-          </div>
-          <DataGridColumnVisibility table={table}/>
-          <label className="switch switch-sm">
-            <input name="check" type="checkbox" value="1" className="order-2" readOnly />
-            <span className="switch-label order-1">Active Users</span>
-          </label>
-        </div>
-      </div>
-    );
-  };
+  // InvitesToolbar extracted to top level
 
   return (
-    <DataGrid 
-      columns={columns} 
-      data={filteredData} 
-      rowSelection={true} 
+    <DataGrid
+      columns={columns}
+      data={filteredData}
+      rowSelection={true}
       onRowSelectionChange={handleRowSelection}
       pagination={{ size: 10 }}
-      sorting={[{ id: 'member', desc: false }]} 
-      toolbar={<Toolbar />}
+      sorting={[{ id: 'member', desc: false }]}
+      toolbar={<InvitesToolbar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />}
       layout={{ card: true }}
     />
   );

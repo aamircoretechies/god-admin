@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useLanguage } from '@/i18n';
 import { toAbsoluteUrl } from '@/utils';
 import { Column, ColumnDef, RowSelectionState } from '@tanstack/react-table';
-import { DataGrid, DataGridColumnHeader, DataGridColumnVisibility, DataGridRowSelect, DataGridRowSelectAll, KeenIcon, useDataGrid, Menu, MenuItem, MenuToggle  } from '@/components';
+import { DataGrid, DataGridColumnHeader, DataGridColumnVisibility, DataGridRowSelect, DataGridRowSelectAll, KeenIcon, useDataGrid, Menu, MenuItem, MenuToggle } from '@/components';
 import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
 import { DropdownCard1 } from '@/partials/dropdowns/general';
@@ -12,6 +12,42 @@ import { MembersData, IMembersData } from '.';
 interface IColumnFilterProps<TData, TValue> {
   column: Column<TData, TValue>;
 }
+
+interface ITeamInfoMembersToolbarProps {
+  searchTerm: string;
+  setSearchTerm: (value: string) => void;
+}
+
+const TeamInfoMembersToolbar = ({ searchTerm, setSearchTerm }: ITeamInfoMembersToolbarProps) => {
+  const { table } = useDataGrid();
+
+  return (
+    <div className="card-header px-5 py-5 border-b-0 flex-wrap gap-2">
+      <h3 className="card-title">Team Members</h3>
+
+      <div className="flex flex-wrap items-center gap-2.5">
+        <div className="relative">
+          <KeenIcon
+            icon="magnifier"
+            className="leading-none text-md text-gray-500 absolute top-1/2 start-0 -translate-y-1/2 ml-3"
+          />
+          <input
+            type="text"
+            placeholder="Search Members"
+            className="input input-sm ps-8"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)} // Update search term
+          />
+        </div>
+        <DataGridColumnVisibility table={table} />
+        <label className="switch switch-sm">
+          <input name="check" type="checkbox" value="1" className="order-2" readOnly />
+          <span className="switch-label order-1">Active Users</span>
+        </label>
+      </div>
+    </div>
+  );
+};
 
 const Members = () => {
   const { isRTL } = useLanguage();
@@ -189,46 +225,17 @@ const Members = () => {
     }
   };
 
-  const Toolbar = () => {
-    const { table } = useDataGrid();
-
-    return (
-      <div className="card-header px-5 py-5 border-b-0 flex-wrap gap-2">
-        <h3 className="card-title">Team Members</h3>
-
-        <div className="flex flex-wrap items-center gap-2.5">
-          <div className="relative">
-            <KeenIcon
-              icon="magnifier"
-              className="leading-none text-md text-gray-500 absolute top-1/2 start-0 -translate-y-1/2 ml-3"
-            />
-            <input
-              type="text"
-              placeholder="Search Members"
-              className="input input-sm ps-8"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)} // Update search term
-            />
-          </div>
-          <DataGridColumnVisibility table={table}/>
-          <label className="switch switch-sm">
-            <input name="check" type="checkbox" value="1" className="order-2" readOnly />
-            <span className="switch-label order-1">Active Users</span>
-          </label>
-        </div>
-      </div>
-    );
-  };
+  // TeamInfoMembersToolbar extracted to top level
 
   return (
-    <DataGrid 
-      columns={columns} 
-      data={filteredData} 
-      rowSelection={true} 
+    <DataGrid
+      columns={columns}
+      data={filteredData}
+      rowSelection={true}
       onRowSelectionChange={handleRowSelection}
       pagination={{ size: 5 }}
-      sorting={[{ id: 'member', desc: false }]} 
-      toolbar={<Toolbar />}
+      sorting={[{ id: 'member', desc: false }]}
+      toolbar={<TeamInfoMembersToolbar searchTerm={searchTerm} setSearchTerm={setSearchTerm} />}
       layout={{ card: true }}
     />
   );

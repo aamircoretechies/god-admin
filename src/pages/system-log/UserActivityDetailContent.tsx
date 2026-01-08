@@ -261,7 +261,7 @@ const UserActivityDetailContent: React.FC = () => {
     const normalizedRole = role.toUpperCase();
     switch (normalizedRole) {
       case 'FREE':
-        return <Badge variant="secondary">Free</Badge>;
+        return <Badge variant="outline">Free</Badge>;
       case 'PREMIUM':
         return <Badge variant="default" className="bg-purple-100 text-purple-800">Premium</Badge>;
       case 'ADMIN':
@@ -312,17 +312,17 @@ const UserActivityDetailContent: React.FC = () => {
               <div className="flex items-center gap-4 mb-4">
                 <h2 className="text-2xl font-bold text-gray-900">{userData.name}</h2>
                 {getRoleBadge(userData.role)}
-                <Badge variant={userData.status === 'Active' ? 'default' : 'secondary'}>
+                <Badge variant={userData.status === 'Active' ? 'default' : 'outline'}>
                   {userData.status}
                 </Badge>
               </div>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="flex items-center gap-2">
-                  <Mail className="w-4 h-4 text-gray-400" />
+                <div className="flex items-center gap-2 -ml-2">
+                  {/* <Mail className="w-4 h-4 text-gray-400" /> */}
                   <span className="text-sm text-gray-600">{userData.email}</span>
                 </div>
-                <div className="flex items-center gap-2">
-                  <Calendar className="w-4 h-4 text-gray-400" />
+                <div className="flex items-center gap-2 ml-3">
+                  <Calendar className="w-4 h-4 text-gray-400 " />
                   <span className="text-sm text-gray-600">Joined {userData.joinDate}</span>
                 </div>
                 <div className="flex items-center gap-2">
@@ -338,14 +338,14 @@ const UserActivityDetailContent: React.FC = () => {
               </div>
             </div>
             <div className="flex flex-col gap-2">
-              <Button variant="outline" size="sm">
+              {/* <Button variant="outline" size="sm">
                 <Shield className="w-4 h-4 mr-2" />
                 Reset Role
               </Button>
               <Button variant="outline" size="sm" className="text-orange-600">
                 <AlertTriangle className="w-4 h-4 mr-2" />
                 Flag User
-              </Button>
+              </Button> */}
             </div>
           </div>
         </CardContent>
@@ -415,7 +415,7 @@ const UserActivityDetailContent: React.FC = () => {
             <select
               value={selectedTimeRange}
               onChange={(e) => setSelectedTimeRange(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+              className="px-3 py-2 border border-gray-300 rounded-md text-sm bg-card"
             >
               <option value="24hours">Last 24 Hours</option>
               <option value="7days">Last 7 Days</option>
@@ -442,7 +442,7 @@ const UserActivityDetailContent: React.FC = () => {
                 </div>
                 
                 {/* Activity Content */}
-                <div className="flex-1 bg-gray-50 rounded-lg p-4">
+                <div className="flex-1 bg-card rounded-lg p-4 ">
                   <div className="flex items-start justify-between mb-2">
                     <div className="flex items-center gap-2">
                       {getActivityIcon(activity.activityType)}
@@ -455,7 +455,7 @@ const UserActivityDetailContent: React.FC = () => {
                     </div>
                   </div>
                   
-                  <p className="text-sm font-medium text-gray-900 mb-2">{activity.details}</p>
+                  <p className="text-sm font-medium text-gray-900 mb-2 break-all">{activity.details}</p>
                   
                   {activity.queryText && (
                     <p className="text-sm text-gray-600 mb-2 italic">"{activity.queryText}"</p>

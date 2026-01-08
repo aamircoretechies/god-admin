@@ -7,17 +7,17 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Avatar } from '@/components/ui/avatar';
 import { toAbsoluteUrl } from '@/utils';
-import { fetchActivityLogs, type ActivityLogResponse } from '@/services/activityLogsApi';
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger 
+import { blockUser, fetchActivityLogs, suspendUser, type ActivityLogResponse } from '@/services/activityLogsApi';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
-import { 
-  Search, 
-  MoreVertical, 
-  Eye, 
+import {
+  Search,
+  MoreVertical,
+  Eye,
   AlertTriangle,
   Shield,
   UserX,
@@ -28,6 +28,7 @@ import {
   XCircle,
   Clock
 } from 'lucide-react';
+import { toast } from 'sonner';
 
 // Types
 interface UserActivityLog {
@@ -75,7 +76,7 @@ const transformActivityLog = (apiData: ActivityLogResponse): UserActivityLog => 
   let bookReference: string | undefined;
   let chapterReference: string | undefined;
   let verseReference: string | undefined;
-  
+
   if (apiData.verseReference) {
     // Try to parse "John 3:16" format
     const match = apiData.verseReference.match(/^(\w+)\s+(\d+):(\d+)$/);
@@ -122,6 +123,18 @@ const ActivityLogListContent: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+
+  // MODALS STATE
+  const [showBlockModal, setShowBlockModal] = useState(false);
+  const [showSuspendModal, setShowSuspendModal] = useState(false);
+
+  // FORM INPUTS
+  const [reason, setReason] = useState('');
+  const [duration, setDuration] = useState('');
+
+  // SELECTED USER
+  const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+
   // Fetch activity logs from API
   useEffect(() => {
     const loadActivityLogs = async () => {
@@ -149,7 +162,7 @@ const ActivityLogListContent: React.FC = () => {
   // Filter logs
   const filteredLogs = useMemo(() => {
     return activityLogs.filter(log => {
-      const matchesSearch = 
+      const matchesSearch =
         log.userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         log.userEmail.toLowerCase().includes(searchTerm.toLowerCase()) ||
         log.details.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -160,14 +173,14 @@ const ActivityLogListContent: React.FC = () => {
       const matchesUser = userFilter === 'all' || log.userRole === userFilter || log.userRole.toLowerCase() === userFilter.toLowerCase();
       const matchesActivityType = activityTypeFilter === 'all' || log.activityType === activityTypeFilter;
       const matchesStatus = statusFilter === 'all' || log.status === statusFilter;
-      
+
       // Date range filter
       let matchesDateRange = true;
       if (dateRangeFilter !== 'all') {
         const logDate = new Date(log.timestamp);
         const now = new Date();
         const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-        
+
         switch (dateRangeFilter) {
           case 'today':
             matchesDateRange = logDate >= today;
@@ -235,7 +248,7 @@ const ActivityLogListContent: React.FC = () => {
       'Password Change': 'bg-red-100 text-red-800',
       'Profile Update': 'bg-indigo-100 text-indigo-800'
     };
-    
+
     return (
       <Badge variant="default" className={colors[type as keyof typeof colors] || 'bg-gray-100 text-gray-800'}>
         {type}
@@ -281,16 +294,16 @@ const ActivityLogListContent: React.FC = () => {
 
   const columns = useMemo<ColumnDef<UserActivityLog>[]>(
     () => [
-      {
-        accessorKey: 'id',
-        header: () => <DataGridRowSelectAll />,
-        cell: ({ row }) => <DataGridRowSelect row={row} />,
-        enableSorting: false,
-        enableHiding: false,
-        meta: {
-          headerClassName: 'w-12'
-        }
-      },
+      // {
+      //   accessorKey: 'id',
+      //   header: () => <DataGridRowSelectAll />,
+      //   cell: ({ row }) => <DataGridRowSelect row={row} />,
+      //   enableSorting: false,
+      //   enableHiding: false,
+      //   meta: {
+      //     headerClassName: 'w-12'
+      //   }
+      // },
       {
         accessorFn: (row: UserActivityLog) => row,
         id: 'user',
@@ -308,7 +321,7 @@ const ActivityLogListContent: React.FC = () => {
               <img src={toAbsoluteUrl(row.original.userAvatar)} alt={row.original.userName} />
             </Avatar>
             <div className="flex flex-col">
-              <Link 
+              <Link
                 to={`/system-log/user/${row.original.userId}`}
                 className="text-sm font-medium text-gray-900 hover:text-primary-active"
               >
@@ -353,7 +366,7 @@ const ActivityLogListContent: React.FC = () => {
               <p className="text-xs text-gray-500 truncate">"{row.original.queryText}"</p>
             )}
             {row.original.bookReference && (
-                <p className="text-xs text-amber-600">
+              <p className="text-xs text-amber-600">
                 {row.original.bookReference} {row.original.chapterReference}:{row.original.verseReference}
               </p>
             )}
@@ -425,18 +438,37 @@ const ActivityLogListContent: React.FC = () => {
                   View User Activity
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem>
+              {/* <DropdownMenuItem>
                 <AlertTriangle className="w-4 h-4 mr-2" />
                 Flag Activity
-              </DropdownMenuItem>
-              <DropdownMenuItem>
+              </DropdownMenuItem> */}
+              {/* <DropdownMenuItem>
+                <Shield className="w-4 h-4 mr-2" />
+                Block User
+              </DropdownMenuItem> */}
+              <DropdownMenuItem
+                onClick={() => {
+                  setSelectedUserId(row.original.userId);
+                  setShowBlockModal(true);
+                }}
+              >
                 <Shield className="w-4 h-4 mr-2" />
                 Block User
               </DropdownMenuItem>
-              <DropdownMenuItem>
+              {/* <DropdownMenuItem>
+                <UserX className="w-4 h-4 mr-2" />
+                Suspend User
+              </DropdownMenuItem> */}
+              <DropdownMenuItem
+                onClick={() => {
+                  setSelectedUserId(row.original.userId);
+                  setShowSuspendModal(true);
+                }}
+              >
                 <UserX className="w-4 h-4 mr-2" />
                 Suspend User
               </DropdownMenuItem>
+
             </DropdownMenuContent>
           </DropdownMenu>
         ),
@@ -454,23 +486,65 @@ const ActivityLogListContent: React.FC = () => {
     console.log(`Selected ${selectedRowIds.length} logs:`, selectedRowIds);
   };
 
-  const Toolbar = () => (
-    <div className="flex flex-col gap-4 p-5">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <div className="flex-1 relative">
+  const handleBlockUser = async () => {
+    try {
+      const res = await blockUser(selectedUserId!, reason, duration);
+
+      if (res.status === 1) {
+        toast.success("User blocked successfully!");
+        setShowBlockModal(false);
+        setReason("");
+        setDuration("");
+      } else {
+        toast.error(res.message || "Failed to block user");
+      }
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || "Error blocking user");
+    }
+  };
+
+  const handleSuspendUser = async () => {
+    try {
+      const res = await suspendUser(selectedUserId!, reason, duration);
+
+      if (res.status === 1) {
+        toast.success("User suspended successfully!");
+        setShowSuspendModal(false);
+        setReason("");
+        setDuration("");
+      } else {
+        toast.error(res.message || "Failed to suspend user");
+      }
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || "Error suspending user");
+    }
+  };
+
+
+
+  const toolbar = (
+    // <div className="flex flex-col gap-4 p-5">
+    <div className="flex flex-col gap-4 p-3 md:p-5">
+      {/* <div className="flex items-center justify-between"> */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        {/* <div className="flex items-center gap-4"> */}
+        <div className="flex flex-col md:flex-row items-stretch md:items-center gap-4 flex-1">
+          {/* <div className="flex-1 relative"> */}
+          <div className="relative w-full md:max-w-md">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <Input
               placeholder="Search by user, activity, verse reference, query..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 max-w-md"
+              // className="pl-10 max-w-md"
+              className="pl-10 w-full"
             />
           </div>
           <select
             value={userFilter}
             onChange={(e) => setUserFilter(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+            // className="px-3 py-2 border border-gray-300 rounded-md text-sm bg-card"
+            className="px-3 py-2 border border-gray-300 rounded-md text-sm bg-card w-full md:w-auto"
           >
             <option value="all">All Users</option>
             <option value="Free">Free</option>
@@ -481,7 +555,8 @@ const ActivityLogListContent: React.FC = () => {
           <select
             value={activityTypeFilter}
             onChange={(e) => setActivityTypeFilter(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+            // className="px-3 py-2 border border-gray-300 rounded-md text-sm bg-card"
+            className="px-3 py-2 border border-gray-300 rounded-md text-sm bg-card w-full md:w-auto"
           >
             <option value="all">All Activities</option>
             <option value="Verse Read">Verse Read</option>
@@ -495,7 +570,8 @@ const ActivityLogListContent: React.FC = () => {
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+            // className="px-3 py-2 border border-gray-300 rounded-md text-sm bg-card"
+            className="px-3 py-2 border border-gray-300 rounded-md text-sm bg-card w-full md:w-auto"
           >
             <option value="all">All Status</option>
             <option value="Success">Success</option>
@@ -505,7 +581,8 @@ const ActivityLogListContent: React.FC = () => {
           <select
             value={dateRangeFilter}
             onChange={(e) => setDateRangeFilter(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+            // className="px-3 py-2 border border-gray-300 rounded-md text-sm bg-card"
+            className="px-3 py-2 border border-gray-300 rounded-md text-sm bg-card w-full md:w-auto"
           >
             <option value="all">All Time</option>
             <option value="today">Today</option>
@@ -514,7 +591,8 @@ const ActivityLogListContent: React.FC = () => {
             <option value="year">This Year</option>
           </select>
         </div>
-        <div className="flex items-center gap-2">
+        {/* <div className="flex items-center gap-2"> */}
+        <div className="flex items-center gap-2 justify-end">
           <span className="text-sm text-gray-600">
             Showing {filteredLogs.length} of {activityLogs.length} activities
           </span>
@@ -551,16 +629,104 @@ const ActivityLogListContent: React.FC = () => {
   }
 
   return (
-    <DataGrid
-      columns={columns}
-      data={filteredLogs}
-      rowSelection={true}
-      onRowSelectionChange={handleRowSelection}
-      pagination={{ size: 10 }}
-      sorting={[{ id: 'timestamp', desc: true }]}
-      toolbar={<Toolbar />}
-      layout={{ card: true }}
-    />
+    <>
+      {
+        showBlockModal && (
+          <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+            {/* <div className="bg-white p-6 rounded-lg w-[400px] space-y-4"> */}
+            <div className="bg-white p-6 rounded-lg w-full max-w-[400px] mx-4 space-y-4">
+              <h2 className="text-lg font-semibold">Block User</h2>
+
+              <input
+                type="text"
+                placeholder="Reason"
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                className="w-full border p-2 rounded"
+              />
+
+              <input
+                type="text"
+                placeholder="Duration (e.g., 1 day)"
+                value={duration}
+                onChange={(e) => setDuration(e.target.value)}
+                className="w-full border p-2 rounded"
+              />
+
+              <div className="flex justify-end gap-2">
+                <button
+                  className="btn btn-sm btn-light"
+                  onClick={() => setShowBlockModal(false)}
+                >
+                  Cancel
+                </button>
+
+                <button
+                  className="btn btn-sm btn-danger"
+                  onClick={handleBlockUser}
+                >
+                  Block
+                </button>
+              </div>
+            </div>
+          </div>
+        )
+      }
+
+      {
+        showSuspendModal && (
+          <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+            {/* <div className="bg-white p-6 rounded-lg w-[400px] space-y-4"> */}
+            <div className="bg-white p-6 rounded-lg w-full max-w-[400px] mx-4 space-y-4">
+              <h2 className="text-lg font-semibold">Suspend User</h2>
+
+              <input
+                type="text"
+                placeholder="Reason"
+                value={reason}
+                onChange={(e) => setReason(e.target.value)}
+                className="w-full border p-2 rounded"
+              />
+
+              <input
+                type="text"
+                placeholder="Duration (e.g., 7 days)"
+                value={duration}
+                onChange={(e) => setDuration(e.target.value)}
+                className="w-full border p-2 rounded"
+              />
+
+              <div className="flex justify-end gap-2">
+                <button
+                  className="btn btn-sm btn-light"
+                  onClick={() => setShowSuspendModal(false)}
+                >
+                  Cancel
+                </button>
+
+                <button
+                  className="btn btn-sm btn-warning"
+                  onClick={handleSuspendUser}
+                >
+                  Suspend
+                </button>
+              </div>
+            </div>
+          </div>
+        )
+      }
+
+      <DataGrid
+        columns={columns}
+        data={filteredLogs}
+        rowSelection={true}
+        onRowSelectionChange={handleRowSelection}
+        pagination={{ size: 10 }}
+        sorting={[{ id: 'timestamp', desc: true }]}
+        toolbar={toolbar}
+        layout={{ card: true }}
+      />
+    </>
   );
 };
 

@@ -25,6 +25,82 @@ interface IColumnFilterProps<TData, TValue> {
   column: Column<TData, TValue>;
 }
 
+interface AppRosterUsersToolbarProps {
+  statusFilter: string;
+  setStatusFilter: (value: string) => void;
+  sortFilter: string;
+  setSortFilter: (value: string) => void;
+  searchInput: string;
+  setSearchInput: (value: string) => void;
+}
+
+const AppRosterUsersToolbar = ({
+  statusFilter,
+  setStatusFilter,
+  sortFilter,
+  setSortFilter,
+  searchInput,
+  setSearchInput
+}: AppRosterUsersToolbarProps) => {
+  const { table, totalRows } = useDataGrid();
+
+  return (
+    <div className="card-header flex-wrap gap-2 border-b-0 px-5">
+      <h3 className="card-title font-medium text-sm">
+        Showing {table.getState().pagination.pageSize} of {totalRows} users
+      </h3>
+
+      <div className="flex flex-wrap gap-2 lg:gap-5">
+        <div className="flex">
+          <label className="input input-sm">
+            <KeenIcon icon="magnifier" />
+            <input
+              type="text"
+              placeholder="Search users"
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+            />
+          </label>
+        </div>
+
+        <div className="flex flex-wrap gap-2.5">
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-28" size="sm">
+              <SelectValue placeholder="Select" />
+            </SelectTrigger>
+            <SelectContent className="w-32">
+              <SelectItem value="all">All</SelectItem>
+              <SelectItem value="active">Active</SelectItem>
+              <SelectItem value="disabled">Disabled</SelectItem>
+              <SelectItem value="pending">Pending</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select value={sortFilter} onValueChange={setSortFilter}>
+            <SelectTrigger className="w-28" size="sm">
+              <SelectValue placeholder="Select" />
+            </SelectTrigger>
+            <SelectContent className="w-32">
+              <SelectItem value="latest">Latest</SelectItem>
+              <SelectItem value="older">Older</SelectItem>
+              <SelectItem value="oldest">Oldest</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <button
+            className="btn btn-sm btn-outline btn-primary"
+            onClick={() => {
+              console.log('Filter button clicked', { statusFilter, sortFilter, searchInput });
+            }}
+          >
+            <KeenIcon icon="setting-4" /> Filters
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const Users = () => {
   const ColumnInputFilter = <TData, TValue>({ column }: IColumnFilterProps<TData, TValue>) => {
     return (
@@ -98,8 +174,8 @@ const Users = () => {
                 <Link to="/network/user-table/user-detail" className="text-sm font-medium text-gray-900 hover:text-primary-active">
                   {row.original.user.userName}
                 </Link>
-                <Link 
-                  to="/network/user-table/user-detail" 
+                <Link
+                  to="/network/user-table/user-detail"
                   className="text-xs text-primary hover:text-primary-active mt-1"
                 >
                   View Details →
@@ -215,8 +291,8 @@ const Users = () => {
         cell: () => {
           return (
             <div className="flex gap-2">
-              <Link 
-                to="/network/user-table/user-detail" 
+              <Link
+                to="/network/user-table/user-detail"
                 className="btn btn-sm btn-outline btn-primary"
               >
                 View Details
@@ -288,65 +364,7 @@ const Users = () => {
     }
   };
 
-  const Toolbar = () => {
-    const { table, totalRows } = useDataGrid();
-
-    return (
-      <div className="card-header flex-wrap gap-2 border-b-0 px-5">
-        <h3 className="card-title font-medium text-sm">
-          Showing {table.getState().pagination.pageSize} of {totalRows} users
-        </h3>
-
-        <div className="flex flex-wrap gap-2 lg:gap-5">
-          <div className="flex">
-            <label className="input input-sm">
-              <KeenIcon icon="magnifier" />
-              <input
-                type="text"
-                placeholder="Search users"
-                value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
-              />
-            </label>
-          </div>
-
-          <div className="flex flex-wrap gap-2.5">
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-28" size="sm">
-                <SelectValue placeholder="Select" />
-              </SelectTrigger>
-              <SelectContent className="w-32">
-                <SelectItem value="all">All</SelectItem>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="disabled">Disabled</SelectItem>
-                <SelectItem value="pending">Pending</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Select value={sortFilter} onValueChange={setSortFilter}>
-              <SelectTrigger className="w-28" size="sm">
-                <SelectValue placeholder="Select" />
-              </SelectTrigger>
-              <SelectContent className="w-32">
-                <SelectItem value="latest">Latest</SelectItem>
-                <SelectItem value="older">Older</SelectItem>
-                <SelectItem value="oldest">Oldest</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <button 
-              className="btn btn-sm btn-outline btn-primary"
-              onClick={() => {
-                console.log('Filter button clicked', { statusFilter, sortFilter, searchInput });
-              }}
-            >
-              <KeenIcon icon="setting-4" /> Filters
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  };
+  // AppRosterUsersToolbar extracted to top level
 
   return (
     <DataGrid
@@ -356,7 +374,16 @@ const Users = () => {
       onRowSelectionChange={handleRowSelection}
       pagination={{ size: 5 }}
       sorting={[{ id: 'phone', desc: false }]}
-      toolbar={<Toolbar />}
+      toolbar={
+        <AppRosterUsersToolbar
+          statusFilter={statusFilter}
+          setStatusFilter={setStatusFilter}
+          sortFilter={sortFilter}
+          setSortFilter={setSortFilter}
+          searchInput={searchInput}
+          setSearchInput={setSearchInput}
+        />
+      }
       layout={{ card: true }}
     />
   );

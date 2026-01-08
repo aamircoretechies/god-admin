@@ -40,6 +40,84 @@ interface UsersProps {
   hideRowsPerPage?: boolean;
 }
 
+interface SaaSUsersToolbarProps {
+  statusFilter: string;
+  setStatusFilter: (value: string) => void;
+  sortFilter: string;
+  setSortFilter: (value: string) => void;
+  searchInput: string;
+  setSearchInput: (value: string) => void;
+}
+
+const SaaSUsersToolbar = ({
+  statusFilter,
+  setStatusFilter,
+  sortFilter,
+  setSortFilter,
+  searchInput,
+  setSearchInput
+}: SaaSUsersToolbarProps) => {
+  const { table, totalRows } = useDataGrid();
+
+  return (
+    <div className="card-header flex-wrap gap-2 border-b-0 px-5">
+      <h3 className="card-title font-medium text-sm">
+        Showing {table.getState().pagination.pageSize} of {totalRows} users
+      </h3>
+
+      <div className="flex flex-wrap gap-2 lg:gap-5">
+        <div className="flex">
+          <label className="input input-sm">
+            <KeenIcon icon="magnifier" />
+            <input
+              type="text"
+              placeholder="Search new users"
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+            />
+          </label>
+        </div>
+
+        <div className="flex flex-wrap gap-2.5">
+          <Select
+            value={statusFilter}
+            onValueChange={(value) => {
+              setStatusFilter(value);
+            }}
+          >
+            <SelectTrigger className="w-28" size="sm">
+              <SelectValue placeholder="Select" />
+            </SelectTrigger>
+            <SelectContent className="w-32">
+              <SelectItem value="all">All</SelectItem>
+              <SelectItem value="active">Active</SelectItem>
+              <SelectItem value="inactive">Inactive</SelectItem>
+              <SelectItem value="disabled">Disabled</SelectItem>
+              <SelectItem value="pending">Pending</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select
+            value={sortFilter}
+            onValueChange={(value) => {
+              setSortFilter(value);
+            }}
+          >
+            <SelectTrigger className="w-28" size="sm">
+              <SelectValue placeholder="Select" />
+            </SelectTrigger>
+            <SelectContent className="w-32">
+              <SelectItem value="latest">Latest</SelectItem>
+              <SelectItem value="older">Older</SelectItem>
+              <SelectItem value="oldest">Oldest</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const Users = ({ hideRowsPerPage = false }: UsersProps) => {
   const ColumnInputFilter = <TData, TValue>({ column }: IColumnFilterProps<TData, TValue>) => {
     return (
@@ -54,16 +132,16 @@ const Users = ({ hideRowsPerPage = false }: UsersProps) => {
 
   const columns = useMemo<ColumnDef<IUsersData>[]>(
     () => [
-   /*    {
-        accessorKey: 'id',
-        header: () => <DataGridRowSelectAll />,
-        cell: ({ row }) => <DataGridRowSelect row={row} />,
-        enableSorting: false,
-        enableHiding: false,
-        meta: {
-          headerClassName: 'w-0'
-        }
-      }, */
+      /*    {
+           accessorKey: 'id',
+           header: () => <DataGridRowSelectAll />,
+           cell: ({ row }) => <DataGridRowSelect row={row} />,
+           enableSorting: false,
+           enableHiding: false,
+           meta: {
+             headerClassName: 'w-0'
+           }
+         }, */
       {
         accessorFn: (row: IUsersData) => row.user,
         id: 'user',
@@ -83,14 +161,14 @@ const Users = ({ hideRowsPerPage = false }: UsersProps) => {
               alt=""
             />
             <div className="flex flex-col">
-              <Link 
-                className="font-medium text-gray-900 hover:text-primary-active mb-px"  
+              <Link
+                className="font-medium text-gray-900 hover:text-primary-active mb-px"
                 to={`/network/user-table/user-detail/${info.row.original.id}`}
               >
                 {info.row.original.user.name}
               </Link>
-              <Link 
-                className="text-2sm text-gray-700 hover:text-primary-active"  
+              <Link
+                className="text-2sm text-gray-700 hover:text-primary-active"
                 to={`/network/user-table/user-detail/${info.row.original.id}`}
               >
                 {info.row.original.user.email}
@@ -103,25 +181,25 @@ const Users = ({ hideRowsPerPage = false }: UsersProps) => {
           cellClassName: 'text-gray-700 font-normal'
         }
       },
-     /*  {
-        accessorFn: (row: IUsersData) => row.labels,
-        id: 'labels',
-        header: ({ column }) => <DataGridColumnHeader title="Products" column={column} />,
-        enableSorting: true,
-        cell: (info: any) => (
-          <div className="flex gap-1.5">
-            {info.row.original.labels.map((label: string, index: number) => (
-              <span key={index} className="badge badge-sm">
-                {label}
-              </span>
-            ))}
-          </div>
-        ),
-        meta: {
-          headerClassName: 'min-w-[200px]',
-          cellClassName: 'text-gray-700 font-normal'
-        }
-      }, */
+      /*  {
+         accessorFn: (row: IUsersData) => row.labels,
+         id: 'labels',
+         header: ({ column }) => <DataGridColumnHeader title="Products" column={column} />,
+         enableSorting: true,
+         cell: (info: any) => (
+           <div className="flex gap-1.5">
+             {info.row.original.labels.map((label: string, index: number) => (
+               <span key={index} className="badge badge-sm">
+                 {label}
+               </span>
+             ))}
+           </div>
+         ),
+         meta: {
+           headerClassName: 'min-w-[200px]',
+           cellClassName: 'text-gray-700 font-normal'
+         }
+       }, */
       {
         accessorFn: (row: IUsersData) => row.joinDate || '2024-01-15',
         id: 'joinDate',
@@ -152,9 +230,10 @@ const Users = ({ hideRowsPerPage = false }: UsersProps) => {
         id: 'actions',
         header: ({ column }) => <DataGridColumnHeader title="Actions" column={column} />,
         enableSorting: false,
+        enableHiding: false,
         cell: (info: any) => (
           <div className="flex gap-2">
-            <Link 
+            <Link
               to={`/network/user-table/user-detail/${info.row.original.id}`}
               className="btn btn-sm btn-outline btn-primary"
             >
@@ -220,77 +299,7 @@ const Users = ({ hideRowsPerPage = false }: UsersProps) => {
     return fetchUsersForDataGrid(params, debouncedSearch, statusFilter, sortFilter);
   }, [debouncedSearch, statusFilter, sortFilter]);
 
-  const Toolbar = () => {
-    const { table, totalRows } = useDataGrid();
-
-    return (
-      <div className="card-header flex-wrap gap-2 border-b-0 px-5">
-        <h3 className="card-title font-medium text-sm">
-          Showing {table.getState().pagination.pageSize} of {totalRows} users
-        </h3>
-
-        <div className="flex flex-wrap gap-2 lg:gap-5">
-          <div className="flex">
-            <label className="input input-sm">
-              <KeenIcon icon="magnifier" />
-              <input
-                type="text"
-                placeholder="Search new users"
-                value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
-              />
-            </label>
-          </div>
-
-          <div className="flex flex-wrap gap-2.5">
-            <Select 
-              value={statusFilter} 
-              onValueChange={(value) => {
-                setStatusFilter(value);
-              }}
-            >
-              <SelectTrigger className="w-28" size="sm">
-                <SelectValue placeholder="Select" />
-              </SelectTrigger>
-              <SelectContent className="w-32">
-                <SelectItem value="all">All</SelectItem>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="inactive">Inactive</SelectItem>
-                <SelectItem value="disabled">Disabled</SelectItem>
-                <SelectItem value="pending">Pending</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Select 
-              value={sortFilter} 
-              onValueChange={(value) => {
-                setSortFilter(value);
-              }}
-            >
-              <SelectTrigger className="w-28" size="sm">
-                <SelectValue placeholder="Select" />
-              </SelectTrigger>
-              <SelectContent className="w-32">
-                <SelectItem value="latest">Latest</SelectItem>
-                <SelectItem value="older">Older</SelectItem>
-                <SelectItem value="oldest">Oldest</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <button 
-              className="btn btn-sm btn-outline btn-primary"
-              onClick={() => {
-                // Additional filter options can be implemented here
-                console.log('Filter button clicked', { statusFilter, sortFilter, searchInput });
-              }}
-            >
-              <KeenIcon icon="setting-4" /> Filters
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  };
+  // SaaSUsersToolbar extracted to top level
 
   // Create a unique key that changes when filters change to force remount
   const dataGridKey = React.useMemo(() => {
@@ -305,7 +314,16 @@ const Users = ({ hideRowsPerPage = false }: UsersProps) => {
       onRowSelectionChange={handleRowSelection}
       pagination={{ size: 5, hideRowsPerPage }}
       sorting={[{ id: 'joinDate', desc: true }]}
-      toolbar={<Toolbar />}
+      toolbar={
+        <SaaSUsersToolbar
+          statusFilter={statusFilter}
+          setStatusFilter={setStatusFilter}
+          sortFilter={sortFilter}
+          setSortFilter={setSortFilter}
+          searchInput={searchInput}
+          setSearchInput={setSearchInput}
+        />
+      }
       layout={{ card: true }}
       serverSide={true}
       onFetchData={customFetchData}

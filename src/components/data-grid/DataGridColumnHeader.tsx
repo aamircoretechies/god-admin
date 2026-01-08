@@ -108,7 +108,7 @@ export function DataGridColumnHeader<TData, TValue>({
             </>
           )}
 
-          {column.getCanHide() && (
+          {/* {column.getCanHide() && (
             <>
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={() => column.toggleVisibility(false)}>
@@ -116,7 +116,7 @@ export function DataGridColumnHeader<TData, TValue>({
                 Hide
               </DropdownMenuItem>
             </>
-          )}
+          )} */}
         </DropdownMenuContent>
       </DropdownMenu>
     </div>

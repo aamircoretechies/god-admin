@@ -150,3 +150,34 @@ export const fetchUserActivityLogs = async (
   return response.data;
 };
 
+
+
+// BLOCK user
+export const blockUser = async (
+  userId: string,
+  reason: string,
+  duration: string
+) => {
+  const response = await axios.post(`${API_URL}/activity/${userId}/block`,
+    { reason, duration }
+  );
+  return response.data;
+};
+
+
+// SUSPEND user
+export const suspendUser = async (
+  userId: string,
+  reason: string,
+  duration: string
+) => {
+  console.log(" SUSPEND USER API CALL:", { userId, reason, duration });
+
+  const response = await axios.post(`${API_URL}/activity/${userId}/suspend`,
+    { reason, duration }
+  );
+
+  console.log("SUSPEND USER API RAW RESPONSE:", response);
+
+  return response.data;
+};

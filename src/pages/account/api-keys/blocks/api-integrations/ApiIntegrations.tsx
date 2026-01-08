@@ -10,6 +10,29 @@ interface IColumnFilterProps<TData, TValue> {
   column: Column<TData, TValue>;
 }
 
+const ApiKeysApiIntegrationsToolbar = () => {
+  const { table } = useDataGrid();
+
+  return (
+    <div className="card-header flex-wrap px-5 py-5 border-b-0">
+      <h3 className="card-title">API Integrations</h3>
+
+      <div className="flex flex-wrap items-center gap-2.5">
+        <div className="flex gap-7.5">
+          <label className="switch switch-sm">
+            <input name="check" type="checkbox" value="1" className="order-2" readOnly />
+            <span className="switch-label order-1">Pause all</span>
+          </label>
+          <a href="#" className="btn btn-sm btn-primary">
+            Add New
+          </a>
+        </div>
+        <DataGridColumnVisibility table={table} />
+      </div>
+    </div>
+  );
+};
+
 const ApiIntegrations = () => {
   const ColumnInputFilter = <TData, TValue>({ column }: IColumnFilterProps<TData, TValue>) => {
     return (
@@ -66,7 +89,7 @@ const ApiIntegrations = () => {
           headerClassName: 'min-w-[224px]',
           cellClassName: 'text-gray-700 font-normal'
         }
-      },   
+      },
       {
         accessorFn: (row) => row.dailyCalls,
         id: 'dailyCalls',
@@ -94,10 +117,10 @@ const ApiIntegrations = () => {
         id: 'actions',
         header: () => '',
         enableSorting: false,
-        cell: () => {                    
+        cell: () => {
           return (
-            <button 
-              className="btn btn-sm btn-icon btn-icon-lg btn-clear btn-light" 
+            <button
+              className="btn btn-sm btn-icon btn-icon-lg btn-clear btn-light"
             >
               <KeenIcon icon="notepad-edit" />
             </button>
@@ -127,38 +150,17 @@ const ApiIntegrations = () => {
     }
   };
 
-  const Toolbar = () => {
-    const { table } = useDataGrid();
-
-    return (
-      <div className="card-header flex-wrap px-5 py-5 border-b-0">
-        <h3 className="card-title">API Integrations</h3>
-
-        <div className="flex flex-wrap items-center gap-2.5">
-          <div className="flex gap-7.5">
-            <label className="switch switch-sm">
-              <input name="check" type="checkbox" value="1" className="order-2" readOnly />
-              <span className="switch-label order-1">Pause all</span>
-            </label>
-            <a href="#" className="btn btn-sm btn-primary">
-              Add New
-            </a>
-          </div>
-          <DataGridColumnVisibility table={table}/>
-        </div>
-      </div>
-    );
-  };
+  // ApiKeysApiIntegrationsToolbar extracted to top level
 
   return (
-    <DataGrid 
-      columns={columns} 
-      data={data} 
-      rowSelection={true} 
+    <DataGrid
+      columns={columns}
+      data={data}
+      rowSelection={true}
       onRowSelectionChange={handleRowSelection}
       pagination={{ size: 10 }}
-      sorting={[{ id: 'integration', desc: false }]} 
-      toolbar={<Toolbar />}
+      sorting={[{ id: 'integration', desc: false }]}
+      toolbar={<ApiKeysApiIntegrationsToolbar />}
       layout={{ card: true }}
     />
   );

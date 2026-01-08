@@ -24,14 +24,6 @@ const ViewTranslationPage = () => {
               <ToolbarPageTitle />
               <ToolbarDescription>View translation details and information.</ToolbarDescription>
             </ToolbarHeading>
-            <ToolbarActions>
-              <button 
-                onClick={() => navigate('/bible-content/translations')}
-                className="btn btn-sm btn-light"
-              >
-                Back to List
-              </button>
-            </ToolbarActions>
           </Toolbar>
         </Container>
       )}

@@ -19,6 +19,82 @@ interface IColumnFilterProps<TData, TValue> {
   column: Column<TData, TValue>;
 }
 
+interface VisitorsToolbarProps {
+  statusFilter: string;
+  setStatusFilter: (value: string) => void;
+  sortFilter: string;
+  setSortFilter: (value: string) => void;
+  searchInput: string;
+  setSearchInput: (value: string) => void;
+}
+
+const VisitorsToolbar = ({
+  statusFilter,
+  setStatusFilter,
+  sortFilter,
+  setSortFilter,
+  searchInput,
+  setSearchInput
+}: VisitorsToolbarProps) => {
+  const { table, totalRows } = useDataGrid();
+
+  return (
+    <div className="card-header flex-wrap gap-2 border-b-0 px-5">
+      <h3 className="card-title font-medium text-sm">
+        Showing {table.getState().pagination.pageSize} of {totalRows} users
+      </h3>
+
+      <div className="flex flex-wrap gap-2 lg:gap-5">
+        <div className="flex">
+          <label className="input input-sm">
+            <KeenIcon icon="magnifier" />
+            <input
+              type="text"
+              placeholder="Search users"
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+            />
+          </label>
+        </div>
+
+        <div className="flex flex-wrap gap-2.5">
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="w-28" size="sm">
+              <SelectValue placeholder="Select" />
+            </SelectTrigger>
+            <SelectContent className="w-32">
+              <SelectItem value="all">All</SelectItem>
+              <SelectItem value="active">Active</SelectItem>
+              <SelectItem value="disabled">Disabled</SelectItem>
+              <SelectItem value="pending">Pending</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <Select value={sortFilter} onValueChange={setSortFilter}>
+            <SelectTrigger className="w-28" size="sm">
+              <SelectValue placeholder="Select" />
+            </SelectTrigger>
+            <SelectContent className="w-32">
+              <SelectItem value="latest">Latest</SelectItem>
+              <SelectItem value="older">Older</SelectItem>
+              <SelectItem value="oldest">Oldest</SelectItem>
+            </SelectContent>
+          </Select>
+
+          <button
+            className="btn btn-sm btn-outline btn-primary"
+            onClick={() => {
+              console.log('Filter button clicked', { statusFilter, sortFilter, searchInput });
+            }}
+          >
+            <KeenIcon icon="setting-4" /> Filters
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const Visitors = () => {
   const ColumnInputFilter = <TData, TValue>({ column }: IColumnFilterProps<TData, TValue>) => {
     return (
@@ -29,7 +105,7 @@ const Visitors = () => {
         className="h-9 w-full max-w-40"
       />
     );
-  };  
+  };
 
   const columns = useMemo<ColumnDef<IVisitorsData>[]>(
     () => [
@@ -46,7 +122,7 @@ const Visitors = () => {
       {
         accessorFn: (row) => row.user,
         id: 'user',
-        header: ({ column }) => <DataGridColumnHeader title="User" filter={<ColumnInputFilter column={column}/>} column={column} />,   
+        header: ({ column }) => <DataGridColumnHeader title="User" filter={<ColumnInputFilter column={column} />} column={column} />,
         enableSorting: true,
         cell: (info) => (
           <div className="flex items-center gap-2.5">
@@ -61,8 +137,8 @@ const Visitors = () => {
               <Link to="/network/user-table/user-detail" className="text-sm font-font-medium text-gray-900 hover:text-primary-active">
                 {info.row.original.user.name}
               </Link>
-              <Link 
-                to="/network/user-table/user-detail" 
+              <Link
+                to="/network/user-table/user-detail"
                 className="text-xs text-primary hover:text-primary-active mt-1"
               >
                 View Details →
@@ -78,7 +154,7 @@ const Visitors = () => {
       {
         accessorFn: (row) => row.browser,
         id: 'browser',
-        header: ({ column }) => <DataGridColumnHeader title="Browser" column={column}/>,  
+        header: ({ column }) => <DataGridColumnHeader title="Browser" column={column} />,
         enableSorting: true,
         cell: (info) => (
           <div className="flex items-center gap-1.5 text-gray-800 font-normal">
@@ -94,7 +170,7 @@ const Visitors = () => {
       {
         accessorFn: (row) => row.ipAddress,
         id: 'ipAddress',
-        header: ({ column }) => <DataGridColumnHeader title="IP Address" column={column}/>,   
+        header: ({ column }) => <DataGridColumnHeader title="IP Address" column={column} />,
         enableSorting: true,
         cell: (info) => {
           return info.row.original.ipAddress;
@@ -108,7 +184,7 @@ const Visitors = () => {
       {
         accessorFn: (row) => row.location,
         id: 'location',
-        header: ({ column }) => <DataGridColumnHeader title="Location" column={column}/>,    
+        header: ({ column }) => <DataGridColumnHeader title="Location" column={column} />,
         enableSorting: true,
         cell: (info) => (
           <div className="flex items-center gap-1.5">
@@ -128,7 +204,7 @@ const Visitors = () => {
       {
         accessorFn: (row) => row.activity,
         id: 'activity',
-        header: ({ column }) => <DataGridColumnHeader title="Activity" column={column}/>,   
+        header: ({ column }) => <DataGridColumnHeader title="Activity" column={column} />,
         enableSorting: true,
         cell: (info: any) => info.row.original.activity,
         meta: {
@@ -141,14 +217,14 @@ const Visitors = () => {
         enableSorting: false,
         cell: ({ row }) => (
           <div className="flex gap-2">
-            <Link 
-              to="/network/user-table/user-detail" 
+            <Link
+              to="/network/user-table/user-detail"
               className="btn btn-sm btn-outline btn-primary"
             >
               View Details
             </Link>
-            <button 
-              className="btn btn-icon btn-light btn-clear btn-sm" 
+            <button
+              className="btn btn-icon btn-light btn-clear btn-sm"
               onClick={() => alert(`Clicked on action button for row ${row.original.user.name}`)}
             >
               <KeenIcon icon="dots-vertical" />
@@ -217,80 +293,29 @@ const Visitors = () => {
         }
       });
     }
-  }; 
+  };
 
-  const Toolbar = () => {
-    const { table, totalRows } = useDataGrid();
-
-    return (
-      <div className="card-header flex-wrap gap-2 border-b-0 px-5">
-        <h3 className="card-title font-medium text-sm">
-          Showing {table.getState().pagination.pageSize} of {totalRows} users
-        </h3>
-
-        <div className="flex flex-wrap gap-2 lg:gap-5">
-          <div className="flex">
-            <label className="input input-sm">
-              <KeenIcon icon="magnifier" />
-              <input
-                type="text"
-                placeholder="Search users"
-                value={searchInput}
-                onChange={(e) => setSearchInput(e.target.value)}
-              />
-            </label>
-          </div>
-
-          <div className="flex flex-wrap gap-2.5">
-            <Select value={statusFilter} onValueChange={setStatusFilter}>
-              <SelectTrigger className="w-28" size="sm">
-                <SelectValue placeholder="Select" />
-              </SelectTrigger>
-              <SelectContent className="w-32">
-                <SelectItem value="all">All</SelectItem>
-                <SelectItem value="active">Active</SelectItem>
-                <SelectItem value="disabled">Disabled</SelectItem>
-                <SelectItem value="pending">Pending</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <Select value={sortFilter} onValueChange={setSortFilter}>
-              <SelectTrigger className="w-28" size="sm">
-                <SelectValue placeholder="Select" />
-              </SelectTrigger>
-              <SelectContent className="w-32">
-                <SelectItem value="latest">Latest</SelectItem>
-                <SelectItem value="older">Older</SelectItem>
-                <SelectItem value="oldest">Oldest</SelectItem>
-              </SelectContent>
-            </Select>
-
-            <button 
-              className="btn btn-sm btn-outline btn-primary"
-              onClick={() => {
-                console.log('Filter button clicked', { statusFilter, sortFilter, searchInput });
-              }}
-            >
-              <KeenIcon icon="setting-4" /> Filters
-            </button>
-          </div>
-        </div>
-      </div>
-    );
-  }; 
-
-  return ( 
-    <DataGrid 
-      columns={columns} 
-      data={data} 
-      rowSelection={true} 
+  return (
+    <DataGrid
+      columns={columns}
+      data={data}
+      rowSelection={true}
       onRowSelectionChange={handleRowSelection}
       pagination={{ size: 5 }}
-      sorting={[{ id: 'user', desc: false }]} 
-      toolbar={<Toolbar />}
+      sorting={[{ id: 'user', desc: false }]}
+      toolbar={
+        <VisitorsToolbar
+          statusFilter={statusFilter}
+          setStatusFilter={setStatusFilter}
+          sortFilter={sortFilter}
+          setSortFilter={setSortFilter}
+          searchInput={searchInput}
+          setSearchInput={setSearchInput}
+        />
+      }
       layout={{ card: true }}
-    />  
-  ); 
+    />
+  );
 };
 
-export {Visitors };
+export { Visitors };

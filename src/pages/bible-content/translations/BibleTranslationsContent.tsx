@@ -1,6 +1,6 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { fetchTranslations, updateTranslation, type TranslationResponse } from '@/services/translationsApi';
+import { fetchTranslations, updateTranslation, uploadTranslation, type TranslationResponse } from '@/services/translationsApi';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,10 +8,10 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
-import { 
-  Languages, 
-  Edit, 
-  Trash2, 
+import {
+  Languages,
+  Edit,
+  Trash2,
   Save,
   X,
   Upload,
@@ -23,6 +23,9 @@ import {
   AlertCircle,
   Clock
 } from 'lucide-react';
+import { toast } from "sonner";
+
+
 
 interface Translation {
   id: string;
@@ -57,7 +60,7 @@ const transformTranslation = (apiTranslation: TranslationResponse): Translation 
     description: '', // API doesn't provide description
     status: (apiTranslation.status?.toLowerCase() || 'draft') as 'active' | 'inactive' | 'pending' | 'draft',
     verseCount: apiTranslation.total_verses || 0, // Map total_verses to verseCount
-    lastUpdated: apiTranslation.last_updated 
+    lastUpdated: apiTranslation.last_updated
       ? new Date(apiTranslation.last_updated).toISOString().split('T')[0]
       : new Date().toISOString().split('T')[0],
     fileSize: formatFileSize(apiTranslation.file_size_mb), // Map file_size_mb to fileSize
@@ -134,6 +137,9 @@ const BibleTranslationsContent = () => {
     isPublic: true
   });
 
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
+
+
   // Fetch translations from API
   useEffect(() => {
     const loadTranslations = async () => {
@@ -159,7 +165,7 @@ const BibleTranslationsContent = () => {
         if (response.success && response.data && Array.isArray(response.data)) {
           const transformedTranslations = response.data.map(transformTranslation);
           setTranslations(transformedTranslations);
-          
+
           // Use metadata if available
           if (response.metadata) {
             setTotalPages(response.metadata.totalPages || 1);
@@ -183,12 +189,12 @@ const BibleTranslationsContent = () => {
           status: err?.response?.status,
           data: err?.response?.data
         });
-        
-        const errorMessage = err?.response?.data?.message 
+
+        const errorMessage = err?.response?.data?.message
           || err?.response?.data?.error
-          || err?.message 
+          || err?.message
           || 'Failed to load translations';
-        
+
         setError(errorMessage);
         setTranslations([]);
       } finally {
@@ -237,83 +243,229 @@ const BibleTranslationsContent = () => {
     });
   };
 
+  //   const handleSave = async () => {
+  //     if (editingTranslation) {
+  //       try {
+  //         setSaving(true);
+  //         setError(null);
+
+  //         // Prepare API request data
+  //         // Convert language display name back to code
+  //         const languageCode = getLanguageCode(formData.language || '');
+
+  //         const updateData = {
+  //           name: formData.name || '',
+  //           abbreviation: formData.version || '', // version maps to abbreviation
+  //           language: languageCode,
+  //           license: formData.license || '',
+  //           is_public: formData.isPublic ?? true
+  //         };
+
+  //         const response = await updateTranslation(editingTranslation.id, updateData);
+
+  //         if (response.success) {
+  //           // Reload translations to get updated data
+  //           const updatedResponse = await fetchTranslations({
+  //             page: currentPage,
+  //             limit: 10,
+  //             search: searchTerm || undefined,
+  //             language: languageFilter !== 'all' ? languageFilter : undefined,
+  //             status: statusFilter !== 'all' ? statusFilter : undefined
+  //           });
+
+  //           if (updatedResponse.success && updatedResponse.data) {
+  //             const transformedTranslations = updatedResponse.data.map(transformTranslation);
+  //             setTranslations(transformedTranslations);
+
+  //             if (updatedResponse.metadata) {
+  //               setTotalPages(updatedResponse.metadata.totalPages || 1);
+  //               setTotalCount(updatedResponse.metadata.total || transformedTranslations.length);
+  //             }
+  //           }
+
+  //           setEditingTranslation(null);
+  //           setFormData({
+  //             name: '',
+  //             version: '',
+  //             language: '',
+  //             description: '',
+  //             status: 'draft',
+  //             publisher: '',
+  //             year: '',
+  //             license: '',
+  //             isPublic: true
+  //           });
+  //         } else {
+  //           setError(response.message || 'Failed to update translation');
+  //         }
+  //       } catch (err: any) {
+  //         console.error('Error updating translation:', err);
+  //         setError(err?.response?.data?.message || err?.message || 'Failed to update translation');
+  //       } finally {
+  //         setSaving(false);
+  //       }
+  //     } else {
+  //       // Create new translation - not implemented yet
+  //       setIsCreating(false);
+  //       setFormData({
+  //         name: '',
+  //         version: '',
+  //         language: '',
+  //         description: '',
+  //         status: 'draft',
+  //         publisher: '',
+  //         year: '',
+  //         license: '',
+  //         isPublic: true
+  //       });
+
+  //     }
+  //     if (isCreating) {
+  //   if (!selectedFile) {
+  //     setError("Please select a file to upload");
+  //     return;
+  //   }
+
+  //   try {
+  //     setSaving(true);
+  //     setError(null);
+
+  //     const languageCode = getLanguageCode(formData.language || "");
+
+  //     const payload = {
+  //       name: formData.name || "",
+  //       abbreviation: formData.version || "",
+  //       language: languageCode,
+  //       license: formData.license || "",
+  //       file: selectedFile,
+  //     };
+
+  //     console.log("UPLOAD PAYLOAD:", payload);
+
+  //     const uploadRes = await uploadTranslation(payload);
+  //     console.log("UPLOAD RESPONSE:", uploadRes);
+
+  //     if (uploadRes.success) {
+  //       // Refresh list
+  //       const updated = await fetchTranslations({ page: currentPage, limit: 10 });
+  //       if (updated.success && updated.data) {
+  //         setTranslations(updated.data.map(transformTranslation));
+  //       }
+  //       setIsCreating(false);
+  //       setSelectedFile(null);
+  //       setFormData({
+  //         name: "",
+  //         version: "",
+  //         language: "",
+  //         description: "",
+  //         status: "draft",
+  //         publisher: "",
+  //         year: "",
+  //         license: "",
+  //         isPublic: true,
+  //       });
+  //     } else {
+  //       setError(uploadRes.message || "Upload failed");
+  //     }
+  //   } catch (err: any) {
+  //     console.error("UPLOAD ERROR:", err);
+  //     setError(err?.response?.data?.message || "Upload failed");
+  //   } finally {
+  //     setSaving(false);
+  //   }
+
+  //   return;
+  // }
+
+  //   };
+
   const handleSave = async () => {
-    if (editingTranslation) {
-      try {
-        setSaving(true);
-        setError(null);
-        
-        // Prepare API request data
-        // Convert language display name back to code
-        const languageCode = getLanguageCode(formData.language || '');
-        
-        const updateData = {
-          name: formData.name || '',
-          abbreviation: formData.version || '', // version maps to abbreviation
+    try {
+      setSaving(true);
+      setError(null);
+
+      const languageCode = getLanguageCode(formData.language || "");
+
+      // CASE 1: Edit + File Upload
+      if (editingTranslation && selectedFile) {
+        const payload = {
+          name: formData.name || "",
+          abbreviation: formData.version || "",
           language: languageCode,
-          license: formData.license || '',
-          is_public: formData.isPublic ?? true
+          license: formData.license || "",
+          file: selectedFile,
         };
 
-        const response = await updateTranslation(editingTranslation.id, updateData);
-        
-        if (response.success) {
-          // Reload translations to get updated data
-          const updatedResponse = await fetchTranslations({
-            page: currentPage,
-            limit: 10,
-            search: searchTerm || undefined,
-            language: languageFilter !== 'all' ? languageFilter : undefined,
-            status: statusFilter !== 'all' ? statusFilter : undefined
-          });
+        const uploadRes = await uploadTranslation(payload);
 
-          if (updatedResponse.success && updatedResponse.data) {
-            const transformedTranslations = updatedResponse.data.map(transformTranslation);
-            setTranslations(transformedTranslations);
-            
-            if (updatedResponse.metadata) {
-              setTotalPages(updatedResponse.metadata.totalPages || 1);
-              setTotalCount(updatedResponse.metadata.total || transformedTranslations.length);
-            }
-          }
-          
-          setEditingTranslation(null);
-          setFormData({
-            name: '',
-            version: '',
-            language: '',
-            description: '',
-            status: 'draft',
-            publisher: '',
-            year: '',
-            license: '',
-            isPublic: true
-          });
-        } else {
-          setError(response.message || 'Failed to update translation');
-        }
-      } catch (err: any) {
-        console.error('Error updating translation:', err);
-        setError(err?.response?.data?.message || err?.message || 'Failed to update translation');
-      } finally {
-        setSaving(false);
+        toast.success(uploadRes.message || "File uploaded successfully ✅");
       }
-    } else {
-      // Create new translation - not implemented yet
+
+      //  CASE 2: Edit without File
+      else if (editingTranslation) {
+        const updateData = {
+          name: formData.name || "",
+          abbreviation: formData.version || "",
+          language: languageCode,
+          license: formData.license || "",
+          is_public: formData.isPublic ?? true,
+        };
+
+        const res = await updateTranslation(editingTranslation.id, updateData);
+
+        toast.success(res.message || "Translation updated successfully ✅");
+      }
+
+      //  CASE 3: Create New Translation
+      else {
+        if (!selectedFile) {
+          toast.error("Please select a file to upload");
+          return;
+        }
+
+        const payload = {
+          name: formData.name || "",
+          abbreviation: formData.version || "",
+          language: languageCode,
+          license: formData.license || "",
+          file: selectedFile,
+        };
+
+        const uploadRes = await uploadTranslation(payload);
+
+        toast.success(uploadRes.message || "Translation created successfully ✅");
+      }
+
+      //  Refresh list
+      const updated = await fetchTranslations({ page: currentPage, limit: 10 });
+      if (updated.success && updated.data) {
+        setTranslations(updated.data.map(transformTranslation));
+      }
+
+      //  Reset
+      setEditingTranslation(null);
       setIsCreating(false);
+      setSelectedFile(null);
       setFormData({
-        name: '',
-        version: '',
-        language: '',
-        description: '',
-        status: 'draft',
-        publisher: '',
-        year: '',
-        license: '',
-        isPublic: true
+        name: "",
+        version: "",
+        language: "",
+        description: "",
+        status: "draft",
+        publisher: "",
+        year: "",
+        license: "",
+        isPublic: true,
       });
+
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || "Something went wrong ❌");
+    } finally {
+      setSaving(false);
     }
   };
+
+
 
   const handleCancel = () => {
     setIsCreating(false);
@@ -470,7 +622,8 @@ const BibleTranslationsContent = () => {
                       value={formData.language}
                       onValueChange={(value) => setFormData({ ...formData, language: value })}
                     >
-                      <SelectTrigger>
+                      {/*                       <SelectTrigger> */}
+                      <SelectTrigger className="w-full">
                         <SelectValue placeholder="Select language" />
                       </SelectTrigger>
                       <SelectContent>
@@ -529,7 +682,8 @@ const BibleTranslationsContent = () => {
                     value={formData.status}
                     onValueChange={(value) => setFormData({ ...formData, status: value as any })}
                   >
-                    <SelectTrigger>
+                    {/*                   <SelectTrigger> */}
+                    <SelectTrigger className="w-full">
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
@@ -562,16 +716,40 @@ const BibleTranslationsContent = () => {
                   </label>
                 </div>
 
-                <div className="p-4 bg-gray-50 dark:bg-coal-100 rounded-lg ">
-                  <h4 className="font-medium text-gray-900 dark:text-white mb-2">Upload Translation File</h4>
+                <div className="p-4  rounded-lg ">
+                  {/* if upload file appleaer then class for this dic :bg-gray-50 dark:bg-coal-100 */}
+                  {/* <h4 className="font-medium text-gray-900 dark:text-white mb-2">Upload Translation File</h4> */}
                   <div className="space-y-2">
-                    <Button variant="outline" className="w-full dark:border-gray-600 dark:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-white">
+                    <input
+                      type="file"
+                      accept=".json,.xml,.txt"
+                      id="translation-file"
+                      className="hidden"
+                      onChange={(e) => {
+                        if (e.target.files && e.target.files.length > 0) {
+                          setSelectedFile(e.target.files[0]);
+                          console.log("Selected File:", e.target.files[0]);
+                        }
+                      }}
+                    />
+
+                    {/* <Button
+                      variant="outline"
+                      className="w-full dark:border-gray-600 dark:text-gray-600 dark:hover:bg-gray-700 dark:hover:text-white"
+                      onClick={() => document.getElementById("translation-file")?.click()}
+                    >
                       <Upload className="w-4 h-4 mr-2" />
                       Choose File
-                    </Button>
-                    <p className="text-xs text-gray-500 dark:text-gray-400">
+                    </Button> */}
+
+                    {/* {selectedFile && (
+                      <p className="text-xs text-green-600 mt-1">
+                        Selected: {selectedFile.name}
+                      </p>
+                    )} */}
+                    {/* <p className="text-xs text-gray-500 dark:text-gray-400">
                       Supported formats: JSON, XML, TXT (Max 10MB)
-                    </p>
+                    </p> */}
                   </div>
                 </div>
               </div>
@@ -581,8 +759,8 @@ const BibleTranslationsContent = () => {
               <Button variant="outline" onClick={handleCancel}>
                 Cancel
               </Button>
-              <Button 
-                onClick={handleSave} 
+              <Button
+                onClick={handleSave}
                 className="bg-primary hover:bg-primary-dark"
                 disabled={saving}
               >
@@ -597,19 +775,22 @@ const BibleTranslationsContent = () => {
       {/* Filters */}
       <Card>
         <CardContent className="p-4">
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          {/* <div className="grid grid-cols-1 md:grid-cols-4 gap-4"> */}
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
             <div className="relative">
               <Languages className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <Input
                 placeholder="Search translations..."
                 value={searchTerm}
                 onChange={(e) => handleSearchChange(e.target.value)}
-                className="pl-10"
+                /* className="pl-10" */
+                className="pl-10 w-full"
               />
             </div>
             <div>
               <Select value={languageFilter} onValueChange={handleLanguageFilterChange}>
-                <SelectTrigger>
+                {/* <SelectTrigger> */}
+                <SelectTrigger className="w-full">
                   <SelectValue placeholder="Filter by language" />
                 </SelectTrigger>
                 <SelectContent>
@@ -632,7 +813,8 @@ const BibleTranslationsContent = () => {
             </div>
             <div>
               <Select value={statusFilter} onValueChange={handleStatusFilterChange}>
-                <SelectTrigger>
+                {/* <SelectTrigger> */}
+                <SelectTrigger className="w-full">
                   <SelectValue placeholder="Filter by status" />
                 </SelectTrigger>
                 <SelectContent>
@@ -682,93 +864,102 @@ const BibleTranslationsContent = () => {
               </div>
             ) : (
               filteredTranslations.map((translation) => (
-              <div key={translation.id} className="p-4 border rounded-lg">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center space-x-3">
-                    <div className="p-2 bg-blue-100 rounded-lg">
-                      <Languages className="w-5 h-5 text-blue-600" />
+                <div key={translation.id} className="p-4 border rounded-lg">
+                  {/* <div className="flex items-center justify-between mb-3"> */}
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-3 gap-3">
+                    <div className="flex items-center space-x-3">
+                      <div className="p-2 bg-blue-100 rounded-lg shrink-0">
+                        <Languages className="w-5 h-5 text-blue-600" />
+                      </div>
+                      <div>
+                        <h3 className="font-semibold text-gray-900">{translation.name}</h3>
+                        <p className="text-sm text-gray-600 line-clamp-1">{translation.description}</p>
+                      </div>
                     </div>
-                    <div>
-                      <h3 className="font-semibold text-gray-900">{translation.name}</h3>
-                      <p className="text-sm text-gray-600">{translation.description}</p>
+                    {/* <div className="flex items-center space-x-2"> */}
+                    <div className="flex items-center space-x-2 pl-11 sm:pl-0">
+                      <Badge className={getStatusColor(translation.status)}>
+                        {translation.status.charAt(0).toUpperCase() + translation.status.slice(1)}
+                      </Badge>
+                      {!translation.isPublic && (
+                        <Badge className="bg-gray-100 text-gray-800">Private</Badge>
+                      )}
                     </div>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <Badge className={getStatusColor(translation.status)}>
-                      {translation.status.charAt(0).toUpperCase() + translation.status.slice(1)}
-                    </Badge>
-                    {!translation.isPublic && (
-                      <Badge className="bg-gray-100 text-gray-800">Private</Badge>
-                    )}
-                  </div>
-                </div>
 
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-3 text-sm">
-                  <div className="flex items-center space-x-2">
-                    <Globe className="w-4 h-4 text-gray-500" />
-                    <span className="text-gray-600">{getLanguageName(translation.language) || translation.language}</span>
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-3 text-sm">
+                    <div className="flex items-center space-x-2">
+                      <Globe className="w-4 h-4 text-gray-500" />
+                      <span className="text-gray-600">{getLanguageName(translation.language) || translation.language}</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <FileText className="w-4 h-4 text-gray-500" />
+                      <span className="text-gray-600">{translation.verseCount.toLocaleString()} verses</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <Clock className="w-4 h-4 text-gray-500" />
+                      <span className="text-gray-600">Updated: {translation.lastUpdated}</span>
+                    </div>
+                    <div className="flex items-center space-x-2">
+                      <FileText className="w-4 h-4 text-gray-500" />
+                      <span className="text-gray-600">{translation.fileSize}</span>
+                    </div>
                   </div>
-                  <div className="flex items-center space-x-2">
-                    <FileText className="w-4 h-4 text-gray-500" />
-                    <span className="text-gray-600">{translation.verseCount.toLocaleString()} verses</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Clock className="w-4 h-4 text-gray-500" />
-                    <span className="text-gray-600">Updated: {translation.lastUpdated}</span>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <FileText className="w-4 h-4 text-gray-500" />
-                    <span className="text-gray-600">{translation.fileSize}</span>
-                  </div>
-                </div>
 
-                <div className="flex justify-between items-center pt-3 border-t">
-                  <div className="text-sm text-gray-500">
-                    {translation.publisher} • {translation.year} • {translation.license}
-                  </div>
-                  <div className="flex space-x-2">
-                    <Link to={`/bible-content/translations/view/${translation.id}`}>
-                      <Button variant="outline" size="sm">
-                        <Eye className="w-4 h-4 mr-1" />
-                        View
+                  {/* <div className="flex justify-between items-center pt-3 border-t"> */}
+                  <div className="flex flex-col sm:flex-row justify-between sm:items-center pt-3 border-t gap-4">
+                    <div className="text-sm text-gray-500">
+                      {translation.publisher} • {translation.year} • {translation.license}
+                    </div>
+                    {/* <div className="flex space-x-2"> */}
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Link to={`/bible-content/translations/view/${translation.id}`} className="flex-1 sm:flex-none">
+                        <Button variant="outline" size="sm" className="w-full">
+                          <Eye className="w-4 h-4 mr-1" />
+                          View
+                        </Button>
+                      </Link>
+                      <Button variant="outline" size="sm" onClick={() => handleEdit(translation)} className="flex-1 sm:flex-none">
+                        <Edit className="w-4 h-4 mr-1" />
+                        Edit
                       </Button>
-                    </Link>
-                    <Button variant="outline" size="sm" onClick={() => handleEdit(translation)}>
-                      <Edit className="w-4 h-4 mr-1" />
-                      Edit
-                    </Button>
-                    <Button variant="outline" size="sm" disabled={true}>
-                      <Download className="w-4 h-4 mr-1" />
-                      Download
-                    </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm"
-                      onClick={() => handleDelete(translation.id)}
-                      disabled={true}
-                    >
-                      <Trash2 className="w-4 h-4 mr-1" />
-                      Delete
-                    </Button>
+                      <Button variant="outline" size="sm" disabled={true} className="flex-1 sm:flex-none">
+                        <Download className="w-4 h-4 mr-1" />
+                        Download
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleDelete(translation.id)}
+                        disabled={true}
+                        className="flex-1 sm:flex-none"
+                      >
+                        <Trash2 className="w-4 h-4 mr-1" />
+                        Delete
+                      </Button>
+                    </div>
                   </div>
                 </div>
-              </div>
               ))
             )}
           </div>
-          
+
           {/* Pagination */}
+          {/* {totalPages > 1 && (
+            <div className="flex items-center justify-between mt-6 pt-6 border-t"> */}
           {totalPages > 1 && (
-            <div className="flex items-center justify-between mt-6 pt-6 border-t">
+            <div className="flex flex-col sm:flex-row items-center justify-between mt-6 pt-6 border-t gap-4">
               <div className="text-sm text-gray-600">
                 Page {currentPage} of {totalPages}
               </div>
-              <div className="flex gap-2">
+              {/* <div className="flex gap-2"> */}
+              <div className="flex items-center gap-2 w-full sm:w-auto">
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                   disabled={currentPage === 1 || loading}
+                  className="flex-1 sm:flex-none"
                 >
                   Previous
                 </Button>
@@ -777,6 +968,7 @@ const BibleTranslationsContent = () => {
                   size="sm"
                   onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
                   disabled={currentPage === totalPages || loading}
+                  className="flex-1 sm:flex-none"
                 >
                   Next
                 </Button>
@@ -789,4 +981,4 @@ const BibleTranslationsContent = () => {
   );
 };
 
-export { BibleTranslationsContent }; 
+export { BibleTranslationsContent };

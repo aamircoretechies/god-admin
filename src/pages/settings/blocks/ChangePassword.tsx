@@ -186,7 +186,7 @@ const ChangePassword = () => {
               </Button>
             </div>
             <p className="text-xs text-gray-500">
-              Password must be at least 6 characters long
+              Password must be at least 8 characters long
             </p>
           </div>
 

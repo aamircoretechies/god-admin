@@ -1,29 +1,29 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { toast } from 'sonner';
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogHeader, 
-  DialogTitle, 
-  DialogTrigger 
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger
 } from '@/components/ui/dialog';
-import { 
-  Textarea 
+import {
+  Textarea
 } from '@/components/ui/textarea';
-import { 
-  ArrowLeft, 
-  Edit, 
-  Download, 
-  Flag, 
-  Trash2, 
-  Check, 
-  X, 
-  User, 
+import {
+  ArrowLeft,
+  Edit,
+  Download,
+  Flag,
+  Trash2,
+  Check,
+  X,
+  User,
   Calendar,
   Tag,
   BookOpen,
@@ -35,6 +35,10 @@ import {
   Monitor,
   Star
 } from 'lucide-react';
+import { fetchLinkedVerses, fetchNoteById, fetchNotes, updateNote } from '@/services/notesApi';
+import { fetchUserProfile } from '@/services/usersApi';
+import { useSearchParams } from 'react-router-dom';
+
 
 // Types
 interface Note {
@@ -66,12 +70,57 @@ interface Note {
   audioUrl?: string;
 }
 
-// Mock data
-const mockNote: Note = {
+// Helper to convert verse_id to a human-readable reference (same rules as list view)
+const parseVerseId = (verseId: string | null): string[] => {
+  if (!verseId) return [];
+
+  try {
+    const parts = verseId.split('_');
+    if (parts.length >= 2) {
+      const book = parts[0];
+      const chapter = parts[1];
+
+      const lastPart = parts[parts.length - 1];
+      const isVersion = lastPart.length <= 3 && /^[A-Z]+$/.test(lastPart);
+
+      if (parts.length >= 4 && isVersion) {
+        // Format: Book_Chapter_Verse_Version
+        const verse = parts[2];
+        return [`${book} ${chapter}:${verse} (${lastPart})`];
+      } else if (parts.length === 3 && isVersion) {
+        // Format: Book_Chapter_Version
+        return [`${book} ${chapter} (${lastPart})`];
+      } else if (parts.length >= 3) {
+        // Format: Book_Chapter_Verse (no version)
+        const verse = parts[2];
+        return [`${book} ${chapter}:${verse}`];
+      } else {
+        // Format: Book_Chapter (no version)
+        return [`${book} ${chapter}`];
+      }
+    }
+  } catch {
+    return verseId ? [verseId] : [];
+  }
+
+  return verseId ? [verseId] : [];
+};
+
+const buildTitleFromVerse = (verseId: string | null, fallback: string): string => {
+  const verses = parseVerseId(verseId);
+  if (verses.length > 0) {
+    return verses[0];
+  }
+  return fallback;
+};
+
+// Mock data (no longer used; kept only for reference)
+/* const mockNote: Note = {
   id: '1',
   userId: 'user1',
-  userName: 'John Doe',
-  userEmail: 'john@example.com',
+  // Initial placeholder values; real data comes from APIs
+  userName: '',
+  userEmail: '',
   userAvatar: '/media/avatars/300-1.png',
   title: 'Reflection on Psalm 23',
   content: `The Lord is my shepherd, I shall not want. He makes me lie down in green pastures, he leads me beside quiet waters, he refreshes my soul. He guides me along the right paths for his name's sake.
@@ -108,15 +157,211 @@ This passage has been a source of comfort during difficult times. The imagery of
     }
   ],
   audioUrl: '/media/audio/psalm23-reflection.mp3'
+}; */
+
+// Empty initial note so the page only shows data after APIs load
+const emptyNote: Note = {
+  id: '',
+  userId: '',
+  userName: '',
+  userEmail: '',
+  userAvatar: '/media/avatars/300-1.png',
+  title: '',
+  content: '',
+  linkedVerses: [],
+  tags: [],
+  status: 'active',
+  createdAt: '',
+  updatedAt: '',
+  hasAudio: false,
+  hasAttachments: false,
+  isFavorite: false,
+  language: '',
+  wordCount: 0,
+  source: 'web',
+  attachments: [],
+  audioUrl: undefined
 };
+
+const truncateText = (text: string, maxLength: number) => {
+  if (!text) return '';
+  return text.length > maxLength
+    ? text.slice(0, maxLength) + '...'
+    : text;
+};
+
 
 const NoteDetailContent: React.FC = () => {
   const { id } = useParams<{ id: string }>();
-  const [note, setNote] = useState<Note>(mockNote);
+  const [note, setNote] = useState<Note>(emptyNote);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [linkedVersesMessage, setLinkedVersesMessage] = useState<string>('');
   const [isEditing, setIsEditing] = useState(false);
   const [editedContent, setEditedContent] = useState(note.content);
   const [editedTags, setEditedTags] = useState(note.tags.join(', '));
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [searchParams] = useSearchParams();
+  const autoEdit = searchParams.get('edit') === 'true';
+
+  useEffect(() => {
+    if (autoEdit) {
+      setIsEditing(true);
+    }
+  }, [autoEdit]);
+
+
+
+  useEffect(() => {
+    setLoading(true);
+    const loadNote = async () => {
+      if (!id) return;
+
+      try {
+        const response = await fetchNoteById(id);
+
+        if (response.success && response.data) {
+          const apiNote = response.data as any;
+
+          // Clean emotion_tags from API (same rules as overview list)
+          const tagsFromApi: string[] | undefined = Array.isArray(apiNote.emotion_tags)
+            ? apiNote.emotion_tags
+              .filter((tag: string) => {
+                if (typeof tag !== 'string') return false;
+                // Skip JSON strings and CONTINUE_READING entries
+                if (tag.startsWith('{') || tag.startsWith('CONTINUE_READING')) {
+                  return false;
+                }
+                return true;
+              })
+              .map((tag: string) =>
+                tag.charAt(0).toUpperCase() + tag.slice(1).toLowerCase()
+              )
+            : undefined;
+
+          const fullName =
+            apiNote.user_name ||
+            apiNote.username ||
+            [apiNote.first_name, apiNote.last_name].filter(Boolean).join(' ') ||
+            (typeof apiNote.name === 'string' ? apiNote.name : '') ||
+            '';
+
+          const email =
+            apiNote.user_email ||
+            apiNote.email ||
+            (typeof apiNote.userEmail === 'string' ? apiNote.userEmail : '') ||
+            '';
+
+          const dynamicTitle = buildTitleFromVerse(
+            typeof apiNote.verse_id === 'string' ? apiNote.verse_id : null,
+            note.title
+          );
+
+          setNote((prev) => ({
+            ...prev,
+            id: apiNote.note_id || prev.id,
+            content: apiNote.content ?? prev.content,
+            title: dynamicTitle,
+            userName: fullName || prev.userName,
+            userEmail: email || prev.userEmail,
+            // Use emotion_tags from API when available, otherwise keep existing tags
+            tags: tagsFromApi && tagsFromApi.length > 0 ? tagsFromApi : prev.tags,
+            createdAt: apiNote.created_at || prev.createdAt,
+            updatedAt: apiNote.updated_at || prev.updatedAt,
+          }));
+
+          if (tagsFromApi && tagsFromApi.length > 0) {
+            setEditedTags(tagsFromApi.join(', '));
+          }
+
+          setEditedContent(apiNote.content ?? note.content);
+
+          // Fetch additional user information from the "Get All Notes" API
+          try {
+            const listResponse = await fetchNotes({
+              page: 1,
+              limit: 10,
+              user_id: apiNote.user_id
+            });
+
+            if (listResponse.status === 1 && Array.isArray(listResponse.data) && listResponse.data.length > 0) {
+              const matched = listResponse.data.find((n: any) => n.note_id === apiNote.note_id) || listResponse.data[0];
+
+              const matchedEmail =
+                (matched as any).user_email ||
+                (matched as any).userEmail ||
+                '';
+
+              const matchedName =
+                matched.username ||
+                (matched as any).user_name ||
+                '';
+
+              setNote((prev) => ({
+                ...prev,
+                userId: matched.user_id || prev.userId,
+                userName: matchedName || prev.userName,
+                userEmail: matchedEmail || prev.userEmail,
+              }));
+            }
+          } catch {
+            // If the list API fails, we still keep the data we already have
+          }
+
+          // Fetch user profile to ensure email matches the note's user
+          try {
+            if (apiNote.user_id) {
+              const profileResponse = await fetchUserProfile(apiNote.user_id);
+              if (
+                profileResponse.status === 1 &&
+                profileResponse.data &&
+                profileResponse.data.basicUserInfo &&
+                profileResponse.data.basicUserInfo.email
+              ) {
+                const profileEmail = profileResponse.data.basicUserInfo.email;
+                setNote((prev) => ({
+                  ...prev,
+                  userEmail: profileEmail || prev.userEmail,
+                }));
+              }
+            }
+          } catch {
+            // If profile fetch fails, fall back to whatever email we already have
+          }
+
+          // Fetch linked verses for today's reflection and display exactly as returned
+          try {
+            const timezone =
+              Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+            const linkedResponse = await fetchLinkedVerses(timezone);
+
+            if (
+              linkedResponse.status === 1 &&
+              linkedResponse.data &&
+              Array.isArray(linkedResponse.data.linked_verses)
+            ) {
+              setNote((prev) => ({
+                ...prev,
+                linkedVerses: linkedResponse.data.linked_verses,
+              }));
+              setLinkedVersesMessage(
+                linkedResponse.data.message || 'No linked verses found for this reflection'
+              );
+            }
+          } catch {
+            // If linked verses API fails, keep existing linkedVerses
+          }
+        } else {
+          toast.error('Failed to load note details');
+        }
+      } catch (error: any) {
+        toast.error(error?.response?.data?.message || 'Failed to load note details');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadNote();
+  }, [id]);
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
@@ -141,14 +386,35 @@ const NoteDetailContent: React.FC = () => {
     }
   };
 
-  const handleSave = () => {
-    setNote({
-      ...note,
-      content: editedContent,
-      tags: editedTags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0),
-      updatedAt: new Date().toISOString()
-    });
-    setIsEditing(false);
+  if (loading) {
+    // Show loader while note data is being fetched; no placeholder content
+    return (
+      <div className="flex items-center justify-center py-12">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary mx-auto mb-4" />
+          <p className="text-gray-600">Loading note details...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const handleSave = async () => {
+    try {
+      if (id) {
+        await updateNote(id, { content: editedContent });
+      }
+
+      setNote({
+        ...note,
+        content: editedContent,
+        tags: editedTags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0),
+        updatedAt: new Date().toISOString()
+      });
+      setIsEditing(false);
+      toast.success('Note updated successfully');
+    } catch (error: any) {
+      toast.error(error?.response?.data?.message || 'Failed to update note');
+    }
   };
 
   const handleCancel = () => {
@@ -249,7 +515,7 @@ const NoteDetailContent: React.FC = () => {
             </Button>
           </Link>
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Note Detail</h1>
+            <h1 className="text-2xl font-bold text-gray-900">Note Details</h1>
             <p className="text-gray-600">Review and moderate note #{note.id}</p>
           </div>
         </div>
@@ -307,7 +573,7 @@ const NoteDetailContent: React.FC = () => {
                       type="text"
                       value={editedTags}
                       onChange={(e) => setEditedTags(e.target.value)}
-                      className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      className="w-full px-3 py-2 border border-gray-300 bg-card rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                       placeholder="Faith, Trust, Comfort"
                     />
                   </div>
@@ -342,11 +608,17 @@ const NoteDetailContent: React.FC = () => {
             </CardHeader>
             <CardContent>
               <div className="flex flex-wrap gap-2">
-                {note.linkedVerses.map((verse, index) => (
-                  <Badge key={index} variant="outline" className="text-sm">
-                    {verse}
-                  </Badge>
-                ))}
+                {note.linkedVerses.length > 0 ? (
+                  note.linkedVerses.map((verse, index) => (
+                    <Badge key={index} variant="outline" className="text-sm">
+                      {verse}
+                    </Badge>
+                  ))
+                ) : (
+                  <p className="text-sm text-gray-600">
+                    {linkedVersesMessage || 'No linked verses found for this reflection'}
+                  </p>
+                )}
               </div>
             </CardContent>
           </Card>
@@ -442,7 +714,11 @@ const NoteDetailContent: React.FC = () => {
                   <AvatarFallback>{note.userName.charAt(0)}</AvatarFallback>
                 </Avatar>
                 <div>
-                  <p className="font-medium">{note.userName}</p>
+                  {/* <p className="font-medium">{note.userName}</p> */}
+                  <p className="font-medium">
+                    {truncateText(note.userName, 21)}
+                  </p>
+
                   <p className="text-sm text-gray-500">{note.userEmail}</p>
                 </div>
               </div>
@@ -473,14 +749,14 @@ const NoteDetailContent: React.FC = () => {
                 <span className="text-sm text-gray-600">Updated:</span>
                 <span className="text-sm font-medium">{formatDate(note.updatedAt)}</span>
               </div>
-              <div className="flex justify-between">
+              {/* <div className="flex justify-between">
                 <span className="text-sm text-gray-600">Word Count:</span>
                 <span className="text-sm font-medium">{note.wordCount}</span>
-              </div>
-              <div className="flex justify-between">
+              </div> */}
+              {/* <div className="flex justify-between">
                 <span className="text-sm text-gray-600">Language:</span>
                 <span className="text-sm font-medium">{note.language}</span>
-              </div>
+              </div> */}
               <div className="flex justify-between">
                 <span className="text-sm text-gray-600">Source:</span>
                 <span className="text-sm font-medium flex items-center gap-1">

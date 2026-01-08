@@ -12,6 +12,39 @@ interface IColumnFilterProps<TData, TValue> {
   column: Column<TData, TValue>;
 }
 
+const MembersTeamsToolbar = () => {
+  const { table } = useDataGrid();
+
+  return (
+    <div className="card-header flex-wrap px-5 py-5 border-b-0">
+      <h3 className="card-title">Teams</h3>
+
+      <div className="flex flex-wrap items-center gap-2.5">
+        <div className="flex gap-6">
+          <div className="relative">
+            <KeenIcon
+              icon="magnifier"
+              className="leading-none text-md text-gray-500 absolute top-1/2 start-0 -translate-y-1/2 ms-3"
+            />
+            <input
+              type="text"
+              placeholder="Search Teams"
+              className="input input-sm ps-8"
+              value={(table.getColumn('team')?.getFilterValue() as string) ?? ''}
+              onChange={(event) => table.getColumn('team')?.setFilterValue(event.target.value)}
+            />
+          </div>
+        </div>
+        <DataGridColumnVisibility table={table} />
+        <label className="switch switch-sm">
+          <input name="check" type="checkbox" value="1" className="order-2" readOnly />
+          <span className="switch-label order-1">Only Active Groups</span>
+        </label>
+      </div>
+    </div>
+  );
+};
+
 const Teams = () => {
   const storageFilterId = 'teams-filter';
   const ColumnInputFilter = <TData, TValue>({ column }: IColumnFilterProps<TData, TValue>) => {
@@ -46,7 +79,7 @@ const Teams = () => {
           const team = row.original.team; // Access the original row data
           const nameMatch = team.name?.toLowerCase().includes(filterValue.toLowerCase());
           const descriptionMatch = team.description?.toLowerCase().includes(filterValue.toLowerCase());
-          
+
           return nameMatch || descriptionMatch;
         },
         cell: (info) => {
@@ -119,8 +152,8 @@ const Teams = () => {
         header: () => '',
         enableSorting: false,
         cell: ({ row }) => (
-          <button 
-            className="btn btn-sm btn-icon btn-clear btn-light" 
+          <button
+            className="btn btn-sm btn-icon btn-clear btn-light"
             onClick={() => alert(`Clicked on edit for ${row.original.team}`)}
           >
             <KeenIcon icon="notepad-edit" />
@@ -135,8 +168,8 @@ const Teams = () => {
         header: () => '',
         enableSorting: false,
         cell: ({ row }) => (
-          <button 
-            className="btn btn-sm btn-icon btn-clear btn-light" 
+          <button
+            className="btn btn-sm btn-icon btn-clear btn-light"
             onClick={() => alert(`Clicked on delete for ${row.original.team}`)}
           >
             <KeenIcon icon="trash" />
@@ -188,48 +221,17 @@ const Teams = () => {
     }
   };
 
-  const Toolbar = () => {
-    const { table } = useDataGrid();
-
-    return (
-      <div className="card-header flex-wrap px-5 py-5 border-b-0">
-        <h3 className="card-title">Teams</h3>
-
-        <div className="flex flex-wrap items-center gap-2.5">
-          <div className="flex gap-6">
-            <div className="relative">
-              <KeenIcon
-                icon="magnifier"
-                className="leading-none text-md text-gray-500 absolute top-1/2 start-0 -translate-y-1/2 ms-3"
-              />
-              <input
-                type="text"
-                placeholder="Search Teams"
-                className="input input-sm ps-8"
-                value={(table.getColumn('team')?.getFilterValue() as string) ?? ''}
-                onChange={(event) => table.getColumn('team')?.setFilterValue(event.target.value)}
-              />
-            </div>
-          </div>
-          <DataGridColumnVisibility table={table}/>
-          <label className="switch switch-sm">
-            <input name="check" type="checkbox" value="1" className="order-2" readOnly />
-            <span className="switch-label order-1">Only Active Groups</span>
-          </label>
-        </div>
-      </div>
-    );
-  };
+  // MembersTeamsToolbar extracted to top level
 
   return (
-    <DataGrid 
-      columns={columns} 
-      data={filteredData} 
-      rowSelection={true} 
+    <DataGrid
+      columns={columns}
+      data={filteredData}
+      rowSelection={true}
       onRowSelectionChange={handleRowSelection}
       pagination={{ size: 10 }}
-      sorting={[{ id: 'team', desc: false }]} 
-      toolbar={<Toolbar />}
+      sorting={[{ id: 'team', desc: false }]}
+      toolbar={<MembersTeamsToolbar />}
       layout={{ card: true }}
     />
   );

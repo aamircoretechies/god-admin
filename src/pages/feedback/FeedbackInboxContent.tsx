@@ -3,18 +3,18 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
 } from '@/components/ui/select';
-import { 
-  Search, 
-  MessageSquare, 
-  Flag, 
-  CheckCircle, 
+import {
+  Search,
+  MessageSquare,
+  Flag,
+  CheckCircle,
   XCircle,
   Clock,
   User,
@@ -24,11 +24,11 @@ import {
   ChevronLeft,
   ChevronRight
 } from 'lucide-react';
-import { 
-  fetchFlaggedContent, 
-  approveFeedback, 
+import {
+  fetchFlaggedContent,
+  approveFeedback,
   rejectFeedback,
-  type FlaggedContentResponse 
+  type FlaggedContentResponse
 } from '@/services/flaggedContentApi';
 import { toast } from 'sonner';
 
@@ -101,7 +101,9 @@ const FeedbackInboxContent = () => {
         const response = await fetchFlaggedContent({
           page: currentPage,
           limit: pageSize,
-          status: filter !== 'all' ? filter.toUpperCase() : undefined,
+          // status: filter !== 'all' ? filter.toUpperCase() : undefined,
+          status: filter === "unresolved" ? "REJECTED" : filter !== "all" ? filter.toUpperCase() : undefined,
+
           search: searchTerm || undefined
         });
 
@@ -143,7 +145,9 @@ const FeedbackInboxContent = () => {
         const updatedResponse = await fetchFlaggedContent({
           page: currentPage,
           limit: pageSize,
-          status: filter !== 'all' ? filter.toUpperCase() : undefined,
+          // status: filter !== 'all' ? filter.toUpperCase() : undefined,
+          status: filter === "unresolved" ? "REJECTED" : filter !== "all" ? filter.toUpperCase() : undefined,
+
           search: searchTerm || undefined
         });
         if (updatedResponse.status === 1 && updatedResponse.data) {
@@ -173,7 +177,9 @@ const FeedbackInboxContent = () => {
         const updatedResponse = await fetchFlaggedContent({
           page: currentPage,
           limit: pageSize,
-          status: filter !== 'all' ? filter.toUpperCase() : undefined,
+          // status: filter !== 'all' ? filter.toUpperCase() : undefined,
+          status: filter === "unresolved" ? "REJECTED" : filter !== "all" ? filter.toUpperCase() : undefined,
+
           search: searchTerm || undefined
         });
         if (updatedResponse.status === 1 && updatedResponse.data) {
@@ -243,13 +249,13 @@ const FeedbackInboxContent = () => {
   // Client-side filtering as fallback (API should handle it)
   const filteredData = useMemo(() => {
     return feedbackData.filter(item => {
-    const matchesFilter = filter === 'all' || item.status === filter;
-    const matchesSearch = searchTerm === '' || 
-      item.user.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.verse.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      item.comment.toLowerCase().includes(searchTerm.toLowerCase());
-    return matchesFilter && matchesSearch;
-  });
+      const matchesFilter = filter === 'all' || item.status === filter;
+      const matchesSearch = searchTerm === '' ||
+        item.user.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.verse.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.comment.toLowerCase().includes(searchTerm.toLowerCase());
+      return matchesFilter && matchesSearch;
+    });
   }, [feedbackData, filter, searchTerm]);
 
   if (loading) {
@@ -284,29 +290,34 @@ const FeedbackInboxContent = () => {
           <CardTitle>Feedback Management</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex flex-col md:flex-row gap-4">
-            <div className="flex-1">
-              <div className="relative">
+          {/* <div className="flex flex-col md:flex-row gap-4"> */}
+          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+            {/* <div className="flex-1"> */}
+            <div className="flex flex-col md:flex-row items-stretch md:items-center gap-4 flex-1">
+              {/* <div className="relative"> */}
+              <div className="relative w-full md:max-w-md">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <Input
                   placeholder="Search feedback..."
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
+                  // className="pl-10"
+                  className="pl-10 w-full"
                 />
               </div>
+              <Select value={filter} onValueChange={setFilter}>
+                {/* <SelectTrigger className="w-full md:w-48"> */}
+                <SelectTrigger className="w-full md:w-auto md:min-w-[192px]">
+                  <SelectValue placeholder="Filter by status" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Items</SelectItem>
+                  <SelectItem value="pending">Pending</SelectItem>
+                  <SelectItem value="unresolved">Unresolved</SelectItem>
+                  <SelectItem value="resolved">Resolved</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
-            <Select value={filter} onValueChange={setFilter}>
-              <SelectTrigger className="w-full md:w-48">
-                <SelectValue placeholder="Filter by status" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="all">All Items</SelectItem>
-                <SelectItem value="pending">Pending</SelectItem>
-                <SelectItem value="unresolved">Unresolved</SelectItem>
-                <SelectItem value="resolved">Resolved</SelectItem>
-              </SelectContent>
-            </Select>
           </div>
         </CardContent>
       </Card>
@@ -316,7 +327,8 @@ const FeedbackInboxContent = () => {
         {filteredData.map((item) => (
           <Card key={item.id} className="hover:shadow-md transition-shadow">
             <CardContent className="p-6">
-              <div className="flex items-start justify-between mb-4">
+              {/* <div className="flex items-start justify-between mb-4"> */}
+              <div className="flex flex-col sm:flex-row items-start justify-between gap-4 mb-4">
                 <div className="flex items-center gap-3">
                   {getTypeIcon(item.type)}
                   <div>
@@ -337,8 +349,8 @@ const FeedbackInboxContent = () => {
                   <BookOpen className="w-4 h-4 text-gray-500" />
                   <span className="font-medium">{item.verse}</span>
                 </div>
-                <p className="text-gray-700 mb-3">{item.comment}</p>
-                
+                <p className="text-gray-700 mb-3 break-all">{item.comment}</p>
+
                 {item.tags && item.tags.length > 0 && (
                   <div className="flex flex-wrap gap-2 mb-3">
                     {item.tags.map((tag, index) => (
@@ -357,10 +369,12 @@ const FeedbackInboxContent = () => {
                 )}
               </div>
 
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  <Button 
-                    variant="outline" 
+              {/* <div className="flex items-center justify-between"> */}
+              <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+                {/* <div className="flex items-center gap-2"> */}
+                <div className="flex flex-wrap items-center gap-2">
+                  <Button
+                    variant="outline"
                     size="sm"
                     onClick={() => handleApprove(item.id)}
                     disabled={item.status === 'resolved'}
@@ -368,8 +382,8 @@ const FeedbackInboxContent = () => {
                     <CheckCircle className="w-4 h-4 mr-1" />
                     Approve
                   </Button>
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     size="sm"
                     onClick={() => handleReject(item.id)}
                     disabled={item.status === 'resolved'}
@@ -382,7 +396,8 @@ const FeedbackInboxContent = () => {
                     Edit (Phase 2)
                   </Button>
                 </div>
-                <div className="text-sm text-gray-500">
+                {/* <div className="text-sm text-gray-500"> */}
+                <div className="text-sm text-gray-500 sm:text-right">
                   <Clock className="w-4 h-4 inline mr-1" />
                   {new Date(item.timestamp).toLocaleTimeString()}
                 </div>
@@ -410,7 +425,8 @@ const FeedbackInboxContent = () => {
       {totalPages > 1 && (
         <Card>
           <CardContent className="p-4">
-            <div className="flex items-center justify-between">
+            {/* <div className="flex items-center justify-between"> */}
+            <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="text-sm text-gray-600">
                 Showing page {currentPage} of {totalPages} ({totalCount} total items)
               </div>

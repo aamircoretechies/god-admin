@@ -3,7 +3,7 @@ import { useEffect, useMemo, useState } from 'react';
 import { useLanguage } from '@/i18n';
 import { toAbsoluteUrl } from '@/utils';
 import { Column, ColumnDef, RowSelectionState } from '@tanstack/react-table';
-import { DataGrid, DataGridColumnHeader, DataGridColumnVisibility, DataGridRowSelect, DataGridRowSelectAll, KeenIcon, useDataGrid, Menu, MenuItem, MenuToggle  } from '@/components';
+import { DataGrid, DataGridColumnHeader, DataGridColumnVisibility, DataGridRowSelect, DataGridRowSelectAll, KeenIcon, useDataGrid, Menu, MenuItem, MenuToggle } from '@/components';
 import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
 import { DropdownCard1 } from '@/partials/dropdowns/general';
@@ -17,7 +17,46 @@ interface IColumnFilterProps<TData, TValue> {
   column: Column<TData, TValue>;
 }
 
-const Members = ({ title}: IMembersProps) => {
+interface IPermissionsMembersToolbarProps {
+  searchTerm: string;
+  setSearchTerm: (value: string) => void;
+  title: string;
+}
+
+const PermissionsMembersToolbar = ({ searchTerm, setSearchTerm, title }: IPermissionsMembersToolbarProps) => {
+  const { table } = useDataGrid();
+
+  return (
+    <div className="card-header px-5 py-5 border-b-0 flex-wrap gap-2">
+      <h3 className="card-title">{title}</h3>
+
+      <div className="flex flex-wrap items-center gap-2.5">
+        <div className="relative">
+          <KeenIcon
+            icon="magnifier"
+            className="leading-none text-md text-gray-500 absolute top-1/2 start-0 -translate-y-1/2 ms-3"
+          />
+          <input
+            type="text"
+            placeholder="Search Members"
+            className="input input-sm ps-8"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)} // Update search term
+          />
+        </div>
+        <DataGridColumnVisibility table={table} />
+        <label className="switch switch-sm">
+          <input name="check" type="checkbox" value="1" className="order-2" readOnly />
+          <span className="switch-label order-1">
+            Active Users
+          </span>
+        </label>
+      </div>
+    </div>
+  );
+};
+
+const Members = ({ title }: IMembersProps) => {
   const { isRTL } = useLanguage();
   const storageFilterId = 'members-filter';
 
@@ -210,48 +249,17 @@ const Members = ({ title}: IMembersProps) => {
     }
   };
 
-  const Toolbar = () => {
-    const { table } = useDataGrid();
-
-    return (
-      <div className="card-header px-5 py-5 border-b-0 flex-wrap gap-2">
-        <h3 className="card-title">{title}</h3>
-
-        <div className="flex flex-wrap items-center gap-2.5">
-          <div className="relative">
-            <KeenIcon
-              icon="magnifier"
-              className="leading-none text-md text-gray-500 absolute top-1/2 start-0 -translate-y-1/2 ms-3"
-            />
-            <input
-              type="text"
-              placeholder="Search Members"
-              className="input input-sm ps-8"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)} // Update search term
-            />
-          </div>
-          <DataGridColumnVisibility table={table}/>
-          <label className="switch switch-sm">
-            <input name="check" type="checkbox" value="1" className="order-2" readOnly />
-            <span className="switch-label order-1">
-              Active Users
-            </span>
-          </label>
-        </div>
-      </div>
-    );
-  };
+  // PermissionsMembersToolbar extracted to top level
 
   return (
-    <DataGrid 
-      columns={columns} 
-      data={filteredData} 
-      rowSelection={true} 
+    <DataGrid
+      columns={columns}
+      data={filteredData}
+      rowSelection={true}
       onRowSelectionChange={handleRowSelection}
       pagination={{ size: 10 }}
-      sorting={[{ id: 'member', desc: false }]} 
-      toolbar={<Toolbar />}
+      sorting={[{ id: 'member', desc: false }]}
+      toolbar={<PermissionsMembersToolbar searchTerm={searchTerm} setSearchTerm={setSearchTerm} title={title} />}
       layout={{ card: true }}
     />
   );

@@ -6,27 +6,31 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger 
+import { toAbsoluteUrl } from '@/utils';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
-import { 
-  Search, 
-  MoreVertical, 
-  Eye, 
-  Edit, 
-  Trash2, 
-  Download, 
-  Flag, 
+import {
+  Search,
+  MoreVertical,
+  Eye,
+  Edit,
+  Trash2,
+  Download,
+  Flag,
   Volume2,
   Paperclip,
   AlertCircle,
   ChevronLeft,
   ChevronRight
 } from 'lucide-react';
-import { fetchNotes, type NoteResponse } from '@/services/notesApi';
+import { deleteNote, exportNotes, fetchNotes, flagNote, type NoteResponse } from '@/services/notesApi';
+import { toast } from "sonner";
+
+
 
 // Types
 interface Note {
@@ -53,7 +57,7 @@ const transformNote = (apiData: NoteResponse): Note => {
   // Parse verse_id to extract verse reference
   const parseVerseId = (verseId: string | null): string[] => {
     if (!verseId) return [];
-    
+
     // Handle different verse_id formats:
     // "Genesis_1_3_SV" -> "Genesis 1:3 (SV)"
     // "Gen_1_1_SV" -> "Gen 1:1 (SV)"
@@ -61,17 +65,17 @@ const transformNote = (apiData: NoteResponse): Note => {
     // "Jude_23_1_SV" -> "Jude 23:1 (SV)"
     // "Jude_1_SV" -> "Jude 1 (SV)"
     // "Gen_1_2" -> "Gen 1:2"
-    
+
     try {
       const parts = verseId.split('_');
       if (parts.length >= 2) {
         const book = parts[0];
         const chapter = parts[1];
-        
+
         // Check if last part is a version (2-3 letter code like SV, KJV)
         const lastPart = parts[parts.length - 1];
         const isVersion = lastPart.length <= 3 && /^[A-Z]+$/.test(lastPart);
-        
+
         if (parts.length >= 4 && isVersion) {
           // Format: Book_Chapter_Verse_Version
           const verse = parts[2];
@@ -92,7 +96,7 @@ const transformNote = (apiData: NoteResponse): Note => {
       // If parsing fails, return the original verse_id
       return [verseId];
     }
-    
+
     return [verseId];
   };
 
@@ -126,12 +130,18 @@ const transformNote = (apiData: NoteResponse): Note => {
   const tags = cleanTags(apiData.emotion_tags);
   const title = extractTitle(apiData.content);
 
+  // Generate avatar from user ID (same logic as UserBasicInfo)
+  const avatarNumber = (parseInt(apiData.user_id.replace(/-/g, ''), 16) % 34) + 1;
+  const userAvatar = toAbsoluteUrl(`/media/avatars/300-${avatarNumber}.png`);
+
+
+
   return {
     id: apiData.note_id,
     userId: apiData.user_id,
     userName: apiData.username || `User ${apiData.user_id.slice(0, 8)}`, // Use username from API
     userEmail: `user-${apiData.user_id.slice(0, 8)}@example.com`, // Fallback
-    userAvatar: undefined,
+    userAvatar: userAvatar,
     title: title,
     content: apiData.content,
     linkedVerses: linkedVerses,
@@ -212,20 +222,20 @@ const NotesOverviewContent: React.FC = () => {
   // Filter notes (client-side filtering for status and language since API may not support them)
   const filteredNotes = useMemo(() => {
     let filtered = notes;
-    
+
     // Apply status filter
     if (statusFilter !== 'all') {
       filtered = filtered.filter(note => note.status === statusFilter);
     }
-    
+
     // Apply language filter
     if (languageFilter !== 'all') {
       filtered = filtered.filter(note => note.language === languageFilter);
     }
-    
+
     // Apply search filter (if not already handled by API)
     if (searchTerm) {
-      filtered = filtered.filter(note => 
+      filtered = filtered.filter(note =>
         note.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         note.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
         note.userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -234,12 +244,12 @@ const NotesOverviewContent: React.FC = () => {
         note.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
       );
     }
-    
+
     // Apply user filter (if not already handled by API)
     if (userFilter !== 'all') {
       filtered = filtered.filter(note => note.userId === userFilter);
     }
-    
+
     return filtered;
   }, [notes, searchTerm, statusFilter, userFilter, languageFilter]);
 
@@ -266,16 +276,16 @@ const NotesOverviewContent: React.FC = () => {
     });
   };
 
-  const ColumnInputFilter = <TData, TValue>({ column }: any) => {
-    return (
-      <Input
-        placeholder="Filter..."
-        value={(column.getFilterValue() as string) ?? ''}
-        onChange={(event) => column.setFilterValue(event.target.value)}
-        className="h-9 w-full max-w-40"
-      />
-    );
-  };
+  // const ColumnInputFilter = <TData, TValue>({ column }: any) => {
+  //   return (
+  //     <Input
+  //       placeholder="Filter..."
+  //       value={(column.getFilterValue() as string) ?? ''}
+  //       onChange={(event) => column.setFilterValue(event.target.value)}
+  //       className="h-9 w-full max-w-40"
+  //     />
+  //   );
+  // };
 
   const columns = useMemo<ColumnDef<Note>[]>(
     () => [
@@ -285,7 +295,7 @@ const NotesOverviewContent: React.FC = () => {
         header: ({ column }) => (
           <DataGridColumnHeader
             title="User"
-            filter={<ColumnInputFilter column={column} />}
+            // filter={<ColumnInputFilter column={column} />}
             column={column}
           />
         ),
@@ -297,7 +307,7 @@ const NotesOverviewContent: React.FC = () => {
               <AvatarFallback>{row.original.userName.charAt(0)}</AvatarFallback>
             </Avatar>
             <div className="flex flex-col">
-              <Link 
+              <Link
                 to={`/notes-journals/detail/${row.original.id}`}
                 className="text-sm font-medium text-gray-900 hover:text-primary-active mb-px"
               >
@@ -306,7 +316,7 @@ const NotesOverviewContent: React.FC = () => {
               <span className="text-2sm text-gray-700 font-normal">
                 {row.original.userEmail}
               </span>
-              <Link 
+              <Link
                 to={`/notes-journals/detail/${row.original.id}`}
                 className="text-xs text-primary hover:text-primary-active mt-1"
               >
@@ -326,7 +336,7 @@ const NotesOverviewContent: React.FC = () => {
         header: ({ column }) => (
           <DataGridColumnHeader
             title="Title / Content"
-            filter={<ColumnInputFilter column={column} />}
+            // filter={<ColumnInputFilter column={column} />}
             column={column}
           />
         ),
@@ -414,7 +424,12 @@ const NotesOverviewContent: React.FC = () => {
       },
       {
         id: 'actions',
-        header: ({ column }) => <DataGridColumnHeader title="Actions" column={column} />,
+        // header: ({ column }) => <DataGridColumnHeader title="Actions" column={column} />,
+        header: () => (
+          <span className="text-sm font-medium select-none cursor-default">
+            Actions
+          </span>
+        ),
         enableSorting: false,
         cell: ({ row }) => (
           <DropdownMenu>
@@ -430,19 +445,26 @@ const NotesOverviewContent: React.FC = () => {
                   View Details
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem>
+              {/* <DropdownMenuItem>
                 <Edit className="w-4 h-4 mr-2" />
                 Edit
+              </DropdownMenuItem> */}
+              <DropdownMenuItem asChild>
+                <Link to={`/notes-journals/detail/${row.original.id}?edit=true`}>
+                  <Edit className="w-4 h-4 mr-2" />
+                  Edit
+                </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem>
+
+              <DropdownMenuItem onClick={() => handleExport(row.original)}>
                 <Download className="w-4 h-4 mr-2" />
                 Export
               </DropdownMenuItem>
-              <DropdownMenuItem>
+              {/* <DropdownMenuItem onClick={() => handleFlag(row.original.id)}>
                 <Flag className="w-4 h-4 mr-2" />
                 {row.original.status === 'flagged' ? 'Unflag' : 'Flag'}
-              </DropdownMenuItem>
-              <DropdownMenuItem className="text-red-600">
+              </DropdownMenuItem> */}
+              <DropdownMenuItem className="text-red-600" onClick={() => handleDelete(row.original.id)}>
                 <Trash2 className="w-4 h-4 mr-2" />
                 Delete
               </DropdownMenuItem>
@@ -458,33 +480,140 @@ const NotesOverviewContent: React.FC = () => {
     []
   );
 
-  const Toolbar = () => (
-    <div className="flex flex-col gap-4 p-5">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <div className="flex-1 relative">
+  const handleFlag = async (id: string) => {
+    // console.log("FLAG REQUEST TRIGGERED");
+    // console.log("Note ID to flag:", id);
+    // console.log("Sending reason:", "Inappropriate content");
+
+    try {
+      const res = await flagNote(id, "Inappropriate content");
+
+      // Log full backend response
+      // console.log("FLAG API SUCCESS RESPONSE:", res);
+
+      if (res.status === 1) {
+        // console.log("Flagging successful. Updating UI...");
+
+        // Update UI instantly
+        setNotes(prev =>
+          prev.map(n =>
+            n.id === id ? { ...n, status: "flagged" } : n
+          )
+        );
+
+        // console.log(" Updated notes state:", notes);
+
+        toast.success("Note flagged successfully!");
+      } else {
+        // console.warn(" FLAG API returned status 0:", res);
+        toast.error(res.message || "Failed to flag note");
+      }
+    } catch (error: any) {
+      // console.error(" FLAG API ERROR:", error);
+
+      console.error("FLAG API ERROR RESPONSE:",
+        error?.response?.data || "No backend response"
+      );
+
+      toast.error(error?.response?.data?.message || "Error flagging note");
+    }
+  };
+
+
+
+
+  const handleDelete = async (id: string) => {
+    try {
+      //  Direct delete on click (no confirm)
+      const res = await deleteNote(id);
+
+      if (res.status === 1) {
+        setNotes(prev => prev.filter(n => n.id !== id));
+
+        // Backend success message toast
+        toast.success(res.message || "Note deleted successfully!");
+      } else {
+        //  Backend error message toast
+        toast.error(res.message || "Failed to delete note");
+      }
+
+    } catch (error: any) {
+      //  API error toast
+      toast.error(error?.response?.data?.message || "Error deleting note");
+    }
+  };
+
+  const handleExport = async (note: Note) => {
+    try {
+      const res = await exportNotes(
+        "json",                 // format: json OR csv
+        note.status || "Active", // status filter
+        note.userEmail           // export only this user's notes
+      );
+
+      // Create file URL
+      const blobUrl = window.URL.createObjectURL(new Blob([res.data]));
+
+      // Create temp link to download
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = `notes-export.${"json"}`; // or csv based on format
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+
+      toast.success("Notes exported successfully!");
+    } catch (error: any) {
+      toast.error(
+        error?.response?.data?.message || "Failed to export notes"
+      );
+    }
+  };
+
+
+
+  const toolbar = (
+    // <div className="flex flex-col gap-4 p-5">
+    <div className="flex flex-col gap-4 p-3 md:p-5">
+      {/* <div className="flex items-center justify-between"> */}
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        {/* <div className="flex items-center gap-4"> */}
+        <div className="flex flex-col md:flex-row items-stretch md:items-center gap-4 flex-1">
+          {/* <div className="flex-1 relative"> */}
+          <div className="relative w-full md:max-w-md">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <Input
               placeholder="Search by user, keyword, verse, tag..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 max-w-md"
+              // className="pl-10 max-w-md"
+              className="pl-10 w-full"
             />
           </div>
+          {/* <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="px-3 py-2 border border-gray-300 rounded-md text-sm dark:bg-card dark:text-white"
+          > */}
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+            className="px-3 py-2 border border-gray-300 rounded-md text-sm dark:bg-card dark:text-white w-full md:w-auto"
           >
             <option value="all">All Status</option>
             <option value="active">Active</option>
             <option value="flagged">Flagged</option>
             <option value="deleted">Deleted</option>
           </select>
+          {/* <select
+            value={userFilter}
+            onChange={(e) => setUserFilter(e.target.value)}
+            className="px-3 py-2 border border-gray-300 rounded-md text-sm dark:bg-card dark:text-white"
+          > */}
           <select
             value={userFilter}
             onChange={(e) => setUserFilter(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+            className="px-3 py-2 border border-gray-300 rounded-md text-sm dark:bg-card dark:text-white w-full md:w-auto"
           >
             <option value="all">All Users</option>
             {uniqueUserIds.map((userId) => {
@@ -496,10 +625,15 @@ const NotesOverviewContent: React.FC = () => {
               );
             })}
           </select>
+          {/* <select
+            value={languageFilter}
+            onChange={(e) => setLanguageFilter(e.target.value)}
+            className="px-3 py-2 border border-gray-300 rounded-md text-sm dark:bg-card dark:text-white"
+          > */}
           <select
             value={languageFilter}
             onChange={(e) => setLanguageFilter(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+            className="px-3 py-2 border border-gray-300 rounded-md text-sm dark:bg-card dark:text-white w-full md:w-auto"
           >
             <option value="all">All Languages</option>
             <option value="English">English</option>
@@ -507,7 +641,8 @@ const NotesOverviewContent: React.FC = () => {
             <option value="French">French</option>
           </select>
         </div>
-        <div className="flex items-center gap-2">
+        {/* <div className="flex items-center gap-2"> */}
+        <div className="flex items-center gap-2 justify-end">
           <span className="text-sm text-gray-600">
             Showing {filteredNotes.length} of {totalCount || notes.length} notes
           </span>
@@ -547,10 +682,10 @@ const NotesOverviewContent: React.FC = () => {
         data={filteredNotes}
         pagination={{ size: 10 }}
         sorting={[{ id: 'createdAt', desc: true }]}
-        toolbar={<Toolbar />}
+        toolbar={toolbar}
         layout={{ card: true }}
       />
-      
+
       {/* Pagination */}
       {totalPages > 1 && (
         <div className="flex items-center justify-between p-4 border-t">

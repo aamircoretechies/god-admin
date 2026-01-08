@@ -5,23 +5,25 @@ import { DataGrid, DataGridColumnHeader } from '@/components/data-grid';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger 
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
-import { 
-  Search, 
-  MoreVertical, 
-  Eye, 
-  Edit, 
-  Trash2, 
+import {
+  Search,
+  MoreVertical,
+  Eye,
+  Edit,
+  Trash2,
   History,
   Copy,
   CheckCircle,
   XCircle,
-  AlertCircle
+  AlertCircle,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import { fetchPrompts, fetchPromptDetail, createPrompt, updatePromptStatus, type PromptResponse, type CreatePromptRequest } from '@/services/promptsApi';
 import { toast } from 'sonner';
@@ -148,7 +150,7 @@ const PromptListContent: React.FC = () => {
       const detailResponse = await fetchPromptDetail(promptId);
       if (detailResponse.status === 1 && detailResponse.data) {
         const promptData = detailResponse.data;
-        
+
         // Create duplicate with "Copy of " prefix
         const duplicateData: CreatePromptRequest = {
           title: `Copy of ${promptData.title}`,
@@ -181,10 +183,10 @@ const PromptListContent: React.FC = () => {
 
   const handleToggleStatus = async (promptId: string, currentStatus: string) => {
     const newStatus = currentStatus === 'Active' ? 'Inactive' : 'Active';
-    
+
     try {
       const response = await updatePromptStatus(promptId, newStatus as 'Active' | 'Inactive');
-      
+
       if (response.status === 1) {
         // Update the prompt in the local state
         setPrompts(prevPrompts =>
@@ -207,7 +209,7 @@ const PromptListContent: React.FC = () => {
   // Filter prompts (client-side filtering as fallback, but API should handle it)
   const filteredPrompts = useMemo(() => {
     return prompts.filter(prompt => {
-      const matchesSearch = 
+      const matchesSearch =
         prompt.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
         prompt.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
         prompt.category.toLowerCase().includes(searchTerm.toLowerCase());
@@ -241,7 +243,7 @@ const PromptListContent: React.FC = () => {
       'Chapter Context': 'bg-indigo-100 text-indigo-800',
       'Other': 'bg-gray-100 text-gray-800'
     };
-    
+
     return (
       <Badge variant="default" className={colors[category] || 'bg-gray-100 text-gray-800'}>
         {category}
@@ -252,7 +254,7 @@ const PromptListContent: React.FC = () => {
   const getRoleBadge = (role: string) => {
     switch (role) {
       case 'All Users':
-        return <Badge variant="secondary">All Users</Badge>;
+        return <Badge variant="outline">All Users</Badge>;
       case 'Premium Only':
         return <Badge variant="default" className="bg-purple-100 text-purple-800">Premium Only</Badge>;
       case 'Admin Only':
@@ -298,7 +300,7 @@ const PromptListContent: React.FC = () => {
         enableSorting: true,
         cell: ({ row }) => (
           <div className="flex flex-col">
-            <Link 
+            <Link
               to={`/ai-prompt-management/view/${row.original.id}`}
               className="text-sm font-medium text-gray-900 hover:text-primary-active mb-1"
             >
@@ -390,7 +392,7 @@ const PromptListContent: React.FC = () => {
                   View History
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem 
+              <DropdownMenuItem
                 onClick={() => handleDuplicate(row.original.id)}
                 disabled={duplicatingId === row.original.id}
               >
@@ -436,23 +438,23 @@ const PromptListContent: React.FC = () => {
     return Array.from(categories).sort();
   }, [prompts]);
 
-  const Toolbar = () => (
-    <div className="flex flex-col gap-4 p-5">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <div className="flex-1 relative">
+  const toolbar = (
+    <div className="flex flex-col gap-4 p-3 md:p-5">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        <div className="flex flex-col md:flex-row items-stretch md:items-center gap-4 flex-1">
+          <div className="relative w-full md:max-w-md">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
             <Input
               placeholder="Search by prompt name, description, category..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 max-w-md"
+              className="pl-10 w-full"
             />
           </div>
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+            className="px-3 py-2 border border-gray-300 rounded-md text-sm dark:bg-card dark:text-white w-full md:w-auto"
           >
             <option value="all">All Status</option>
             <option value="Active">Active</option>
@@ -461,7 +463,7 @@ const PromptListContent: React.FC = () => {
           <select
             value={categoryFilter}
             onChange={(e) => setCategoryFilter(e.target.value)}
-            className="px-3 py-2 border border-gray-300 rounded-md text-sm"
+            className="px-3 py-2 border border-gray-300 rounded-md text-sm dark:bg-card dark:text-white w-full md:w-auto"
           >
             <option value="all">All Categories</option>
             {uniqueCategories.map(category => (
@@ -469,7 +471,7 @@ const PromptListContent: React.FC = () => {
             ))}
           </select>
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 justify-end">
           <span className="text-sm text-gray-600">
             Showing {filteredPrompts.length} of {totalCount || prompts.length} prompts
           </span>
@@ -503,14 +505,45 @@ const PromptListContent: React.FC = () => {
   }
 
   return (
-    <DataGrid
-      columns={columns}
-      data={filteredPrompts}
-      pagination={{ size: 10 }}
-      sorting={[{ id: 'title', desc: false }]}
-      toolbar={<Toolbar />}
-      layout={{ card: true }}
-    />
+    <div className="space-y-4">
+      <DataGrid
+        columns={columns}
+        data={filteredPrompts}
+        pagination={{ size: 10 }}
+        sorting={[{ id: 'title', desc: false }]}
+        toolbar={toolbar}
+        layout={{ card: true }}
+      />
+
+      {/* Pagination */}
+      {Math.ceil(totalCount / pageSize) > 1 && (
+        <div className="flex items-center justify-between p-4 border-t">
+          <div className="text-sm text-gray-600">
+            Showing page {currentPage} of {Math.ceil(totalCount / pageSize)} ({totalCount} total prompts)
+          </div>
+          <div className="flex items-center space-x-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+              disabled={currentPage === 1}
+            >
+              <ChevronLeft className="w-4 h-4" />
+              Previous
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage(prev => Math.min(Math.ceil(totalCount / pageSize), prev + 1))}
+              disabled={currentPage === Math.ceil(totalCount / pageSize)}
+            >
+              Next
+              <ChevronRight className="w-4 h-4" />
+            </Button>
+          </div>
+        </div>
+      )}
+    </div>
   );
 };
 

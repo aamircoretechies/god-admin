@@ -24,14 +24,17 @@ const BibleTranslationsPage = () => {
               <ToolbarPageTitle />
               <ToolbarDescription>Manage Bible translations and versions.</ToolbarDescription>
             </ToolbarHeading>
-        {/*     <ToolbarActions> */}
-           {/*    <a href="#" className="btn btn-sm btn-light">
+            {/*         <ToolbarActions> */}
+            <ToolbarActions>
+              <div className="flex flex-wrap justify-center sm:justify-end gap-2">
+                {/*    <a href="#" className="btn btn-sm btn-light">
                 Import Translation
               </a> */}
-              {/* <a href="#" className="btn btn-sm btn-primary">
+                {/* <a href="#" className="btn btn-sm btn-primary">
                 Add New Translation
               </a> */}
-         {/*    </ToolbarActions> */}
+              </div>
+            </ToolbarActions>
           </Toolbar>
         </Container>
       )}

@@ -8,10 +8,19 @@ import {
   ToolbarPageTitle
 } from '@/partials/toolbar';
 import { useLayout } from '@/providers';
-import { AddEditPromptContent } from './AddEditPromptContent';
+// import { AddEditPromptContent } from './AddEditPromptContent';
+import AddEditPromptContent from './AddEditPromptContent';
+
+import { useRef } from 'react';
+
 
 const AddEditPrompt = () => {
   const { currentLayout } = useLayout();
+  const contentRef = useRef<{
+    submit: () => void;
+    cancel: () => void;
+  }>(null);
+
 
   return (
     <Fragment>
@@ -23,19 +32,35 @@ const AddEditPrompt = () => {
               <ToolbarDescription>Create or edit AI prompt templates for biblical content generation.</ToolbarDescription>
             </ToolbarHeading>
             <ToolbarActions>
-              <a href="#" className="btn btn-sm btn-light">
+              {/* <a href="#" className="btn btn-sm btn-light">
                 Cancel
-              </a>
-              <a href="#" className="btn btn-sm btn-primary">
+              </a> */}
+              <button
+                className="btn btn-sm btn-light"
+                onClick={() => contentRef.current?.cancel()}
+              >
+                Cancel
+              </button>
+
+              {/* <a href="#" className="btn btn-sm btn-primary">
                 Save Prompt
-              </a>
+              </a> */}
+              <button
+                className="btn btn-sm btn-primary"
+                onClick={() => contentRef.current?.submit()}
+              >
+                Save Prompt
+              </button>
+
             </ToolbarActions>
           </Toolbar>
         </Container>
       )}
 
       <Container>
-        <AddEditPromptContent />
+        {/* <AddEditPromptContent /> */}
+        <AddEditPromptContent ref={contentRef} />
+
       </Container>
     </Fragment>
   );

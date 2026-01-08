@@ -11,6 +11,29 @@ interface IColumnFilterProps<TData, TValue> {
   column: Column<TData, TValue>;
 }
 
+const AppearanceApiIntegrationsToolbar = () => {
+  const { table } = useDataGrid();
+
+  return (
+    <div className="card-header px-5 py-5 border-b-0">
+      <h3 className="card-title">API Integrations</h3>
+
+      <div className="flex items-center gap-2.5">
+        <div className="flex gap-7.5">
+          <label className="switch switch-sm">
+            <input name="check" type="checkbox" value="1" className="order-2" readOnly />
+            <span className="switch-label order-1">
+              Pause all
+            </span>
+          </label>
+          <a href="#" className="btn btn-sm btn-primary">Add New</a>
+        </div>
+        <DataGridColumnVisibility table={table} />
+      </div>
+    </div>
+  );
+};
+
 const ApiIntegrations = () => {
   const ColumnInputFilter = <TData, TValue>({ column }: IColumnFilterProps<TData, TValue>) => {
     return (
@@ -67,13 +90,13 @@ const ApiIntegrations = () => {
           headerTitle: 'API Key',
           headerClassName: 'min-w-[224px]'
         }
-      },   
+      },
       {
         accessorFn: (row) => row.dailyCalls,
         id: 'dailyCalls',
         header: ({ column }) => <DataGridColumnHeader title="Daily Calls" column={column} />,
         enableSorting: true,
-        cell: (info) => {                    
+        cell: (info) => {
           return info.row.original.dailyCalls;
         },
         meta: {
@@ -86,7 +109,7 @@ const ApiIntegrations = () => {
         id: 'actions',
         header: ({ column }) => <DataGridColumnHeader title="Status" column={column} />,
         enableSorting: true,
-        cell: (info) => {                    
+        cell: (info) => {
           return info.row.original.actions;
         },
         meta: {
@@ -97,10 +120,10 @@ const ApiIntegrations = () => {
         id: 'actions',
         header: () => '',
         enableSorting: false,
-        cell: () => {                    
+        cell: () => {
           return (
-            <button 
-              className="btn btn-sm btn-icon btn-icon-lg btn-clear btn-light" 
+            <button
+              className="btn btn-sm btn-icon btn-icon-lg btn-clear btn-light"
             >
               <KeenIcon icon="notepad-edit" />
             </button>
@@ -130,39 +153,18 @@ const ApiIntegrations = () => {
     }
   };
 
-  const Toolbar = () => {
-    const { table } = useDataGrid();
-
-    return (
-      <div className="card-header px-5 py-5 border-b-0">
-        <h3 className="card-title">API Integrations</h3>
-
-        <div className="flex items-center gap-2.5">
-          <div className="flex gap-7.5">
-            <label className="switch switch-sm">
-              <input name="check" type="checkbox" value="1" className="order-2" readOnly />
-              <span className="switch-label order-1">
-                Pause all
-              </span>
-            </label>
-            <a href="#" className="btn btn-sm btn-primary">Add New</a>
-          </div>
-          <DataGridColumnVisibility table={table}/>
-        </div>
-      </div>
-    );
-  };
+  // AppearanceApiIntegrationsToolbar extracted to top level
 
   return (
     <>
-      <DataGrid 
-        columns={columns} 
-        data={data} 
-        rowSelection={true} 
+      <DataGrid
+        columns={columns}
+        data={data}
+        rowSelection={true}
         onRowSelectionChange={handleRowSelection}
         pagination={{ size: 10 }}
-        sorting={[{ id: 'integration', desc: false }]} 
-        toolbar={<Toolbar />}
+        sorting={[{ id: 'integration', desc: false }]}
+        toolbar={<AppearanceApiIntegrationsToolbar />}
         layout={{ card: true }}
       />
 

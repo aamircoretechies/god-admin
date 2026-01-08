@@ -266,23 +266,23 @@ const ViewChapterContent: React.FC = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Book Description</h4>
+                <h4 className="text-sm font-medium text-gray-700 dark:text-white mb-2">Book Description</h4>
                 <p className="text-gray-900 dark:text-white">{book.description}</p>
               </div>
               
               <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-200 dark:border-gray-700">
                 <div>
-                  <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Book</h4>
+                  <h4 className="text-sm font-medium text-gray-700 dark:text-white mb-2">Book</h4>
                   <p className="text-gray-900 dark:text-white">{book.name}</p>
                 </div>
                 <div>
-                  <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Chapter Number</h4>
+                  <h4 className="text-sm font-medium text-gray-700 dark:text-white mb-2">Chapter Number</h4>
                   <p className="text-gray-900 dark:text-white">{chapter.number}</p>
                 </div>
               </div>
 
               <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
-                <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Total Verses</h4>
+                <h4 className="text-sm font-medium text-gray-700 dark:text-white mb-2">Total Verses</h4>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">{chapter.verses}</p>
               </div>
             </CardContent>
@@ -307,10 +307,10 @@ const ViewChapterContent: React.FC = () => {
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <div className="flex items-center space-x-2 mb-2">
-                            <Badge variant="outline" className="dark:border-gray-600 dark:text-gray-300">
+                            <Badge variant="default" className="dark:border-gray-600 dark:text-gray-300">
                               Verse {verse.number}
                             </Badge>
-                            <span className="text-xs text-gray-500 dark:text-gray-400">{verse.translation}</span>
+                            <span className="text-xs text-gray-500 dark:text-white">{verse.translation}</span>
                           </div>
                           <p className="text-gray-900 dark:text-white leading-relaxed">{verse.text}</p>
                         </div>
@@ -345,15 +345,15 @@ const ViewChapterContent: React.FC = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Status</span>
+                <span className="text-sm font-medium text-gray-700 dark:text-white">Status</span>
                 {getStatusBadge(chapter.status)}
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Testament</span>
+                <span className="text-sm font-medium text-gray-700 dark:text-white">Testament</span>
                 {getTestamentBadge(book.testament)}
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Book Status</span>
+                <span className="text-sm font-medium text-gray-700 dark:text-white">Book Status</span>
                 {getStatusBadge(book.status)}
               </div>
             </CardContent>
@@ -368,14 +368,14 @@ const ViewChapterContent: React.FC = () => {
               <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-100 dark:border-blue-800/30">
                 <div className="flex items-center space-x-2 mb-2">
                   <FileText className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                  <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">Total Verses</h4>
+                  <h4 className="text-sm font-medium text-gray-700 dark:text-white">Total Verses</h4>
                 </div>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">{chapter.verses}</p>
               </div>
               <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-100 dark:border-green-800/30">
                 <div className="flex items-center space-x-2 mb-2">
                   <BookOpen className="w-5 h-5 text-green-600 dark:text-green-400" />
-                  <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">Book Chapters</h4>
+                  <h4 className="text-sm font-medium text-gray-700 dark:text-white">Book Chapters</h4>
                 </div>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">{book.chapters}</p>
               </div>
