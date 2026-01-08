@@ -45,10 +45,12 @@ export interface BibleBookDetailResponse {
 export const fetchBibleBooks = async (params: {
   page?: number;
   limit?: number;
+  translation?: string; // Translation code like 'KJV', 'SV'
 }): Promise<BibleBooksListResponse> => {
   const queryParams = new URLSearchParams();
   if (params.page) queryParams.append('page', params.page.toString());
   if (params.limit) queryParams.append('limit', params.limit.toString());
+  if (params.translation) queryParams.append('translation', params.translation);
 
   const response = await axios.get<BibleBooksListResponse>(
     `${API_URL}/admin/bible/books?${queryParams.toString()}`
@@ -59,10 +61,18 @@ export const fetchBibleBooks = async (params: {
 /**
  * Fetch Bible book detail with chapters
  */
-export const fetchBibleBookDetail = async (bookId: string): Promise<BibleBookDetailResponse> => {
-  const response = await axios.get<BibleBookDetailResponse>(
-    `${API_URL}/admin/bible/books/${bookId}`
-  );
+export const fetchBibleBookDetail = async (
+  bookId: string,
+  translation?: string
+): Promise<BibleBookDetailResponse> => {
+  const queryParams = new URLSearchParams();
+  if (translation) queryParams.append('translation', translation);
+
+  const url = translation
+    ? `${API_URL}/admin/bible/books/${bookId}?${queryParams.toString()}`
+    : `${API_URL}/admin/bible/books/${bookId}`;
+
+  const response = await axios.get<BibleBookDetailResponse>(url);
   return response.data;
 };
 
@@ -109,14 +119,27 @@ export interface ChapterDetailResponse {
 
 /**
  * Fetch chapter detail with verses
+ * @param bookId - Book ID
+ * @param chapterId - Chapter ID
+ * @param translation - Optional translation code (KJV or SV) to filter verses
  */
 export const fetchChapterDetail = async (
   bookId: string,
-  chapterId: string
+  chapterId: string,
+  translation?: string
 ): Promise<ChapterDetailData | null> => {
   try {
+    const queryParams = new URLSearchParams();
+    if (translation) {
+      queryParams.append('translation', translation);
+    }
+
+    const url = translation
+      ? `${API_URL}/admin/bible/books/${bookId}/chapters/${chapterId}?${queryParams.toString()}`
+      : `${API_URL}/admin/bible/books/${bookId}/chapters/${chapterId}`;
+
     const response = await axios.get<ChapterDetailResponse>(
-      `${API_URL}/admin/bible/books/${bookId}/chapters/${chapterId}`,
+      url,
       {
         headers: {
           'Cache-Control': 'no-cache'

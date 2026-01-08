@@ -36,11 +36,13 @@ export interface AIExplanationsListResponse {
 export interface VerseExplanation {
   explanation_id: string;
   context_type: string;
+  explanation_type?: string; // Used for edit/delete operations
   category: string;
   label: string;
   content: string;
   sources: string[];
   has_content: boolean;
+  experience_level?: string; // e.g., "NEW_TO_BIBLE"
   created_at?: string;
   updated_at?: string;
   [key: string]: any; // For additional fields
@@ -92,6 +94,59 @@ export const fetchVerseAIExplanationHistory = async (
 ): Promise<VerseAIExplanationHistoryResponse> => {
   const response = await axios.get<VerseAIExplanationHistoryResponse>(
     `${API_URL}/admin/bible/ai-explanations/verse/${verseId}`
+  );
+  return response.data;
+};
+
+/**
+ * Update AI explanation
+ * PUT /api/v1/admin/bible/ai-explanations/verse/:verse_id/explanation
+ */
+export interface UpdateAIExplanationRequest {
+  explanation_type: string;
+  experience_level: string;
+  content: string;
+  sources?: string[];
+}
+
+export interface UpdateAIExplanationResponse {
+  status: number;
+  message: string;
+  data?: any;
+}
+
+export const updateAIExplanation = async (
+  verseId: string,
+  data: UpdateAIExplanationRequest
+): Promise<UpdateAIExplanationResponse> => {
+  const response = await axios.put<UpdateAIExplanationResponse>(
+    `${API_URL}/admin/bible/ai-explanations/verse/${verseId}/explanation`,
+    data
+  );
+  return response.data;
+};
+
+/**
+ * Delete AI explanation
+ * DELETE /api/v1/admin/bible/ai-explanations/verse/:verse_id/explanation
+ * Query params: explanation_type, experience_level
+ */
+export interface DeleteAIExplanationResponse {
+  status: number;
+  message: string;
+}
+
+export const deleteAIExplanation = async (
+  verseId: string,
+  explanationType: string,
+  experienceLevel: string
+): Promise<DeleteAIExplanationResponse> => {
+  const queryParams = new URLSearchParams();
+  queryParams.append('explanation_type', explanationType);
+  queryParams.append('experience_level', experienceLevel);
+
+  const response = await axios.delete<DeleteAIExplanationResponse>(
+    `${API_URL}/admin/bible/ai-explanations/verse/${verseId}/explanation?${queryParams.toString()}`
   );
   return response.data;
 };

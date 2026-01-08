@@ -1,8 +1,12 @@
-import React, { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Label } from '@/components/ui/label';
 import { 
   BookOpen, 
   Calendar, 
@@ -10,9 +14,20 @@ import {
   Brain,
   Loader2,
   AlertCircle,
-  FileText
+  FileText,
+  Edit,
+  Trash2,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
-import { fetchVerseAIExplanationHistory, type VerseAIExplanationHistoryResponse } from '@/services/aiExplanationsApi';
+import { 
+  fetchVerseAIExplanationHistory, 
+  deleteAIExplanation, 
+  updateAIExplanation,
+  type VerseAIExplanationHistoryResponse,
+  type UpdateAIExplanationRequest
+} from '@/services/aiExplanationsApi';
+import { toast } from 'sonner';
 
 interface VerseDetailModalProps {
   isOpen: boolean;
@@ -31,21 +46,47 @@ interface VerseDetailModalProps {
   };
 }
 
+// Valid experience levels as per backend validation
+export const VALID_EXPERIENCE_LEVELS = [
+  'NEW_TO_BIBLE',
+  'SOME_KNOWLEDGE',
+  'REGULAR_READER',
+  'ADVANCED_STUDENT',
+  'SCHOLAR'
+] as const;
+
+// Map experience_level from API to UI labels
+const mapExperienceLevel = (level: string | undefined): string => {
+  if (!level) return 'Not specified';
+  
+  const levelMap: Record<string, string> = {
+    'NEW_TO_BIBLE': 'First Time',
+    'SOME_KNOWLEDGE': 'Some Knowledge',
+    'REGULAR_READER': 'Regular Reader',
+    'REGULAR': 'Regular Reader',
+    'OCCASIONAL': 'Occasionally',
+    'OCCASIONALLY': 'Occasionally',
+    'ADVANCED_STUDENT': 'Advanced Student',
+    'THEOLOGICAL': 'Theological',
+    'ADVANCED': 'Advanced Student',
+    'SCHOLAR': 'Scholar'
+  };
+  
+  return levelMap[level.toUpperCase()] || level;
+};
+
 const VerseDetailModal: React.FC<VerseDetailModalProps> = ({ isOpen, onClose, verse }) => {
   const [aiExplanationHistory, setAIExplanationHistory] = useState<VerseAIExplanationHistoryResponse['data'] | null>(null);
   const [loadingHistory, setLoadingHistory] = useState(false);
   const [historyError, setHistoryError] = useState<string | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pageSize] = useState(5); // Number of explanations per page
+  const [deletingId, setDeletingId] = useState<string | null>(null);
+  const [editingExplanation, setEditingExplanation] = useState<any | null>(null);
+  const [editFormData, setEditFormData] = useState<UpdateAIExplanationRequest | null>(null);
+  const [saving, setSaving] = useState(false);
 
-  useEffect(() => {
-    if (isOpen && verse?.verseId) {
-      loadAIExplanationHistory();
-    } else {
-      setAIExplanationHistory(null);
-      setHistoryError(null);
-    }
-  }, [isOpen, verse?.verseId]);
-
-  const loadAIExplanationHistory = async () => {
+  const loadAIExplanationHistory = useCallback(async () => {
     if (!verse?.verseId) return;
     
     try {
@@ -62,6 +103,102 @@ const VerseDetailModal: React.FC<VerseDetailModalProps> = ({ isOpen, onClose, ve
       setHistoryError(error?.response?.data?.message || error?.message || 'Failed to load AI explanation history');
     } finally {
       setLoadingHistory(false);
+    }
+  }, [verse?.verseId]);
+
+  useEffect(() => {
+    if (isOpen && verse?.verseId) {
+      loadAIExplanationHistory();
+      setCurrentPage(1); // Reset to first page when modal opens
+    } else {
+      setAIExplanationHistory(null);
+      setHistoryError(null);
+      setCurrentPage(1);
+    }
+  }, [isOpen, verse?.verseId, loadAIExplanationHistory]);
+
+  // Calculate pagination
+  const totalExplanations = aiExplanationHistory?.explanations?.length || 0;
+  const totalPages = Math.ceil(totalExplanations / pageSize);
+  const startIndex = (currentPage - 1) * pageSize;
+  const endIndex = startIndex + pageSize;
+  const paginatedExplanations = aiExplanationHistory?.explanations?.slice(startIndex, endIndex) || [];
+
+  const handleEditExplanation = (explanation: any) => {
+    // Get explanation_type (use explanation_type if available, otherwise use context_type or category)
+    const explanationType = explanation.explanation_type || explanation.context_type || explanation.category || 'general';
+    const experienceLevel = explanation.experience_level || 'NEW_TO_BIBLE';
+    
+    setEditingExplanation(explanation);
+    setEditFormData({
+      explanation_type: explanationType,
+      experience_level: experienceLevel,
+      content: explanation.content || '',
+      sources: explanation.sources || []
+    });
+  };
+
+  const handleSaveEdit = async () => {
+    if (!verse?.verseId || !editFormData) return;
+
+    try {
+      setSaving(true);
+      const response = await updateAIExplanation(verse.verseId, editFormData);
+      
+      if (response.status === 1) {
+        toast.success('Explanation updated successfully');
+        setEditingExplanation(null);
+        setEditFormData(null);
+        // Reload the explanation history
+        await loadAIExplanationHistory();
+      } else {
+        toast.error(response.message || 'Failed to update explanation');
+      }
+    } catch (error: any) {
+      console.error('Error updating explanation:', error);
+      toast.error(error?.response?.data?.message || error?.message || 'Failed to update explanation');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingExplanation(null);
+    setEditFormData(null);
+  };
+
+  const handleDeleteExplanation = async (explanation: any) => {
+    if (!verse?.verseId) return;
+    
+    // Confirm deletion
+    if (!window.confirm('Are you sure you want to delete this explanation? This action cannot be undone.')) {
+      return;
+    }
+
+    try {
+      // Get explanation_type and experience_level
+      const explanationType = explanation.explanation_type || explanation.context_type || explanation.category || 'general';
+      const experienceLevel = explanation.experience_level || 'NEW_TO_BIBLE';
+      
+      setDeletingId(explanation.explanation_id);
+      const response = await deleteAIExplanation(verse.verseId, explanationType, experienceLevel);
+      
+      if (response.status === 1) {
+        toast.success('Explanation deleted successfully');
+        // Reload the explanation history
+        await loadAIExplanationHistory();
+        // Adjust page if current page becomes empty
+        if (paginatedExplanations.length === 1 && currentPage > 1) {
+          setCurrentPage(prev => Math.max(1, prev - 1));
+        }
+      } else {
+        toast.error(response.message || 'Failed to delete explanation');
+      }
+    } catch (error: any) {
+      console.error('Error deleting explanation:', error);
+      toast.error(error?.response?.data?.message || error?.message || 'Failed to delete explanation');
+    } finally {
+      setDeletingId(null);
     }
   };
 
@@ -173,22 +310,38 @@ const VerseDetailModal: React.FC<VerseDetailModalProps> = ({ isOpen, onClose, ve
                       </div>
                     </div>
 
-                    {aiExplanationHistory.explanations && aiExplanationHistory.explanations.length > 0 ? (
+                    {totalExplanations > 0 ? (
                       <div className="space-y-3">
-                        <h4 className="font-medium text-gray-900 dark:text-white">Explanations</h4>
-                        {aiExplanationHistory.explanations.map((explanation, index) => (
+                        <div className="flex items-center justify-between">
+                          <h4 className="font-medium text-gray-900 dark:text-white">
+                            Explanations ({totalExplanations})
+                          </h4>
+                          {totalPages > 1 && (
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm text-gray-600 dark:text-gray-400">
+                                Page {currentPage} of {totalPages}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+                        {paginatedExplanations.map((explanation, index) => (
                           <div
                             key={explanation.explanation_id || index}
                             className="p-4 border rounded-lg border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50"
                           >
                             <div className="flex items-start justify-between mb-2">
-                              <div className="flex items-center gap-2">
+                              <div className="flex items-center gap-2 flex-wrap">
                                 <Badge variant="outline" className="text-xs">
                                   {explanation.category || explanation.label || 'General'}
                                 </Badge>
                                 {explanation.context_type && (
                                   <Badge variant="secondary" className="text-xs">
                                     {explanation.context_type}
+                                  </Badge>
+                                )}
+                                {explanation.experience_level && (
+                                  <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 text-xs">
+                                    {mapExperienceLevel(explanation.experience_level)}
                                   </Badge>
                                 )}
                                 {explanation.has_content ? (
@@ -200,6 +353,30 @@ const VerseDetailModal: React.FC<VerseDetailModalProps> = ({ isOpen, onClose, ve
                                     No Content
                                   </Badge>
                                 )}
+                              </div>
+                              <div className="flex items-center gap-2">
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleEditExplanation(explanation)}
+                                >
+                                  <Edit className="w-3 h-3 mr-1" />
+                                  Edit
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => handleDeleteExplanation(explanation)}
+                                  disabled={deletingId === explanation.explanation_id}
+                                  className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
+                                >
+                                  {deletingId === explanation.explanation_id ? (
+                                    <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                                  ) : (
+                                    <Trash2 className="w-3 h-3 mr-1" />
+                                  )}
+                                  Delete
+                                </Button>
                               </div>
                             </div>
                             {explanation.content && (
@@ -219,6 +396,33 @@ const VerseDetailModal: React.FC<VerseDetailModalProps> = ({ isOpen, onClose, ve
                             )}
                           </div>
                         ))}
+                        
+                        {/* Pagination Controls */}
+                        {totalPages > 1 && (
+                          <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                              disabled={currentPage === 1}
+                            >
+                              <ChevronLeft className="w-4 h-4 mr-1" />
+                              Previous
+                            </Button>
+                            <span className="text-sm text-gray-600 dark:text-gray-400">
+                              Showing {startIndex + 1}-{Math.min(endIndex, totalExplanations)} of {totalExplanations}
+                            </span>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                              disabled={currentPage === totalPages}
+                            >
+                              Next
+                              <ChevronRight className="w-4 h-4 ml-1" />
+                            </Button>
+                          </div>
+                        )}
                       </div>
                     ) : (
                       <div className="text-center py-8 text-gray-500 dark:text-gray-400">
@@ -252,6 +456,92 @@ const VerseDetailModal: React.FC<VerseDetailModalProps> = ({ isOpen, onClose, ve
           </div>
         </div>
       </DialogContent>
+
+      {/* Edit Explanation Dialog */}
+      <Dialog open={!!editingExplanation} onOpenChange={handleCancelEdit}>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Edit Explanation</DialogTitle>
+            <DialogDescription>
+              Update the explanation content, experience level, and other details.
+            </DialogDescription>
+          </DialogHeader>
+          
+          {editFormData && (
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="explanation_type">Explanation Type</Label>
+                <Input
+                  id="explanation_type"
+                  value={editFormData.explanation_type}
+                  onChange={(e) => setEditFormData({ ...editFormData, explanation_type: e.target.value })}
+                  placeholder="e.g., theological, historical, cultural"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="experience_level">Experience Level</Label>
+                <Select
+                  value={editFormData.experience_level}
+                  onValueChange={(value) => setEditFormData({ ...editFormData, experience_level: value })}
+                >
+                  <SelectTrigger id="experience_level">
+                    <SelectValue placeholder="Select experience level" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {VALID_EXPERIENCE_LEVELS.map((level) => (
+                      <SelectItem key={level} value={level}>
+                        {mapExperienceLevel(level)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="content">Content</Label>
+                <Textarea
+                  id="content"
+                  value={editFormData.content}
+                  onChange={(e) => setEditFormData({ ...editFormData, content: e.target.value })}
+                  placeholder="Enter explanation content..."
+                  rows={8}
+                  className="resize-none"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="sources">Sources (comma-separated)</Label>
+                <Input
+                  id="sources"
+                  value={editFormData.sources?.join(', ') || ''}
+                  onChange={(e) => {
+                    const sources = e.target.value.split(',').map(s => s.trim()).filter(Boolean);
+                    setEditFormData({ ...editFormData, sources });
+                  }}
+                  placeholder="Source 1, Source 2, Source 3"
+                />
+              </div>
+
+              <div className="flex justify-end gap-2 pt-4">
+                <Button variant="outline" onClick={handleCancelEdit} disabled={saving}>
+                  Cancel
+                </Button>
+                <Button onClick={handleSaveEdit} disabled={saving || !editFormData.content.trim()}>
+                  {saving ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    'Save Changes'
+                  )}
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
     </Dialog>
   );
 };

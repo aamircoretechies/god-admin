@@ -4,6 +4,7 @@ import { fetchChapterDetail, type ChapterDetailData } from '@/services/bibleBook
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { VerseDetailModal } from '@/components/verse-detail-modal/VerseDetailModal';
 import { 
   ArrowLeft, 
@@ -92,6 +93,7 @@ const ViewChapterContent: React.FC = () => {
   } | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [translationFilter, setTranslationFilter] = useState<string>('KJV');
 
   useEffect(() => {
     const loadChapter = async () => {
@@ -104,7 +106,7 @@ const ViewChapterContent: React.FC = () => {
       try {
         setLoading(true);
         setError(null);
-        const apiData = await fetchChapterDetail(bookId, chapterId);
+        const apiData = await fetchChapterDetail(bookId, chapterId, translationFilter);
         
         if (apiData) {
           const transformed = transformChapterData(apiData);
@@ -124,7 +126,7 @@ const ViewChapterContent: React.FC = () => {
     };
 
     loadChapter();
-  }, [bookId, chapterId]);
+  }, [bookId, chapterId, translationFilter]);
 
   const handleVerseClick = (verse: Verse) => {
     if (!book || !chapter) return;
@@ -215,6 +217,15 @@ const ViewChapterContent: React.FC = () => {
           </div>
         </div>
         <div className="flex items-center gap-2">
+          <Select value={translationFilter} onValueChange={setTranslationFilter}>
+            <SelectTrigger className="w-[120px]">
+              <SelectValue placeholder="Translation" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="KJV">KJV</SelectItem>
+              <SelectItem value="SV">SV</SelectItem>
+            </SelectContent>
+          </Select>
           <Button 
             variant="outline" 
             disabled={true}

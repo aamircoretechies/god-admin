@@ -56,6 +56,7 @@ const BibleBooksChaptersContent = () => {
   const [isCreatingChapter, setIsCreatingChapter] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [testamentFilter, setTestamentFilter] = useState<string>('all');
+  const [translationFilter, setTranslationFilter] = useState<string>('KJV');
   const [selectedVerse, setSelectedVerse] = useState<any>(null);
   const [isVerseModalOpen, setIsVerseModalOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState(1);
@@ -75,13 +76,24 @@ const BibleBooksChaptersContent = () => {
     status: 'draft'
   });
 
+  // Reset page and clear chapters when translation filter changes
+  useEffect(() => {
+    setCurrentPage(1);
+    setChapters({}); // Clear chapters cache when translation changes
+    setExpandedBooks([]); // Collapse all books when translation changes
+  }, [translationFilter]);
+
   // Load books on component mount
   useEffect(() => {
     const loadBooks = async () => {
       try {
         setLoadingBooks(true);
         setError(null);
-        const response = await fetchBibleBooks({ page: currentPage, limit: 20 });
+        const response = await fetchBibleBooks({ 
+          page: currentPage, 
+          limit: 20,
+          translation: translationFilter 
+        });
         if (response.status === 1) {
           const transformedBooks: BibleBook[] = response.data.map((book) => ({
             id: book.book_id,
@@ -106,18 +118,18 @@ const BibleBooksChaptersContent = () => {
     };
 
     loadBooks();
-  }, [currentPage]);
+  }, [currentPage, translationFilter]);
 
   // Load chapters when a book is expanded
   const loadChaptersForBook = async (bookId: string) => {
     if (chapters[bookId]) {
-      // Already loaded
+      // Already loaded (cache is cleared when translation changes)
       return;
     }
 
     try {
       setLoadingChapters(prev => ({ ...prev, [bookId]: true }));
-      const response = await fetchBibleBookDetail(bookId);
+      const response = await fetchBibleBookDetail(bookId, translationFilter);
       if (response.status === 1) {
         const transformedChapters: Chapter[] = response.data.chapters.map((chapter) => ({
           id: chapter.chapter_id,
@@ -400,7 +412,7 @@ const BibleBooksChaptersContent = () => {
       {/* Filters */}
       <Card>
         <CardContent className="p-4">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
             <div className="relative">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
               <Input
@@ -409,6 +421,17 @@ const BibleBooksChaptersContent = () => {
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10"
               />
+            </div>
+            <div>
+              <Select value={translationFilter} onValueChange={setTranslationFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select translation" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="KJV">KJV</SelectItem>
+                  <SelectItem value="SV">SV</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div>
               <Select value={testamentFilter} onValueChange={setTestamentFilter}>
