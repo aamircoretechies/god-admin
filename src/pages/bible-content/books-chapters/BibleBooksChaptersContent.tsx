@@ -432,7 +432,7 @@ const BibleBooksChaptersContent = () => {
                 className="pl-10 w-full"
               />
             </div>
-            <div>
+            {/* <div>
               <Select value={translationFilter} onValueChange={setTranslationFilter}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select translation" />
@@ -442,7 +442,7 @@ const BibleBooksChaptersContent = () => {
                   <SelectItem value="SV">SV</SelectItem>
                 </SelectContent>
               </Select>
-            </div>
+            </div> */}
             <div>
               <Select value={testamentFilter} onValueChange={setTestamentFilter}>
                 <SelectTrigger className="w-full">

@@ -150,9 +150,9 @@ const ActivityAnalytics = () => {
                 Export PDF
               </a>
               */}
-              <a href="#" className="btn btn-sm btn-primary">
+              {/* <a href="#" className="btn btn-sm btn-primary">
                 Generate Insights
-              </a>
+              </a> */}
             </ToolbarActions>
           </Toolbar>
         </Container>

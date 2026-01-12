@@ -87,29 +87,29 @@ const transformTranslation = (apiTranslation: TranslationResponse): Translation 
 // Language mapping: code -> display name
 const languageMap: Record<string, string> = {
   en: 'English',
-  es: 'Spanish',
-  fr: 'French',
-  de: 'German',
-  pt: 'Portuguese',
-  it: 'Italian',
   nl: 'Dutch',
-  ru: 'Russian',
-  zh: 'Chinese',
-  ja: 'Japanese',
-  ko: 'Korean',
-  ar: 'Arabic',
-  he: 'Hebrew',
-  el: 'Greek',
-  la: 'Latin',
-  sv: 'Swedish',
-  no: 'Norwegian',
-  da: 'Danish',
-  fi: 'Finnish',
-  pl: 'Polish',
-  cs: 'Czech',
-  hu: 'Hungarian',
-  ro: 'Romanian',
-  bg: 'Bulgarian'
+  // es: 'Spanish',
+  // fr: 'French',
+  // de: 'German',
+  // pt: 'Portuguese',
+  // it: 'Italian',
+  // ru: 'Russian',
+  // zh: 'Chinese',
+  // ja: 'Japanese',
+  // ko: 'Korean',
+  // ar: 'Arabic',
+  // he: 'Hebrew',
+  // el: 'Greek',
+  // la: 'Latin',
+  // sv: 'Swedish',
+  // no: 'Norwegian',
+  // da: 'Danish',
+  // fi: 'Finnish',
+  // pl: 'Polish',
+  // cs: 'Czech',
+  // hu: 'Hungarian',
+  // ro: 'Romanian',
+  // bg: 'Bulgarian'
 };
 
 // Get display name for language code
@@ -219,12 +219,16 @@ const BibleTranslationsContent = () => {
   }, [currentPage, searchTerm, languageFilter, statusFilter]);
 
   // Get unique languages from fetched translations
-  const availableLanguages = useMemo(() => {
-    const languagesSet = new Set<string>();
-    translations.forEach((t) => {
-      if (t.language) languagesSet.add(t.language);
-    });
-    return Array.from(languagesSet).sort();
+  const [allAvailableLanguages, setAllAvailableLanguages] = useState<string[]>(Object.keys(languageMap));
+
+  useEffect(() => {
+    if (translations.length > 0) {
+      const currentLanguages = translations.map((t) => t.language).filter(Boolean);
+      setAllAvailableLanguages((prev) => {
+        const combined = new Set([...prev, ...currentLanguages]);
+        return Array.from(combined).sort();
+      });
+    }
   }, [translations]);
 
   const filteredTranslations = translations;
@@ -411,7 +415,7 @@ const BibleTranslationsContent = () => {
 
         const uploadRes = await uploadTranslation(payload);
 
-        toast.success(uploadRes.message || 'File uploaded successfully ✅');
+        toast.success(uploadRes.message || 'File uploaded successfully ');
       }
 
       //  CASE 2: Edit without File
@@ -426,7 +430,7 @@ const BibleTranslationsContent = () => {
 
         const res = await updateTranslation(editingTranslation.id, updateData);
 
-        toast.success(res.message || 'Translation updated successfully ✅');
+        toast.success(res.message || 'Translation updated successfully ');
       }
 
       //  CASE 3: Create New Translation
@@ -446,7 +450,7 @@ const BibleTranslationsContent = () => {
 
         const uploadRes = await uploadTranslation(payload);
 
-        toast.success(uploadRes.message || 'Translation created successfully ✅');
+        toast.success(uploadRes.message || 'Translation created successfully ');
       }
 
       //  Refresh list
@@ -471,7 +475,7 @@ const BibleTranslationsContent = () => {
         isPublic: true
       });
     } catch (err: any) {
-      toast.error(err?.response?.data?.message || 'Something went wrong ❌');
+      toast.error(err?.response?.data?.message || 'Something went wrong ');
     } finally {
       setSaving(false);
     }
@@ -603,7 +607,7 @@ const BibleTranslationsContent = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-900 mb-2">
                     Translation Name
                   </label>
                   <Input
@@ -615,7 +619,7 @@ const BibleTranslationsContent = () => {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-900 mb-2">
                       Version Code
                     </label>
                     <Input
@@ -625,7 +629,7 @@ const BibleTranslationsContent = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-900 mb-2">
                       Language
                     </label>
                     <Select
@@ -648,7 +652,7 @@ const BibleTranslationsContent = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-900 mb-2">
                     Description
                   </label>
                   <Textarea
@@ -661,7 +665,7 @@ const BibleTranslationsContent = () => {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-900 mb-2">
                       Publisher
                     </label>
                     <Input
@@ -671,7 +675,7 @@ const BibleTranslationsContent = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                    <label className="block text-sm font-medium text-gray-700 dark:text-gray-900 mb-2">
                       Year
                     </label>
                     <Input
@@ -685,7 +689,7 @@ const BibleTranslationsContent = () => {
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-900 mb-2">
                     Status
                   </label>
                   <Select
@@ -706,7 +710,7 @@ const BibleTranslationsContent = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-900 mb-2">
                     License
                   </label>
                   <Input
@@ -809,17 +813,11 @@ const BibleTranslationsContent = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Languages</SelectItem>
-                  {availableLanguages.length > 0
-                    ? availableLanguages.map((language) => (
-                        <SelectItem key={language} value={language}>
-                          {language}
-                        </SelectItem>
-                      ))
-                    : languages.map((language) => (
-                        <SelectItem key={language} value={language}>
-                          {language}
-                        </SelectItem>
-                      ))}
+                  {allAvailableLanguages.map((language) => (
+                    <SelectItem key={language} value={language}>
+                      {getLanguageName(language)}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>

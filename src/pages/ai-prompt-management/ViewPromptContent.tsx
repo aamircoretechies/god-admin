@@ -374,8 +374,8 @@ const ViewPromptContent: React.FC = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="bg-gray-50 p-6 rounded-lg border border-gray-200">
-                <div className="prose prose-sm max-w-none">{formatContent(promptData.content)}</div>
+              <div className="bg-gray-50 p-6 rounded-lg border border-gray-200  dark:bg-black">
+                <div className="prose prose-sm max-w-none dark:bg-black">{formatContent(promptData.content)}</div>
               </div>
             </CardContent>
           </Card>

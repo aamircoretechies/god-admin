@@ -20,18 +20,20 @@ import { fetchActivityAnalytics, type ActivityAnalyticsResponse } from '@/servic
 // Simple chart components (placeholder for actual chart library)
 const SimpleBarChart = ({ data, title }: { data: any[]; title: string }) => (
   <div className="space-y-2">
-    <h4 className="text-sm font-medium text-gray-700">{title}</h4>
+    <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">{title}</h4>
     <div className="space-y-1">
       {data.map((item, index) => (
         <div key={index} className="flex items-center gap-2">
-          <div className="w-20 text-xs text-gray-600">{item.label}</div>
-          <div className="flex-1 bg-gray-200 rounded-full h-2">
+          <div className="w-20 text-xs text-gray-500 dark:text-gray-400">{item.label}</div>
+          <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
             <div
               className="bg-amber-500 h-2 rounded-full"
               style={{ width: `${item.percentage}%` }}
             ></div>
           </div>
-          <div className="w-12 text-xs text-gray-600">{item.value}</div>
+          <div className="w-12 text-xs font-medium text-gray-900 dark:text-gray-100 text-right">
+            {item.value}
+          </div>
         </div>
       ))}
     </div>
@@ -44,19 +46,21 @@ const SimpleLineChart = ({ data, title }: { data: any[]; title: string }) => {
 
   return (
     <div className="space-y-2">
-      <h4 className="text-sm font-medium text-gray-700">{title}</h4>
-      <div className="h-32 flex items-end gap-1">
+      <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">{title}</h4>
+      <div className="h-32 flex items-end gap-1 pt-6">
         {data.map((item, index) => (
           <div
             key={index}
-            className="flex-1 bg-amber-500 rounded-t"
+            className="flex-1 bg-amber-500 rounded-t relative group"
             style={{ height: `${(item.value / maxValue) * 100}%` }}
           >
-            <div className="text-xs text-white text-center mt-1">{item.value}</div>
+            <div className="absolute bottom-full left-0 right-0 text-[10px] font-medium text-gray-900 dark:text-white text-center mb-1">
+              {item.value}
+            </div>
           </div>
         ))}
       </div>
-      <div className="flex justify-between text-xs text-gray-500">
+      <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400">
         {data.map((item, index) => (
           <span key={index}>{item.label}</span>
         ))}

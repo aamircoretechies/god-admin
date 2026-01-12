@@ -23,7 +23,7 @@ const FeedbackInboxPage = () => {
               <ToolbarDescription>Manage user feedback and AI response flags.</ToolbarDescription>
             </ToolbarHeading>
             {/* <ToolbarActions> */}
-            <ToolbarActions>
+            {/* <ToolbarActions>
               <div className="flex flex-wrap justify-center sm:justify-end gap-2">
                 <a href="#" className="btn btn-sm btn-light">
                   Export Feedback
@@ -32,7 +32,7 @@ const FeedbackInboxPage = () => {
                   Mark All Read
                 </a>
               </div>
-            </ToolbarActions>
+            </ToolbarActions> */}
           </Toolbar>
         </Container>
       )}
