@@ -1,18 +1,18 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
 } from '@/components/ui/select';
-import { 
-  BarChart3, 
-  TrendingUp, 
-  Users, 
-  Crown, 
+import {
+  BarChart3,
+  TrendingUp,
+  Users,
+  Crown,
   DollarSign,
   Calendar,
   Activity,
@@ -45,15 +45,20 @@ const mockChartData = {
 };
 
 // Simple chart components
-const SimpleBarChart: React.FC<{ data: number[], labels: string[], title: string, color: string }> = ({ data, labels, title, color }) => (
+const SimpleBarChart: React.FC<{
+  data: number[];
+  labels: string[];
+  title: string;
+  color: string;
+}> = ({ data, labels, title, color }) => (
   <div className="space-y-2">
     <h4 className="text-sm font-medium text-gray-700">{title}</h4>
     <div className="flex items-end gap-1 h-32">
       {data.map((value, index) => (
         <div key={index} className="flex-1 flex flex-col items-center">
-          <div 
+          <div
             className="rounded-t w-full"
-            style={{ 
+            style={{
               height: `${(value / Math.max(...data)) * 100}%`,
               backgroundColor: color
             }}
@@ -65,15 +70,20 @@ const SimpleBarChart: React.FC<{ data: number[], labels: string[], title: string
   </div>
 );
 
-const SimpleLineChart: React.FC<{ data: number[], labels: string[], title: string, color: string }> = ({ data, labels, title, color }) => (
+const SimpleLineChart: React.FC<{
+  data: number[];
+  labels: string[];
+  title: string;
+  color: string;
+}> = ({ data, labels, title, color }) => (
   <div className="space-y-2">
     <h4 className="text-sm font-medium text-gray-700">{title}</h4>
     <div className="flex items-end gap-1 h-32">
       {data.map((value, index) => (
         <div key={index} className="flex-1 flex flex-col items-center">
-          <div 
+          <div
             className="rounded-t w-full"
-            style={{ 
+            style={{
               height: `${(value / Math.max(...data)) * 100}%`,
               backgroundColor: color
             }}
@@ -94,7 +104,7 @@ const SubscriptionAnalyticsContent: React.FC = () => {
     monthlyGrowth: 15.2,
     conversionRate: 21.1,
     churnRate: 1.7,
-    avgRevenuePerUser: 25.00,
+    avgRevenuePerUser: 25.0,
     totalSubscribers: 382,
     freeUsers: 1847,
     premiumUsers: 382
@@ -111,10 +121,11 @@ const SubscriptionAnalyticsContent: React.FC = () => {
             </div>
             <div className="flex-1">
               <p className="text-sm text-gray-600">Total Revenue</p>
-              <p className="text-2xl font-bold text-gray-900">${analyticsData.totalRevenue.toLocaleString()}</p>
+              <p className="text-2xl font-bold text-gray-900">
+                ${analyticsData.totalRevenue.toLocaleString()}
+              </p>
               <div className="flex items-center gap-1 text-xs text-green-600">
-                <ArrowUpRight className="w-3 h-3" />
-                +{analyticsData.monthlyGrowth}% from last month
+                <ArrowUpRight className="w-3 h-3" />+{analyticsData.monthlyGrowth}% from last month
               </div>
             </div>
           </CardContent>
@@ -127,7 +138,9 @@ const SubscriptionAnalyticsContent: React.FC = () => {
             </div>
             <div className="flex-1">
               <p className="text-sm text-gray-600">Premium Users</p>
-              <p className="text-2xl font-bold text-gray-900">{analyticsData.premiumUsers.toLocaleString()}</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {analyticsData.premiumUsers.toLocaleString()}
+              </p>
               <div className="flex items-center gap-1 text-xs text-green-600">
                 <ArrowUpRight className="w-3 h-3" />
                 +8.5% from last month
@@ -139,7 +152,7 @@ const SubscriptionAnalyticsContent: React.FC = () => {
         <Card>
           <CardContent className="flex items-center gap-4 p-6">
             <div className="p-3 bg-amber-100 rounded-lg flex-shrink-0">
-            <Target className="w-6 h-6 text-amber-600" />
+              <Target className="w-6 h-6 text-amber-600" />
             </div>
             <div className="flex-1">
               <p className="text-sm text-gray-600">Conversion Rate</p>
@@ -193,7 +206,7 @@ const SubscriptionAnalyticsContent: React.FC = () => {
                 color="#8B5CF6"
               />
             </div>
-            
+
             {/* Growth Comparison */}
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4 pt-4 border-t">
               <div className="text-center">
@@ -288,7 +301,9 @@ const SubscriptionAnalyticsContent: React.FC = () => {
                   <span className="text-sm">Free Users</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium">{analyticsData.freeUsers.toLocaleString()}</span>
+                  <span className="text-sm font-medium">
+                    {analyticsData.freeUsers.toLocaleString()}
+                  </span>
                   <Badge variant="secondary">82.9%</Badge>
                 </div>
               </div>
@@ -298,16 +313,22 @@ const SubscriptionAnalyticsContent: React.FC = () => {
                   <span className="text-sm">Premium Users</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="text-sm font-medium">{analyticsData.premiumUsers.toLocaleString()}</span>
-                  <Badge variant="default" className="bg-purple-100 text-purple-800">17.1%</Badge>
+                  <span className="text-sm font-medium">
+                    {analyticsData.premiumUsers.toLocaleString()}
+                  </span>
+                  <Badge variant="default" className="bg-purple-100 text-purple-800">
+                    17.1%
+                  </Badge>
                 </div>
               </div>
             </div>
-            
+
             <div className="mt-6 pt-4 border-t">
               <div className="flex items-center justify-between">
                 <span className="text-sm text-gray-600">Total Users</span>
-                <span className="text-sm font-medium">{(analyticsData.freeUsers + analyticsData.premiumUsers).toLocaleString()}</span>
+                <span className="text-sm font-medium">
+                  {(analyticsData.freeUsers + analyticsData.premiumUsers).toLocaleString()}
+                </span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm text-gray-600">Avg. Revenue per User</span>
@@ -330,21 +351,27 @@ const SubscriptionAnalyticsContent: React.FC = () => {
               <div className="w-2 h-2 bg-green-500 rounded-full"></div>
               <div>
                 <p className="font-medium text-green-900">Strong Premium Growth</p>
-                <p className="text-sm text-green-700">Premium users increased by 153% in 6 months</p>
+                <p className="text-sm text-green-700">
+                  Premium users increased by 153% in 6 months
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-3 p-3 bg-amber-50 rounded-lg">
               <div className="w-2 h-2 bg-amber-500 rounded-full"></div>
               <div>
                 <p className="font-medium text-amber-900">High Conversion Rate</p>
-                <p className="text-sm text-amber-700">21.1% conversion rate, above industry average</p>
+                <p className="text-sm text-amber-700">
+                  21.1% conversion rate, above industry average
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-3 p-3 bg-yellow-50 rounded-lg">
               <div className="w-2 h-2 bg-yellow-500 rounded-full"></div>
               <div>
                 <p className="font-medium text-yellow-900">Low Churn Rate</p>
-                <p className="text-sm text-yellow-700">1.7% churn rate indicates strong retention</p>
+                <p className="text-sm text-yellow-700">
+                  1.7% churn rate indicates strong retention
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-3 p-3 bg-purple-50 rounded-lg">

@@ -138,30 +138,27 @@ export const fetchChapterDetail = async (
       ? `${API_URL}/admin/bible/books/${bookId}/chapters/${chapterId}?${queryParams.toString()}`
       : `${API_URL}/admin/bible/books/${bookId}/chapters/${chapterId}`;
 
-    const response = await axios.get<ChapterDetailResponse>(
-      url,
-      {
-        headers: {
-          'Cache-Control': 'no-cache'
-        }
+    const response = await axios.get<ChapterDetailResponse>(url, {
+      headers: {
+        'Cache-Control': 'no-cache'
       }
-    );
-    
+    });
+
     console.log('Chapter detail response:', response);
-    
+
     if (!response.data) {
       console.error('No response data received');
       throw new Error('No data received from server');
     }
-    
+
     const responseData = response.data;
-    
+
     // Check if status is 1 (success) and data exists
     if (responseData.status === 1 && responseData.data) {
       console.log('Found chapter detail:', responseData.data);
       return responseData.data;
     }
-    
+
     console.error('Unexpected response structure:', JSON.stringify(responseData, null, 2));
     throw new Error('Unexpected response structure from API');
   } catch (error: any) {
@@ -177,4 +174,3 @@ export const fetchChapterDetail = async (
     throw error;
   }
 };
-

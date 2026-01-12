@@ -20,7 +20,9 @@ const BibleAnalyticsPage = () => {
           <Toolbar>
             <ToolbarHeading>
               <ToolbarPageTitle />
-              <ToolbarDescription>Bible-specific analytics and insights for content performance.</ToolbarDescription>
+              <ToolbarDescription>
+                Bible-specific analytics and insights for content performance.
+              </ToolbarDescription>
             </ToolbarHeading>
             <ToolbarActions>
               <a href="#" className="btn btn-sm btn-light">
@@ -42,5 +44,3 @@ const BibleAnalyticsPage = () => {
 };
 
 export { BibleAnalyticsPage };
-
-

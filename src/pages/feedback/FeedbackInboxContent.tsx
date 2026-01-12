@@ -102,7 +102,12 @@ const FeedbackInboxContent = () => {
           page: currentPage,
           limit: pageSize,
           // status: filter !== 'all' ? filter.toUpperCase() : undefined,
-          status: filter === "unresolved" ? "REJECTED" : filter !== "all" ? filter.toUpperCase() : undefined,
+          status:
+            filter === 'unresolved'
+              ? 'REJECTED'
+              : filter !== 'all'
+                ? filter.toUpperCase()
+                : undefined,
 
           search: searchTerm || undefined
         });
@@ -123,9 +128,12 @@ const FeedbackInboxContent = () => {
       }
     };
 
-    const debounceTimer = setTimeout(() => {
-      loadFlaggedContent();
-    }, searchTerm ? 500 : 0);
+    const debounceTimer = setTimeout(
+      () => {
+        loadFlaggedContent();
+      },
+      searchTerm ? 500 : 0
+    );
 
     return () => clearTimeout(debounceTimer);
   }, [currentPage, filter, searchTerm]);
@@ -146,7 +154,12 @@ const FeedbackInboxContent = () => {
           page: currentPage,
           limit: pageSize,
           // status: filter !== 'all' ? filter.toUpperCase() : undefined,
-          status: filter === "unresolved" ? "REJECTED" : filter !== "all" ? filter.toUpperCase() : undefined,
+          status:
+            filter === 'unresolved'
+              ? 'REJECTED'
+              : filter !== 'all'
+                ? filter.toUpperCase()
+                : undefined,
 
           search: searchTerm || undefined
         });
@@ -160,7 +173,8 @@ const FeedbackInboxContent = () => {
         throw new Error(response.message || 'Failed to approve feedback');
       }
     } catch (err: any) {
-      const errorMessage = err?.response?.data?.message || err?.message || 'Failed to approve feedback';
+      const errorMessage =
+        err?.response?.data?.message || err?.message || 'Failed to approve feedback';
       toast.error(errorMessage);
     }
   };
@@ -178,7 +192,12 @@ const FeedbackInboxContent = () => {
           page: currentPage,
           limit: pageSize,
           // status: filter !== 'all' ? filter.toUpperCase() : undefined,
-          status: filter === "unresolved" ? "REJECTED" : filter !== "all" ? filter.toUpperCase() : undefined,
+          status:
+            filter === 'unresolved'
+              ? 'REJECTED'
+              : filter !== 'all'
+                ? filter.toUpperCase()
+                : undefined,
 
           search: searchTerm || undefined
         });
@@ -192,7 +211,8 @@ const FeedbackInboxContent = () => {
         throw new Error(response.message || 'Failed to reject feedback');
       }
     } catch (err: any) {
-      const errorMessage = err?.response?.data?.message || err?.message || 'Failed to reject feedback';
+      const errorMessage =
+        err?.response?.data?.message || err?.message || 'Failed to reject feedback';
       toast.error(errorMessage);
     }
   };
@@ -213,11 +233,23 @@ const FeedbackInboxContent = () => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'pending':
-        return <Badge variant="default" className="bg-yellow-100 text-yellow-800">Pending</Badge>;
+        return (
+          <Badge variant="default" className="bg-yellow-100 text-yellow-800">
+            Pending
+          </Badge>
+        );
       case 'unresolved':
-        return <Badge variant="default" className="bg-red-100 text-red-800">Unresolved</Badge>;
+        return (
+          <Badge variant="default" className="bg-red-100 text-red-800">
+            Unresolved
+          </Badge>
+        );
       case 'resolved':
-        return <Badge variant="secondary" className="bg-green-100 text-green-800">Resolved</Badge>;
+        return (
+          <Badge variant="secondary" className="bg-green-100 text-green-800">
+            Resolved
+          </Badge>
+        );
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
@@ -226,11 +258,23 @@ const FeedbackInboxContent = () => {
   const getTypeBadge = (type: string) => {
     switch (type) {
       case 'Content':
-        return <Badge variant="secondary" className="bg-blue-100 text-blue-800">Content</Badge>;
+        return (
+          <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+            Content
+          </Badge>
+        );
       case 'Audio':
-        return <Badge variant="secondary" className="bg-green-100 text-green-800">Audio</Badge>;
+        return (
+          <Badge variant="secondary" className="bg-green-100 text-green-800">
+            Audio
+          </Badge>
+        );
       case 'Other':
-        return <Badge variant="secondary" className="bg-gray-100 text-gray-800">Other</Badge>;
+        return (
+          <Badge variant="secondary" className="bg-gray-100 text-gray-800">
+            Other
+          </Badge>
+        );
       default:
         return <Badge variant="outline">{type}</Badge>;
     }
@@ -248,9 +292,10 @@ const FeedbackInboxContent = () => {
 
   // Client-side filtering as fallback (API should handle it)
   const filteredData = useMemo(() => {
-    return feedbackData.filter(item => {
+    return feedbackData.filter((item) => {
       const matchesFilter = filter === 'all' || item.status === filter;
-      const matchesSearch = searchTerm === '' ||
+      const matchesSearch =
+        searchTerm === '' ||
         item.user.toLowerCase().includes(searchTerm.toLowerCase()) ||
         item.verse.toLowerCase().includes(searchTerm.toLowerCase()) ||
         item.comment.toLowerCase().includes(searchTerm.toLowerCase());
@@ -333,9 +378,7 @@ const FeedbackInboxContent = () => {
                   {getTypeIcon(item.type)}
                   <div>
                     <div className="font-medium">{item.user}</div>
-                    <div className="text-sm text-gray-500">
-                      {formatDate(item.timestamp)}
-                    </div>
+                    <div className="text-sm text-gray-500">{formatDate(item.timestamp)}</div>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -391,7 +434,12 @@ const FeedbackInboxContent = () => {
                     <XCircle className="w-4 h-4 mr-1" />
                     Reject
                   </Button>
-                  <Button variant="outline" size="sm" disabled title="Editing not available in Phase 1">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    disabled
+                    title="Editing not available in Phase 1"
+                  >
                     <AlertTriangle className="w-4 h-4 mr-1" />
                     Edit (Phase 2)
                   </Button>
@@ -434,7 +482,7 @@ const FeedbackInboxContent = () => {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                  onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
                   disabled={currentPage === 1}
                 >
                   <ChevronLeft className="w-4 h-4" />
@@ -443,7 +491,7 @@ const FeedbackInboxContent = () => {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                  onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
                   disabled={currentPage === totalPages}
                 >
                   Next

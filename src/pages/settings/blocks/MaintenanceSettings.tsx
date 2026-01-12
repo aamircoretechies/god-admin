@@ -3,14 +3,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
-import { 
-  Wrench, 
-  Clock, 
-  Settings,
-  Save,
-  Play,
-  AlertTriangle
-} from 'lucide-react';
+import { Wrench, Clock, Settings, Save, Play, AlertTriangle } from 'lucide-react';
 
 const MaintenanceSettings = () => {
   return (
@@ -25,43 +18,29 @@ const MaintenanceSettings = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
             <Label htmlFor="maintenance_window">Maintenance Window</Label>
-            <Input 
-              id="maintenance_window" 
+            <Input
+              id="maintenance_window"
               placeholder="Sunday 2:00 AM - 4:00 AM"
               defaultValue="Sunday 2:00 AM - 4:00 AM"
             />
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="maintenance_duration">Duration (hours)</Label>
-            <Input 
-              id="maintenance_duration" 
-              type="number"
-              placeholder="2"
-              defaultValue="2"
-            />
+            <Input id="maintenance_duration" type="number" placeholder="2" defaultValue="2" />
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="maintenance_frequency">Frequency</Label>
-            <Input 
-              id="maintenance_frequency" 
-              placeholder="Weekly"
-              defaultValue="Weekly"
-            />
+            <Input id="maintenance_frequency" placeholder="Weekly" defaultValue="Weekly" />
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="maintenance_notice">Notice Period (hours)</Label>
-            <Input 
-              id="maintenance_notice" 
-              type="number"
-              placeholder="24"
-              defaultValue="24"
-            />
+            <Input id="maintenance_notice" type="number" placeholder="24" defaultValue="24" />
           </div>
         </div>
-        
+
         <div className="space-y-4">
           <h4 className="font-medium text-gray-900">Maintenance Tasks</h4>
           <div className="space-y-3">
@@ -72,7 +51,7 @@ const MaintenanceSettings = () => {
               </div>
               <Switch id="database_optimization" defaultChecked />
             </div>
-            
+
             <div className="flex items-center justify-between">
               <div>
                 <Label htmlFor="cache_cleanup">Cache Cleanup</Label>
@@ -80,7 +59,7 @@ const MaintenanceSettings = () => {
               </div>
               <Switch id="cache_cleanup" defaultChecked />
             </div>
-            
+
             <div className="flex items-center justify-between">
               <div>
                 <Label htmlFor="log_rotation">Log Rotation</Label>
@@ -88,7 +67,7 @@ const MaintenanceSettings = () => {
               </div>
               <Switch id="log_rotation" defaultChecked />
             </div>
-            
+
             <div className="flex items-center justify-between">
               <div>
                 <Label htmlFor="temp_cleanup">Temp File Cleanup</Label>
@@ -98,7 +77,7 @@ const MaintenanceSettings = () => {
             </div>
           </div>
         </div>
-        
+
         <div className="space-y-4">
           <h4 className="font-medium text-gray-900">Maintenance Options</h4>
           <div className="space-y-3">
@@ -109,7 +88,7 @@ const MaintenanceSettings = () => {
               </div>
               <Switch id="auto_maintenance" defaultChecked />
             </div>
-            
+
             <div className="flex items-center justify-between">
               <div>
                 <Label htmlFor="maintenance_mode">Maintenance Mode</Label>
@@ -117,7 +96,7 @@ const MaintenanceSettings = () => {
               </div>
               <Switch id="maintenance_mode" defaultChecked />
             </div>
-            
+
             <div className="flex items-center justify-between">
               <div>
                 <Label htmlFor="user_notifications">User Notifications</Label>
@@ -127,7 +106,7 @@ const MaintenanceSettings = () => {
             </div>
           </div>
         </div>
-        
+
         <div className="flex items-center gap-3 pt-4">
           <Button className="flex items-center gap-2">
             <Save className="w-4 h-4" />

@@ -18,7 +18,6 @@ import {
 } from '@/components/menu';
 import { useEffect } from 'react';
 
-
 interface IDropdownUserProps {
   menuItemRef: any;
 }
@@ -36,7 +35,6 @@ const DropdownUser = ({ menuItemRef }: IDropdownUserProps) => {
     });
   };
 
-
   useEffect(() => {
     const handleScroll = () => {
       if (menuItemRef.current && menuItemRef.current.isOpen()) {
@@ -51,16 +49,16 @@ const DropdownUser = ({ menuItemRef }: IDropdownUserProps) => {
     };
   }, [menuItemRef]);
 
-
-
   const buildHeader = () => {
-    const userName = currentUser?.fullname ||
+    const userName =
+      currentUser?.fullname ||
       (currentUser?.first_name && currentUser?.last_name
         ? `${currentUser.first_name} ${currentUser.last_name}`
         : currentUser?.first_name || 'User');
     const userEmail = currentUser?.email || '';
     const userRole = currentUser?.role || 'USER';
-    const userAvatar = currentUser?.profile_picture || currentUser?.pic || '/media/avatars/300-2.png';
+    const userAvatar =
+      currentUser?.profile_picture || currentUser?.pic || '/media/avatars/300-2.png';
 
     return (
       <div className="flex items-center justify-between px-5 py-1.5 gap-1.5">
@@ -100,7 +98,6 @@ const DropdownUser = ({ menuItemRef }: IDropdownUserProps) => {
       <Fragment>
         <MenuSeparator />
         <div className="flex flex-col">
-
           <MenuItem
             toggle="dropdown"
             trigger="hover"

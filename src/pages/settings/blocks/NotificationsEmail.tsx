@@ -4,11 +4,7 @@ import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 // Email notifications are disabled - API calls removed
-import { 
-  Mail, 
-  Settings,
-  Save
-} from 'lucide-react';
+import { Mail, Settings, Save } from 'lucide-react';
 
 const NotificationsEmail = () => {
   const [loading, setLoading] = useState(true);
@@ -50,7 +46,6 @@ const NotificationsEmail = () => {
     );
   }
 
-
   return (
     <Card id="notifications_email">
       <CardHeader>
@@ -71,7 +66,7 @@ const NotificationsEmail = () => {
               Email notifications are optional for Phase 1. Configure if needed.
             </p>
           </div>
-          
+
           <div className="space-y-4">
             <h4 className="font-medium text-gray-900">Notification Preferences</h4>
             <div className="space-y-3">
@@ -80,33 +75,33 @@ const NotificationsEmail = () => {
                   <Label htmlFor="system_emails">System Emails</Label>
                   <p className="text-sm text-gray-500">Receive system-generated emails</p>
                 </div>
-                <Switch 
+                <Switch
                   id="system_emails"
                   checked={getSettingValue('system_emails') === 'true'}
                   onCheckedChange={() => {}} // Disabled - no action
                   disabled={true}
                 />
               </div>
-              
+
               <div className="flex items-center justify-between">
                 <div>
                   <Label htmlFor="alerts">Alerts</Label>
                   <p className="text-sm text-gray-500">Receive alert notifications</p>
                 </div>
-                <Switch 
+                <Switch
                   id="alerts"
                   checked={getSettingValue('alerts') === 'true'}
                   onCheckedChange={() => {}} // Disabled - no action
                   disabled={true}
                 />
               </div>
-              
+
               <div className="flex items-center justify-between">
                 <div>
                   <Label htmlFor="maintenance_notices">Maintenance Notices</Label>
                   <p className="text-sm text-gray-500">Receive maintenance notifications</p>
                 </div>
-                <Switch 
+                <Switch
                   id="maintenance_notices"
                   checked={getSettingValue('maintenance_notices') === 'true'}
                   onCheckedChange={() => {}} // Disabled - no action
@@ -116,13 +111,9 @@ const NotificationsEmail = () => {
             </div>
           </div>
         </div>
-        
+
         <div className="flex items-center gap-3 pt-4">
-          <Button 
-            className="flex items-center gap-2"
-            onClick={handleSave}
-            disabled={true}
-          >
+          <Button className="flex items-center gap-2" onClick={handleSave} disabled={true}>
             <Save className="w-4 h-4" />
             Save Settings
           </Button>

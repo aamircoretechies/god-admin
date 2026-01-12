@@ -2,17 +2,15 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Search, 
-  TrendingUp, 
-  Eye, 
-  MessageSquare,
-  FileText,
-  BookOpen,
-  Calendar
-} from 'lucide-react';
+import { Search, TrendingUp, Eye, MessageSquare, FileText, BookOpen, Calendar } from 'lucide-react';
 
 interface SearchResult {
   id: string;
@@ -57,7 +55,8 @@ const mockSearchResults: SearchResult[] = [
     id: '1',
     type: 'verse',
     title: 'John 3:16',
-    content: 'For God so loved the world, that he gave his only begotten Son, that whosoever believeth in him should not perish, but have everlasting life.',
+    content:
+      'For God so loved the world, that he gave his only begotten Son, that whosoever believeth in him should not perish, but have everlasting life.',
     book: 'John',
     chapter: 3,
     verse: 16,
@@ -70,7 +69,8 @@ const mockSearchResults: SearchResult[] = [
     id: '2',
     type: 'explanation',
     title: 'John 3:16 - AI Explanation',
-    content: 'This verse encapsulates the gospel message: God\'s love motivated the gift of His Son for the salvation of humanity. The term "only begotten" emphasizes Christ\'s unique relationship with the Father.',
+    content:
+      'This verse encapsulates the gospel message: God\'s love motivated the gift of His Son for the salvation of humanity. The term "only begotten" emphasizes Christ\'s unique relationship with the Father.',
     book: 'John',
     chapter: 3,
     verse: 16,
@@ -109,7 +109,7 @@ const mockAnalyticsData: AnalyticsData = {
     { id: '2', title: 'Psalm 23', type: 'verse', views: 980 },
     { id: '3', title: 'Romans 8:28', type: 'verse', views: 890 },
     { id: '4', title: 'The Power of Prayer', type: 'reflection', views: 750 },
-    { id: '5', title: 'God\'s Grace Explained', type: 'explanation', views: 680 }
+    { id: '5', title: "God's Grace Explained", type: 'explanation', views: 680 }
   ]
 };
 
@@ -123,15 +123,17 @@ const ContentSearchAnalyticsContent = () => {
 
   const handleSearch = () => {
     if (!searchTerm.trim()) return;
-    
+
     setIsSearching(true);
     // Simulate search delay
     setTimeout(() => {
-      const filtered = mockSearchResults.filter(result => {
-        const matchesContent = result.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                              result.title.toLowerCase().includes(searchTerm.toLowerCase());
+      const filtered = mockSearchResults.filter((result) => {
+        const matchesContent =
+          result.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          result.title.toLowerCase().includes(searchTerm.toLowerCase());
         const matchesType = contentTypeFilter === 'all' || result.type === contentTypeFilter;
-        const matchesTranslation = translationFilter === 'all' || result.translation === translationFilter;
+        const matchesTranslation =
+          translationFilter === 'all' || result.translation === translationFilter;
         return matchesContent && matchesType && matchesTranslation;
       });
       setSearchResults(filtered);
@@ -192,16 +194,18 @@ const ContentSearchAnalyticsContent = () => {
                   className="pl-10"
                 />
               </div>
-              <Button onClick={handleSearch} disabled={isSearching} className="bg-primary hover:bg-primary-dark">
+              <Button
+                onClick={handleSearch}
+                disabled={isSearching}
+                className="bg-primary hover:bg-primary-dark"
+              >
                 {isSearching ? 'Searching...' : 'Search'}
               </Button>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Content Type
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Content Type</label>
                 <Select value={contentTypeFilter} onValueChange={setContentTypeFilter}>
                   <SelectTrigger>
                     <SelectValue placeholder="All content types" />
@@ -215,9 +219,7 @@ const ContentSearchAnalyticsContent = () => {
                 </Select>
               </div>
               <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Translation
-                </label>
+                <label className="block text-sm font-medium text-gray-700 mb-2">Translation</label>
                 <Select value={translationFilter} onValueChange={setTranslationFilter}>
                   <SelectTrigger>
                     <SelectValue placeholder="All translations" />
@@ -235,14 +237,14 @@ const ContentSearchAnalyticsContent = () => {
             {/* Search Results */}
             {searchResults.length > 0 && (
               <div className="space-y-4">
-                <h3 className="font-medium text-gray-900">Search Results ({searchResults.length})</h3>
+                <h3 className="font-medium text-gray-900">
+                  Search Results ({searchResults.length})
+                </h3>
                 {searchResults.map((result) => (
                   <div key={result.id} className="p-4 border rounded-lg">
                     <div className="flex items-center justify-between mb-3">
                       <div className="flex items-center space-x-3">
-                        <div className="p-2 bg-blue-100 rounded-lg">
-                          {getTypeIcon(result.type)}
-                        </div>
+                        <div className="p-2 bg-blue-100 rounded-lg">{getTypeIcon(result.type)}</div>
                         <div>
                           <h3 className="font-semibold text-gray-900">{result.title}</h3>
                           <p className="text-sm text-gray-600">
@@ -261,9 +263,7 @@ const ContentSearchAnalyticsContent = () => {
                     </div>
 
                     <div className="mb-3">
-                      <p className="text-sm text-gray-700 line-clamp-3">
-                        {result.content}
-                      </p>
+                      <p className="text-sm text-gray-700 line-clamp-3">{result.content}</p>
                     </div>
 
                     <div className="flex justify-between items-center pt-3 border-t">
@@ -303,7 +303,10 @@ const ContentSearchAnalyticsContent = () => {
           <CardContent>
             <div className="space-y-3">
               {analyticsData.popularSearches.map((search, index) => (
-                <div key={index} className="flex items-center justify-between p-3 border rounded-lg">
+                <div
+                  key={index}
+                  className="flex items-center justify-between p-3 border rounded-lg"
+                >
                   <div className="flex items-center space-x-3">
                     <div className="flex items-center justify-center w-8 h-8 bg-amber-100 rounded-full">
                       <span className="text-sm font-bold text-amber-600">{index + 1}</span>
@@ -337,7 +340,9 @@ const ContentSearchAnalyticsContent = () => {
                 <div key={index} className="p-3 border rounded-lg">
                   <div className="flex items-center justify-between mb-2">
                     <h3 className="font-medium text-gray-900">{content.type}</h3>
-                    <span className="text-sm text-gray-600">{content.views.toLocaleString()} views</span>
+                    <span className="text-sm text-gray-600">
+                      {content.views.toLocaleString()} views
+                    </span>
                   </div>
                   <div className="space-y-1">
                     <div className="flex justify-between text-sm">
@@ -349,8 +354,8 @@ const ContentSearchAnalyticsContent = () => {
                       <span className="font-medium">{content.interactions.toLocaleString()}</span>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div 
-                        className="bg-amber-600 h-2 rounded-full" 
+                      <div
+                        className="bg-amber-600 h-2 rounded-full"
                         style={{ width: `${(content.interactions / content.views) * 100}%` }}
                       ></div>
                     </div>
@@ -380,7 +385,9 @@ const ContentSearchAnalyticsContent = () => {
                 </div>
                 <div className="flex items-center space-x-4">
                   <span className="text-sm text-gray-900">{activity.searches} searches</span>
-                  <span className="text-sm text-gray-600">{activity.views.toLocaleString()} views</span>
+                  <span className="text-sm text-gray-600">
+                    {activity.views.toLocaleString()} views
+                  </span>
                 </div>
               </div>
             ))}
@@ -416,7 +423,9 @@ const ContentSearchAnalyticsContent = () => {
                         {content.type.charAt(0).toUpperCase() + content.type.slice(1)}
                       </Badge>
                     </td>
-                    <td className="py-3 px-4 text-center text-gray-600">{content.views.toLocaleString()}</td>
+                    <td className="py-3 px-4 text-center text-gray-600">
+                      {content.views.toLocaleString()}
+                    </td>
                     <td className="py-3 px-4 text-center">
                       <Button variant="outline" size="sm">
                         <Eye className="w-4 h-4 mr-1" />
@@ -434,4 +443,4 @@ const ContentSearchAnalyticsContent = () => {
   );
 };
 
-export { ContentSearchAnalyticsContent }; 
+export { ContentSearchAnalyticsContent };

@@ -58,7 +58,7 @@ export const fetchFlaggedContent = async (params: {
   const response = await axios.get<FlaggedContentListResponse>(
     `${API_URL}/admin/bible/flagged?${queryParams.toString()}`
   );
-  
+
   return response.data;
 };
 
@@ -129,4 +129,3 @@ export const rejectFeedback = async (
   );
   return response.data;
 };
-

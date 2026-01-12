@@ -45,5 +45,3 @@ const FeedbackInboxPage = () => {
 };
 
 export { FeedbackInboxPage };
-
-

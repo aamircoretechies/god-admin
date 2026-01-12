@@ -20,7 +20,9 @@ const AdminSettings = () => {
           <Toolbar>
             <ToolbarHeading>
               <ToolbarPageTitle />
-              <ToolbarDescription>Configure defaults and moderation policies for journals.</ToolbarDescription>
+              <ToolbarDescription>
+                Configure defaults and moderation policies for journals.
+              </ToolbarDescription>
             </ToolbarHeading>
             <ToolbarActions>
               <a href="#" className="btn btn-sm btn-light">

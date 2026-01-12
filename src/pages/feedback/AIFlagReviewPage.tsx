@@ -42,5 +42,3 @@ const AIFlagReviewPage = () => {
 };
 
 export { AIFlagReviewPage };
-
-

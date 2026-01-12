@@ -3,14 +3,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
-import { 
-  Users, 
-  UserPlus, 
-  Settings,
-  Save,
-  Plus,
-  Trash2
-} from 'lucide-react';
+import { Users, UserPlus, Settings, Save, Plus, Trash2 } from 'lucide-react';
 
 const UserManagementGroups = () => {
   return (
@@ -30,7 +23,7 @@ const UserManagementGroups = () => {
               Create Group
             </Button>
           </div>
-          
+
           <div className="space-y-3">
             <div className="flex items-center justify-between p-3 border rounded-lg">
               <div>
@@ -38,46 +31,54 @@ const UserManagementGroups = () => {
                 <p className="text-sm text-gray-500">5 members • Full system access</p>
               </div>
               <div className="flex items-center gap-2">
-                <Button size="sm" variant="outline">Manage</Button>
+                <Button size="sm" variant="outline">
+                  Manage
+                </Button>
                 <Button size="sm" variant="outline" className="text-red-600">
                   <Trash2 className="w-4 h-4" />
                 </Button>
               </div>
             </div>
-            
+
             <div className="flex items-center justify-between p-3 border rounded-lg">
               <div>
                 <h5 className="font-medium">Content Editors</h5>
                 <p className="text-sm text-gray-500">12 members • Content management</p>
               </div>
               <div className="flex items-center gap-2">
-                <Button size="sm" variant="outline">Manage</Button>
+                <Button size="sm" variant="outline">
+                  Manage
+                </Button>
                 <Button size="sm" variant="outline" className="text-red-600">
                   <Trash2 className="w-4 h-4" />
                 </Button>
               </div>
             </div>
-            
+
             <div className="flex items-center justify-between p-3 border rounded-lg">
               <div>
                 <h5 className="font-medium">Moderators</h5>
                 <p className="text-sm text-gray-500">8 members • Content moderation</p>
               </div>
               <div className="flex items-center gap-2">
-                <Button size="sm" variant="outline">Manage</Button>
+                <Button size="sm" variant="outline">
+                  Manage
+                </Button>
                 <Button size="sm" variant="outline" className="text-red-600">
                   <Trash2 className="w-4 h-4" />
                 </Button>
               </div>
             </div>
-            
+
             <div className="flex items-center justify-between p-3 border rounded-lg">
               <div>
                 <h5 className="font-medium">Viewers</h5>
                 <p className="text-sm text-gray-500">150 members • Read-only access</p>
               </div>
               <div className="flex items-center gap-2">
-                <Button size="sm" variant="outline">Manage</Button>
+                <Button size="sm" variant="outline">
+                  Manage
+                </Button>
                 <Button size="sm" variant="outline" className="text-red-600">
                   <Trash2 className="w-4 h-4" />
                 </Button>
@@ -85,18 +86,20 @@ const UserManagementGroups = () => {
             </div>
           </div>
         </div>
-        
+
         <div className="space-y-4">
           <h4 className="font-medium text-gray-900">Group Settings</h4>
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <div>
                 <Label htmlFor="auto_assign">Auto-assign New Users</Label>
-                <p className="text-sm text-gray-500">Automatically assign new users to default group</p>
+                <p className="text-sm text-gray-500">
+                  Automatically assign new users to default group
+                </p>
               </div>
               <Switch id="auto_assign" defaultChecked />
             </div>
-            
+
             <div className="flex items-center justify-between">
               <div>
                 <Label htmlFor="group_permissions">Inherit Group Permissions</Label>
@@ -106,7 +109,7 @@ const UserManagementGroups = () => {
             </div>
           </div>
         </div>
-        
+
         <div className="flex items-center gap-3 pt-4">
           <Button className="flex items-center gap-2">
             <Save className="w-4 h-4" />

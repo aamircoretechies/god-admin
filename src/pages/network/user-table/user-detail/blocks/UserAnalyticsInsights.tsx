@@ -32,10 +32,10 @@ const UserAnalyticsInsights = () => {
 
   const getEngagementTagColor = (tag: string) => {
     const colors: { [key: string]: string } = {
-      'Seeker': 'bg-blue-100 text-blue-800',
-      'Learner': 'bg-green-100 text-green-800',
-      'Grower': 'bg-purple-100 text-purple-800',
-      'Teacher': 'bg-orange-100 text-orange-800'
+      Seeker: 'bg-blue-100 text-blue-800',
+      Learner: 'bg-green-100 text-green-800',
+      Grower: 'bg-purple-100 text-purple-800',
+      Teacher: 'bg-orange-100 text-orange-800'
     };
     return colors[tag] || 'bg-gray-100 text-gray-800';
   };
@@ -62,8 +62,8 @@ const UserAnalyticsInsights = () => {
                       <span className="text-sm text-gray-700">{book.name}</span>
                       <div className="flex items-center gap-2">
                         <div className="w-16 bg-gray-200 rounded-full h-2">
-                          <div 
-                            className="bg-primary h-2 rounded-full" 
+                          <div
+                            className="bg-primary h-2 rounded-full"
                             style={{ width: `${book.percentage}%` }}
                           ></div>
                         </div>
@@ -75,7 +75,9 @@ const UserAnalyticsInsights = () => {
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700">Average Session Time</label>
-                <p className="text-lg font-semibold text-primary">{analyticsData.averageSessionTime}</p>
+                <p className="text-lg font-semibold text-primary">
+                  {analyticsData.averageSessionTime}
+                </p>
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700">Total Reading Time</label>
@@ -86,17 +88,23 @@ const UserAnalyticsInsights = () => {
 
           {/* Engagement Metrics */}
           <div className="space-y-4">
-            <h4 className="text-sm font-semibold text-gray-900 border-b pb-2">Engagement Metrics</h4>
+            <h4 className="text-sm font-semibold text-gray-900 border-b pb-2">
+              Engagement Metrics
+            </h4>
             <div className="space-y-3">
               <div>
                 <label className="text-sm font-medium text-gray-700">Engagement Tag</label>
-                <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getEngagementTagColor(analyticsData.engagementTag)}`}>
+                <span
+                  className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getEngagementTagColor(analyticsData.engagementTag)}`}
+                >
                   {analyticsData.engagementTag}
                 </span>
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700">Reading Streak</label>
-                <p className="text-lg font-semibold text-success">{analyticsData.readingStreak} days</p>
+                <p className="text-lg font-semibold text-success">
+                  {analyticsData.readingStreak} days
+                </p>
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700">Voice vs Reading Ratio</label>
@@ -107,8 +115,8 @@ const UserAnalyticsInsights = () => {
                       <span>{analyticsData.voiceVsReadingRatio.voice}%</span>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div 
-                        className="bg-success h-2 rounded-full" 
+                      <div
+                        className="bg-success h-2 rounded-full"
                         style={{ width: `${analyticsData.voiceVsReadingRatio.voice}%` }}
                       ></div>
                     </div>
@@ -119,8 +127,8 @@ const UserAnalyticsInsights = () => {
                       <span>{analyticsData.voiceVsReadingRatio.reading}%</span>
                     </div>
                     <div className="w-full bg-gray-200 rounded-full h-2">
-                      <div 
-                        className="bg-primary h-2 rounded-full" 
+                      <div
+                        className="bg-primary h-2 rounded-full"
                         style={{ width: `${analyticsData.voiceVsReadingRatio.reading}%` }}
                       ></div>
                     </div>
@@ -137,7 +145,7 @@ const UserAnalyticsInsights = () => {
           <div className="flex items-end justify-between gap-2 h-32">
             {Object.entries(analyticsData.weeklyActivity).map(([day, value]) => (
               <div key={day} className="flex flex-col items-center gap-1">
-                <div 
+                <div
                   className="w-8 bg-primary rounded-t"
                   style={{ height: `${(value / 100) * 80}px` }}
                 ></div>
@@ -153,7 +161,7 @@ const UserAnalyticsInsights = () => {
           <h4 className="text-sm font-semibold text-gray-900 mb-4">Favorite Topics</h4>
           <div className="flex flex-wrap gap-2">
             {analyticsData.favoriteTopics.map((topic, index) => (
-              <span 
+              <span
                 key={index}
                 className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-warning/10 text-warning"
               >
@@ -168,7 +176,3 @@ const UserAnalyticsInsights = () => {
 };
 
 export { UserAnalyticsInsights };
-
-
-
-

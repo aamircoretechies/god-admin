@@ -171,7 +171,10 @@ const Users = () => {
               />
 
               <div className="flex flex-col">
-                <Link to="/network/user-table/user-detail" className="text-sm font-medium text-gray-900 hover:text-primary-active">
+                <Link
+                  to="/network/user-table/user-detail"
+                  className="text-sm font-medium text-gray-900 hover:text-primary-active"
+                >
                   {row.original.user.userName}
                 </Link>
                 <Link
@@ -318,11 +321,12 @@ const Users = () => {
     // Apply search filter
     if (debouncedSearch) {
       const searchLower = debouncedSearch.toLowerCase();
-      filtered = filtered.filter((user) =>
-        user.user.userName.toLowerCase().includes(searchLower) ||
-        user.phone.toLowerCase().includes(searchLower) ||
-        user.branch.toLowerCase().includes(searchLower) ||
-        user.labels.some((label) => label.toLowerCase().includes(searchLower))
+      filtered = filtered.filter(
+        (user) =>
+          user.user.userName.toLowerCase().includes(searchLower) ||
+          user.phone.toLowerCase().includes(searchLower) ||
+          user.branch.toLowerCase().includes(searchLower) ||
+          user.labels.some((label) => label.toLowerCase().includes(searchLower))
       );
     }
 

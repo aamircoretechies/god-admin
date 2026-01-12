@@ -3,14 +3,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
-import { 
-  Bell, 
-  AlertTriangle, 
-  Settings,
-  Save,
-  Plus,
-  Trash2
-} from 'lucide-react';
+import { Bell, AlertTriangle, Settings, Save, Plus, Trash2 } from 'lucide-react';
 
 const NotificationsAlertRules = () => {
   return (
@@ -30,7 +23,7 @@ const NotificationsAlertRules = () => {
               Add Rule
             </Button>
           </div>
-          
+
           <div className="space-y-3">
             <div className="flex items-center justify-between p-3 border rounded-lg">
               <div>
@@ -39,13 +32,15 @@ const NotificationsAlertRules = () => {
               </div>
               <div className="flex items-center gap-2">
                 <Switch defaultChecked />
-                <Button size="sm" variant="outline">Edit</Button>
+                <Button size="sm" variant="outline">
+                  Edit
+                </Button>
                 <Button size="sm" variant="outline" className="text-red-600">
                   <Trash2 className="w-4 h-4" />
                 </Button>
               </div>
             </div>
-            
+
             <div className="flex items-center justify-between p-3 border rounded-lg">
               <div>
                 <h5 className="font-medium">Low Disk Space</h5>
@@ -53,13 +48,15 @@ const NotificationsAlertRules = () => {
               </div>
               <div className="flex items-center gap-2">
                 <Switch defaultChecked />
-                <Button size="sm" variant="outline">Edit</Button>
+                <Button size="sm" variant="outline">
+                  Edit
+                </Button>
                 <Button size="sm" variant="outline" className="text-red-600">
                   <Trash2 className="w-4 h-4" />
                 </Button>
               </div>
             </div>
-            
+
             <div className="flex items-center justify-between p-3 border rounded-lg">
               <div>
                 <h5 className="font-medium">Failed Login Attempts</h5>
@@ -67,13 +64,15 @@ const NotificationsAlertRules = () => {
               </div>
               <div className="flex items-center gap-2">
                 <Switch defaultChecked />
-                <Button size="sm" variant="outline">Edit</Button>
+                <Button size="sm" variant="outline">
+                  Edit
+                </Button>
                 <Button size="sm" variant="outline" className="text-red-600">
                   <Trash2 className="w-4 h-4" />
                 </Button>
               </div>
             </div>
-            
+
             <div className="flex items-center justify-between p-3 border rounded-lg">
               <div>
                 <h5 className="font-medium">Database Connection Errors</h5>
@@ -81,7 +80,9 @@ const NotificationsAlertRules = () => {
               </div>
               <div className="flex items-center gap-2">
                 <Switch defaultChecked />
-                <Button size="sm" variant="outline">Edit</Button>
+                <Button size="sm" variant="outline">
+                  Edit
+                </Button>
                 <Button size="sm" variant="outline" className="text-red-600">
                   <Trash2 className="w-4 h-4" />
                 </Button>
@@ -89,7 +90,7 @@ const NotificationsAlertRules = () => {
             </div>
           </div>
         </div>
-        
+
         <div className="space-y-4">
           <h4 className="font-medium text-gray-900">Rule Settings</h4>
           <div className="space-y-3">
@@ -100,7 +101,7 @@ const NotificationsAlertRules = () => {
               </div>
               <Switch id="rule_aggregation" defaultChecked />
             </div>
-            
+
             <div className="flex items-center justify-between">
               <div>
                 <Label htmlFor="rule_escalation">Alert Escalation</Label>
@@ -108,7 +109,7 @@ const NotificationsAlertRules = () => {
               </div>
               <Switch id="rule_escalation" defaultChecked />
             </div>
-            
+
             <div className="flex items-center justify-between">
               <div>
                 <Label htmlFor="rule_suppression">Alert Suppression</Label>
@@ -118,7 +119,7 @@ const NotificationsAlertRules = () => {
             </div>
           </div>
         </div>
-        
+
         <div className="flex items-center gap-3 pt-4">
           <Button className="flex items-center gap-2">
             <Save className="w-4 h-4" />

@@ -5,18 +5,18 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { approveFeedback, rejectFeedback } from '@/services/flaggedContentApi';
 import { toast } from 'sonner';
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
 } from '@/components/ui/select';
-import { 
-  Flag, 
-  CheckCircle, 
-  XCircle, 
-  Edit, 
+import {
+  Flag,
+  CheckCircle,
+  XCircle,
+  Edit,
   AlertTriangle,
   BookOpen,
   User,
@@ -49,9 +49,11 @@ const AIFlagReviewContent = () => {
       user: 'John Doe',
       verse: 'John 3:16',
       originalQuery: 'Explain the meaning of this verse',
-      aiResponse: 'This verse means that God loves everyone unconditionally and there are no requirements for salvation.',
+      aiResponse:
+        'This verse means that God loves everyone unconditionally and there are no requirements for salvation.',
       flagReason: 'Inaccurate',
-      flagDetails: 'The response contradicts the biblical teaching that faith in Jesus is required for salvation.',
+      flagDetails:
+        'The response contradicts the biblical teaching that faith in Jesus is required for salvation.',
       priority: 'high',
       status: 'pending',
       timestamp: '2024-01-20T10:30:00Z'
@@ -61,9 +63,11 @@ const AIFlagReviewContent = () => {
       user: 'Sarah Wilson',
       verse: 'Romans 8:28',
       originalQuery: 'What does this verse teach about suffering?',
-      aiResponse: 'This verse is about how God causes all things to happen for our benefit, including suffering.',
+      aiResponse:
+        'This verse is about how God causes all things to happen for our benefit, including suffering.',
       flagReason: 'Inaccurate',
-      flagDetails: 'Misinterprets the verse - it says God works through all things, not that He causes all things.',
+      flagDetails:
+        'Misinterprets the verse - it says God works through all things, not that He causes all things.',
       priority: 'medium',
       status: 'pending',
       timestamp: '2024-01-20T09:15:00Z'
@@ -73,7 +77,8 @@ const AIFlagReviewContent = () => {
       user: 'Mike Johnson',
       verse: '1 Corinthians 13:4',
       originalQuery: 'Explain what love is according to this verse',
-      aiResponse: 'Love is just being nice to people and not being mean. It\'s basically common sense.',
+      aiResponse:
+        "Love is just being nice to people and not being mean. It's basically common sense.",
       flagReason: 'Offensive',
       flagDetails: 'Oversimplifies and trivializes the profound biblical concept of love.',
       priority: 'high',
@@ -85,11 +90,23 @@ const AIFlagReviewContent = () => {
   const getPriorityBadge = (priority: string) => {
     switch (priority) {
       case 'high':
-        return <Badge variant="destructive" className="bg-red-100 text-red-800">High Priority</Badge>;
+        return (
+          <Badge variant="destructive" className="bg-red-100 text-red-800">
+            High Priority
+          </Badge>
+        );
       case 'medium':
-        return <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">Medium Priority</Badge>;
+        return (
+          <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
+            Medium Priority
+          </Badge>
+        );
       case 'low':
-        return <Badge variant="secondary" className="bg-green-100 text-green-800">Low Priority</Badge>;
+        return (
+          <Badge variant="secondary" className="bg-green-100 text-green-800">
+            Low Priority
+          </Badge>
+        );
       default:
         return <Badge variant="outline">{priority}</Badge>;
     }
@@ -98,11 +115,23 @@ const AIFlagReviewContent = () => {
   const getReasonBadge = (reason: string) => {
     switch (reason) {
       case 'Inaccurate':
-        return <Badge variant="destructive" className="bg-red-100 text-red-800">Inaccurate</Badge>;
+        return (
+          <Badge variant="destructive" className="bg-red-100 text-red-800">
+            Inaccurate
+          </Badge>
+        );
       case 'Offensive':
-        return <Badge variant="destructive" className="bg-red-100 text-red-800">Offensive</Badge>;
+        return (
+          <Badge variant="destructive" className="bg-red-100 text-red-800">
+            Offensive
+          </Badge>
+        );
       case 'Irrelevant':
-        return <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">Irrelevant</Badge>;
+        return (
+          <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
+            Irrelevant
+          </Badge>
+        );
       default:
         return <Badge variant="outline">{reason}</Badge>;
     }
@@ -111,13 +140,29 @@ const AIFlagReviewContent = () => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'pending':
-        return <Badge variant="default" className="bg-orange-100 text-orange-800">Pending Review</Badge>;
+        return (
+          <Badge variant="default" className="bg-orange-100 text-orange-800">
+            Pending Review
+          </Badge>
+        );
       case 'approved':
-        return <Badge variant="secondary" className="bg-green-100 text-green-800">Approved</Badge>;
+        return (
+          <Badge variant="secondary" className="bg-green-100 text-green-800">
+            Approved
+          </Badge>
+        );
       case 'rejected':
-        return <Badge variant="destructive" className="bg-red-100 text-red-800">Rejected</Badge>;
+        return (
+          <Badge variant="destructive" className="bg-red-100 text-red-800">
+            Rejected
+          </Badge>
+        );
       case 'edited':
-        return <Badge variant="secondary" className="bg-amber-100 text-amber-800">Edited</Badge>;
+        return (
+          <Badge variant="secondary" className="bg-amber-100 text-amber-800">
+            Edited
+          </Badge>
+        );
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
@@ -144,7 +189,8 @@ const AIFlagReviewContent = () => {
         throw new Error(response.message || 'Failed to approve AI response');
       }
     } catch (err: any) {
-      const errorMessage = err?.response?.data?.message || err?.message || 'Failed to approve AI response';
+      const errorMessage =
+        err?.response?.data?.message || err?.message || 'Failed to approve AI response';
       toast.error(errorMessage);
     }
   };
@@ -162,7 +208,8 @@ const AIFlagReviewContent = () => {
         throw new Error(response.message || 'Failed to reject AI response');
       }
     } catch (err: any) {
-      const errorMessage = err?.response?.data?.message || err?.message || 'Failed to reject AI response';
+      const errorMessage =
+        err?.response?.data?.message || err?.message || 'Failed to reject AI response';
       toast.error(errorMessage);
     }
   };
@@ -322,7 +369,7 @@ const AIFlagReviewContent = () => {
                       Edit Response (Phase 2)
                     </Button>
                   </div>
-                  
+
                   {selectedFlag === flag.id && (
                     <Button
                       onClick={() => handleSaveCorrection(flag.id)}

@@ -20,7 +20,9 @@ const ModerationQueue = () => {
           <Toolbar>
             <ToolbarHeading>
               <ToolbarPageTitle />
-              <ToolbarDescription>Review flagged notes and journal entries requiring moderation.</ToolbarDescription>
+              <ToolbarDescription>
+                Review flagged notes and journal entries requiring moderation.
+              </ToolbarDescription>
             </ToolbarHeading>
             <ToolbarActions>
               <a href="#" className="btn btn-sm btn-light">

@@ -2,7 +2,13 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { fetchAlerts, resolveAlert, dismissAlert, acknowledgeAlert, type AlertResponse } from '@/services/alertsApi';
+import {
+  fetchAlerts,
+  resolveAlert,
+  dismissAlert,
+  acknowledgeAlert,
+  type AlertResponse
+} from '@/services/alertsApi';
 import {
   AlertTriangle,
   AlertCircle,
@@ -39,26 +45,29 @@ interface SystemAlert {
 const transformAlert = (apiData: AlertResponse): SystemAlert => {
   // Map severity
   const severityMap: Record<string, 'low' | 'medium' | 'high' | 'critical'> = {
-    'LOW': 'low',
-    'MEDIUM': 'medium',
-    'HIGH': 'high',
-    'CRITICAL': 'critical'
+    LOW: 'low',
+    MEDIUM: 'medium',
+    HIGH: 'high',
+    CRITICAL: 'critical'
   };
 
   // Map status
   const statusMap: Record<string, 'new' | 'acknowledged' | 'resolved'> = {
-    'NEW': 'new',
-    'ACKNOWLEDGED': 'acknowledged',
-    'RESOLVED': 'resolved'
+    NEW: 'new',
+    ACKNOWLEDGED: 'acknowledged',
+    RESOLVED: 'resolved'
   };
 
   // Map category
-  const categoryMap: Record<string, 'spam' | 'rate_limit' | 'security' | 'performance' | 'user_behavior'> = {
-    'SPAM': 'spam',
-    'RATE_LIMIT': 'rate_limit',
-    'SECURITY': 'security',
-    'PERFORMANCE': 'performance',
-    'USER_BEHAVIOR': 'user_behavior'
+  const categoryMap: Record<
+    string,
+    'spam' | 'rate_limit' | 'security' | 'performance' | 'user_behavior'
+  > = {
+    SPAM: 'spam',
+    RATE_LIMIT: 'rate_limit',
+    SECURITY: 'security',
+    PERFORMANCE: 'performance',
+    USER_BEHAVIOR: 'user_behavior'
   };
 
   // Derive type from severity and category
@@ -199,7 +208,8 @@ const SystemAlertsContent: React.FC = () => {
       }
     } catch (err: any) {
       console.error('Error acknowledging alert:', err);
-      const errorMsg = err?.response?.data?.message || err?.message || 'Failed to acknowledge alert';
+      const errorMsg =
+        err?.response?.data?.message || err?.message || 'Failed to acknowledge alert';
       setError(errorMsg);
       setTimeout(() => setError(null), 5000);
     } finally {
@@ -212,11 +222,23 @@ const SystemAlertsContent: React.FC = () => {
       case 'critical':
         return <Badge variant="destructive">Critical</Badge>;
       case 'high':
-        return <Badge variant="default" className="bg-red-100 text-red-800">High</Badge>;
+        return (
+          <Badge variant="default" className="bg-red-100 text-red-800">
+            High
+          </Badge>
+        );
       case 'medium':
-        return <Badge variant="default" className="bg-yellow-100 text-yellow-800">Medium</Badge>;
+        return (
+          <Badge variant="default" className="bg-yellow-100 text-yellow-800">
+            Medium
+          </Badge>
+        );
       case 'low':
-        return <Badge variant="default" className="bg-amber-100 text-amber-800">Low</Badge>;
+        return (
+          <Badge variant="default" className="bg-amber-100 text-amber-800">
+            Low
+          </Badge>
+        );
       default:
         return <Badge variant="outline">{severity}</Badge>;
     }
@@ -240,11 +262,23 @@ const SystemAlertsContent: React.FC = () => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'new':
-        return <Badge variant="default" className="bg-amber-100 text-amber-800">New</Badge>;
+        return (
+          <Badge variant="default" className="bg-amber-100 text-amber-800">
+            New
+          </Badge>
+        );
       case 'acknowledged':
-        return <Badge variant="default" className="bg-yellow-100 text-yellow-800">Acknowledged</Badge>;
+        return (
+          <Badge variant="default" className="bg-yellow-100 text-yellow-800">
+            Acknowledged
+          </Badge>
+        );
       case 'resolved':
-        return <Badge variant="default" className="bg-green-100 text-green-800">Resolved</Badge>;
+        return (
+          <Badge variant="default" className="bg-green-100 text-green-800">
+            Resolved
+          </Badge>
+        );
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
@@ -252,17 +286,20 @@ const SystemAlertsContent: React.FC = () => {
 
   const getCategoryBadge = (category: string) => {
     const colors = {
-      'spam': 'bg-red-100 text-red-800',
-      'rate_limit': 'bg-orange-100 text-orange-800',
-      'security': 'bg-purple-100 text-purple-800',
-      'performance': 'bg-amber-100 text-amber-800',
-      'user_behavior': 'bg-pink-100 text-pink-800'
+      spam: 'bg-red-100 text-red-800',
+      rate_limit: 'bg-orange-100 text-orange-800',
+      security: 'bg-purple-100 text-purple-800',
+      performance: 'bg-amber-100 text-amber-800',
+      user_behavior: 'bg-pink-100 text-pink-800'
     };
 
-    const displayName = category.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    const displayName = category.replace(/_/g, ' ').replace(/\b\w/g, (l) => l.toUpperCase());
 
     return (
-      <Badge variant="default" className={colors[category as keyof typeof colors] || 'bg-gray-100 text-gray-800'}>
+      <Badge
+        variant="default"
+        className={colors[category as keyof typeof colors] || 'bg-gray-100 text-gray-800'}
+      >
         {displayName}
       </Badge>
     );
@@ -279,7 +316,7 @@ const SystemAlertsContent: React.FC = () => {
   };
 
   const filteredAlerts = useMemo(() => {
-    return alerts.filter(alert => {
+    return alerts.filter((alert) => {
       if (selectedFilter === 'all') return true;
       if (selectedFilter === 'new') return alert.status === 'new';
       if (selectedFilter === 'critical') return alert.severity === 'critical';
@@ -291,9 +328,9 @@ const SystemAlertsContent: React.FC = () => {
   const stats = useMemo(() => {
     return {
       total: alerts.length,
-      new: alerts.filter(a => a.status === 'new').length,
-      critical: alerts.filter(a => a.severity === 'critical').length,
-      actionRequired: alerts.filter(a => a.actionRequired).length
+      new: alerts.filter((a) => a.status === 'new').length,
+      critical: alerts.filter((a) => a.severity === 'critical').length,
+      actionRequired: alerts.filter((a) => a.actionRequired).length
     };
   }, [alerts]);
 
@@ -426,7 +463,7 @@ const SystemAlertsContent: React.FC = () => {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
                   disabled={currentPage === 1}
                 >
                   Previous
@@ -437,7 +474,7 @@ const SystemAlertsContent: React.FC = () => {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
                   disabled={currentPage === totalPages}
                 >
                   Next
@@ -451,22 +488,29 @@ const SystemAlertsContent: React.FC = () => {
       {/* Alerts List */}
       <div className="space-y-4">
         {filteredAlerts.map((alert) => (
-          <Card key={alert.id} className={`border-l-4 ${alert.severity === 'critical' ? 'border-l-red-500' :
-            alert.severity === 'high' ? 'border-l-orange-500' :
-              alert.severity === 'medium' ? 'border-l-yellow-500' :
-                'border-l-amber-500'
-            }`}>
+          <Card
+            key={alert.id}
+            className={`border-l-4 ${
+              alert.severity === 'critical'
+                ? 'border-l-red-500'
+                : alert.severity === 'high'
+                  ? 'border-l-orange-500'
+                  : alert.severity === 'medium'
+                    ? 'border-l-yellow-500'
+                    : 'border-l-amber-500'
+            }`}
+          >
             <CardContent className="p-6">
               <div className="flex items-start gap-4">
-                <div className="flex-shrink-0 mt-1">
-                  {getTypeIcon(alert.type)}
-                </div>
+                <div className="flex-shrink-0 mt-1">{getTypeIcon(alert.type)}</div>
                 <div className="flex-1 min-w-0">
                   {/* <div className="flex items-start justify-between mb-3"> */}
                   <div className="flex flex-col xl:flex-row xl:items-start justify-between gap-4 mb-3">
                     {/* <div className="flex items-center gap-3"> */}
                     <div className="flex flex-wrap items-center gap-2 md:gap-3">
-                      <h3 className="text-lg font-semibold text-gray-900 truncate">{alert.title}</h3>
+                      <h3 className="text-lg font-semibold text-gray-900 truncate">
+                        {alert.title}
+                      </h3>
                       {getSeverityBadge(alert.severity)}
                       {getStatusBadge(alert.status)}
                       {getCategoryBadge(alert.category)}
@@ -482,7 +526,11 @@ const SystemAlertsContent: React.FC = () => {
                         variant="ghost"
                         size="sm"
                         onClick={() => handleAcknowledge(alert.id)}
-                        disabled={processingAlert === alert.id || alert.status === 'acknowledged' || alert.status === 'resolved'}
+                        disabled={
+                          processingAlert === alert.id ||
+                          alert.status === 'acknowledged' ||
+                          alert.status === 'resolved'
+                        }
                         title="Acknowledge"
                       >
                         <Eye className="w-4 h-4" />
@@ -543,7 +591,11 @@ const SystemAlertsContent: React.FC = () => {
                           size="sm"
                           variant="outline"
                           onClick={() => handleAcknowledge(alert.id)}
-                          disabled={processingAlert === alert.id || alert.status === 'acknowledged' || alert.status === 'resolved'}
+                          disabled={
+                            processingAlert === alert.id ||
+                            alert.status === 'acknowledged' ||
+                            alert.status === 'resolved'
+                          }
                         >
                           <Shield className="w-4 h-4 mr-2" />
                           Acknowledge
@@ -573,7 +625,9 @@ const SystemAlertsContent: React.FC = () => {
           <CardContent className="p-12 text-center">
             <CheckCircle className="w-12 h-12 text-green-600 mx-auto mb-4" />
             <h3 className="text-lg font-semibold text-gray-900 mb-2">No Alerts Found</h3>
-            <p className="text-gray-600">All systems are running smoothly with no alerts to display.</p>
+            <p className="text-gray-600">
+              All systems are running smoothly with no alerts to display.
+            </p>
           </CardContent>
         </Card>
       )}

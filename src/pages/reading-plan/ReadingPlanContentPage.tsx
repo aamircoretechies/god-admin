@@ -3,14 +3,20 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
-import { 
-  FileText, 
-  Plus, 
-  Edit, 
-  Trash2, 
+import {
+  FileText,
+  Plus,
+  Edit,
+  Trash2,
   Save,
   X,
   Brain,
@@ -44,7 +50,8 @@ const mockContent: Content[] = [
     day: 1,
     type: 'reflection',
     title: 'The Beginning of Good News',
-    content: 'Today we begin our journey through the New Testament. Matthew opens with the genealogy of Jesus, connecting Him to the promises of the Old Testament...',
+    content:
+      'Today we begin our journey through the New Testament. Matthew opens with the genealogy of Jesus, connecting Him to the promises of the Old Testament...',
     status: 'published',
     aiGenerated: false,
     createdAt: '2024-01-15',
@@ -57,7 +64,8 @@ const mockContent: Content[] = [
     day: 1,
     type: 'ai_explanation',
     title: 'AI Explanation: Matthew 1:1-17',
-    content: 'This passage establishes Jesus\' royal lineage through King David and Abraham. The genealogy shows God\'s faithfulness to His promises...',
+    content:
+      "This passage establishes Jesus' royal lineage through King David and Abraham. The genealogy shows God's faithfulness to His promises...",
     status: 'pending',
     aiGenerated: true,
     createdAt: '2024-01-15',
@@ -70,7 +78,8 @@ const mockContent: Content[] = [
     day: 1,
     type: 'devotional',
     title: 'The Blessed Man',
-    content: 'Psalm 1 introduces us to the theme of wisdom in the Psalter. The blessed person is one who delights in God\'s law...',
+    content:
+      "Psalm 1 introduces us to the theme of wisdom in the Psalter. The blessed person is one who delights in God's law...",
     status: 'approved',
     aiGenerated: false,
     createdAt: '2024-01-20',
@@ -83,7 +92,8 @@ const mockContent: Content[] = [
     day: 2,
     type: 'question',
     title: 'Reflection Questions: Matthew 1:18-25',
-    content: '1. How does the story of Jesus\' birth demonstrate God\'s faithfulness?\n2. What does it mean that Jesus is called "Immanuel"?\n3. How does Joseph\'s response model obedience to God?',
+    content:
+      "1. How does the story of Jesus' birth demonstrate God's faithfulness?\n2. What does it mean that Jesus is called \"Immanuel\"?\n3. How does Joseph's response model obedience to God?",
     status: 'draft',
     aiGenerated: true,
     createdAt: '2024-01-16',
@@ -114,7 +124,7 @@ const ReadingPlanContentPage = () => {
     { id: '3', title: 'Gospel of John Study' }
   ];
 
-  const filteredContent = content.filter(item => {
+  const filteredContent = content.filter((item) => {
     const matchesPlan = selectedPlan === 'all' || item.planId === selectedPlan;
     const matchesType = selectedType === 'all' || item.type === selectedType;
     const matchesStatus = selectedStatus === 'all' || item.status === selectedStatus;
@@ -143,7 +153,11 @@ const ReadingPlanContentPage = () => {
 
   const handleSave = () => {
     if (editingContent) {
-      setContent(content.map(c => c.id === editingContent.id ? { ...formData, id: editingContent.id } as Content : c));
+      setContent(
+        content.map((c) =>
+          c.id === editingContent.id ? ({ ...formData, id: editingContent.id } as Content) : c
+        )
+      );
       setEditingContent(null);
     } else {
       const newContent: Content = {
@@ -181,11 +195,17 @@ const ReadingPlanContentPage = () => {
   };
 
   const handleDelete = (id: string) => {
-    setContent(content.filter(c => c.id !== id));
+    setContent(content.filter((c) => c.id !== id));
   };
 
   const handleStatusChange = (id: string, newStatus: string) => {
-    setContent(content.map(c => c.id === id ? { ...c, status: newStatus as any, updatedAt: new Date().toISOString().split('T')[0] } : c));
+    setContent(
+      content.map((c) =>
+        c.id === id
+          ? { ...c, status: newStatus as any, updatedAt: new Date().toISOString().split('T')[0] }
+          : c
+      )
+    );
   };
 
   const getStatusColor = (status: string) => {
@@ -224,7 +244,9 @@ const ReadingPlanContentPage = () => {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Content Management</h1>
-          <p className="text-gray-600 mt-2">Manage reflections, devotionals, and AI-generated content</p>
+          <p className="text-gray-600 mt-2">
+            Manage reflections, devotionals, and AI-generated content
+          </p>
         </div>
         <Button onClick={handleCreateNew} className="bg-primary hover:bg-primary-dark">
           <Plus className="w-4 h-4 mr-2" />
@@ -272,9 +294,7 @@ const ReadingPlanContentPage = () => {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Day
-                    </label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Day</label>
                     <Input
                       type="number"
                       value={formData.day}
@@ -304,9 +324,7 @@ const ReadingPlanContentPage = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Title
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Title</label>
                   <Input
                     value={formData.title}
                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
@@ -315,9 +333,7 @@ const ReadingPlanContentPage = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Status
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
                   <Select
                     value={formData.status}
                     onValueChange={(value) => setFormData({ ...formData, status: value as any })}
@@ -337,9 +353,7 @@ const ReadingPlanContentPage = () => {
 
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Content
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Content</label>
                   <Textarea
                     value={formData.content}
                     onChange={(e) => setFormData({ ...formData, content: e.target.value })}
@@ -351,11 +365,11 @@ const ReadingPlanContentPage = () => {
                 <div className="flex items-center space-x-2">
                   <Switch
                     checked={formData.aiGenerated}
-                    onCheckedChange={(checked) => setFormData({ ...formData, aiGenerated: checked })}
+                    onCheckedChange={(checked) =>
+                      setFormData({ ...formData, aiGenerated: checked })
+                    }
                   />
-                  <label className="text-sm font-medium text-gray-700">
-                    AI Generated Content
-                  </label>
+                  <label className="text-sm font-medium text-gray-700">AI Generated Content</label>
                 </div>
 
                 {formData.aiGenerated && (
@@ -433,9 +447,7 @@ const ReadingPlanContentPage = () => {
             </div>
             <div className="flex items-center space-x-2">
               <Settings className="w-4 h-4 text-gray-500" />
-              <span className="text-sm text-gray-600">
-                {filteredContent.length} items
-              </span>
+              <span className="text-sm text-gray-600">{filteredContent.length} items</span>
             </div>
           </div>
         </CardContent>
@@ -477,9 +489,7 @@ const ReadingPlanContentPage = () => {
                 </div>
 
                 <div className="mb-3">
-                  <p className="text-sm text-gray-700 line-clamp-3">
-                    {contentItem.content}
-                  </p>
+                  <p className="text-sm text-gray-700 line-clamp-3">{contentItem.content}</p>
                 </div>
 
                 <div className="flex justify-between items-center pt-3 border-t">
@@ -497,8 +507,8 @@ const ReadingPlanContentPage = () => {
                       Edit
                     </Button>
                     {contentItem.status === 'pending' && (
-                      <Button 
-                        variant="outline" 
+                      <Button
+                        variant="outline"
                         size="sm"
                         onClick={() => handleStatusChange(contentItem.id, 'approved')}
                       >
@@ -506,8 +516,8 @@ const ReadingPlanContentPage = () => {
                         Approve
                       </Button>
                     )}
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       size="sm"
                       onClick={() => handleDelete(contentItem.id)}
                     >
@@ -538,7 +548,7 @@ const ReadingPlanContentPage = () => {
                 <span className="font-medium">Pending Review</span>
               </div>
               <p className="text-2xl font-bold text-gray-900">
-                {content.filter(c => c.aiGenerated && c.status === 'pending').length}
+                {content.filter((c) => c.aiGenerated && c.status === 'pending').length}
               </p>
               <p className="text-sm text-gray-600">AI-generated content awaiting approval</p>
             </div>
@@ -548,7 +558,7 @@ const ReadingPlanContentPage = () => {
                 <span className="font-medium">Approved</span>
               </div>
               <p className="text-2xl font-bold text-gray-900">
-                {content.filter(c => c.aiGenerated && c.status === 'approved').length}
+                {content.filter((c) => c.aiGenerated && c.status === 'approved').length}
               </p>
               <p className="text-sm text-gray-600">AI content approved for use</p>
             </div>
@@ -558,7 +568,7 @@ const ReadingPlanContentPage = () => {
                 <span className="font-medium">Published</span>
               </div>
               <p className="text-2xl font-bold text-gray-900">
-                {content.filter(c => c.aiGenerated && c.status === 'published').length}
+                {content.filter((c) => c.aiGenerated && c.status === 'published').length}
               </p>
               <p className="text-sm text-gray-600">AI content live for users</p>
             </div>
@@ -569,4 +579,4 @@ const ReadingPlanContentPage = () => {
   );
 };
 
-export { ReadingPlanContentPage }; 
+export { ReadingPlanContentPage };

@@ -109,7 +109,7 @@ const mockFlaggedNotes: FlaggedNote[] = [
     title: 'Study Notes on Romans',
     content: 'Romans 8:28 - All things work together for good...',
     linkedVerses: ['Romans 8:28', 'Romans 8:29'],
-    tags: ['Study', 'Romans', 'God\'s Plan'],
+    tags: ['Study', 'Romans', "God's Plan"],
     status: 'flagged',
     createdAt: '2024-01-13T14:20:00Z',
     updatedAt: '2024-01-13T14:20:00Z',
@@ -130,7 +130,7 @@ const ModerationQueueContent: React.FC = () => {
   // Filter notes by priority
   const filteredNotes = useMemo(() => {
     if (priorityFilter === 'all') return mockFlaggedNotes;
-    return mockFlaggedNotes.filter(note => note.priority === priorityFilter);
+    return mockFlaggedNotes.filter((note) => note.priority === priorityFilter);
   }, [priorityFilter]);
 
   const getPriorityBadge = (priority: string) => {
@@ -138,7 +138,11 @@ const ModerationQueueContent: React.FC = () => {
       case 'high':
         return <Badge variant="destructive">High Priority</Badge>;
       case 'medium':
-        return <Badge variant="default" className="bg-yellow-100 text-yellow-800">Medium Priority</Badge>;
+        return (
+          <Badge variant="default" className="bg-yellow-100 text-yellow-800">
+            Medium Priority
+          </Badge>
+        );
       case 'low':
         return <Badge variant="secondary">Low Priority</Badge>;
       default:
@@ -213,9 +217,7 @@ const ModerationQueueContent: React.FC = () => {
               >
                 {row.original.userName}
               </Link>
-              <span className="text-2sm text-gray-700 font-normal">
-                {row.original.userEmail}
-              </span>
+              <span className="text-2sm text-gray-700 font-normal">{row.original.userEmail}</span>
             </div>
           </div>
         ),
@@ -360,7 +362,8 @@ const ModerationQueueContent: React.FC = () => {
             ⚠️ {filteredNotes.length} notes flagged for review
           </p>
           <p className="text-sm text-red-700">
-            {filteredNotes.filter(note => note.priority === 'high').length} high priority items require immediate attention
+            {filteredNotes.filter((note) => note.priority === 'high').length} high priority items
+            require immediate attention
           </p>
         </div>
       </div>
@@ -383,9 +386,7 @@ const ModerationQueueContent: React.FC = () => {
           </div>
         </div>
         <div className="flex items-center gap-2">
-          <span className="text-sm text-gray-600">
-            {filteredNotes.length} flagged notes
-          </span>
+          <span className="text-sm text-gray-600">{filteredNotes.length} flagged notes</span>
         </div>
       </div>
     </div>
@@ -404,4 +405,3 @@ const ModerationQueueContent: React.FC = () => {
 };
 
 export { ModerationQueueContent };
-

@@ -3,14 +3,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
-import { 
-  Code, 
-  Bug, 
-  Settings,
-  Save,
-  Play,
-  Terminal
-} from 'lucide-react';
+import { Code, Bug, Settings, Save, Play, Terminal } from 'lucide-react';
 
 const AdvancedDeveloperTools = () => {
   return (
@@ -32,7 +25,7 @@ const AdvancedDeveloperTools = () => {
               </div>
               <Switch id="debug_mode" />
             </div>
-            
+
             <div className="flex items-center justify-between">
               <div>
                 <Label htmlFor="profiling">Performance Profiling</Label>
@@ -40,7 +33,7 @@ const AdvancedDeveloperTools = () => {
               </div>
               <Switch id="profiling" />
             </div>
-            
+
             <div className="flex items-center justify-between">
               <div>
                 <Label htmlFor="query_logging">Query Logging</Label>
@@ -48,7 +41,7 @@ const AdvancedDeveloperTools = () => {
               </div>
               <Switch id="query_logging" />
             </div>
-            
+
             <div className="flex items-center justify-between">
               <div>
                 <Label htmlFor="api_documentation">API Documentation</Label>
@@ -58,7 +51,7 @@ const AdvancedDeveloperTools = () => {
             </div>
           </div>
         </div>
-        
+
         <div className="space-y-4">
           <h4 className="font-medium text-gray-900">Testing Tools</h4>
           <div className="space-y-3">
@@ -69,7 +62,7 @@ const AdvancedDeveloperTools = () => {
               </div>
               <Switch id="test_mode" />
             </div>
-            
+
             <div className="flex items-center justify-between">
               <div>
                 <Label htmlFor="mock_data">Mock Data</Label>
@@ -77,7 +70,7 @@ const AdvancedDeveloperTools = () => {
               </div>
               <Switch id="mock_data" />
             </div>
-            
+
             <div className="flex items-center justify-between">
               <div>
                 <Label htmlFor="test_emails">Test Emails</Label>
@@ -87,32 +80,22 @@ const AdvancedDeveloperTools = () => {
             </div>
           </div>
         </div>
-        
+
         <div className="space-y-4">
           <h4 className="font-medium text-gray-900">Development Settings</h4>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
               <Label htmlFor="dev_port">Development Port</Label>
-              <Input 
-                id="dev_port" 
-                type="number"
-                placeholder="3000"
-                defaultValue="3000"
-              />
+              <Input id="dev_port" type="number" placeholder="3000" defaultValue="3000" />
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="hot_reload">Hot Reload Port</Label>
-              <Input 
-                id="hot_reload" 
-                type="number"
-                placeholder="3001"
-                defaultValue="3001"
-              />
+              <Input id="hot_reload" type="number" placeholder="3001" defaultValue="3001" />
             </div>
           </div>
         </div>
-        
+
         <div className="flex items-center gap-3 pt-4">
           <Button className="flex items-center gap-2">
             <Save className="w-4 h-4" />

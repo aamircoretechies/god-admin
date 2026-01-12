@@ -1,14 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
-import { 
-  Stethoscope, 
-  Activity, 
-  AlertTriangle,
-  Play,
-  Download,
-  Eye
-} from 'lucide-react';
+import { Stethoscope, Activity, AlertTriangle, Play, Download, Eye } from 'lucide-react';
 
 const AdvancedDiagnostics = () => {
   return (
@@ -33,7 +26,7 @@ const AdvancedDiagnostics = () => {
                 Run
               </Button>
             </div>
-            
+
             <div className="flex items-center justify-between">
               <div>
                 <h5 className="font-medium text-sm">Performance Analysis</h5>
@@ -44,7 +37,7 @@ const AdvancedDiagnostics = () => {
                 Run
               </Button>
             </div>
-            
+
             <div className="flex items-center justify-between">
               <div>
                 <h5 className="font-medium text-sm">Security Scan</h5>
@@ -55,7 +48,7 @@ const AdvancedDiagnostics = () => {
                 Run
               </Button>
             </div>
-            
+
             <div className="flex items-center justify-between">
               <div>
                 <h5 className="font-medium text-sm">Database Diagnostics</h5>
@@ -68,7 +61,7 @@ const AdvancedDiagnostics = () => {
             </div>
           </div>
         </div>
-        
+
         <div className="space-y-4">
           <h4 className="font-medium text-gray-900">Real-time Monitoring</h4>
           <div className="space-y-3">
@@ -79,7 +72,7 @@ const AdvancedDiagnostics = () => {
               </div>
               <Switch defaultChecked />
             </div>
-            
+
             <div className="flex items-center justify-between">
               <div>
                 <h5 className="font-medium text-sm">Memory Monitoring</h5>
@@ -87,7 +80,7 @@ const AdvancedDiagnostics = () => {
               </div>
               <Switch defaultChecked />
             </div>
-            
+
             <div className="flex items-center justify-between">
               <div>
                 <h5 className="font-medium text-sm">Network Monitoring</h5>
@@ -95,7 +88,7 @@ const AdvancedDiagnostics = () => {
               </div>
               <Switch />
             </div>
-            
+
             <div className="flex items-center justify-between">
               <div>
                 <h5 className="font-medium text-sm">Error Tracking</h5>
@@ -105,7 +98,7 @@ const AdvancedDiagnostics = () => {
             </div>
           </div>
         </div>
-        
+
         <div className="space-y-4">
           <h4 className="font-medium text-gray-900">Recent Diagnostics</h4>
           <div className="space-y-3">
@@ -121,7 +114,7 @@ const AdvancedDiagnostics = () => {
                 </div>
               </div>
             </div>
-            
+
             <div className="p-3 border rounded-lg">
               <div className="flex items-center justify-between">
                 <div>
@@ -134,7 +127,7 @@ const AdvancedDiagnostics = () => {
                 </div>
               </div>
             </div>
-            
+
             <div className="p-3 border rounded-lg">
               <div className="flex items-center justify-between">
                 <div>
@@ -149,7 +142,7 @@ const AdvancedDiagnostics = () => {
             </div>
           </div>
         </div>
-        
+
         <div className="flex items-center gap-3 pt-4">
           <Button className="flex items-center gap-2">
             <Activity className="w-4 h-4" />

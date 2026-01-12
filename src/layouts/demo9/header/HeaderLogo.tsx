@@ -22,12 +22,12 @@ interface IHeaderLogoTeam {
   urlPartial: string;
   path: string;
 }
-interface IHeaderLogoTeams extends Array<IHeaderLogoTeam> { }
+interface IHeaderLogoTeams extends Array<IHeaderLogoTeam> {}
 
 interface IHeaderLogoMonth {
   title: string;
 }
-interface IHeaderLogoMonths extends Array<IHeaderLogoMonth> { }
+interface IHeaderLogoMonths extends Array<IHeaderLogoMonth> {}
 
 const HeaderLogo = () => {
   const desktopMode = useResponsive('up', 'lg');

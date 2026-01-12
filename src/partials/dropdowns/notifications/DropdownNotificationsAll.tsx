@@ -1,9 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { getHeight } from '@/utils';
 import { useViewport } from '@/hooks';
-import {
-  DropdownNotificationsItem1
-} from './items';
+import { DropdownNotificationsItem1 } from './items';
 
 const DropdownNotificationsAll = () => {
   const footerRef = useRef<HTMLDivElement>(null);

@@ -21,7 +21,7 @@ const HeaderLogo = () => {
         <img
           src={toAbsoluteUrl('/media/app/mini-logo.svg')}
           // className="max-h-[25px] w-full"
-           className="h-[25px] w-auto"
+          className="h-[25px] w-auto"
           alt="mini-logo"
         />
       </Link>
@@ -35,7 +35,7 @@ const HeaderLogo = () => {
           <KeenIcon icon="menu" />
         </button>
 
-       {/*  {megaMenuEnabled && (
+        {/*  {megaMenuEnabled && (
           <button
             type="button"
             className="btn btn-icon btn-light btn-clear btn-sm"

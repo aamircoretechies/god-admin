@@ -26,12 +26,12 @@ const Highlights = ({ limit }: IHighlightsProps) => {
 
   const rows: IHighlightsRows = [
     { icon: 'users', text: 'Free Users', total: 172, stats: 3.9, increase: true },
-    { icon: 'crown', text: 'Subscribers', total: 85, stats: 0.7, increase: false },
+    { icon: 'crown', text: 'Subscribers', total: 85, stats: 0.7, increase: false }
   ];
 
   const items: IHighlightsItems = [
     { badgeColor: 'badge-success', label: 'Free Users' },
-    { badgeColor: 'badge-primary', label: 'Subscribers' },
+    { badgeColor: 'badge-primary', label: 'Subscribers' }
   ];
 
   const renderRow = (row: IHighlightsRow, index: number) => {

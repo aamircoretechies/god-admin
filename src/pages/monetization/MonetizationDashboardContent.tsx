@@ -1,11 +1,11 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Users, 
-  Crown, 
-  CreditCard, 
-  TrendingUp, 
+import {
+  Users,
+  Crown,
+  CreditCard,
+  TrendingUp,
   DollarSign,
   Calendar,
   Activity,
@@ -26,15 +26,20 @@ const mockChartData = {
 };
 
 // Simple chart components
-const SimpleLineChart: React.FC<{ data: number[], labels: string[], title: string, color: string }> = ({ data, labels, title, color }) => (
+const SimpleLineChart: React.FC<{
+  data: number[];
+  labels: string[];
+  title: string;
+  color: string;
+}> = ({ data, labels, title, color }) => (
   <div className="space-y-2">
     <h4 className="text-sm font-medium text-gray-700">{title}</h4>
     <div className="flex items-end gap-1 h-32">
       {data.map((value, index) => (
         <div key={index} className="flex-1 flex flex-col items-center">
-          <div 
+          <div
             className="rounded-t w-full"
-            style={{ 
+            style={{
               height: `${(value / Math.max(...data)) * 100}%`,
               backgroundColor: color
             }}
@@ -70,7 +75,9 @@ const MonetizationDashboardContent: React.FC = () => {
             </div>
             <div>
               <p className="text-sm text-gray-600">Total Free Users</p>
-              <p className="text-2xl font-bold text-gray-900">{subscriptionStats.totalFreeUsers.toLocaleString()}</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {subscriptionStats.totalFreeUsers.toLocaleString()}
+              </p>
               <p className="text-xs text-green-600">+12% from last month</p>
             </div>
           </CardContent>
@@ -83,7 +90,9 @@ const MonetizationDashboardContent: React.FC = () => {
             </div>
             <div>
               <p className="text-sm text-gray-600">Total Premium Users</p>
-              <p className="text-2xl font-bold text-gray-900">{subscriptionStats.totalPremiumUsers.toLocaleString()}</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {subscriptionStats.totalPremiumUsers.toLocaleString()}
+              </p>
               <p className="text-xs text-green-600">+8% from last month</p>
             </div>
           </CardContent>
@@ -96,7 +105,9 @@ const MonetizationDashboardContent: React.FC = () => {
             </div>
             <div>
               <p className="text-sm text-gray-600">Active Subscriptions</p>
-              <p className="text-2xl font-bold text-gray-900">{subscriptionStats.activeSubscriptions.toLocaleString()}</p>
+              <p className="text-2xl font-bold text-gray-900">
+                {subscriptionStats.activeSubscriptions.toLocaleString()}
+              </p>
               <p className="text-xs text-green-600">+5% from last month</p>
             </div>
           </CardContent>
@@ -109,7 +120,9 @@ const MonetizationDashboardContent: React.FC = () => {
             </div>
             <div>
               <p className="text-sm text-gray-600">Monthly Revenue</p>
-              <p className="text-2xl font-bold text-gray-900">${subscriptionStats.monthlyRevenue.toLocaleString()}</p>
+              <p className="text-2xl font-bold text-gray-900">
+                ${subscriptionStats.monthlyRevenue.toLocaleString()}
+              </p>
               <p className="text-xs text-green-600">+15% from last month</p>
             </div>
           </CardContent>
@@ -134,7 +147,11 @@ const MonetizationDashboardContent: React.FC = () => {
               <div className="flex items-center gap-2">
                 <span className="text-sm font-medium">{subscriptionStats.activeSubscriptions}</span>
                 <Badge variant="default" className="bg-green-100 text-green-800">
-                  {((subscriptionStats.activeSubscriptions / subscriptionStats.totalPremiumUsers) * 100).toFixed(1)}%
+                  {(
+                    (subscriptionStats.activeSubscriptions / subscriptionStats.totalPremiumUsers) *
+                    100
+                  ).toFixed(1)}
+                  %
                 </Badge>
               </div>
             </div>
@@ -146,7 +163,11 @@ const MonetizationDashboardContent: React.FC = () => {
               <div className="flex items-center gap-2">
                 <span className="text-sm font-medium">{subscriptionStats.trialSubscriptions}</span>
                 <Badge variant="default" className="bg-yellow-100 text-yellow-800">
-                  {((subscriptionStats.trialSubscriptions / subscriptionStats.totalPremiumUsers) * 100).toFixed(1)}%
+                  {(
+                    (subscriptionStats.trialSubscriptions / subscriptionStats.totalPremiumUsers) *
+                    100
+                  ).toFixed(1)}
+                  %
                 </Badge>
               </div>
             </div>
@@ -156,9 +177,15 @@ const MonetizationDashboardContent: React.FC = () => {
                 <span className="text-sm">Expired</span>
               </div>
               <div className="flex items-center gap-2">
-                <span className="text-sm font-medium">{subscriptionStats.expiredSubscriptions}</span>
+                <span className="text-sm font-medium">
+                  {subscriptionStats.expiredSubscriptions}
+                </span>
                 <Badge variant="default" className="bg-red-100 text-red-800">
-                  {((subscriptionStats.expiredSubscriptions / subscriptionStats.totalPremiumUsers) * 100).toFixed(1)}%
+                  {(
+                    (subscriptionStats.expiredSubscriptions / subscriptionStats.totalPremiumUsers) *
+                    100
+                  ).toFixed(1)}
+                  %
                 </Badge>
               </div>
             </div>
@@ -177,21 +204,27 @@ const MonetizationDashboardContent: React.FC = () => {
               <span className="text-sm text-gray-600">Conversion Rate</span>
               <div className="flex items-center gap-2">
                 <span className="text-sm font-medium">{subscriptionStats.conversionRate}%</span>
-                <Badge variant="default" className="bg-green-100 text-green-800">+2.1%</Badge>
+                <Badge variant="default" className="bg-green-100 text-green-800">
+                  +2.1%
+                </Badge>
               </div>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm text-gray-600">Churn Rate</span>
               <div className="flex items-center gap-2">
                 <span className="text-sm font-medium">{subscriptionStats.churnRate}%</span>
-                <Badge variant="default" className="bg-red-100 text-red-800">+0.3%</Badge>
+                <Badge variant="default" className="bg-red-100 text-red-800">
+                  +0.3%
+                </Badge>
               </div>
             </div>
             <div className="flex items-center justify-between">
               <span className="text-sm text-gray-600">Avg. Revenue per User</span>
               <div className="flex items-center gap-2">
                 <span className="text-sm font-medium">$25.00</span>
-                <Badge variant="default" className="bg-green-100 text-green-800">+$2.50</Badge>
+                <Badge variant="default" className="bg-green-100 text-green-800">
+                  +$2.50
+                </Badge>
               </div>
             </div>
           </CardContent>

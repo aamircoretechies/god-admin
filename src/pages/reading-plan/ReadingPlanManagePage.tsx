@@ -3,19 +3,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { 
-  BookOpen, 
-  Plus, 
-  Edit, 
-  Trash2, 
-  Save,
-  X,
-  Calendar,
-  Target,
-  FileText
-} from 'lucide-react';
+import { BookOpen, Plus, Edit, Trash2, Save, X, Calendar, Target, FileText } from 'lucide-react';
 
 interface ReadingPlan {
   id: string;
@@ -64,20 +60,72 @@ const mockPlans: ReadingPlan[] = [
 ];
 
 const bibleBooks = [
-  'Genesis', 'Exodus', 'Leviticus', 'Numbers', 'Deuteronomy',
-  'Joshua', 'Judges', 'Ruth', '1 Samuel', '2 Samuel',
-  '1 Kings', '2 Kings', '1 Chronicles', '2 Chronicles', 'Ezra',
-  'Nehemiah', 'Esther', 'Job', 'Psalms', 'Proverbs',
-  'Ecclesiastes', 'Song of Solomon', 'Isaiah', 'Jeremiah', 'Lamentations',
-  'Ezekiel', 'Daniel', 'Hosea', 'Joel', 'Amos',
-  'Obadiah', 'Jonah', 'Micah', 'Nahum', 'Habakkuk',
-  'Zephaniah', 'Haggai', 'Zechariah', 'Malachi',
-  'Matthew', 'Mark', 'Luke', 'John', 'Acts',
-  'Romans', '1 Corinthians', '2 Corinthians', 'Galatians', 'Ephesians',
-  'Philippians', 'Colossians', '1 Thessalonians', '2 Thessalonians',
-  '1 Timothy', '2 Timothy', 'Titus', 'Philemon', 'Hebrews',
-  'James', '1 Peter', '2 Peter', '1 John', '2 John',
-  '3 John', 'Jude', 'Revelation'
+  'Genesis',
+  'Exodus',
+  'Leviticus',
+  'Numbers',
+  'Deuteronomy',
+  'Joshua',
+  'Judges',
+  'Ruth',
+  '1 Samuel',
+  '2 Samuel',
+  '1 Kings',
+  '2 Kings',
+  '1 Chronicles',
+  '2 Chronicles',
+  'Ezra',
+  'Nehemiah',
+  'Esther',
+  'Job',
+  'Psalms',
+  'Proverbs',
+  'Ecclesiastes',
+  'Song of Solomon',
+  'Isaiah',
+  'Jeremiah',
+  'Lamentations',
+  'Ezekiel',
+  'Daniel',
+  'Hosea',
+  'Joel',
+  'Amos',
+  'Obadiah',
+  'Jonah',
+  'Micah',
+  'Nahum',
+  'Habakkuk',
+  'Zephaniah',
+  'Haggai',
+  'Zechariah',
+  'Malachi',
+  'Matthew',
+  'Mark',
+  'Luke',
+  'John',
+  'Acts',
+  'Romans',
+  '1 Corinthians',
+  '2 Corinthians',
+  'Galatians',
+  'Ephesians',
+  'Philippians',
+  'Colossians',
+  '1 Thessalonians',
+  '2 Thessalonians',
+  '1 Timothy',
+  '2 Timothy',
+  'Titus',
+  'Philemon',
+  'Hebrews',
+  'James',
+  '1 Peter',
+  '2 Peter',
+  '1 John',
+  '2 John',
+  '3 John',
+  'Jude',
+  'Revelation'
 ];
 
 const ReadingPlanManagePage = () => {
@@ -124,7 +172,11 @@ const ReadingPlanManagePage = () => {
 
   const handleSave = () => {
     if (editingPlan) {
-      setPlans(plans.map(p => p.id === editingPlan.id ? { ...formData, id: editingPlan.id } as ReadingPlan : p));
+      setPlans(
+        plans.map((p) =>
+          p.id === editingPlan.id ? ({ ...formData, id: editingPlan.id } as ReadingPlan) : p
+        )
+      );
       setEditingPlan(null);
     } else {
       const newPlan: ReadingPlan = {
@@ -168,7 +220,7 @@ const ReadingPlanManagePage = () => {
   };
 
   const handleDelete = (id: string) => {
-    setPlans(plans.filter(p => p.id !== id));
+    setPlans(plans.filter((p) => p.id !== id));
   };
 
   const getStatusColor = (status: string) => {
@@ -216,9 +268,7 @@ const ReadingPlanManagePage = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Plan Title
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Plan Title</label>
                   <Input
                     value={formData.title}
                     onChange={(e) => setFormData({ ...formData, title: e.target.value })}
@@ -240,9 +290,7 @@ const ReadingPlanManagePage = () => {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Duration
-                    </label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Duration</label>
                     <Input
                       type="number"
                       value={formData.duration}
@@ -256,7 +304,9 @@ const ReadingPlanManagePage = () => {
                     </label>
                     <Select
                       value={formData.durationType}
-                      onValueChange={(value) => setFormData({ ...formData, durationType: value as any })}
+                      onValueChange={(value) =>
+                        setFormData({ ...formData, durationType: value as any })
+                      }
                     >
                       <SelectTrigger>
                         <SelectValue />
@@ -282,9 +332,7 @@ const ReadingPlanManagePage = () => {
                     />
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      End Date
-                    </label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">End Date</label>
                     <Input
                       type="date"
                       value={formData.endDate}
@@ -322,11 +370,17 @@ const ReadingPlanManagePage = () => {
                   </Select>
                   <div className="flex flex-wrap gap-2 mt-2">
                     {formData.bibleBooks?.map((book, index) => (
-                      <Badge key={index} variant="secondary" className="cursor-pointer"
-                        onClick={() => setFormData({
-                          ...formData,
-                          bibleBooks: formData.bibleBooks?.filter((_, i) => i !== index)
-                        })}>
+                      <Badge
+                        key={index}
+                        variant="secondary"
+                        className="cursor-pointer"
+                        onClick={() =>
+                          setFormData({
+                            ...formData,
+                            bibleBooks: formData.bibleBooks?.filter((_, i) => i !== index)
+                          })
+                        }
+                      >
                         {book} <X className="w-3 h-3 ml-1" />
                       </Badge>
                     ))}
@@ -334,15 +388,15 @@ const ReadingPlanManagePage = () => {
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Chapters
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Chapters</label>
                   <Input
                     value={formData.chapters?.join(', ')}
-                    onChange={(e) => setFormData({
-                      ...formData,
-                      chapters: e.target.value.split(',').map(c => c.trim())
-                    })}
+                    onChange={(e) =>
+                      setFormData({
+                        ...formData,
+                        chapters: e.target.value.split(',').map((c) => c.trim())
+                      })
+                    }
                     placeholder="e.g., 1-28, 1-16, 1-24"
                   />
                 </div>
@@ -364,16 +418,16 @@ const ReadingPlanManagePage = () => {
                   </label>
                   <Textarea
                     value={formData.reflectionContent}
-                    onChange={(e) => setFormData({ ...formData, reflectionContent: e.target.value })}
+                    onChange={(e) =>
+                      setFormData({ ...formData, reflectionContent: e.target.value })
+                    }
                     placeholder="Add reflection questions or content..."
                     rows={4}
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Status
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
                   <Select
                     value={formData.status}
                     onValueChange={(value) => setFormData({ ...formData, status: value as any })}
@@ -442,7 +496,9 @@ const ReadingPlanManagePage = () => {
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm">
                   <div className="flex items-center space-x-2">
                     <Calendar className="w-4 h-4 text-gray-500" />
-                    <span className="text-gray-600">{plan.duration} {plan.durationType}</span>
+                    <span className="text-gray-600">
+                      {plan.duration} {plan.durationType}
+                    </span>
                   </div>
                   <div className="flex items-center space-x-2">
                     <Target className="w-4 h-4 text-gray-500" />
@@ -465,4 +521,4 @@ const ReadingPlanManagePage = () => {
   );
 };
 
-export { ReadingPlanManagePage }; 
+export { ReadingPlanManagePage };

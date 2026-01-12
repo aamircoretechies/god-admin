@@ -58,7 +58,7 @@ const NotesOverview = () => {
         // Build CSV content
         const csvContent = [
           csvHeaders.map(escapeCsvValue).join(','),
-          ...csvRows.map(row => row.map(cell => escapeCsvValue(String(cell || ''))).join(','))
+          ...csvRows.map((row) => row.map((cell) => escapeCsvValue(String(cell || ''))).join(','))
         ].join('\n');
 
         // Create and download CSV file
@@ -90,13 +90,12 @@ const NotesOverview = () => {
           <Toolbar>
             <ToolbarHeading>
               <ToolbarPageTitle />
-              <ToolbarDescription>Manage and moderate user notes and journal entries.</ToolbarDescription>
+              <ToolbarDescription>
+                Manage and moderate user notes and journal entries.
+              </ToolbarDescription>
             </ToolbarHeading>
             <ToolbarActions>
-              <button 
-                onClick={handleExportCSV}
-                className="btn btn-sm btn-light"
-              >
+              <button onClick={handleExportCSV} className="btn btn-sm btn-light">
                 Export CSV
               </button>
               {/* Export Excel - Commented out

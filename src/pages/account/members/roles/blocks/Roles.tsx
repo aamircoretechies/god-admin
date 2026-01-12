@@ -31,7 +31,8 @@ const Roles = () => {
       },
       title: 'Admin',
       subTitle: 'Full access',
-      description: 'Full system access including user management, content moderation, and system settings.',
+      description:
+        'Full system access including user management, content moderation, and system settings.',
       team: '2 people',
       path: '/public-profile/profiles/creator'
     },

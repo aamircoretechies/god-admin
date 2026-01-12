@@ -13,14 +13,12 @@ import AddEditPromptContent from './AddEditPromptContent';
 
 import { useRef } from 'react';
 
-
 const AddEditPrompt = () => {
   const { currentLayout } = useLayout();
   const contentRef = useRef<{
     submit: () => void;
     cancel: () => void;
   }>(null);
-
 
   return (
     <Fragment>
@@ -29,16 +27,15 @@ const AddEditPrompt = () => {
           <Toolbar>
             <ToolbarHeading>
               <ToolbarPageTitle />
-              <ToolbarDescription>Create or edit AI prompt templates for biblical content generation.</ToolbarDescription>
+              <ToolbarDescription>
+                Create or edit AI prompt templates for biblical content generation.
+              </ToolbarDescription>
             </ToolbarHeading>
             <ToolbarActions>
               {/* <a href="#" className="btn btn-sm btn-light">
                 Cancel
               </a> */}
-              <button
-                className="btn btn-sm btn-light"
-                onClick={() => contentRef.current?.cancel()}
-              >
+              <button className="btn btn-sm btn-light" onClick={() => contentRef.current?.cancel()}>
                 Cancel
               </button>
 
@@ -51,7 +48,6 @@ const AddEditPrompt = () => {
               >
                 Save Prompt
               </button>
-
             </ToolbarActions>
           </Toolbar>
         </Container>
@@ -60,7 +56,6 @@ const AddEditPrompt = () => {
       <Container>
         {/* <AddEditPromptContent /> */}
         <AddEditPromptContent ref={contentRef} />
-
       </Container>
     </Fragment>
   );

@@ -5,12 +5,12 @@ interface DummyDataIndicatorProps {
   className?: string;
 }
 
-export const DummyDataIndicator = ({ 
-  text = 'Dummy Data', 
-  className = '' 
+export const DummyDataIndicator = ({
+  text = 'Dummy Data',
+  className = ''
 }: DummyDataIndicatorProps) => {
   return (
-    <span 
+    <span
       className={`inline-flex items-center gap-1 text-xs text-gray-500 italic ${className}`}
       title="This is dummy data - not available from API"
     >
@@ -19,4 +19,3 @@ export const DummyDataIndicator = ({
     </span>
   );
 };
-

@@ -22,4 +22,4 @@ const TheologicalInsightsContent = () => {
   );
 };
 
-export { TheologicalInsightsContent }; 
+export { TheologicalInsightsContent };

@@ -1,18 +1,18 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
 } from '@/components/ui/select';
-import { 
-  TrendingUp, 
-  BookOpen, 
-  MessageSquare, 
-  Users, 
+import {
+  TrendingUp,
+  BookOpen,
+  MessageSquare,
+  Users,
   Download,
   Calendar,
   BarChart3,
@@ -40,7 +40,8 @@ const BibleAnalyticsContent = () => {
 
   const topVerses: TopVerse[] = [
     {
-      verse: 'For God so loved the world that he gave his one and only Son, that whoever believes in him shall not perish but have eternal life.',
+      verse:
+        'For God so loved the world that he gave his one and only Son, that whoever believes in him shall not perish but have eternal life.',
       views: 1247,
       aiQueries: 89,
       book: 'John',
@@ -56,7 +57,8 @@ const BibleAnalyticsContent = () => {
       verseNumber: 1
     },
     {
-      verse: 'And we know that in all things God works for the good of those who love him, who have been called according to his purpose.',
+      verse:
+        'And we know that in all things God works for the good of those who love him, who have been called according to his purpose.',
       views: 756,
       aiQueries: 54,
       book: 'Romans',
@@ -205,11 +207,16 @@ const BibleAnalyticsContent = () => {
         <CardContent>
           <div className="space-y-4">
             {topVerses.map((verse, index) => (
-              <div key={index} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50">
+              <div
+                key={index}
+                className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50"
+              >
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-2">
                     <span className="text-sm font-medium text-gray-500">#{index + 1}</span>
-                    <span className="font-medium">{verse.book} {verse.chapter}:{verse.verseNumber}</span>
+                    <span className="font-medium">
+                      {verse.book} {verse.chapter}:{verse.verseNumber}
+                    </span>
                   </div>
                   <p className="text-sm text-gray-700 mb-2 line-clamp-2">{verse.verse}</p>
                   <div className="flex items-center gap-4 text-xs text-gray-500">
@@ -243,9 +250,7 @@ const BibleAnalyticsContent = () => {
                   <div className="flex items-center gap-3">
                     <div className="w-3 h-3 bg-amber-500 rounded-full" />
                     <span className="font-medium">{topic.topic}</span>
-                    <div className="flex items-center gap-1">
-                      {getTrendIcon(topic.trend)}
-                    </div>
+                    <div className="flex items-center gap-1">{getTrendIcon(topic.trend)}</div>
                   </div>
                   <div className="text-right">
                     <div className="font-bold">{topic.queries}</div>
@@ -275,7 +280,7 @@ const BibleAnalyticsContent = () => {
                     </span>
                   </div>
                   <div className="w-full bg-gray-200 rounded-full h-2">
-                    <div 
+                    <div
                       className="bg-amber-500 h-2 rounded-full transition-all duration-300"
                       style={{ width: `${topic.percentage}%` }}
                     />
@@ -317,4 +322,3 @@ const BibleAnalyticsContent = () => {
 };
 
 export { BibleAnalyticsContent };
-

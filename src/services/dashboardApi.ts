@@ -64,17 +64,14 @@ export interface DashboardAnalyticsResponse {
 }
 
 // Fetch dashboard analytics
-export const fetchDashboardAnalytics = async (period: string = '30d'): Promise<DashboardAnalyticsResponse> => {
+export const fetchDashboardAnalytics = async (
+  period: string = '30d'
+): Promise<DashboardAnalyticsResponse> => {
   const response = await axios.get<DashboardAnalyticsResponse>(
     `${API_URL}/admin/dashboard/analytics?period=${period}`
   );
   return response.data;
 };
-
-
-
-
-
 
 // ===== Team Members API =====
 
@@ -100,9 +97,6 @@ export interface TeamMembersResponse {
 // };
 
 export const fetchTeamMembers = async (): Promise<TeamMembersResponse> => {
-  const response = await axios.get<TeamMembersResponse>(
-    `${API_URL}/users/team`
-  );
+  const response = await axios.get<TeamMembersResponse>(`${API_URL}/users/team`);
   return response.data;
 };
-

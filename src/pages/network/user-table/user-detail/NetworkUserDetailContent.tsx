@@ -17,4 +17,3 @@ const NetworkUserDetailContent = () => {
 };
 
 export { NetworkUserDetailContent };
-

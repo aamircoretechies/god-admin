@@ -3,14 +3,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
-import { 
-  Brain, 
-  Zap, 
-  Settings,
-  Save,
-  TestTube,
-  RefreshCw
-} from 'lucide-react';
+import { Brain, Zap, Settings, Save, TestTube, RefreshCw } from 'lucide-react';
 
 const ContentAiConfig = () => {
   return (
@@ -25,44 +18,31 @@ const ContentAiConfig = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
             <Label htmlFor="ai_model">AI Model</Label>
-            <Input 
-              id="ai_model" 
-              placeholder="gpt-4"
-              defaultValue="gpt-4"
-            />
+            <Input id="ai_model" placeholder="gpt-4" defaultValue="gpt-4" />
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="ai_temperature">Temperature</Label>
-            <Input 
-              id="ai_temperature" 
+            <Input
+              id="ai_temperature"
               type="number"
               step="0.1"
               placeholder="0.7"
               defaultValue="0.7"
             />
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="ai_max_tokens">Max Tokens</Label>
-            <Input 
-              id="ai_max_tokens" 
-              type="number"
-              placeholder="2048"
-              defaultValue="2048"
-            />
+            <Input id="ai_max_tokens" type="number" placeholder="2048" defaultValue="2048" />
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="ai_api_key">API Key</Label>
-            <Input 
-              id="ai_api_key" 
-              type="password"
-              placeholder="Enter API key"
-            />
+            <Input id="ai_api_key" type="password" placeholder="Enter API key" />
           </div>
         </div>
-        
+
         <div className="space-y-4">
           <h4 className="font-medium text-gray-900">AI Features</h4>
           <div className="space-y-3">
@@ -73,7 +53,7 @@ const ContentAiConfig = () => {
               </div>
               <Switch id="content_generation" defaultChecked />
             </div>
-            
+
             <div className="flex items-center justify-between">
               <div>
                 <Label htmlFor="content_summarization">Content Summarization</Label>
@@ -81,7 +61,7 @@ const ContentAiConfig = () => {
               </div>
               <Switch id="content_summarization" defaultChecked />
             </div>
-            
+
             <div className="flex items-center justify-between">
               <div>
                 <Label htmlFor="content_translation">Content Translation</Label>
@@ -89,7 +69,7 @@ const ContentAiConfig = () => {
               </div>
               <Switch id="content_translation" />
             </div>
-            
+
             <div className="flex items-center justify-between">
               <div>
                 <Label htmlFor="content_optimization">Content Optimization</Label>
@@ -99,7 +79,7 @@ const ContentAiConfig = () => {
             </div>
           </div>
         </div>
-        
+
         <div className="space-y-4">
           <h4 className="font-medium text-gray-900">AI Settings</h4>
           <div className="space-y-3">
@@ -110,7 +90,7 @@ const ContentAiConfig = () => {
               </div>
               <Switch id="ai_rate_limiting" defaultChecked />
             </div>
-            
+
             <div className="flex items-center justify-between">
               <div>
                 <Label htmlFor="ai_caching">AI Response Caching</Label>
@@ -118,7 +98,7 @@ const ContentAiConfig = () => {
               </div>
               <Switch id="ai_caching" defaultChecked />
             </div>
-            
+
             <div className="flex items-center justify-between">
               <div>
                 <Label htmlFor="ai_fallback">Fallback Mode</Label>
@@ -128,7 +108,7 @@ const ContentAiConfig = () => {
             </div>
           </div>
         </div>
-        
+
         <div className="flex items-center gap-3 pt-4">
           <Button className="flex items-center gap-2">
             <Save className="w-4 h-4" />

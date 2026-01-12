@@ -20,7 +20,9 @@ const NotesAnalytics = () => {
           <Toolbar>
             <ToolbarHeading>
               <ToolbarPageTitle />
-              <ToolbarDescription>Insights and trends for user notes and journal entries.</ToolbarDescription>
+              <ToolbarDescription>
+                Insights and trends for user notes and journal entries.
+              </ToolbarDescription>
             </ToolbarHeading>
             <ToolbarActions>
               <a href="#" className="btn btn-sm btn-light">

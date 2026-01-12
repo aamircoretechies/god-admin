@@ -1,9 +1,4 @@
-import {
-  ChannelStats,
-  EntryCallout,
-  TeamMeeting,
-  Teams
-} from './blocks';
+import { ChannelStats, EntryCallout, TeamMeeting, Teams } from './blocks';
 import { NetworkSaasUsersContent } from '@/pages/network/user-table/saas-users';
 import { BibleKPICards } from '@/partials/cards/BibleKPICards';
 
@@ -24,8 +19,6 @@ const Demo1LightSidebarContent = () => {
           <NetworkSaasUsersContent hideRowsPerPage={true} />
         </div>
       </div>
-
-      
     </div>
   );
 };

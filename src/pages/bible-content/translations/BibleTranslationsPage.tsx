@@ -46,4 +46,4 @@ const BibleTranslationsPage = () => {
   );
 };
 
-export { BibleTranslationsPage }; 
+export { BibleTranslationsPage };

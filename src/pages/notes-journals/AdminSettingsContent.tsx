@@ -4,25 +4,21 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
 } from '@/components/ui/select';
-import { 
-  Textarea 
-} from '@/components/ui/textarea';
-import { 
-  Separator 
-} from '@/components/ui/separator';
-import { 
-  Settings, 
-  Bell, 
-  Shield, 
-  Download, 
-  Save, 
+import { Textarea } from '@/components/ui/textarea';
+import { Separator } from '@/components/ui/separator';
+import {
+  Settings,
+  Bell,
+  Shield,
+  Download,
+  Save,
   RotateCcw,
   AlertTriangle,
   FileText,
@@ -39,13 +35,13 @@ const AdminSettingsContent: React.FC = () => {
     dailyReminderEnabled: true,
     reminderTime: '09:00',
     reminderMessage: 'Take a moment to reflect on your spiritual journey today.',
-    
+
     // Reflection Length Defaults
     defaultReflectionLength: 'medium',
     shortLength: 100,
     mediumLength: 300,
     deepLength: 500,
-    
+
     // AI Prompts
     aiPromptsEnabled: true,
     aiPromptFrequency: 'daily',
@@ -55,26 +51,26 @@ const AdminSettingsContent: React.FC = () => {
       'What are you grateful for today?',
       'What challenges are you facing and how can prayer help?'
     ],
-    
+
     // Moderation Settings
     autoFlaggingEnabled: true,
     flagKeywords: ['spam', 'inappropriate', 'offensive'],
     maxVersesPerNote: 10,
     minNoteLength: 10,
     maxNoteLength: 5000,
-    
+
     // Export Options
     exportFormats: ['csv', 'pdf', 'json'],
     includeMetadata: true,
     includeAttachments: false,
-    
+
     // Content Guidelines
     contentGuidelines: `1. Keep content respectful and spiritually uplifting
 2. Avoid inappropriate language or content
 3. Focus on personal spiritual growth and reflection
 4. Respect others' beliefs and perspectives
 5. Use appropriate tags and verse references`,
-    
+
     // Notification Settings
     notifyOnFlagged: true,
     notifyOnBulkActions: true,
@@ -86,14 +82,14 @@ const AdminSettingsContent: React.FC = () => {
   const [hasChanges, setHasChanges] = useState(false);
 
   const handleSettingChange = (key: string, value: any) => {
-    setSettings(prev => ({ ...prev, [key]: value }));
+    setSettings((prev) => ({ ...prev, [key]: value }));
     setHasChanges(true);
   };
 
   const handleSave = async () => {
     setIsSaving(true);
     // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
+    await new Promise((resolve) => setTimeout(resolve, 1000));
     setIsSaving(false);
     setHasChanges(false);
     console.log('Settings saved:', settings);
@@ -160,7 +156,7 @@ const AdminSettingsContent: React.FC = () => {
                 onCheckedChange={(checked) => handleSettingChange('dailyReminderEnabled', checked)}
               />
             </div>
-            
+
             {settings.dailyReminderEnabled && (
               <>
                 <div className="space-y-2">
@@ -174,7 +170,7 @@ const AdminSettingsContent: React.FC = () => {
                     onChange={(e) => handleSettingChange('reminderTime', e.target.value)}
                   />
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="reminderMessage" className="text-sm font-medium">
                     Reminder Message
@@ -205,8 +201,8 @@ const AdminSettingsContent: React.FC = () => {
               <Label htmlFor="defaultLength" className="text-sm font-medium">
                 Default Reflection Length
               </Label>
-              <Select 
-                value={settings.defaultReflectionLength} 
+              <Select
+                value={settings.defaultReflectionLength}
                 onValueChange={(value) => handleSettingChange('defaultReflectionLength', value)}
               >
                 <SelectTrigger>
@@ -219,7 +215,7 @@ const AdminSettingsContent: React.FC = () => {
                 </SelectContent>
               </Select>
             </div>
-            
+
             <div className="grid grid-cols-3 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="shortLength" className="text-sm font-medium">
@@ -277,15 +273,15 @@ const AdminSettingsContent: React.FC = () => {
                 onCheckedChange={(checked) => handleSettingChange('aiPromptsEnabled', checked)}
               />
             </div>
-            
+
             {settings.aiPromptsEnabled && (
               <>
                 <div className="space-y-2">
                   <Label htmlFor="promptFrequency" className="text-sm font-medium">
                     Prompt Frequency
                   </Label>
-                  <Select 
-                    value={settings.aiPromptFrequency} 
+                  <Select
+                    value={settings.aiPromptFrequency}
                     onValueChange={(value) => handleSettingChange('aiPromptFrequency', value)}
                   >
                     <SelectTrigger>
@@ -298,11 +294,9 @@ const AdminSettingsContent: React.FC = () => {
                     </SelectContent>
                   </Select>
                 </div>
-                
+
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium">
-                    Custom Prompts
-                  </Label>
+                  <Label className="text-sm font-medium">Custom Prompts</Label>
                   <div className="space-y-2">
                     {settings.customPrompts.map((prompt, index) => (
                       <div key={index} className="flex gap-2">
@@ -363,23 +357,24 @@ const AdminSettingsContent: React.FC = () => {
                 onCheckedChange={(checked) => handleSettingChange('autoFlaggingEnabled', checked)}
               />
             </div>
-            
+
             {settings.autoFlaggingEnabled && (
               <>
                 <div className="space-y-2">
-                  <Label className="text-sm font-medium">
-                    Flag Keywords (comma-separated)
-                  </Label>
+                  <Label className="text-sm font-medium">Flag Keywords (comma-separated)</Label>
                   <Input
                     value={settings.flagKeywords.join(', ')}
                     onChange={(e) => {
-                      const keywords = e.target.value.split(',').map(k => k.trim()).filter(k => k.length > 0);
+                      const keywords = e.target.value
+                        .split(',')
+                        .map((k) => k.trim())
+                        .filter((k) => k.length > 0);
                       handleSettingChange('flagKeywords', keywords);
                     }}
                     placeholder="spam, inappropriate, offensive"
                   />
                 </div>
-                
+
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <Label htmlFor="maxVerses" className="text-sm font-medium">
@@ -389,7 +384,9 @@ const AdminSettingsContent: React.FC = () => {
                       id="maxVerses"
                       type="number"
                       value={settings.maxVersesPerNote}
-                      onChange={(e) => handleSettingChange('maxVersesPerNote', parseInt(e.target.value))}
+                      onChange={(e) =>
+                        handleSettingChange('maxVersesPerNote', parseInt(e.target.value))
+                      }
                     />
                   </div>
                   <div className="space-y-2">
@@ -400,11 +397,13 @@ const AdminSettingsContent: React.FC = () => {
                       id="minLength"
                       type="number"
                       value={settings.minNoteLength}
-                      onChange={(e) => handleSettingChange('minNoteLength', parseInt(e.target.value))}
+                      onChange={(e) =>
+                        handleSettingChange('minNoteLength', parseInt(e.target.value))
+                      }
                     />
                   </div>
                 </div>
-                
+
                 <div className="space-y-2">
                   <Label htmlFor="maxLength" className="text-sm font-medium">
                     Max Note Length
@@ -431,9 +430,7 @@ const AdminSettingsContent: React.FC = () => {
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label className="text-sm font-medium">
-                Export Formats
-              </Label>
+              <Label className="text-sm font-medium">Export Formats</Label>
               <div className="space-y-2">
                 {['csv', 'pdf', 'json'].map((format) => (
                   <div key={format} className="flex items-center space-x-2">
@@ -444,7 +441,7 @@ const AdminSettingsContent: React.FC = () => {
                       onChange={(e) => {
                         const formats = e.target.checked
                           ? [...settings.exportFormats, format]
-                          : settings.exportFormats.filter(f => f !== format);
+                          : settings.exportFormats.filter((f) => f !== format);
                         handleSettingChange('exportFormats', formats);
                       }}
                     />
@@ -455,9 +452,9 @@ const AdminSettingsContent: React.FC = () => {
                 ))}
               </div>
             </div>
-            
+
             <Separator />
-            
+
             <div className="flex items-center justify-between">
               <Label htmlFor="includeMetadata" className="text-sm font-medium">
                 Include Metadata
@@ -468,7 +465,7 @@ const AdminSettingsContent: React.FC = () => {
                 onCheckedChange={(checked) => handleSettingChange('includeMetadata', checked)}
               />
             </div>
-            
+
             <div className="flex items-center justify-between">
               <Label htmlFor="includeAttachments" className="text-sm font-medium">
                 Include Attachments
@@ -501,7 +498,7 @@ const AdminSettingsContent: React.FC = () => {
                 onCheckedChange={(checked) => handleSettingChange('notifyOnFlagged', checked)}
               />
             </div>
-            
+
             <div className="flex items-center justify-between">
               <Label htmlFor="notifyBulk" className="text-sm font-medium">
                 Notify on Bulk Actions
@@ -512,7 +509,7 @@ const AdminSettingsContent: React.FC = () => {
                 onCheckedChange={(checked) => handleSettingChange('notifyOnBulkActions', checked)}
               />
             </div>
-            
+
             <div className="flex items-center justify-between">
               <Label htmlFor="emailNotifications" className="text-sm font-medium">
                 Email Notifications
@@ -523,16 +520,17 @@ const AdminSettingsContent: React.FC = () => {
                 onCheckedChange={(checked) => handleSettingChange('emailNotifications', checked)}
               />
             </div>
-            
+
             {settings.emailNotifications && (
               <div className="space-y-2">
-                <Label className="text-sm font-medium">
-                  Notification Recipients
-                </Label>
+                <Label className="text-sm font-medium">Notification Recipients</Label>
                 <Textarea
                   value={settings.notificationRecipients.join(', ')}
                   onChange={(e) => {
-                    const recipients = e.target.value.split(',').map(r => r.trim()).filter(r => r.length > 0);
+                    const recipients = e.target.value
+                      .split(',')
+                      .map((r) => r.trim())
+                      .filter((r) => r.length > 0);
                     handleSettingChange('notificationRecipients', recipients);
                   }}
                   placeholder="admin@example.com, moderator@example.com"
@@ -574,9 +572,7 @@ const AdminSettingsContent: React.FC = () => {
           <CardContent className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <AlertTriangle className="w-5 h-5 text-yellow-600" />
-              <span className="text-sm font-medium text-yellow-900">
-                You have unsaved changes
-              </span>
+              <span className="text-sm font-medium text-yellow-900">You have unsaved changes</span>
             </div>
             <Button onClick={handleSave} disabled={isSaving}>
               <Save className="w-4 h-4 mr-2" />
@@ -590,4 +586,3 @@ const AdminSettingsContent: React.FC = () => {
 };
 
 export { AdminSettingsContent };
-

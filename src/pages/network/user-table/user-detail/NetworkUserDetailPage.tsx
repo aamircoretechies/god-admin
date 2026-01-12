@@ -44,7 +44,8 @@ const NetworkUserDetailPage = () => {
         toast.error(response.message || 'Failed to export user data');
       }
     } catch (error: any) {
-      const errorMessage = error?.response?.data?.message || error?.message || 'Failed to export user data';
+      const errorMessage =
+        error?.response?.data?.message || error?.message || 'Failed to export user data';
       toast.error(errorMessage);
     }
   };
@@ -64,13 +65,10 @@ const NetworkUserDetailPage = () => {
               <ToolbarDescription>User Profile & Analytics Dashboard</ToolbarDescription>
             </ToolbarHeading>
             <ToolbarActions>
-              <button 
-                onClick={handleExportData}
-                className="btn btn-sm btn-light"
-              >
+              <button onClick={handleExportData} className="btn btn-sm btn-light">
                 Export Data
               </button>
-              <button 
+              <button
                 onClick={handleEditProfile}
                 className="btn btn-sm btn-primary"
                 disabled
@@ -91,4 +89,3 @@ const NetworkUserDetailPage = () => {
 };
 
 export { NetworkUserDetailPage };
-

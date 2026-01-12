@@ -72,7 +72,7 @@ const ActivityLogList = () => {
         // Build CSV content
         const csvContent = [
           csvHeaders.map(escapeCsvValue).join(','),
-          ...csvRows.map(row => row.map(cell => escapeCsvValue(String(cell || ''))).join(','))
+          ...csvRows.map((row) => row.map((cell) => escapeCsvValue(String(cell || ''))).join(','))
         ].join('\n');
 
         // Create and download CSV file
@@ -80,7 +80,10 @@ const ActivityLogList = () => {
         const link = document.createElement('a');
         const url = URL.createObjectURL(blob);
         link.setAttribute('href', url);
-        link.setAttribute('download', `activity_logs_${new Date().toISOString().split('T')[0]}.csv`);
+        link.setAttribute(
+          'download',
+          `activity_logs_${new Date().toISOString().split('T')[0]}.csv`
+        );
         link.style.visibility = 'hidden';
         document.body.appendChild(link);
         link.click();
@@ -93,7 +96,9 @@ const ActivityLogList = () => {
       }
     } catch (error: any) {
       console.error('Error exporting activity logs:', error);
-      toast.error(error?.response?.data?.message || error?.message || 'Failed to export activity logs');
+      toast.error(
+        error?.response?.data?.message || error?.message || 'Failed to export activity logs'
+      );
     }
   };
 
@@ -104,13 +109,12 @@ const ActivityLogList = () => {
           <Toolbar>
             <ToolbarHeading>
               <ToolbarPageTitle />
-              <ToolbarDescription>Monitor and track user activities across the platform.</ToolbarDescription>
+              <ToolbarDescription>
+                Monitor and track user activities across the platform.
+              </ToolbarDescription>
             </ToolbarHeading>
             <ToolbarActions>
-              <button 
-                onClick={handleExportCSV}
-                className="btn btn-sm btn-light"
-              >
+              <button onClick={handleExportCSV} className="btn btn-sm btn-light">
                 Export CSV
               </button>
               {/* Export Excel - Commented out

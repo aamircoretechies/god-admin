@@ -4,9 +4,9 @@ import { fetchTranslationById, type TranslationDetailData } from '@/services/tra
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { 
-  ArrowLeft, 
-  Download, 
+import {
+  ArrowLeft,
+  Download,
   Upload,
   Globe,
   FileText,
@@ -37,30 +37,30 @@ interface Translation {
 
 // Language mapping: code -> display name
 const languageMap: Record<string, string> = {
-  'en': 'English',
-  'es': 'Spanish',
-  'fr': 'French',
-  'de': 'German',
-  'pt': 'Portuguese',
-  'it': 'Italian',
-  'nl': 'Dutch',
-  'ru': 'Russian',
-  'zh': 'Chinese',
-  'ja': 'Japanese',
-  'ko': 'Korean',
-  'ar': 'Arabic',
-  'he': 'Hebrew',
-  'el': 'Greek',
-  'la': 'Latin',
-  'sv': 'Swedish',
-  'no': 'Norwegian',
-  'da': 'Danish',
-  'fi': 'Finnish',
-  'pl': 'Polish',
-  'cs': 'Czech',
-  'hu': 'Hungarian',
-  'ro': 'Romanian',
-  'bg': 'Bulgarian'
+  en: 'English',
+  es: 'Spanish',
+  fr: 'French',
+  de: 'German',
+  pt: 'Portuguese',
+  it: 'Italian',
+  nl: 'Dutch',
+  ru: 'Russian',
+  zh: 'Chinese',
+  ja: 'Japanese',
+  ko: 'Korean',
+  ar: 'Arabic',
+  he: 'Hebrew',
+  el: 'Greek',
+  la: 'Latin',
+  sv: 'Swedish',
+  no: 'Norwegian',
+  da: 'Danish',
+  fi: 'Finnish',
+  pl: 'Polish',
+  cs: 'Czech',
+  hu: 'Hungarian',
+  ro: 'Romanian',
+  bg: 'Bulgarian'
 };
 
 // Transform API response to component format
@@ -113,7 +113,7 @@ const ViewTranslationContent: React.FC = () => {
         setLoading(true);
         setError(null);
         const apiTranslation = await fetchTranslationById(id);
-        
+
         if (apiTranslation) {
           const transformed = transformTranslation(apiTranslation);
           setTranslation(transformed);
@@ -152,7 +152,9 @@ const ViewTranslationContent: React.FC = () => {
       <div className="text-center py-12">
         <AlertCircle className="w-12 h-12 text-gray-400 mx-auto mb-4" />
         <h3 className="text-lg font-semibold text-gray-900 mb-2">Translation Not Found</h3>
-        <p className="text-gray-600 mb-4">{error || 'The translation you\'re looking for doesn\'t exist.'}</p>
+        <p className="text-gray-600 mb-4">
+          {error || "The translation you're looking for doesn't exist."}
+        </p>
         <Button onClick={() => navigate('/bible-content/translations')}>
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to Translations
@@ -224,7 +226,9 @@ const ViewTranslationContent: React.FC = () => {
           </Button>
           <div>
             <h2 className="text-2xl font-bold text-gray-900">{translation.name}</h2>
-            <p className="text-gray-600 mt-1">{translation.version} • {translation.language}</p>
+            <p className="text-gray-600 mt-1">
+              {translation.version} • {translation.language}
+            </p>
           </div>
         </div>
       </div>
@@ -247,7 +251,7 @@ const ViewTranslationContent: React.FC = () => {
                   <p className="text-gray-900">{translation.description}</p>
                 </div>
               )}
-              
+
               {(translation.publisher || translation.year) && (
                 <div className="grid grid-cols-2 gap-4 pt-4 border-t">
                   {translation.publisher && (
@@ -285,16 +289,22 @@ const ViewTranslationContent: React.FC = () => {
                 <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-100 dark:border-blue-800/30">
                   <div className="flex items-center space-x-2 mb-2">
                     <FileText className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                    <h4 className="text-sm font-medium text-gray-700 dark:text-white">Total Verses</h4>
+                    <h4 className="text-sm font-medium text-gray-700 dark:text-white">
+                      Total Verses
+                    </h4>
                   </div>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white">{translation.verseCount.toLocaleString()}</p>
+                  <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                    {translation.verseCount.toLocaleString()}
+                  </p>
                 </div>
                 <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-100 dark:border-green-800/30">
                   <div className="flex items-center space-x-2 mb-2">
                     <FileText className="w-5 h-5 text-green-600 dark:text-green-400" />
                     <h4 className="text-sm font-medium text-gray-700 dark:text-white">File Size</h4>
                   </div>
-                  <p className="text-2xl font-bold text-gray-900 dark:text-white">{translation.fileSize}</p>
+                  <p className="text-2xl font-bold text-gray-900 dark:text-white">
+                    {translation.fileSize}
+                  </p>
                 </div>
               </div>
             </CardContent>
@@ -325,7 +335,13 @@ const ViewTranslationContent: React.FC = () => {
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium">Visibility</span>
-                <Badge className={translation.isPublic ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>
+                <Badge
+                  className={
+                    translation.isPublic
+                      ? 'bg-green-100 text-green-800'
+                      : 'bg-gray-100 text-gray-800'
+                  }
+                >
                   {translation.isPublic ? 'Public' : 'Private'}
                 </Badge>
               </div>
@@ -382,4 +398,3 @@ const ViewTranslationContent: React.FC = () => {
 };
 
 export { ViewTranslationContent };
-

@@ -6,7 +6,9 @@ import { fetchUserProfile, type UserProfileResponse } from '@/services/usersApi'
 const UserRoleAccessControl = () => {
   const { id } = useParams<{ id: string }>();
   const [loading, setLoading] = useState(true);
-  const [roleData, setRoleData] = useState<UserProfileResponse['data']['roleAndAccess'] | null>(null);
+  const [roleData, setRoleData] = useState<UserProfileResponse['data']['roleAndAccess'] | null>(
+    null
+  );
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {

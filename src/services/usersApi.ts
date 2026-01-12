@@ -124,9 +124,7 @@ export const fetchUsers = async (params: {
   if (params.search) queryParams.append('search', params.search);
   if (params.status && params.status !== 'all') queryParams.append('status', params.status);
 
-  const response = await axios.get<UsersListResponse>(
-    `${API_URL}/users?${queryParams.toString()}`
-  );
+  const response = await axios.get<UsersListResponse>(`${API_URL}/users?${queryParams.toString()}`);
   return response.data;
 };
 
@@ -137,7 +135,7 @@ export const fetchUserProfile = async (userId: string): Promise<UserProfileRespo
   // Try admin endpoint first, fallback to regular endpoint
   const adminUrl = `${API_URL}/admin/users/${userId}/profile`;
   const userUrl = `${API_URL}/users/${userId}/profile`;
-  
+
   try {
     const response = await axios.get<UserProfileResponse>(adminUrl);
     return response.data;
@@ -189,11 +187,11 @@ export const fetchUsersForDataGrid = async (
 ): Promise<{ data: TransformedUserData[]; totalCount: number }> => {
   const page = params.pageIndex + 1; // API uses 1-based pagination
   const pageSize = params.pageSize || 10;
-  
+
   // Map sorting
   let sortBy = 'joinedAt';
   let sortOrder: 'asc' | 'desc' = 'desc';
-  
+
   if (params.sorting && params.sorting.length > 0) {
     const sort = params.sorting[0];
     if (sort.id === 'joinDate') {
@@ -315,10 +313,7 @@ export interface AdminCreatedUsersResponse {
 export const createTeamMember = async (
   data: CreateTeamMemberRequest
 ): Promise<CreateTeamMemberResponse> => {
-  const response = await axios.post<CreateTeamMemberResponse>(
-    `${API_URL}/users`,
-    data
-  );
+  const response = await axios.post<CreateTeamMemberResponse>(`${API_URL}/users`, data);
   return response.data;
 };
 
@@ -535,9 +530,7 @@ export interface DeleteTeamMemberResponse {
  * Delete single team member
  * DELETE /users/team/:id
  */
-export const deleteTeamMember = async (
-  teamMemberId: string
-): Promise<DeleteTeamMemberResponse> => {
+export const deleteTeamMember = async (teamMemberId: string): Promise<DeleteTeamMemberResponse> => {
   const response = await axios.delete<DeleteTeamMemberResponse>(
     `${API_URL}/users/team/${teamMemberId}`
   );
@@ -607,9 +600,6 @@ export interface GetRolesResponse {
  * GET /admin/roles
  */
 export const getAvailableRoles = async (): Promise<GetRolesResponse> => {
-  const response = await axios.get<GetRolesResponse>(
-    `${API_URL}/admin/roles`
-  );
+  const response = await axios.get<GetRolesResponse>(`${API_URL}/admin/roles`);
   return response.data;
 };
-

@@ -18,7 +18,6 @@ const AccountRolesPage = () => {
 
   return (
     <Fragment>
-
       {currentLayout?.name === 'demo1-layout' && (
         <Container>
           <Toolbar>

@@ -4,15 +4,16 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
 import { AlertCircle } from 'lucide-react';
 import { fetchSettings, updateSetting, type Setting } from '@/services/settingsApi';
-import { 
-  Settings, 
-  Upload,
-  Save,
-  RefreshCw
-} from 'lucide-react';
+import { Settings, Upload, Save, RefreshCw } from 'lucide-react';
 
 const GeneralSettings = () => {
   const [settings, setSettings] = useState<Setting[]>([]);
@@ -32,7 +33,7 @@ const GeneralSettings = () => {
           setSettings(generalSettings);
           // Initialize local values
           const initialValues: Record<string, string> = {};
-          generalSettings.forEach(setting => {
+          generalSettings.forEach((setting) => {
             initialValues[setting.setting_id] = setting.value;
           });
           setLocalValues(initialValues);
@@ -51,17 +52,17 @@ const GeneralSettings = () => {
   }, []);
 
   const handleValueChange = (settingId: string, value: string) => {
-    setLocalValues(prev => ({ ...prev, [settingId]: value }));
+    setLocalValues((prev) => ({ ...prev, [settingId]: value }));
   };
 
   const handleSave = async () => {
     try {
       setSaving(true);
       setError(null);
-      
+
       // Update all changed settings
       const updatePromises = Object.entries(localValues).map(([settingId, value]) => {
-        const originalSetting = settings.find(s => s.setting_id === settingId);
+        const originalSetting = settings.find((s) => s.setting_id === settingId);
         if (originalSetting && originalSetting.value !== value) {
           return updateSetting(settingId, { value });
         }
@@ -69,13 +70,13 @@ const GeneralSettings = () => {
       });
 
       await Promise.all(updatePromises);
-      
+
       // Reload settings
       const response = await fetchSettings();
       if (response.status === 1 && response.data?.general) {
         setSettings(response.data.general);
         const newValues: Record<string, string> = {};
-        response.data.general.forEach(setting => {
+        response.data.general.forEach((setting) => {
           newValues[setting.setting_id] = setting.value;
         });
         setLocalValues(newValues);
@@ -89,7 +90,7 @@ const GeneralSettings = () => {
   };
 
   const getSettingValue = (key: string): string => {
-    const setting = settings.find(s => s.key === key);
+    const setting = settings.find((s) => s.key === key);
     if (setting) {
       return localValues[setting.setting_id] || setting.value;
     }
@@ -97,7 +98,7 @@ const GeneralSettings = () => {
   };
 
   const getSettingId = (key: string): string | undefined => {
-    return settings.find(s => s.key === key)?.setting_id;
+    return settings.find((s) => s.key === key)?.setting_id;
   };
 
   if (loading) {
@@ -144,13 +145,13 @@ const GeneralSettings = () => {
             </div>
           </div>
         )}
-        
+
         {/* Phase 1 General Settings - Brand Identity Alignment */}
         <div className="space-y-6">
           <div className="space-y-2">
             <Label htmlFor="site_title">Site Title</Label>
-            <Input 
-              id="site_title" 
+            <Input
+              id="site_title"
               placeholder="Enter site title"
               value={getSettingValue('site_title')}
               onChange={(e) => {
@@ -159,20 +160,24 @@ const GeneralSettings = () => {
               }}
             />
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="logo_upload">Logo Upload</Label>
             <div className="flex items-center gap-3">
               <div className="w-16 h-16 border-2 border-dashed border-gray-300 rounded-lg flex items-center justify-center">
                 {getSettingValue('logo_url') ? (
-                  <img src={getSettingValue('logo_url')} alt="Logo" className="w-full h-full object-contain rounded-lg" />
+                  <img
+                    src={getSettingValue('logo_url')}
+                    alt="Logo"
+                    className="w-full h-full object-contain rounded-lg"
+                  />
                 ) : (
                   <Upload className="w-6 h-6 text-gray-400" />
                 )}
               </div>
               <div className="flex-1">
-                <Input 
-                  id="logo_url" 
+                <Input
+                  id="logo_url"
                   placeholder="Enter logo URL"
                   value={getSettingValue('logo_url')}
                   onChange={(e) => {
@@ -189,11 +194,11 @@ const GeneralSettings = () => {
               </div>
             </div>
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="theme_selector">Theme Selector</Label>
-            <Select 
-              value={getSettingValue('theme')} 
+            <Select
+              value={getSettingValue('theme')}
               onValueChange={(value) => {
                 const settingId = getSettingId('theme');
                 if (settingId) handleValueChange(settingId, value);
@@ -219,22 +224,18 @@ const GeneralSettings = () => {
             </Select>
           </div>
         </div>
-        
+
         <div className="flex items-center gap-3 pt-4">
-          <Button 
-            className="flex items-center gap-2"
-            onClick={handleSave}
-            disabled={saving}
-          >
+          <Button className="flex items-center gap-2" onClick={handleSave} disabled={saving}>
             <Save className="w-4 h-4" />
             {saving ? 'Saving...' : 'Save Settings'}
           </Button>
-          <Button 
-            variant="outline" 
+          <Button
+            variant="outline"
             className="flex items-center gap-2"
             onClick={() => {
               const initialValues: Record<string, string> = {};
-              settings.forEach(setting => {
+              settings.forEach((setting) => {
                 initialValues[setting.setting_id] = setting.value;
               });
               setLocalValues(initialValues);

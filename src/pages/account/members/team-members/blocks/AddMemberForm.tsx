@@ -2,26 +2,22 @@ import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
 } from '@/components/ui/select';
-import { 
+import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
+  DialogTrigger
 } from '@/components/ui/dialog';
-import { 
-  UserPlus, 
-  Eye, 
-  EyeOff 
-} from 'lucide-react';
+import { UserPlus, Eye, EyeOff } from 'lucide-react';
 import { createTeamMember, getAvailableRoles, type Role } from '@/services/usersApi';
 import { toast } from 'sonner';
 
@@ -75,7 +71,7 @@ const AddMemberForm = () => {
   }, [isOpen]);
 
   const handleInputChange = (field: keyof AddMemberFormData, value: string) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [field]: value
     }));
@@ -88,7 +84,7 @@ const AddMemberForm = () => {
     // Validation
     const trimmedFirstName = formData.first_name.trim();
     const trimmedLastName = formData.last_name.trim();
-    
+
     // Check for white-space-only input
     if (trimmedFirstName.length === 0) {
       toast.error('First Name is required and cannot be only spaces');
@@ -125,7 +121,11 @@ const AddMemberForm = () => {
 
       // Include custom_role_id - if "None" is selected, send empty string or null
       // The API should handle empty/null custom_role_id
-      if (formData.custom_role_id && formData.custom_role_id.trim() !== '' && formData.custom_role_id !== 'none') {
+      if (
+        formData.custom_role_id &&
+        formData.custom_role_id.trim() !== '' &&
+        formData.custom_role_id !== 'none'
+      ) {
         requestData.custom_role_id = formData.custom_role_id.trim();
       } else {
         // Explicitly set to undefined/null when "None" is selected
@@ -133,10 +133,10 @@ const AddMemberForm = () => {
       }
 
       const response = await createTeamMember(requestData);
-      
+
       if (response.status === 1) {
         toast.success(response.message || 'Member added successfully!');
-        
+
         // Reset form
         setFormData({
           email: '',
@@ -146,19 +146,21 @@ const AddMemberForm = () => {
           role: 'FREE',
           custom_role_id: undefined
         });
-        
+
         setIsOpen(false);
-        
+
         // Trigger page refresh to show new member in list
         // Using a custom event that the Members component can listen to
         window.dispatchEvent(new CustomEvent('teamMemberAdded'));
       } else {
         throw new Error(response.message || 'Failed to create team member');
       }
-      
     } catch (error: any) {
       console.error('Error adding member:', error);
-      const errorMessage = error?.response?.data?.message || error?.message || 'Error adding member. Please try again.';
+      const errorMessage =
+        error?.response?.data?.message ||
+        error?.message ||
+        'Error adding member. Please try again.';
       toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
@@ -184,16 +186,12 @@ const AddMemberForm = () => {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <button 
-          type="button" 
-          className="btn btn-sm btn-primary"
-          onClick={handleOpenDialog}
-        >
+        <button type="button" className="btn btn-sm btn-primary" onClick={handleOpenDialog}>
           <UserPlus className="w-4 h-4 mr-2" />
           Add Member
         </button>
       </DialogTrigger>
-      
+
       <DialogContent className="sm:max-w-[540px] max-h-[90vh] overflow-y-auto p-0">
         <DialogHeader className="px-6 pt-6 pb-4">
           <DialogTitle className="text-xl font-semibold">Add New Team Member</DialogTitle>
@@ -201,7 +199,7 @@ const AddMemberForm = () => {
             Create a new team member account with admin or moderator role.
           </DialogDescription>
         </DialogHeader>
-        
+
         <div className="px-6 pb-6">
           <form onSubmit={handleSubmit} className="space-y-5">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -229,7 +227,7 @@ const AddMemberForm = () => {
                   {formData.first_name.length}/50 characters
                 </p>
               </div>
-              
+
               <div className="space-y-1.5">
                 <Label htmlFor="last_name" className="text-sm font-medium text-gray-700">
                   Last Name
@@ -306,8 +304,8 @@ const AddMemberForm = () => {
               <Label htmlFor="role" className="text-sm font-medium text-gray-700">
                 Role
               </Label>
-              <Select 
-                value={formData.role} 
+              <Select
+                value={formData.role}
                 onValueChange={(value: string) => handleInputChange('role', value)}
               >
                 <SelectTrigger className="h-10">
@@ -325,8 +323,8 @@ const AddMemberForm = () => {
               <Label htmlFor="custom_role_id" className="text-sm font-medium text-gray-700">
                 Custom Role (Optional)
               </Label>
-              <Select 
-                value={formData.custom_role_id || 'none'} 
+              <Select
+                value={formData.custom_role_id || 'none'}
                 onValueChange={(value: string) => {
                   const roleId = value === 'none' ? '' : value;
                   handleInputChange('custom_role_id', roleId);
@@ -334,7 +332,9 @@ const AddMemberForm = () => {
                 disabled={isLoadingRoles}
               >
                 <SelectTrigger className="h-10">
-                  <SelectValue placeholder={isLoadingRoles ? "Loading roles..." : "Select custom role"} />
+                  <SelectValue
+                    placeholder={isLoadingRoles ? 'Loading roles...' : 'Select custom role'}
+                  />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">None</SelectItem>
@@ -347,7 +347,9 @@ const AddMemberForm = () => {
                 </SelectContent>
               </Select>
               <p className="text-xs text-gray-500 mt-1">
-                {isLoadingRoles ? 'Loading available roles...' : 'Select a custom role or leave as None'}
+                {isLoadingRoles
+                  ? 'Loading available roles...'
+                  : 'Select a custom role or leave as None'}
               </p>
             </div>
 

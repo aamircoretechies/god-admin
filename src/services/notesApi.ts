@@ -59,10 +59,7 @@ export const fetchNotes = async (params: {
 };
 
 // Update note content
-export const updateNote = async (
-  id: string,
-  payload: { content: string }
-): Promise<any> => {
+export const updateNote = async (id: string, payload: { content: string }): Promise<any> => {
   const response = await axios.patch(`${API_URL}/notes/${id}`, payload);
   return response.data;
 };
@@ -74,9 +71,7 @@ export const fetchNoteById = async (id: string): Promise<SingleNoteResponse> => 
 };
 
 // Fetch linked verses for today's reflection
-export const fetchLinkedVerses = async (
-  timezone: string
-): Promise<LinkedVersesResponse> => {
+export const fetchLinkedVerses = async (timezone: string): Promise<LinkedVersesResponse> => {
   const response = await axios.get<LinkedVersesResponse>(
     `${API_URL}/reflections/daily/linked-verses`,
     {
@@ -86,36 +81,29 @@ export const fetchLinkedVerses = async (
   return response.data;
 };
 
-
-
 export const deleteNote = async (id: string): Promise<any> => {
   const response = await axios.delete(`${API_URL}/admin/notes/${id}`);
   return response.data;
 };
 
-
-
 // FLAG note
 export const flagNote = async (id: string, reason: string) => {
-  const response = await axios.post(`${API_URL}/notes/${id}/flag`,
-    { reason }
-  );
+  const response = await axios.post(`${API_URL}/notes/${id}/flag`, { reason });
   return response.data;
 };
 
 // EXPORT notes
-export const exportNotes = async (format: "json" | "csv", status?: string, userEmail?: string) => {
+export const exportNotes = async (format: 'json' | 'csv', status?: string, userEmail?: string) => {
   const query = new URLSearchParams();
 
-  query.append("format", format);
-  if (status) query.append("status", status);
-  if (userEmail) query.append("userEmail", userEmail);
+  query.append('format', format);
+  if (status) query.append('status', status);
+  if (userEmail) query.append('userEmail', userEmail);
 
   // important: responseType = "blob" for file download
   const response = await axios.get(`${API_URL}/notes/export?${query.toString()}`, {
-    responseType: "blob"
+    responseType: 'blob'
   });
 
   return response;
 };
-

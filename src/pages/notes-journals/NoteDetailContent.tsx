@@ -12,9 +12,7 @@ import {
   DialogTitle,
   DialogTrigger
 } from '@/components/ui/dialog';
-import {
-  Textarea
-} from '@/components/ui/textarea';
+import { Textarea } from '@/components/ui/textarea';
 import {
   ArrowLeft,
   Edit,
@@ -38,7 +36,6 @@ import {
 import { fetchLinkedVerses, fetchNoteById, fetchNotes, updateNote } from '@/services/notesApi';
 import { fetchUserProfile } from '@/services/usersApi';
 import { useSearchParams } from 'react-router-dom';
-
 
 // Types
 interface Note {
@@ -185,11 +182,8 @@ const emptyNote: Note = {
 
 const truncateText = (text: string, maxLength: number) => {
   if (!text) return '';
-  return text.length > maxLength
-    ? text.slice(0, maxLength) + '...'
-    : text;
+  return text.length > maxLength ? text.slice(0, maxLength) + '...' : text;
 };
-
 
 const NoteDetailContent: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -209,8 +203,6 @@ const NoteDetailContent: React.FC = () => {
     }
   }, [autoEdit]);
 
-
-
   useEffect(() => {
     setLoading(true);
     const loadNote = async () => {
@@ -225,17 +217,15 @@ const NoteDetailContent: React.FC = () => {
           // Clean emotion_tags from API (same rules as overview list)
           const tagsFromApi: string[] | undefined = Array.isArray(apiNote.emotion_tags)
             ? apiNote.emotion_tags
-              .filter((tag: string) => {
-                if (typeof tag !== 'string') return false;
-                // Skip JSON strings and CONTINUE_READING entries
-                if (tag.startsWith('{') || tag.startsWith('CONTINUE_READING')) {
-                  return false;
-                }
-                return true;
-              })
-              .map((tag: string) =>
-                tag.charAt(0).toUpperCase() + tag.slice(1).toLowerCase()
-              )
+                .filter((tag: string) => {
+                  if (typeof tag !== 'string') return false;
+                  // Skip JSON strings and CONTINUE_READING entries
+                  if (tag.startsWith('{') || tag.startsWith('CONTINUE_READING')) {
+                    return false;
+                  }
+                  return true;
+                })
+                .map((tag: string) => tag.charAt(0).toUpperCase() + tag.slice(1).toLowerCase())
             : undefined;
 
           const fullName =
@@ -266,7 +256,7 @@ const NoteDetailContent: React.FC = () => {
             // Use emotion_tags from API when available, otherwise keep existing tags
             tags: tagsFromApi && tagsFromApi.length > 0 ? tagsFromApi : prev.tags,
             createdAt: apiNote.created_at || prev.createdAt,
-            updatedAt: apiNote.updated_at || prev.updatedAt,
+            updatedAt: apiNote.updated_at || prev.updatedAt
           }));
 
           if (tagsFromApi && tagsFromApi.length > 0) {
@@ -283,24 +273,24 @@ const NoteDetailContent: React.FC = () => {
               user_id: apiNote.user_id
             });
 
-            if (listResponse.status === 1 && Array.isArray(listResponse.data) && listResponse.data.length > 0) {
-              const matched = listResponse.data.find((n: any) => n.note_id === apiNote.note_id) || listResponse.data[0];
+            if (
+              listResponse.status === 1 &&
+              Array.isArray(listResponse.data) &&
+              listResponse.data.length > 0
+            ) {
+              const matched =
+                listResponse.data.find((n: any) => n.note_id === apiNote.note_id) ||
+                listResponse.data[0];
 
-              const matchedEmail =
-                (matched as any).user_email ||
-                (matched as any).userEmail ||
-                '';
+              const matchedEmail = (matched as any).user_email || (matched as any).userEmail || '';
 
-              const matchedName =
-                matched.username ||
-                (matched as any).user_name ||
-                '';
+              const matchedName = matched.username || (matched as any).user_name || '';
 
               setNote((prev) => ({
                 ...prev,
                 userId: matched.user_id || prev.userId,
                 userName: matchedName || prev.userName,
-                userEmail: matchedEmail || prev.userEmail,
+                userEmail: matchedEmail || prev.userEmail
               }));
             }
           } catch {
@@ -320,7 +310,7 @@ const NoteDetailContent: React.FC = () => {
                 const profileEmail = profileResponse.data.basicUserInfo.email;
                 setNote((prev) => ({
                   ...prev,
-                  userEmail: profileEmail || prev.userEmail,
+                  userEmail: profileEmail || prev.userEmail
                 }));
               }
             }
@@ -330,8 +320,7 @@ const NoteDetailContent: React.FC = () => {
 
           // Fetch linked verses for today's reflection and display exactly as returned
           try {
-            const timezone =
-              Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+            const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
             const linkedResponse = await fetchLinkedVerses(timezone);
 
             if (
@@ -341,7 +330,7 @@ const NoteDetailContent: React.FC = () => {
             ) {
               setNote((prev) => ({
                 ...prev,
-                linkedVerses: linkedResponse.data.linked_verses,
+                linkedVerses: linkedResponse.data.linked_verses
               }));
               setLinkedVersesMessage(
                 linkedResponse.data.message || 'No linked verses found for this reflection'
@@ -376,11 +365,19 @@ const NoteDetailContent: React.FC = () => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'active':
-        return <Badge variant="default" className="bg-green-100 text-green-800">Active</Badge>;
+        return (
+          <Badge variant="default" className="bg-green-100 text-green-800">
+            Active
+          </Badge>
+        );
       case 'flagged':
         return <Badge variant="destructive">Flagged</Badge>;
       case 'deleted':
-        return <Badge variant="secondary" className="bg-gray-100 text-gray-600">Deleted</Badge>;
+        return (
+          <Badge variant="secondary" className="bg-gray-100 text-gray-600">
+            Deleted
+          </Badge>
+        );
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
@@ -407,7 +404,10 @@ const NoteDetailContent: React.FC = () => {
       setNote({
         ...note,
         content: editedContent,
-        tags: editedTags.split(',').map(tag => tag.trim()).filter(tag => tag.length > 0),
+        tags: editedTags
+          .split(',')
+          .map((tag) => tag.trim())
+          .filter((tag) => tag.length > 0),
         updatedAt: new Date().toISOString()
       });
       setIsEditing(false);
@@ -482,7 +482,7 @@ const NoteDetailContent: React.FC = () => {
       // Build CSV content
       const csvContent = [
         csvHeaders.map(escapeCsvValue).join(','),
-        ...csvRows.map(row => row.map(cell => escapeCsvValue(String(cell || ''))).join(','))
+        ...csvRows.map((row) => row.map((cell) => escapeCsvValue(String(cell || ''))).join(','))
       ].join('\n');
 
       // Create and download CSV file
@@ -490,7 +490,10 @@ const NoteDetailContent: React.FC = () => {
       const link = document.createElement('a');
       const url = URL.createObjectURL(blob);
       link.setAttribute('href', url);
-      link.setAttribute('download', `note_${note.id}_${new Date().toISOString().split('T')[0]}.csv`);
+      link.setAttribute(
+        'download',
+        `note_${note.id}_${new Date().toISOString().split('T')[0]}.csv`
+      );
       link.style.visibility = 'hidden';
       document.body.appendChild(link);
       link.click();
@@ -547,11 +550,7 @@ const NoteDetailContent: React.FC = () => {
                     {note.isFavorite && <Star className="w-4 h-4 text-yellow-500" />}
                   </div>
                 </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setIsEditing(!isEditing)}
-                >
+                <Button variant="outline" size="sm" onClick={() => setIsEditing(!isEditing)}>
                   <Edit className="w-4 h-4 mr-2" />
                   {isEditing ? 'Cancel' : 'Edit'}
                 </Button>
@@ -634,7 +633,11 @@ const NoteDetailContent: React.FC = () => {
             <CardContent>
               <div className="flex flex-wrap gap-2">
                 {note.tags.map((tag, index) => (
-                  <Badge key={index} variant="secondary" className="bg-gray-100 text-gray-800 border border-gray-300">
+                  <Badge
+                    key={index}
+                    variant="secondary"
+                    className="bg-gray-100 text-gray-800 border border-gray-300"
+                  >
                     {tag}
                   </Badge>
                 ))}
@@ -715,9 +718,7 @@ const NoteDetailContent: React.FC = () => {
                 </Avatar>
                 <div>
                   {/* <p className="font-medium">{note.userName}</p> */}
-                  <p className="font-medium">
-                    {truncateText(note.userName, 21)}
-                  </p>
+                  <p className="font-medium">{truncateText(note.userName, 21)}</p>
 
                   <p className="text-sm text-gray-500">{note.userEmail}</p>
                 </div>
@@ -825,4 +826,3 @@ const NoteDetailContent: React.FC = () => {
 };
 
 export { NoteDetailContent };
-

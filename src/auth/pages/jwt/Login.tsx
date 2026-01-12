@@ -85,9 +85,6 @@ const Login = () => {
           <h3 className="text-lg font-semibold text-gray-900 leading-none mb-2.5">Sign in</h3>
         </div>
 
-
-      
-
         {formik.status && <Alert variant="danger">{formik.status}</Alert>}
 
         <div className="flex flex-col gap-1">

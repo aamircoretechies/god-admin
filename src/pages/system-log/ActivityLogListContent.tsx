@@ -1,13 +1,23 @@
 import React, { useState, useMemo, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ColumnDef } from '@tanstack/react-table';
-import { DataGrid, DataGridColumnHeader, DataGridRowSelect, DataGridRowSelectAll } from '@/components/data-grid';
+import {
+  DataGrid,
+  DataGridColumnHeader,
+  DataGridRowSelect,
+  DataGridRowSelectAll
+} from '@/components/data-grid';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Avatar } from '@/components/ui/avatar';
 import { toAbsoluteUrl } from '@/utils';
-import { blockUser, fetchActivityLogs, suspendUser, type ActivityLogResponse } from '@/services/activityLogsApi';
+import {
+  blockUser,
+  fetchActivityLogs,
+  suspendUser,
+  type ActivityLogResponse
+} from '@/services/activityLogsApi';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -64,10 +74,10 @@ const transformActivityLog = (apiData: ActivityLogResponse): UserActivityLog => 
   // Map role from API format to component format
   const mapRole = (role: string): UserActivityLog['userRole'] => {
     const roleMap: { [key: string]: UserActivityLog['userRole'] } = {
-      'FREE': 'Free',
-      'PREMIUM': 'Premium',
-      'ADMIN': 'Admin',
-      'MODERATOR': 'Moderator'
+      FREE: 'Free',
+      PREMIUM: 'Premium',
+      ADMIN: 'Admin',
+      MODERATOR: 'Moderator'
     };
     return roleMap[role] || (role as UserActivityLog['userRole']);
   };
@@ -112,7 +122,6 @@ const transformActivityLog = (apiData: ActivityLogResponse): UserActivityLog => 
   };
 };
 
-
 const ActivityLogListContent: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [userFilter, setUserFilter] = useState<string>('all');
@@ -122,7 +131,6 @@ const ActivityLogListContent: React.FC = () => {
   const [activityLogs, setActivityLogs] = useState<UserActivityLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
 
   // MODALS STATE
   const [showBlockModal, setShowBlockModal] = useState(false);
@@ -161,7 +169,7 @@ const ActivityLogListContent: React.FC = () => {
 
   // Filter logs
   const filteredLogs = useMemo(() => {
-    return activityLogs.filter(log => {
+    return activityLogs.filter((log) => {
       const matchesSearch =
         log.userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         log.userEmail.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -170,8 +178,12 @@ const ActivityLogListContent: React.FC = () => {
         (log.bookReference && log.bookReference.toLowerCase().includes(searchTerm.toLowerCase())) ||
         (log.verseReference && log.verseReference.toLowerCase().includes(searchTerm.toLowerCase()));
 
-      const matchesUser = userFilter === 'all' || log.userRole === userFilter || log.userRole.toLowerCase() === userFilter.toLowerCase();
-      const matchesActivityType = activityTypeFilter === 'all' || log.activityType === activityTypeFilter;
+      const matchesUser =
+        userFilter === 'all' ||
+        log.userRole === userFilter ||
+        log.userRole.toLowerCase() === userFilter.toLowerCase();
+      const matchesActivityType =
+        activityTypeFilter === 'all' || log.activityType === activityTypeFilter;
       const matchesStatus = statusFilter === 'all' || log.status === statusFilter;
 
       // Date range filter
@@ -203,18 +215,28 @@ const ActivityLogListContent: React.FC = () => {
         }
       }
 
-      return matchesSearch && matchesUser && matchesActivityType && matchesStatus && matchesDateRange;
+      return (
+        matchesSearch && matchesUser && matchesActivityType && matchesStatus && matchesDateRange
+      );
     });
   }, [activityLogs, searchTerm, userFilter, activityTypeFilter, statusFilter, dateRangeFilter]);
 
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'Success':
-        return <Badge variant="default" className="bg-green-100 text-green-800">Success</Badge>;
+        return (
+          <Badge variant="default" className="bg-green-100 text-green-800">
+            Success
+          </Badge>
+        );
       case 'Error':
         return <Badge variant="destructive">Error</Badge>;
       case 'Warning':
-        return <Badge variant="default" className="bg-yellow-100 text-yellow-800">Warning</Badge>;
+        return (
+          <Badge variant="default" className="bg-yellow-100 text-yellow-800">
+            Warning
+          </Badge>
+        );
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
@@ -226,11 +248,19 @@ const ActivityLogListContent: React.FC = () => {
       case 'FREE':
         return <Badge variant="secondary">Free</Badge>;
       case 'PREMIUM':
-        return <Badge variant="default" className="bg-purple-100 text-purple-800">Premium</Badge>;
+        return (
+          <Badge variant="default" className="bg-purple-100 text-purple-800">
+            Premium
+          </Badge>
+        );
       case 'ADMIN':
         return <Badge variant="destructive">Admin</Badge>;
       case 'MODERATOR':
-        return <Badge variant="default" className="bg-amber-100 text-amber-800">Moderator</Badge>;
+        return (
+          <Badge variant="default" className="bg-amber-100 text-amber-800">
+            Moderator
+          </Badge>
+        );
       default:
         return <Badge variant="outline">{role}</Badge>;
     }
@@ -240,17 +270,20 @@ const ActivityLogListContent: React.FC = () => {
     const colors = {
       'Verse Read': 'bg-amber-100 text-amber-800',
       'AI Query': 'bg-purple-100 text-purple-800',
-      'Bookmark': 'bg-green-100 text-green-800',
-      'Share': 'bg-orange-100 text-orange-800',
+      Bookmark: 'bg-green-100 text-green-800',
+      Share: 'bg-orange-100 text-orange-800',
       'Feedback Submitted': 'bg-pink-100 text-pink-800',
-      'Login': 'bg-gray-100 text-gray-800',
-      'Logout': 'bg-gray-100 text-gray-800',
+      Login: 'bg-gray-100 text-gray-800',
+      Logout: 'bg-gray-100 text-gray-800',
       'Password Change': 'bg-red-100 text-red-800',
       'Profile Update': 'bg-indigo-100 text-indigo-800'
     };
 
     return (
-      <Badge variant="default" className={colors[type as keyof typeof colors] || 'bg-gray-100 text-gray-800'}>
+      <Badge
+        variant="default"
+        className={colors[type as keyof typeof colors] || 'bg-gray-100 text-gray-800'}
+      >
         {type}
       </Badge>
     );
@@ -367,7 +400,8 @@ const ActivityLogListContent: React.FC = () => {
             )}
             {row.original.bookReference && (
               <p className="text-xs text-amber-600">
-                {row.original.bookReference} {row.original.chapterReference}:{row.original.verseReference}
+                {row.original.bookReference} {row.original.chapterReference}:
+                {row.original.verseReference}
               </p>
             )}
           </div>
@@ -468,7 +502,6 @@ const ActivityLogListContent: React.FC = () => {
                 <UserX className="w-4 h-4 mr-2" />
                 Suspend User
               </DropdownMenuItem>
-
             </DropdownMenuContent>
           </DropdownMenu>
         ),
@@ -491,15 +524,15 @@ const ActivityLogListContent: React.FC = () => {
       const res = await blockUser(selectedUserId!, reason, duration);
 
       if (res.status === 1) {
-        toast.success("User blocked successfully!");
+        toast.success('User blocked successfully!');
         setShowBlockModal(false);
-        setReason("");
-        setDuration("");
+        setReason('');
+        setDuration('');
       } else {
-        toast.error(res.message || "Failed to block user");
+        toast.error(res.message || 'Failed to block user');
       }
     } catch (err: any) {
-      toast.error(err?.response?.data?.message || "Error blocking user");
+      toast.error(err?.response?.data?.message || 'Error blocking user');
     }
   };
 
@@ -508,19 +541,17 @@ const ActivityLogListContent: React.FC = () => {
       const res = await suspendUser(selectedUserId!, reason, duration);
 
       if (res.status === 1) {
-        toast.success("User suspended successfully!");
+        toast.success('User suspended successfully!');
         setShowSuspendModal(false);
-        setReason("");
-        setDuration("");
+        setReason('');
+        setDuration('');
       } else {
-        toast.error(res.message || "Failed to suspend user");
+        toast.error(res.message || 'Failed to suspend user');
       }
     } catch (err: any) {
-      toast.error(err?.response?.data?.message || "Error suspending user");
+      toast.error(err?.response?.data?.message || 'Error suspending user');
     }
   };
-
-
 
   const toolbar = (
     // <div className="flex flex-col gap-4 p-5">
@@ -630,91 +661,75 @@ const ActivityLogListContent: React.FC = () => {
 
   return (
     <>
-      {
-        showBlockModal && (
-          <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-            {/* <div className="bg-white p-6 rounded-lg w-[400px] space-y-4"> */}
-            <div className="bg-white p-6 rounded-lg w-full max-w-[400px] mx-4 space-y-4">
-              <h2 className="text-lg font-semibold">Block User</h2>
+      {showBlockModal && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          {/* <div className="bg-white p-6 rounded-lg w-[400px] space-y-4"> */}
+          <div className="bg-white p-6 rounded-lg w-full max-w-[400px] mx-4 space-y-4">
+            <h2 className="text-lg font-semibold">Block User</h2>
 
-              <input
-                type="text"
-                placeholder="Reason"
-                value={reason}
-                onChange={(e) => setReason(e.target.value)}
-                className="w-full border p-2 rounded"
-              />
+            <input
+              type="text"
+              placeholder="Reason"
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              className="w-full border p-2 rounded"
+            />
 
-              <input
-                type="text"
-                placeholder="Duration (e.g., 1 day)"
-                value={duration}
-                onChange={(e) => setDuration(e.target.value)}
-                className="w-full border p-2 rounded"
-              />
+            <input
+              type="text"
+              placeholder="Duration (e.g., 1 day)"
+              value={duration}
+              onChange={(e) => setDuration(e.target.value)}
+              className="w-full border p-2 rounded"
+            />
 
-              <div className="flex justify-end gap-2">
-                <button
-                  className="btn btn-sm btn-light"
-                  onClick={() => setShowBlockModal(false)}
-                >
-                  Cancel
-                </button>
+            <div className="flex justify-end gap-2">
+              <button className="btn btn-sm btn-light" onClick={() => setShowBlockModal(false)}>
+                Cancel
+              </button>
 
-                <button
-                  className="btn btn-sm btn-danger"
-                  onClick={handleBlockUser}
-                >
-                  Block
-                </button>
-              </div>
+              <button className="btn btn-sm btn-danger" onClick={handleBlockUser}>
+                Block
+              </button>
             </div>
           </div>
-        )
-      }
+        </div>
+      )}
 
-      {
-        showSuspendModal && (
-          <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-            {/* <div className="bg-white p-6 rounded-lg w-[400px] space-y-4"> */}
-            <div className="bg-white p-6 rounded-lg w-full max-w-[400px] mx-4 space-y-4">
-              <h2 className="text-lg font-semibold">Suspend User</h2>
+      {showSuspendModal && (
+        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+          {/* <div className="bg-white p-6 rounded-lg w-[400px] space-y-4"> */}
+          <div className="bg-white p-6 rounded-lg w-full max-w-[400px] mx-4 space-y-4">
+            <h2 className="text-lg font-semibold">Suspend User</h2>
 
-              <input
-                type="text"
-                placeholder="Reason"
-                value={reason}
-                onChange={(e) => setReason(e.target.value)}
-                className="w-full border p-2 rounded"
-              />
+            <input
+              type="text"
+              placeholder="Reason"
+              value={reason}
+              onChange={(e) => setReason(e.target.value)}
+              className="w-full border p-2 rounded"
+            />
 
-              <input
-                type="text"
-                placeholder="Duration (e.g., 7 days)"
-                value={duration}
-                onChange={(e) => setDuration(e.target.value)}
-                className="w-full border p-2 rounded"
-              />
+            <input
+              type="text"
+              placeholder="Duration (e.g., 7 days)"
+              value={duration}
+              onChange={(e) => setDuration(e.target.value)}
+              className="w-full border p-2 rounded"
+            />
 
-              <div className="flex justify-end gap-2">
-                <button
-                  className="btn btn-sm btn-light"
-                  onClick={() => setShowSuspendModal(false)}
-                >
-                  Cancel
-                </button>
+            <div className="flex justify-end gap-2">
+              <button className="btn btn-sm btn-light" onClick={() => setShowSuspendModal(false)}>
+                Cancel
+              </button>
 
-                <button
-                  className="btn btn-sm btn-warning"
-                  onClick={handleSuspendUser}
-                >
-                  Suspend
-                </button>
-              </div>
+              <button className="btn btn-sm btn-warning" onClick={handleSuspendUser}>
+                Suspend
+              </button>
             </div>
           </div>
-        )
-      }
+        </div>
+      )}
 
       <DataGrid
         columns={columns}

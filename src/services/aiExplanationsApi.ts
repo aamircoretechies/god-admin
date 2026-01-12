@@ -1,4 +1,3 @@
-
 import axios from 'axios';
 import { API_URL } from '@/utils/Api';
 
@@ -151,4 +150,3 @@ export const deleteAIExplanation = async (
   );
   return response.data;
 };
-

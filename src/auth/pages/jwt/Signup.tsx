@@ -94,7 +94,6 @@ const Signup = () => {
           </div>
         </div>
 
-
         {formik.status && <Alert variant="danger">{formik.status}</Alert>}
 
         <div className="flex flex-col gap-1">

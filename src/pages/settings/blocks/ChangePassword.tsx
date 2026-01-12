@@ -3,13 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { 
-  Lock, 
-  Eye, 
-  EyeOff, 
-  Save,
-  AlertCircle
-} from 'lucide-react';
+import { Lock, Eye, EyeOff, Save, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import axios from 'axios';
 import { useAuthContext } from '@/auth';
@@ -28,7 +22,7 @@ const ChangePassword = () => {
   const [error, setError] = useState<string | null>(null);
 
   const handleInputChange = (field: keyof typeof formData, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
     setError(null);
   };
 
@@ -73,7 +67,7 @@ const ChangePassword = () => {
       const apiUrl = import.meta.env.DEV
         ? '/api/auth/change-password'
         : `${import.meta.env.VITE_APP_API_URL || 'https://api.growondaily.com'}/api/auth/change-password`;
-      
+
       const response = await axios.put(
         apiUrl,
         {
@@ -82,7 +76,7 @@ const ChangePassword = () => {
         },
         {
           headers: {
-            'Authorization': `Bearer ${auth?.token}`,
+            Authorization: `Bearer ${auth?.token}`,
             'Content-Type': 'application/json'
           }
         }
@@ -101,7 +95,10 @@ const ChangePassword = () => {
       }
     } catch (err: any) {
       console.error('Error changing password:', err);
-      const errorMessage = err?.response?.data?.message || err?.message || 'Failed to change password. Please try again.';
+      const errorMessage =
+        err?.response?.data?.message ||
+        err?.message ||
+        'Failed to change password. Please try again.';
       setError(errorMessage);
       toast.error(errorMessage);
     } finally {
@@ -185,9 +182,7 @@ const ChangePassword = () => {
                 )}
               </Button>
             </div>
-            <p className="text-xs text-gray-500">
-              Password must be at least 8 characters long
-            </p>
+            <p className="text-xs text-gray-500">Password must be at least 8 characters long</p>
           </div>
 
           <div className="space-y-2">
@@ -238,4 +233,3 @@ const ChangePassword = () => {
 };
 
 export { ChangePassword };
-

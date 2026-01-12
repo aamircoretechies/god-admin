@@ -2,14 +2,20 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { toAbsoluteUrl } from '@/utils';
-import { 
-  TrendingUp, 
-  Users, 
-  BookOpen, 
-  Search, 
+import {
+  TrendingUp,
+  Users,
+  BookOpen,
+  Search,
   Filter,
   AlertCircle,
   CheckCircle,
@@ -129,9 +135,10 @@ const ReadingPlanProgressPage = () => {
   const [planFilter, setPlanFilter] = useState<string>('all');
   const [selectedUser, setSelectedUser] = useState<UserProgress | null>(null);
 
-  const filteredProgress = userProgress.filter(progress => {
-    const matchesSearch = progress.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         progress.email.toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredProgress = userProgress.filter((progress) => {
+    const matchesSearch =
+      progress.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      progress.email.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'all' || progress.status === statusFilter;
     const matchesPlan = planFilter === 'all' || progress.planId === planFilter;
     return matchesSearch && matchesStatus && matchesPlan;
@@ -174,19 +181,23 @@ const ReadingPlanProgressPage = () => {
   };
 
   const handleManualUpdate = (userId: string, newProgress: number) => {
-    setUserProgress(userProgress.map(progress => {
-      if (progress.id === userId) {
-        return {
-          ...progress,
-          progress: newProgress,
-          chaptersCompleted: Math.round((newProgress / 100) * progress.totalChapters)
-        };
-      }
-      return progress;
-    }));
+    setUserProgress(
+      userProgress.map((progress) => {
+        if (progress.id === userId) {
+          return {
+            ...progress,
+            progress: newProgress,
+            chaptersCompleted: Math.round((newProgress / 100) * progress.totalChapters)
+          };
+        }
+        return progress;
+      })
+    );
   };
 
-  const uniquePlans = Array.from(new Set(userProgress.map(p => ({ id: p.planId, title: p.planTitle }))));
+  const uniquePlans = Array.from(
+    new Set(userProgress.map((p) => ({ id: p.planId, title: p.planTitle })))
+  );
 
   return (
     <div className="p-6 space-y-6">
@@ -224,7 +235,7 @@ const ReadingPlanProgressPage = () => {
               <div>
                 <p className="text-sm font-medium text-gray-600">Active Users</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {userProgress.filter(p => p.status === 'in_progress').length}
+                  {userProgress.filter((p) => p.status === 'in_progress').length}
                 </p>
               </div>
               <div className="p-3 bg-green-100 rounded-full">
@@ -240,7 +251,7 @@ const ReadingPlanProgressPage = () => {
               <div>
                 <p className="text-sm font-medium text-gray-600">Completed</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {userProgress.filter(p => p.status === 'completed').length}
+                  {userProgress.filter((p) => p.status === 'completed').length}
                 </p>
               </div>
               <div className="p-3 bg-purple-100 rounded-full">
@@ -256,7 +267,7 @@ const ReadingPlanProgressPage = () => {
               <div>
                 <p className="text-sm font-medium text-gray-600">Lagging Users</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {userProgress.filter(p => p.status === 'lagging').length}
+                  {userProgress.filter((p) => p.status === 'lagging').length}
                 </p>
               </div>
               <div className="p-3 bg-red-100 rounded-full">
@@ -311,9 +322,7 @@ const ReadingPlanProgressPage = () => {
             </div>
             <div className="flex items-center space-x-2">
               <Filter className="w-4 h-4 text-gray-500" />
-              <span className="text-sm text-gray-600">
-                {filteredProgress.length} results
-              </span>
+              <span className="text-sm text-gray-600">{filteredProgress.length} results</span>
             </div>
           </div>
         </CardContent>
@@ -333,7 +342,11 @@ const ReadingPlanProgressPage = () => {
               <div key={progress.id} className="p-4 border rounded-lg">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center space-x-3">
-                    <img src={toAbsoluteUrl(progress.avatar)} alt={progress.name} className="w-10 h-10 rounded-full" />
+                    <img
+                      src={toAbsoluteUrl(progress.avatar)}
+                      alt={progress.name}
+                      className="w-10 h-10 rounded-full"
+                    />
                     <div>
                       <h3 className="font-semibold text-gray-900">{progress.name}</h3>
                       <p className="text-sm text-gray-600">{progress.email}</p>
@@ -341,7 +354,8 @@ const ReadingPlanProgressPage = () => {
                   </div>
                   <div className="flex items-center space-x-2">
                     <Badge className={getStatusColor(progress.status)}>
-                      {progress.status.replace('_', ' ').charAt(0).toUpperCase() + progress.status.slice(1).replace('_', ' ')}
+                      {progress.status.replace('_', ' ').charAt(0).toUpperCase() +
+                        progress.status.slice(1).replace('_', ' ')}
                     </Badge>
                     {progress.daysBehind > 0 && (
                       <Badge className="bg-red-100 text-red-800">
@@ -382,7 +396,8 @@ const ReadingPlanProgressPage = () => {
                   <div className="flex items-center space-x-2">
                     {getStatusIcon(progress.status)}
                     <span className="text-sm text-gray-600">
-                      {progress.milestones.filter(m => m.achieved).length} / {progress.milestones.length} milestones
+                      {progress.milestones.filter((m) => m.achieved).length} /{' '}
+                      {progress.milestones.length} milestones
                     </span>
                   </div>
                   <div className="flex space-x-2">
@@ -436,7 +451,9 @@ const ReadingPlanProgressPage = () => {
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">Chapters:</span>
-                      <span>{selectedUser.chaptersCompleted} / {selectedUser.totalChapters}</span>
+                      <span>
+                        {selectedUser.chaptersCompleted} / {selectedUser.totalChapters}
+                      </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">Last Read:</span>
@@ -454,7 +471,9 @@ const ReadingPlanProgressPage = () => {
                         ) : (
                           <Clock className="w-4 h-4 text-gray-400" />
                         )}
-                        <span className={`text-sm ${milestone.achieved ? 'text-gray-900' : 'text-gray-500'}`}>
+                        <span
+                          className={`text-sm ${milestone.achieved ? 'text-gray-900' : 'text-gray-500'}`}
+                        >
                           {milestone.title}
                         </span>
                         {milestone.achieved && (
@@ -473,4 +492,4 @@ const ReadingPlanProgressPage = () => {
   );
 };
 
-export { ReadingPlanProgressPage }; 
+export { ReadingPlanProgressPage };

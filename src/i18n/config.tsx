@@ -6,8 +6,8 @@ import zhMessages from './messages/zh.json';
 import { type TLanguage } from './types.d';
 
 const I18N_MESSAGES = {
-  en: enMessages,
- /*  ar: arMessages,
+  en: enMessages
+  /*  ar: arMessages,
   fr: frMessages,
   zh: zhMessages */
 };
@@ -21,7 +21,7 @@ const I18N_LANGUAGES: readonly TLanguage[] = [
     direction: 'ltr',
     flag: toAbsoluteUrl('/media/flags/united-states.svg'),
     messages: I18N_MESSAGES.en
-  },
+  }
   /* {
     label: 'Arabic (Saudi)',
     code: 'ar',

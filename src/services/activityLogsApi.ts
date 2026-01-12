@@ -102,7 +102,9 @@ export interface ActivityAnalyticsResponse {
 }
 
 // Fetch activity analytics
-export const fetchActivityAnalytics = async (days: number = 7): Promise<ActivityAnalyticsResponse> => {
+export const fetchActivityAnalytics = async (
+  days: number = 7
+): Promise<ActivityAnalyticsResponse> => {
   const response = await axios.get<ActivityAnalyticsResponse>(
     `${API_URL}/admin/activity/analytics?days=${days}`
   );
@@ -150,34 +152,19 @@ export const fetchUserActivityLogs = async (
   return response.data;
 };
 
-
-
 // BLOCK user
-export const blockUser = async (
-  userId: string,
-  reason: string,
-  duration: string
-) => {
-  const response = await axios.post(`${API_URL}/activity/${userId}/block`,
-    { reason, duration }
-  );
+export const blockUser = async (userId: string, reason: string, duration: string) => {
+  const response = await axios.post(`${API_URL}/activity/${userId}/block`, { reason, duration });
   return response.data;
 };
 
-
 // SUSPEND user
-export const suspendUser = async (
-  userId: string,
-  reason: string,
-  duration: string
-) => {
-  console.log(" SUSPEND USER API CALL:", { userId, reason, duration });
+export const suspendUser = async (userId: string, reason: string, duration: string) => {
+  console.log(' SUSPEND USER API CALL:', { userId, reason, duration });
 
-  const response = await axios.post(`${API_URL}/activity/${userId}/suspend`,
-    { reason, duration }
-  );
+  const response = await axios.post(`${API_URL}/activity/${userId}/suspend`, { reason, duration });
 
-  console.log("SUSPEND USER API RAW RESPONSE:", response);
+  console.log('SUSPEND USER API RAW RESPONSE:', response);
 
   return response.data;
 };

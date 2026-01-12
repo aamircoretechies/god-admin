@@ -36,4 +36,3 @@ const ViewTranslationPage = () => {
 };
 
 export { ViewTranslationPage };
-

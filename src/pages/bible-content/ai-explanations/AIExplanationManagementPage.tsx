@@ -22,7 +22,9 @@ const AIExplanationManagementPage = () => {
           <Toolbar>
             <ToolbarHeading>
               <ToolbarPageTitle />
-              <ToolbarDescription>Review and manage AI-generated Bible explanations.</ToolbarDescription>
+              <ToolbarDescription>
+                Review and manage AI-generated Bible explanations.
+              </ToolbarDescription>
             </ToolbarHeading>
             {/* ToolbarActions - Review Guidelines and Create Explanation buttons commented out
             <ToolbarActions>
@@ -45,4 +47,4 @@ const AIExplanationManagementPage = () => {
   );
 };
 
-export { AIExplanationManagementPage }; 
+export { AIExplanationManagementPage };

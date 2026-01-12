@@ -76,9 +76,7 @@ export interface BibleDashboardResponse {
  * Fetch Bible Content Dashboard data
  */
 export const fetchBibleDashboard = async (): Promise<BibleDashboardResponse> => {
-  const response = await axios.get<BibleDashboardResponse>(
-    `${API_URL}/admin/bible/dashboard`
-  );
+  const response = await axios.get<BibleDashboardResponse>(`${API_URL}/admin/bible/dashboard`);
   return response.data;
 };
 
@@ -103,4 +101,3 @@ export const getLanguageName = (code: string): string => {
   };
   return languageMap[code] || code.toUpperCase();
 };
-

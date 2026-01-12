@@ -67,7 +67,7 @@ const setUser = (user: UserModel | undefined) => {
 
 export function setupAxios(axios: any) {
   axios.defaults.headers.Accept = 'application/json';
-  
+
   // Request interceptor - add auth token to requests
   axios.interceptors.request.use(
     (config: { headers: { Authorization: string } }) => {
@@ -90,7 +90,7 @@ export function setupAxios(axios: any) {
       if (error?.response?.status === 401) {
         // Clear auth from localStorage
         removeAuth();
-        
+
         // Only redirect if we're not already on the login page
         const currentPath = window.location.pathname;
         if (!currentPath.includes('/auth/login')) {
@@ -101,7 +101,7 @@ export function setupAxios(axios: any) {
           window.location.href = loginPath;
         }
       }
-      
+
       return Promise.reject(error);
     }
   );

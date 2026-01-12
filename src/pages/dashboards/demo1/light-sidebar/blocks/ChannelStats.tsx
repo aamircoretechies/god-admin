@@ -33,10 +33,10 @@ const ChannelStats = () => {
         setLoading(true);
         setError(null);
         const response = await fetchDashboardAnalytics('30d');
-        
+
         if (response.status === 1 && response.data) {
           const { secondaryMetrics } = response.data;
-          
+
           const transformedItems: IChannelStatsItems = [
             {
               icon: <Users className="w-6 h-6 text-olive-500" />,
@@ -59,7 +59,7 @@ const ChannelStats = () => {
               label: secondaryMetrics.reports.label
             }
           ];
-          
+
           setItems(transformedItems);
         } else {
           throw new Error(response.message || 'Failed to fetch dashboard analytics');

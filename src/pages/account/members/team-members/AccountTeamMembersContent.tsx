@@ -7,10 +7,7 @@ const AccountTeamMembersContent = () => {
     <div className="grid gap-5 lg:gap-7.5">
       <Members />
 
-      <div className="grid lg:grid-cols-2 gap-5 lg:gap-7.5">
-       
-      </div>
-
+      <div className="grid lg:grid-cols-2 gap-5 lg:gap-7.5"></div>
     </div>
   );
 };

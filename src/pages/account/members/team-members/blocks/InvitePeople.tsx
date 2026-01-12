@@ -28,19 +28,19 @@ const InvitePeople = () => {
     try {
       // Parse CSV file
       const text = await file.text();
-      const lines = text.split('\n').filter(line => line.trim());
-      
+      const lines = text.split('\n').filter((line) => line.trim());
+
       if (lines.length < 2) {
         toast.error('CSV file must have at least a header row and one data row');
         return;
       }
 
       // Parse CSV (simple parser - assumes comma-separated)
-      const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
+      const headers = lines[0].split(',').map((h) => h.trim().toLowerCase());
       const members: ImportTeamMember[] = [];
 
       for (let i = 1; i < lines.length; i++) {
-        const values = lines[i].split(',').map(v => v.trim());
+        const values = lines[i].split(',').map((v) => v.trim());
         const member: ImportTeamMember = {
           email: '',
           role: 'FREE'
@@ -81,19 +81,19 @@ const InvitePeople = () => {
 
       // Call import API
       const response = await importTeamMembers({ members });
-      
+
       if (response.status === 1 && response.data) {
         const { success, failed, skipped } = response.data;
         const successCount = success.length;
         const failedCount = failed.length;
         const skippedCount = skipped.length;
-        
+
         let message = `Import completed: ${successCount} success`;
         if (failedCount > 0) message += `, ${failedCount} failed`;
         if (skippedCount > 0) message += `, ${skippedCount} skipped`;
-        
+
         toast.success(message);
-        
+
         // Show details if there are failures or skipped items
         if (failedCount > 0 || skippedCount > 0) {
           console.log('Import details:', { success, failed, skipped });
@@ -102,7 +102,8 @@ const InvitePeople = () => {
         toast.error(response.message || 'Failed to import team members');
       }
     } catch (error: any) {
-      const errorMessage = error?.response?.data?.message || error?.message || 'Failed to import file';
+      const errorMessage =
+        error?.response?.data?.message || error?.message || 'Failed to import file';
       toast.error(errorMessage);
     }
   };
@@ -127,7 +128,7 @@ const InvitePeople = () => {
             type="text"
             value={emailInput}
             onChange={(e) => setEmailInput(e.target.value)}
-          /> 
+          />
         </div>
 
         <div className="flex items-baseline flex-wrap gap-2.5">
@@ -140,10 +141,10 @@ const InvitePeople = () => {
               <SelectContent>
                 <SelectItem value="1">Member</SelectItem>
                 <SelectItem value="2">Editor</SelectItem>
-                <SelectItem value="3">Designer</SelectItem> 
-                <SelectItem value="4">Admin</SelectItem>  
+                <SelectItem value="3">Designer</SelectItem>
+                <SelectItem value="4">Admin</SelectItem>
               </SelectContent>
-            </Select>  
+            </Select>
 
             <a href="#" className="btn btn-sm btn-light btn-outline">
               <KeenIcon icon="plus-squared" />

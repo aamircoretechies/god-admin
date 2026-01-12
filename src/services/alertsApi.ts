@@ -91,4 +91,3 @@ export const acknowledgeAlert = async (alertId: string): Promise<AlertActionResp
   );
   return response.data;
 };
-

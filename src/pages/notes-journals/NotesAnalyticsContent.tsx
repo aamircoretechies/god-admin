@@ -2,21 +2,21 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
 } from '@/components/ui/select';
-import { 
-  BarChart3, 
-  TrendingUp, 
-  Users, 
-  FileText, 
-  Tag, 
-  BookOpen, 
-  Volume2, 
+import {
+  BarChart3,
+  TrendingUp,
+  Users,
+  FileText,
+  Tag,
+  BookOpen,
+  Volume2,
   Smartphone,
   Monitor,
   Calendar,
@@ -66,13 +66,17 @@ const mockChartData = {
 };
 
 // Simple chart components (you can replace with actual chart libraries like recharts)
-const SimpleBarChart: React.FC<{ data: number[], labels: string[], title: string }> = ({ data, labels, title }) => (
+const SimpleBarChart: React.FC<{ data: number[]; labels: string[]; title: string }> = ({
+  data,
+  labels,
+  title
+}) => (
   <div className="space-y-2">
     <h4 className="text-sm font-medium text-gray-700">{title}</h4>
     <div className="flex items-end gap-1 h-32">
       {data.map((value, index) => (
         <div key={index} className="flex-1 flex flex-col items-center">
-          <div 
+          <div
             className="bg-blue-500 rounded-t w-full"
             style={{ height: `${(value / Math.max(...data)) * 100}%` }}
           />
@@ -83,14 +87,17 @@ const SimpleBarChart: React.FC<{ data: number[], labels: string[], title: string
   </div>
 );
 
-const SimplePieChart: React.FC<{ data: Array<{ name: string, count: number, percentage: number }>, title: string }> = ({ data, title }) => (
+const SimplePieChart: React.FC<{
+  data: Array<{ name: string; count: number; percentage: number }>;
+  title: string;
+}> = ({ data, title }) => (
   <div className="space-y-3">
     <h4 className="text-sm font-medium text-gray-700">{title}</h4>
     <div className="space-y-2">
       {data.map((item, index) => (
         <div key={index} className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div 
+            <div
               className="w-3 h-3 rounded-full"
               style={{ backgroundColor: `hsl(${index * 45}, 70%, 60%)` }}
             />
@@ -226,10 +233,7 @@ const NotesAnalyticsContent: React.FC = () => {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <SimplePieChart
-              data={mockChartData.usageByMode}
-              title="How users create notes"
-            />
+            <SimplePieChart data={mockChartData.usageByMode} title="How users create notes" />
           </CardContent>
         </Card>
 
@@ -246,7 +250,12 @@ const NotesAnalyticsContent: React.FC = () => {
               {mockChartData.topTags.slice(0, 8).map((tag, index) => (
                 <div key={index} className="flex items-center justify-between">
                   <div className="flex items-center gap-2">
-                    <Badge variant="secondary" className="bg-gray-100 text-gray-800 border border-gray-300">{tag.name}</Badge>
+                    <Badge
+                      variant="secondary"
+                      className="bg-gray-100 text-gray-800 border border-gray-300"
+                    >
+                      {tag.name}
+                    </Badge>
                   </div>
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-medium">{tag.count}</span>
@@ -389,4 +398,3 @@ const NotesAnalyticsContent: React.FC = () => {
 };
 
 export { NotesAnalyticsContent };
-

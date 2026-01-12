@@ -27,25 +27,32 @@ const BibleContentDashboardPage = () => {
           ['Active Translations', response.data.overview.activeTranslations],
           ['AI Explanations', response.data.overview.aiExplanations],
           ['Flagged Content', response.data.overview.flaggedContent],
-          ['Pending Updates', response.data.translationsByStatus.Pending || 0],
+          ['Pending Updates', response.data.translationsByStatus.Pending || 0]
         ];
 
         const csvContent = [
           headers.join(','),
-          ...rows.map(row => row.map(cell => {
-            const cellStr = String(cell || '');
-            if (cellStr.includes(',') || cellStr.includes('"') || cellStr.includes('\n')) {
-              return `"${cellStr.replace(/"/g, '""')}"`;
-            }
-            return cellStr;
-          }).join(','))
+          ...rows.map((row) =>
+            row
+              .map((cell) => {
+                const cellStr = String(cell || '');
+                if (cellStr.includes(',') || cellStr.includes('"') || cellStr.includes('\n')) {
+                  return `"${cellStr.replace(/"/g, '""')}"`;
+                }
+                return cellStr;
+              })
+              .join(',')
+          )
         ].join('\n');
 
         const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
         const link = document.createElement('a');
         const url = URL.createObjectURL(blob);
         link.setAttribute('href', url);
-        link.setAttribute('download', `bible_content_dashboard_${new Date().toISOString().split('T')[0]}.csv`);
+        link.setAttribute(
+          'download',
+          `bible_content_dashboard_${new Date().toISOString().split('T')[0]}.csv`
+        );
         link.style.visibility = 'hidden';
         document.body.appendChild(link);
         link.click();
@@ -57,7 +64,9 @@ const BibleContentDashboardPage = () => {
       }
     } catch (error: any) {
       console.error('Error exporting dashboard data:', error);
-      toast.error(error?.response?.data?.message || error?.message || 'Failed to export dashboard data');
+      toast.error(
+        error?.response?.data?.message || error?.message || 'Failed to export dashboard data'
+      );
     }
   };
 
@@ -68,13 +77,12 @@ const BibleContentDashboardPage = () => {
           <Toolbar>
             <ToolbarHeading>
               <ToolbarPageTitle />
-              <ToolbarDescription>Manage Bible translations, content, and AI explanations.</ToolbarDescription>
+              <ToolbarDescription>
+                Manage Bible translations, content, and AI explanations.
+              </ToolbarDescription>
             </ToolbarHeading>
             <ToolbarActions>
-              <button 
-                onClick={handleExportData}
-                className="btn btn-sm btn-light"
-              >
+              <button onClick={handleExportData} className="btn btn-sm btn-light">
                 Export Data
               </button>
             </ToolbarActions>
@@ -89,4 +97,4 @@ const BibleContentDashboardPage = () => {
   );
 };
 
-export { BibleContentDashboardPage }; 
+export { BibleContentDashboardPage };

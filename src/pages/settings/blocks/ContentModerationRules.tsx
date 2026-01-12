@@ -3,14 +3,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
-import { 
-  Shield, 
-  AlertTriangle, 
-  CheckCircle,
-  Save,
-  Plus,
-  Trash2
-} from 'lucide-react';
+import { Shield, AlertTriangle, CheckCircle, Save, Plus, Trash2 } from 'lucide-react';
 
 const ContentModerationRules = () => {
   return (
@@ -30,7 +23,7 @@ const ContentModerationRules = () => {
               Add Rule
             </Button>
           </div>
-          
+
           <div className="space-y-3">
             <div className="flex items-center justify-between p-3 border rounded-lg">
               <div>
@@ -39,13 +32,15 @@ const ContentModerationRules = () => {
               </div>
               <div className="flex items-center gap-2">
                 <Switch defaultChecked />
-                <Button size="sm" variant="outline">Edit</Button>
+                <Button size="sm" variant="outline">
+                  Edit
+                </Button>
                 <Button size="sm" variant="outline" className="text-red-600">
                   <Trash2 className="w-4 h-4" />
                 </Button>
               </div>
             </div>
-            
+
             <div className="flex items-center justify-between p-3 border rounded-lg">
               <div>
                 <h5 className="font-medium">Spam Detection</h5>
@@ -53,13 +48,15 @@ const ContentModerationRules = () => {
               </div>
               <div className="flex items-center gap-2">
                 <Switch defaultChecked />
-                <Button size="sm" variant="outline">Edit</Button>
+                <Button size="sm" variant="outline">
+                  Edit
+                </Button>
                 <Button size="sm" variant="outline" className="text-red-600">
                   <Trash2 className="w-4 h-4" />
                 </Button>
               </div>
             </div>
-            
+
             <div className="flex items-center justify-between p-3 border rounded-lg">
               <div>
                 <h5 className="font-medium">Duplicate Content</h5>
@@ -67,13 +64,15 @@ const ContentModerationRules = () => {
               </div>
               <div className="flex items-center gap-2">
                 <Switch defaultChecked />
-                <Button size="sm" variant="outline">Edit</Button>
+                <Button size="sm" variant="outline">
+                  Edit
+                </Button>
                 <Button size="sm" variant="outline" className="text-red-600">
                   <Trash2 className="w-4 h-4" />
                 </Button>
               </div>
             </div>
-            
+
             <div className="flex items-center justify-between p-3 border rounded-lg">
               <div>
                 <h5 className="font-medium">Link Validation</h5>
@@ -81,7 +80,9 @@ const ContentModerationRules = () => {
               </div>
               <div className="flex items-center gap-2">
                 <Switch />
-                <Button size="sm" variant="outline">Edit</Button>
+                <Button size="sm" variant="outline">
+                  Edit
+                </Button>
                 <Button size="sm" variant="outline" className="text-red-600">
                   <Trash2 className="w-4 h-4" />
                 </Button>
@@ -89,18 +90,20 @@ const ContentModerationRules = () => {
             </div>
           </div>
         </div>
-        
+
         <div className="space-y-4">
           <h4 className="font-medium text-gray-900">Moderation Settings</h4>
           <div className="space-y-3">
             <div className="flex items-center justify-between">
               <div>
                 <Label htmlFor="auto_moderation">Auto Moderation</Label>
-                <p className="text-sm text-gray-500">Automatically moderate content based on rules</p>
+                <p className="text-sm text-gray-500">
+                  Automatically moderate content based on rules
+                </p>
               </div>
               <Switch id="auto_moderation" defaultChecked />
             </div>
-            
+
             <div className="flex items-center justify-between">
               <div>
                 <Label htmlFor="manual_review">Manual Review Required</Label>
@@ -108,7 +111,7 @@ const ContentModerationRules = () => {
               </div>
               <Switch id="manual_review" defaultChecked />
             </div>
-            
+
             <div className="flex items-center justify-between">
               <div>
                 <Label htmlFor="user_notifications">User Notifications</Label>
@@ -118,7 +121,7 @@ const ContentModerationRules = () => {
             </div>
           </div>
         </div>
-        
+
         <div className="flex items-center gap-3 pt-4">
           <Button className="flex items-center gap-2">
             <Save className="w-4 h-4" />

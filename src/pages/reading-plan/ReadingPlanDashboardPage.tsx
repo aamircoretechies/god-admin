@@ -2,10 +2,10 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { 
-  BookOpen, 
-  Users, 
-  TrendingUp, 
+import {
+  BookOpen,
+  Users,
+  TrendingUp,
   Calendar,
   Eye,
   CheckCircle,
@@ -143,7 +143,11 @@ const ReadingPlanDashboardPage = () => {
               <div>
                 <p className="text-sm font-medium text-gray-600">Avg Completion</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {Math.round(mockReadingPlans.reduce((sum, plan) => sum + plan.completionRate, 0) / mockReadingPlans.length)}%
+                  {Math.round(
+                    mockReadingPlans.reduce((sum, plan) => sum + plan.completionRate, 0) /
+                      mockReadingPlans.length
+                  )}
+                  %
                 </p>
               </div>
               <div className="p-3 bg-yellow-100 rounded-full">
@@ -182,7 +186,9 @@ const ReadingPlanDashboardPage = () => {
               <div
                 key={plan.id}
                 className={`p-4 border rounded-lg cursor-pointer transition-all ${
-                  selectedPlan === plan.id ? 'border-primary bg-primary/5' : 'border-gray-200 hover:border-gray-300'
+                  selectedPlan === plan.id
+                    ? 'border-primary bg-primary/5'
+                    : 'border-gray-200 hover:border-gray-300'
                 }`}
                 onClick={() => setSelectedPlan(plan.id)}
               >
@@ -228,7 +234,10 @@ const ReadingPlanDashboardPage = () => {
                     <span className="font-medium">{plan.completionRate}%</span>
                   </div>
                   <div className={`progress h-2 ${getProgressColor(plan.completionRate)}`}>
-                    <div className="progress-bar" style={{ width: `${plan.completionRate}%` }}></div>
+                    <div
+                      className="progress-bar"
+                      style={{ width: `${plan.completionRate}%` }}
+                    ></div>
                   </div>
                 </div>
 
@@ -264,11 +273,29 @@ const ReadingPlanDashboardPage = () => {
         <CardContent>
           <div className="space-y-3">
             {[
-              { title: 'Chapter 5 completion', plan: '30-Day New Testament', date: '2024-01-25', users: 45 },
-              { title: 'Week 2 milestone', plan: 'Psalms in 7 Days', date: '2024-01-22', users: 23 },
-              { title: 'Gospel study completion', plan: 'Gospel of John Study', date: '2024-01-28', users: 67 }
+              {
+                title: 'Chapter 5 completion',
+                plan: '30-Day New Testament',
+                date: '2024-01-25',
+                users: 45
+              },
+              {
+                title: 'Week 2 milestone',
+                plan: 'Psalms in 7 Days',
+                date: '2024-01-22',
+                users: 23
+              },
+              {
+                title: 'Gospel study completion',
+                plan: 'Gospel of John Study',
+                date: '2024-01-28',
+                users: 67
+              }
             ].map((milestone, index) => (
-              <div key={index} className="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+              <div
+                key={index}
+                className="flex items-center justify-between p-3 bg-gray-50 rounded-lg"
+              >
                 <div className="flex items-center space-x-3">
                   <div className="p-2 bg-yellow-100 rounded-full">
                     <Clock className="w-4 h-4 text-yellow-600" />
@@ -291,4 +318,4 @@ const ReadingPlanDashboardPage = () => {
   );
 };
 
-export { ReadingPlanDashboardPage }; 
+export { ReadingPlanDashboardPage };

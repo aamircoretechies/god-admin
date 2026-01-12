@@ -20,7 +20,9 @@ const PromptHistory = () => {
           <Toolbar>
             <ToolbarHeading>
               <ToolbarPageTitle />
-              <ToolbarDescription>View version history and changes for AI prompt templates.</ToolbarDescription>
+              <ToolbarDescription>
+                View version history and changes for AI prompt templates.
+              </ToolbarDescription>
             </ToolbarHeading>
             <ToolbarActions>
               <a href="#" className="btn btn-sm btn-light">

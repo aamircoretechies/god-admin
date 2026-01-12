@@ -27,7 +27,9 @@ const BibleBooksChaptersPage = () => {
             {/* <ToolbarActions> */}
             <ToolbarActions>
               <div className="flex flex-wrap justify-center sm:justify-end gap-2 text-center sm:text-right">
-                <span className="text-sm text-gray-500">Content management not available in Phase 1</span>
+                <span className="text-sm text-gray-500">
+                  Content management not available in Phase 1
+                </span>
               </div>
             </ToolbarActions>
           </Toolbar>
@@ -41,4 +43,4 @@ const BibleBooksChaptersPage = () => {
   );
 };
 
-export { BibleBooksChaptersPage }; 
+export { BibleBooksChaptersPage };

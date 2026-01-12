@@ -2,12 +2,7 @@ import { useMemo, useState } from 'react';
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { toAbsoluteUrl } from '@/utils';
-import {
-  DataGrid,
-  DataGridColumnHeader,
-  KeenIcon,
-  useDataGrid
-} from '@/components';
+import { DataGrid, DataGridColumnHeader, KeenIcon, useDataGrid } from '@/components';
 import { ColumnDef, Column, RowSelectionState } from '@tanstack/react-table';
 import {
   Select,
@@ -295,9 +290,12 @@ const Users = ({ hideRowsPerPage = false }: UsersProps) => {
   }, [searchInput]);
 
   // Custom fetch function that includes search and filters
-  const customFetchData = React.useCallback(async (params: any) => {
-    return fetchUsersForDataGrid(params, debouncedSearch, statusFilter, sortFilter);
-  }, [debouncedSearch, statusFilter, sortFilter]);
+  const customFetchData = React.useCallback(
+    async (params: any) => {
+      return fetchUsersForDataGrid(params, debouncedSearch, statusFilter, sortFilter);
+    },
+    [debouncedSearch, statusFilter, sortFilter]
+  );
 
   // SaaSUsersToolbar extracted to top level
 

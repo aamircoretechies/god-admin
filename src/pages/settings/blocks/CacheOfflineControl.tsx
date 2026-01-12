@@ -7,12 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Save } from 'lucide-react';
 import { AlertCircle } from 'lucide-react';
 import { fetchCacheConfiguration, updateCacheConfiguration } from '@/services/settingsApi';
-import {
-  Database,
-  Download,
-  Trash2,
-  AlertTriangle
-} from 'lucide-react';
+import { Database, Download, Trash2, AlertTriangle } from 'lucide-react';
 
 const CacheOfflineControl = () => {
   const [config, setConfig] = useState<{
@@ -67,7 +62,7 @@ const CacheOfflineControl = () => {
   }, []);
 
   const handleValueChange = (key: keyof typeof localValues, value: string | boolean) => {
-    setLocalValues(prev => ({ ...prev, [key]: value }));
+    setLocalValues((prev) => ({ ...prev, [key]: value }));
   };
 
   const handleSave = async () => {
@@ -210,9 +205,7 @@ const CacheOfflineControl = () => {
                 <Download className="w-4 h-4 mr-2" />
                 {isPreloading ? 'Preloading...' : 'Preload Translations'}
               </Button>
-              <p className="text-xs text-gray-500">
-                Download translations for offline access
-              </p>
+              <p className="text-xs text-gray-500">Download translations for offline access</p>
             </div>
           </div>
 
@@ -223,9 +216,7 @@ const CacheOfflineControl = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <Label htmlFor="cache_enabled">Cache Enabled</Label>
-                  <p className="text-xs text-gray-500">
-                    Enable caching system
-                  </p>
+                  <p className="text-xs text-gray-500">Enable caching system</p>
                 </div>
                 <Switch
                   id="cache_enabled"
@@ -258,9 +249,7 @@ const CacheOfflineControl = () => {
               <div className="flex items-center justify-between">
                 <div>
                   <Label htmlFor="offline_mode">Offline Mode</Label>
-                  <p className="text-xs text-gray-500">
-                    Enable offline mode
-                  </p>
+                  <p className="text-xs text-gray-500">Enable offline mode</p>
                 </div>
                 <Switch
                   id="offline_mode"
@@ -281,11 +270,7 @@ const CacheOfflineControl = () => {
             <Save className="w-4 h-4" />
             {saving ? 'Saving...' : 'Save Settings'}
           </Button> */}
-          <Button
-            className="flex items-center gap-2"
-            onClick={handleSave}
-            disabled={true}
-          >
+          <Button className="flex items-center gap-2" onClick={handleSave} disabled={true}>
             <Save className="w-4 h-4" />
             Save Settings
           </Button>
@@ -314,4 +299,3 @@ const CacheOfflineControl = () => {
 };
 
 export { CacheOfflineControl };
-

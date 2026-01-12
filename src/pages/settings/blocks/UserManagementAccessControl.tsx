@@ -3,14 +3,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
-import { 
-  Lock, 
-  Shield, 
-  Users,
-  Save,
-  Plus,
-  Trash2
-} from 'lucide-react';
+import { Lock, Shield, Users, Save, Plus, Trash2 } from 'lucide-react';
 
 const UserManagementAccessControl = () => {
   return (
@@ -30,7 +23,7 @@ const UserManagementAccessControl = () => {
               Add IP
             </Button>
           </div>
-          
+
           <div className="space-y-3">
             <div className="flex items-center justify-between p-3 border rounded-lg">
               <div>
@@ -41,7 +34,7 @@ const UserManagementAccessControl = () => {
                 <Trash2 className="w-4 h-4" />
               </Button>
             </div>
-            
+
             <div className="flex items-center justify-between p-3 border rounded-lg">
               <div>
                 <span className="font-medium">10.0.0.50</span>
@@ -53,7 +46,7 @@ const UserManagementAccessControl = () => {
             </div>
           </div>
         </div>
-        
+
         <div className="space-y-4">
           <h4 className="font-medium text-gray-900">Access Restrictions</h4>
           <div className="space-y-3">
@@ -64,7 +57,7 @@ const UserManagementAccessControl = () => {
               </div>
               <Switch id="ip_restriction" />
             </div>
-            
+
             <div className="flex items-center justify-between">
               <div>
                 <Label htmlFor="time_restriction">Time Restriction</Label>
@@ -72,7 +65,7 @@ const UserManagementAccessControl = () => {
               </div>
               <Switch id="time_restriction" />
             </div>
-            
+
             <div className="flex items-center justify-between">
               <div>
                 <Label htmlFor="geographic_restriction">Geographic Restriction</Label>
@@ -82,7 +75,7 @@ const UserManagementAccessControl = () => {
             </div>
           </div>
         </div>
-        
+
         <div className="flex items-center gap-3 pt-4">
           <Button className="flex items-center gap-2">
             <Save className="w-4 h-4" />

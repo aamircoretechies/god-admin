@@ -7,9 +7,9 @@ import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
-import { 
-  BookOpen, 
-  Calendar, 
+import {
+  BookOpen,
+  Calendar,
   History,
   Brain,
   Loader2,
@@ -20,9 +20,9 @@ import {
   ChevronLeft,
   ChevronRight
 } from 'lucide-react';
-import { 
-  fetchVerseAIExplanationHistory, 
-  deleteAIExplanation, 
+import {
+  fetchVerseAIExplanationHistory,
+  deleteAIExplanation,
   updateAIExplanation,
   type VerseAIExplanationHistoryResponse,
   type UpdateAIExplanationRequest
@@ -58,7 +58,7 @@ export const VALID_EXPERIENCE_LEVELS = [
 // Map experience_level from API to UI labels
 const mapExperienceLevel = (level: string | undefined): string => {
   if (!level) return 'Not specified';
-  
+
   const levelMap: Record<string, string> = {
     'NEW_TO_BIBLE': 'First Time',
     'SOME_KNOWLEDGE': 'Some Knowledge',
@@ -71,7 +71,7 @@ const mapExperienceLevel = (level: string | undefined): string => {
     'ADVANCED': 'Advanced Student',
     'SCHOLAR': 'Scholar'
   };
-  
+
   return levelMap[level.toUpperCase()] || level;
 };
 
@@ -88,7 +88,7 @@ const VerseDetailModal: React.FC<VerseDetailModalProps> = ({ isOpen, onClose, ve
 
   const loadAIExplanationHistory = useCallback(async () => {
     if (!verse?.verseId) return;
-    
+
     try {
       setLoadingHistory(true);
       setHistoryError(null);
@@ -128,7 +128,7 @@ const VerseDetailModal: React.FC<VerseDetailModalProps> = ({ isOpen, onClose, ve
     // Get explanation_type (use explanation_type if available, otherwise use context_type or category)
     const explanationType = explanation.explanation_type || explanation.context_type || explanation.category || 'general';
     const experienceLevel = explanation.experience_level || 'NEW_TO_BIBLE';
-    
+
     setEditingExplanation(explanation);
     setEditFormData({
       explanation_type: explanationType,
@@ -144,7 +144,7 @@ const VerseDetailModal: React.FC<VerseDetailModalProps> = ({ isOpen, onClose, ve
     try {
       setSaving(true);
       const response = await updateAIExplanation(verse.verseId, editFormData);
-      
+
       if (response.status === 1) {
         toast.success('Explanation updated successfully');
         setEditingExplanation(null);
@@ -169,7 +169,7 @@ const VerseDetailModal: React.FC<VerseDetailModalProps> = ({ isOpen, onClose, ve
 
   const handleDeleteExplanation = async (explanation: any) => {
     if (!verse?.verseId) return;
-    
+
     // Confirm deletion
     if (!window.confirm('Are you sure you want to delete this explanation? This action cannot be undone.')) {
       return;
@@ -179,10 +179,10 @@ const VerseDetailModal: React.FC<VerseDetailModalProps> = ({ isOpen, onClose, ve
       // Get explanation_type and experience_level
       const explanationType = explanation.explanation_type || explanation.context_type || explanation.category || 'general';
       const experienceLevel = explanation.experience_level || 'NEW_TO_BIBLE';
-      
+
       setDeletingId(explanation.explanation_id);
       const response = await deleteAIExplanation(verse.verseId, explanationType, experienceLevel);
-      
+
       if (response.status === 1) {
         toast.success('Explanation deleted successfully');
         // Reload the explanation history
@@ -331,13 +331,8 @@ const VerseDetailModal: React.FC<VerseDetailModalProps> = ({ isOpen, onClose, ve
                             className="p-4 border rounded-lg border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50"
                           >
                             <div className="flex items-start justify-between mb-2">
-<<<<<<< HEAD
-                              <div className="flex items-center gap-2 flex-wrap">
-                                <Badge variant="outline" className="text-xs">
-=======
                               <div className="flex items-center gap-2">
                                 <Badge variant="secondary" className="text-xs text-gray-900">
->>>>>>> 31602d218e4ab452376b6a9e0190698e73c36512
                                   {explanation.category || explanation.label || 'General'}
                                 </Badge>
                                 {explanation.context_type && (
@@ -351,7 +346,7 @@ const VerseDetailModal: React.FC<VerseDetailModalProps> = ({ isOpen, onClose, ve
                                   </Badge>
                                 )}
                                 {explanation.has_content ? (
-                                  <Badge  className="bg-green-100 text-green-800 dark:bg-black dark:text-green-300 text-xs">
+                                  <Badge className="bg-green-100 text-green-800 dark:bg-black dark:text-green-300 text-xs">
                                     Has Content
                                   </Badge>
                                 ) : (
@@ -402,7 +397,7 @@ const VerseDetailModal: React.FC<VerseDetailModalProps> = ({ isOpen, onClose, ve
                             )}
                           </div>
                         ))}
-                        
+
                         {/* Pagination Controls */}
                         {totalPages > 1 && (
                           <div className="flex items-center justify-between pt-4 border-t border-gray-200 dark:border-gray-700">
@@ -440,8 +435,8 @@ const VerseDetailModal: React.FC<VerseDetailModalProps> = ({ isOpen, onClose, ve
                 ) : (
                   <div className="text-center py-4 text-gray-500 dark:text-gray-400">
                     <p className="text-sm">Click to load AI explanation history</p>
-                    <Button 
-                      className="mt-2" 
+                    <Button
+                      className="mt-2"
                       variant="outline"
                       onClick={loadAIExplanationHistory}
                     >
@@ -465,92 +460,91 @@ const VerseDetailModal: React.FC<VerseDetailModalProps> = ({ isOpen, onClose, ve
 
       {/* Edit Explanation Dialog */}
       <Dialog open={!!editingExplanation} onOpenChange={handleCancelEdit}>
-        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Edit Explanation</DialogTitle>
-            <DialogDescription>
-              Update the explanation content, experience level, and other details.
-            </DialogDescription>
-          </DialogHeader>
-          
-          {editFormData && (
-            <div className="space-y-4 py-4">
-              <div className="space-y-2">
-                <Label htmlFor="explanation_type">Explanation Type</Label>
-                <Input
-                  id="explanation_type"
-                  value={editFormData.explanation_type}
-                  onChange={(e) => setEditFormData({ ...editFormData, explanation_type: e.target.value })}
-                  placeholder="e.g., theological, historical, cultural"
-                />
-              </div>
+    <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+      <DialogHeader>
+        <DialogTitle>Edit Explanation</DialogTitle>
+        <DialogDescription>
+          Update the explanation content, experience level, and other details.
+        </DialogDescription>
+      </DialogHeader>
 
-              <div className="space-y-2">
-                <Label htmlFor="experience_level">Experience Level</Label>
-                <Select
-                  value={editFormData.experience_level}
-                  onValueChange={(value) => setEditFormData({ ...editFormData, experience_level: value })}
-                >
-                  <SelectTrigger id="experience_level">
-                    <SelectValue placeholder="Select experience level" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {VALID_EXPERIENCE_LEVELS.map((level) => (
-                      <SelectItem key={level} value={level}>
-                        {mapExperienceLevel(level)}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+      {editFormData && (
+        <div className="space-y-4 py-4">
+          <div className="space-y-2">
+            <Label htmlFor="explanation_type">Explanation Type</Label>
+            <Input
+              id="explanation_type"
+              value={editFormData.explanation_type}
+              onChange={(e) => setEditFormData({ ...editFormData, explanation_type: e.target.value })}
+              placeholder="e.g., theological, historical, cultural"
+            />
+          </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="content">Content</Label>
-                <Textarea
-                  id="content"
-                  value={editFormData.content}
-                  onChange={(e) => setEditFormData({ ...editFormData, content: e.target.value })}
-                  placeholder="Enter explanation content..."
-                  rows={8}
-                  className="resize-none"
-                />
-              </div>
+          <div className="space-y-2">
+            <Label htmlFor="experience_level">Experience Level</Label>
+            <Select
+              value={editFormData.experience_level}
+              onValueChange={(value) => setEditFormData({ ...editFormData, experience_level: value })}
+            >
+              <SelectTrigger id="experience_level">
+                <SelectValue placeholder="Select experience level" />
+              </SelectTrigger>
+              <SelectContent>
+                {VALID_EXPERIENCE_LEVELS.map((level) => (
+                  <SelectItem key={level} value={level}>
+                    {mapExperienceLevel(level)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="sources">Sources (comma-separated)</Label>
-                <Input
-                  id="sources"
-                  value={editFormData.sources?.join(', ') || ''}
-                  onChange={(e) => {
-                    const sources = e.target.value.split(',').map(s => s.trim()).filter(Boolean);
-                    setEditFormData({ ...editFormData, sources });
-                  }}
-                  placeholder="Source 1, Source 2, Source 3"
-                />
-              </div>
+          <div className="space-y-2">
+            <Label htmlFor="content">Content</Label>
+            <Textarea
+              id="content"
+              value={editFormData.content}
+              onChange={(e) => setEditFormData({ ...editFormData, content: e.target.value })}
+              placeholder="Enter explanation content..."
+              rows={8}
+              className="resize-none"
+            />
+          </div>
 
-              <div className="flex justify-end gap-2 pt-4">
-                <Button variant="outline" onClick={handleCancelEdit} disabled={saving}>
-                  Cancel
-                </Button>
-                <Button onClick={handleSaveEdit} disabled={saving || !editFormData.content.trim()}>
-                  {saving ? (
-                    <>
-                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                      Saving...
-                    </>
-                  ) : (
-                    'Save Changes'
-                  )}
-                </Button>
-              </div>
-            </div>
-          )}
-        </DialogContent>
+          <div className="space-y-2">
+            <Label htmlFor="sources">Sources (comma-separated)</Label>
+            <Input
+              id="sources"
+              value={editFormData.sources?.join(', ') || ''}
+              onChange={(e) => {
+                const sources = e.target.value.split(',').map(s => s.trim()).filter(Boolean);
+                setEditFormData({ ...editFormData, sources });
+              }}
+              placeholder="Source 1, Source 2, Source 3"
+            />
+          </div>
+
+          <div className="flex justify-end gap-2 pt-4">
+            <Button variant="outline" onClick={handleCancelEdit} disabled={saving}>
+              Cancel
+            </Button>
+            <Button onClick={handleSaveEdit} disabled={saving || !editFormData.content.trim()}>
+              {saving ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                'Save Changes'
+              )}
+            </Button>
+          </div>
+        </div>
+      )}
+    </DialogContent>
       </Dialog>
     </Dialog>
   );
 };
 
 export { VerseDetailModal };
-

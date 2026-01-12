@@ -43,4 +43,4 @@ const ContentModerationPage = () => {
   );
 };
 
-export { ContentModerationPage }; 
+export { ContentModerationPage };

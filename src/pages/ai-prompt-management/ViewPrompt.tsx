@@ -27,11 +27,7 @@ const ViewPrompt = () => {
               <ToolbarDescription>View AI prompt template details and metadata.</ToolbarDescription>
             </ToolbarHeading>
             <ToolbarActions>
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => navigate('/ai-prompt-management')}
-              >
+              <Button variant="outline" size="sm" onClick={() => navigate('/ai-prompt-management')}>
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Back to List
               </Button>

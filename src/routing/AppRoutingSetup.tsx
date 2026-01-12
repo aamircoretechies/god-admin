@@ -15,31 +15,26 @@ import { AIExplanationManagementPage } from '@/pages/bible-content/ai-explanatio
 import { TheologicalInsightsPage } from '@/pages/bible-content/theological-insights/TheologicalInsightsPage';
 import { ContentModerationPage } from '@/pages/bible-content/moderation';
 import { ContentSearchAnalyticsPage } from '@/pages/bible-content/search-analytics';
-import { 
-  NotesOverview, 
-  NoteDetail, 
-  ModerationQueue, 
-  NotesAnalytics, 
-  AdminSettings 
+import {
+  NotesOverview,
+  NoteDetail,
+  ModerationQueue,
+  NotesAnalytics,
+  AdminSettings
 } from '@/pages/notes-journals';
-import { 
-  MonetizationDashboard, 
-  SubscriptionManagement, 
-  SubscriptionAnalytics 
+import {
+  MonetizationDashboard,
+  SubscriptionManagement,
+  SubscriptionAnalytics
 } from '@/pages/monetization';
-import { 
-  PromptList, 
-  AddEditPrompt, 
-  ViewPrompt, 
-  PromptHistory 
-} from '@/pages/ai-prompt-management';
+import { PromptList, AddEditPrompt, ViewPrompt, PromptHistory } from '@/pages/ai-prompt-management';
 import { FeedbackInboxPage } from '@/pages/feedback/FeedbackInboxPage';
 import { AIFlagReviewPage } from '@/pages/feedback/AIFlagReviewPage';
-import { 
-  ActivityLogList, 
-  UserActivityDetail, 
-  ActivityAnalytics, 
-  SystemAlerts 
+import {
+  ActivityLogList,
+  UserActivityDetail,
+  ActivityAnalytics,
+  SystemAlerts
 } from '@/pages/system-log';
 import {
   ProfileActivityPage,
@@ -132,7 +127,7 @@ const AppRoutingSetup = (): ReactElement => {
         <Route element={<Demo1Layout />}>
           <Route path="/" element={<DefaultPage />} />
           <Route path="/dark-sidebar" element={<Demo1DarkSidebarPage />} />
-          
+
           {/* Reading Plan Routes */}
           <Route path="/reading-plan" element={<ReadingPlanDashboardPage />} />
           <Route path="/reading-plan/manage" element={<ReadingPlanManagePage />} />
@@ -141,41 +136,44 @@ const AppRoutingSetup = (): ReactElement => {
           <Route path="/reading-plan/content" element={<ReadingPlanContentPage />} />
           <Route path="/reading-plan/analytics" element={<ReadingPlanAnalyticsPage />} />
           <Route path="/reading-plan/notifications" element={<ReadingPlanNotificationsPage />} />
-          
+
           {/* Bible Content Routes */}
           <Route path="/bible-content" element={<BibleContentDashboardPage />} />
           <Route path="/bible-content/translations" element={<BibleTranslationsPage />} />
           <Route path="/bible-content/translations/view/:id" element={<ViewTranslationPage />} />
           <Route path="/bible-content/books-chapters" element={<BibleBooksChaptersPage />} />
-          <Route path="/bible-content/books-chapters/view/:bookId/:chapterId" element={<ViewChapterPage />} />
+          <Route
+            path="/bible-content/books-chapters/view/:bookId/:chapterId"
+            element={<ViewChapterPage />}
+          />
           <Route path="/bible-content/ai-explanations" element={<AIExplanationManagementPage />} />
           <Route path="/bible-content/theological-insights" element={<TheologicalInsightsPage />} />
           {/* <Route path="/bible-content/moderation" element={<ContentModerationPage />} /> */}
           <Route path="/bible-content/search-analytics" element={<ContentSearchAnalyticsPage />} />
-          
+
           {/* Notes & Journals Routes */}
           <Route path="/notes-journals" element={<NotesOverview />} />
           <Route path="/notes-journals/detail/:id" element={<NoteDetail />} />
           <Route path="/notes-journals/moderation" element={<ModerationQueue />} />
           <Route path="/notes-journals/analytics" element={<NotesAnalytics />} />
           <Route path="/notes-journals/settings" element={<AdminSettings />} />
-          
+
           {/* Monetization Routes */}
           <Route path="/monetization" element={<MonetizationDashboard />} />
           <Route path="/monetization/subscription-plan" element={<SubscriptionManagement />} />
           <Route path="/monetization/subscription-reports" element={<SubscriptionAnalytics />} />
-          
+
           {/* AI Prompt Management Routes */}
           <Route path="/ai-prompt-management" element={<PromptList />} />
           <Route path="/ai-prompt-management/add" element={<AddEditPrompt />} />
           <Route path="/ai-prompt-management/edit/:id" element={<AddEditPrompt />} />
           <Route path="/ai-prompt-management/view/:id" element={<ViewPrompt />} />
           <Route path="/ai-prompt-management/history/:id" element={<PromptHistory />} />
-          
+
           {/* Feedback & Moderation Routes */}
           <Route path="/feedback/inbox" element={<FeedbackInboxPage />} />
           <Route path="/feedback/ai-flags" element={<AIFlagReviewPage />} />
-          
+
           {/* System Log Routes */}
           <Route path="/system-log" element={<ActivityLogList />} />
           <Route path="/system-log/user/:id" element={<UserActivityDetail />} />

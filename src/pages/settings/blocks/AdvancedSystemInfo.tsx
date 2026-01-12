@@ -1,13 +1,6 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { 
-  Info, 
-  Server, 
-  Database,
-  Download,
-  RefreshCw,
-  Eye
-} from 'lucide-react';
+import { Info, Server, Database, Download, RefreshCw, Eye } from 'lucide-react';
 
 const AdvancedSystemInfo = () => {
   return (
@@ -40,7 +33,7 @@ const AdvancedSystemInfo = () => {
             </div>
           </div>
         </div>
-        
+
         <div className="space-y-4">
           <h4 className="font-medium text-gray-900">Resource Usage</h4>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -58,7 +51,7 @@ const AdvancedSystemInfo = () => {
             </div>
           </div>
         </div>
-        
+
         <div className="space-y-4">
           <h4 className="font-medium text-gray-900">Performance Metrics</h4>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -80,7 +73,7 @@ const AdvancedSystemInfo = () => {
             </div>
           </div>
         </div>
-        
+
         <div className="space-y-4">
           <h4 className="font-medium text-gray-900">System Health</h4>
           <div className="space-y-3">
@@ -114,7 +107,7 @@ const AdvancedSystemInfo = () => {
             </div>
           </div>
         </div>
-        
+
         <div className="flex items-center gap-3 pt-4">
           <Button variant="outline" className="flex items-center gap-2">
             <RefreshCw className="w-4 h-4" />

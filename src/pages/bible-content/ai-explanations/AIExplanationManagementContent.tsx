@@ -267,10 +267,11 @@ const AIExplanationManagementContent = () => {
       if (!explanationToUpdate) return;
 
       // const updatePromise = updateAIExplanation(`${explanationToUpdate.verseId}_${explanationToUpdate.fieldName}`, {
-      const updatePromise = updateAIExplanation(explanationToUpdate.id, {
-        verse_text: formData.verseText || '',
-        explanation: formData.explanation || '',
-        status: formData.status === 'needs_review' ? 'Pending' : (formData.status?.charAt(0).toUpperCase() + formData.status!.slice(1)) || 'Pending'
+      const updatePromise = updateAIExplanation(explanationToUpdate.verseId, {
+        explanation_type: explanationToUpdate.fieldName || explanationToUpdate.category || 'general',
+        experience_level: 'NEW_TO_BIBLE',
+        content: formData.explanation || '',
+        sources: []
       });
 
       toast.promise(updatePromise, {
@@ -752,36 +753,6 @@ const AIExplanationManagementContent = () => {
                       </Badge>
                     </div>
                   </div>
-              <div key={explanation.id} className="p-4 border rounded-lg min-w-[600px]">
-                <div className="flex items-center justify-between mb-3">
-                  <div className="flex items-center space-x-3">
-                    <div className="p-2 bg-purple-100 rounded-lg">
-                      <Brain className="w-5 h-5 text-purple-600" />
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-gray-900">
-                        {explanation.book} {explanation.chapter}:{explanation.verse}
-                        {explanation.translation && (
-                          <span className="text-sm font-normal text-gray-500 ml-2">
-                            ({explanation.translation.abbreviation})
-                          </span>
-                        )}
-                      </h3>
-                      <p className="text-sm text-gray-600 italic flex items-center gap-1">
-                        {explanation.verseText || ''}
-                        {/* {!explanation.verseText && <DummyDataIndicator text="Verse text is not available in the API" />} */}
-                      </p>
-                    </div>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <Badge className={getStatusColor(explanation.status)}>
-                      {explanation.status.replace('_', ' ').charAt(0).toUpperCase() + explanation.status.slice(1).replace('_', ' ')}
-                    </Badge>
-                    <Badge className="bg-purple-100 text-purple-800">
-                      {explanation.category.charAt(0).toUpperCase() + explanation.category.slice(1)}
-                    </Badge>
-                  </div>
-                </div>
 
                   <div className="mb-3">
                     <p className="text-sm text-gray-700 line-clamp-3">
@@ -856,35 +827,35 @@ const AIExplanationManagementContent = () => {
                   </div>
                 </div>
               ))}
-            </div>
-          )}
 
-          {/* Pagination */}
-          {totalPages > 1 && (
-            <div className="flex items-center justify-between mt-6 pt-6 border-t">
-              <div className="text-sm text-gray-600">
-                Showing page {currentPage} of {totalPages}
-              </div>
-              <div className="flex items-center space-x-2">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                  disabled={currentPage === 1}
-                >
-                  <ChevronLeft className="w-4 h-4" />
-                  Previous
-                </Button>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                  disabled={currentPage === totalPages}
-                >
-                  Next
-                  <ChevronRight className="w-4 h-4" />
-                </Button>
-              </div>
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="flex items-center justify-between mt-6 pt-6 border-t">
+                  <div className="text-sm text-gray-600">
+                    Showing page {currentPage} of {totalPages}
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                      disabled={currentPage === 1}
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                      Previous
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                      disabled={currentPage === totalPages}
+                    >
+                      Next
+                      <ChevronRight className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
         </CardContent>
@@ -978,55 +949,6 @@ const AIExplanationManagementContent = () => {
               <div className="grid grid-cols-2 gap-4 pt-2 border-t border-gray-200">
                 <div className="space-y-1.5">
                   <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Created At</label>
-            <div className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm font-medium text-gray-600">Book</label>
-                  <p className="text-sm text-gray-900">{selectedExplanation.book}</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-gray-600">Chapter</label>
-                  <p className="text-sm text-gray-900">{selectedExplanation.chapter}</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-gray-600">Verse</label>
-                  <p className="text-sm text-gray-900">{selectedExplanation.verse}</p>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-gray-600">Status</label>
-                  <Badge className={getStatusColor(selectedExplanation.status)}>
-                    {selectedExplanation.status.replace('_', ' ').charAt(0).toUpperCase() + selectedExplanation.status.slice(1).replace('_', ' ')}
-                  </Badge>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-gray-600">Category</label>
-                  <Badge className="bg-purple-100 text-purple-800">
-                    {selectedExplanation.category.charAt(0).toUpperCase() + selectedExplanation.category.slice(1)}
-                  </Badge>
-                </div>
-                {selectedExplanation.translation && (
-                  <div>
-                    <label className="text-sm font-medium text-gray-600">Translation</label>
-                    <p className="text-sm text-gray-900">{selectedExplanation.translation.full_name} ({selectedExplanation.translation.abbreviation})</p>
-                  </div>
-                )}
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-600">Verse Text</label>
-                <p className="text-sm text-gray-700 italic mt-1">
-                  {selectedExplanation.verseText || ''}
-                  {/* {selectedExplanation.verseText || 'Verse text not available'} */}
-                </p>
-              </div>
-              <div>
-                <label className="text-sm font-medium text-gray-600">Explanation</label>
-                <p className="text-sm text-gray-700 mt-1 whitespace-pre-wrap">
-                  {selectedExplanation.explanation}
-                </p>
-              </div>
-              <div className="grid grid-cols-2 gap-4 pt-4 border-t">
-                <div>
-                  <label className="text-sm font-medium text-gray-600">Created At</label>
                   <p className="text-sm text-gray-900">{selectedExplanation.createdAt}</p>
                 </div>
                 <div className="space-y-1.5">
@@ -1036,10 +958,10 @@ const AIExplanationManagementContent = () => {
               </div>
             </div>
           )}
-        </DialogContent>
-      </Dialog>
-    </div>
-  );
+                </DialogContent>
+              </Dialog>
+            </div>
+          );
 };
 
-export { AIExplanationManagementContent }; 
+export { AIExplanationManagementContent };

@@ -2,15 +2,7 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { 
-  History, 
-  User, 
-  Calendar,
-  RotateCcw,
-  Eye,
-  CheckCircle,
-  AlertCircle
-} from 'lucide-react';
+import { History, User, Calendar, RotateCcw, Eye, CheckCircle, AlertCircle } from 'lucide-react';
 
 interface VersionHistory {
   id: string;
@@ -32,7 +24,8 @@ const PromptHistoryContent: React.FC = () => {
       id: '3',
       version: 3,
       title: 'Verse Explanation Template',
-      content: 'Please explain the following Bible verse in simple, easy-to-understand language. Include the historical context, key themes, and practical application for daily life. Focus on making the message accessible to readers of all backgrounds while maintaining theological accuracy.',
+      content:
+        'Please explain the following Bible verse in simple, easy-to-understand language. Include the historical context, key themes, and practical application for daily life. Focus on making the message accessible to readers of all backgrounds while maintaining theological accuracy.',
       changes: ['Enhanced accessibility focus', 'Added theological accuracy requirement'],
       editedBy: 'Admin User',
       editedAt: '2024-01-20T14:20:00Z',
@@ -42,7 +35,8 @@ const PromptHistoryContent: React.FC = () => {
       id: '2',
       version: 2,
       title: 'Verse Explanation Template',
-      content: 'Please explain the following Bible verse in simple, easy-to-understand language. Include the historical context, key themes, and practical application for daily life.',
+      content:
+        'Please explain the following Bible verse in simple, easy-to-understand language. Include the historical context, key themes, and practical application for daily life.',
       changes: ['Added practical application requirement', 'Improved clarity'],
       editedBy: 'Admin User',
       editedAt: '2024-01-18T11:30:00Z',
@@ -86,11 +80,13 @@ const PromptHistoryContent: React.FC = () => {
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-2xl font-bold text-gray-900">Version History</h2>
-          <p className="text-gray-600 mt-1">Verse Explanation Template - Track changes and restore previous versions</p>
+          <p className="text-gray-600 mt-1">
+            Verse Explanation Template - Track changes and restore previous versions
+          </p>
         </div>
         <div className="flex items-center gap-2">
           <Badge variant="default" className="bg-green-100 text-green-800">
-            Current: v{versionHistory.find(v => v.isCurrent)?.version}
+            Current: v{versionHistory.find((v) => v.isCurrent)?.version}
           </Badge>
         </div>
       </div>
@@ -118,7 +114,7 @@ const PromptHistoryContent: React.FC = () => {
                 >
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
-                      <Badge variant={version.isCurrent ? "default" : "default"}>
+                      <Badge variant={version.isCurrent ? 'default' : 'default'}>
                         v{version.version}
                       </Badge>
                       {version.isCurrent && (
@@ -167,7 +163,7 @@ const PromptHistoryContent: React.FC = () => {
         {/* Version Details */}
         <div className="lg:col-span-2">
           {(() => {
-            const selectedVersionData = versionHistory.find(v => v.id === selectedVersion);
+            const selectedVersionData = versionHistory.find((v) => v.id === selectedVersion);
             if (!selectedVersionData) return null;
 
             return (
@@ -256,8 +252,8 @@ const PromptHistoryContent: React.FC = () => {
                     <CardContent>
                       <div className="bg-yellow-50 p-4 rounded-lg">
                         <p className="text-sm text-yellow-800">
-                          This feature would show a side-by-side comparison with the previous version, 
-                          highlighting additions, deletions, and modifications.
+                          This feature would show a side-by-side comparison with the previous
+                          version, highlighting additions, deletions, and modifications.
                         </p>
                       </div>
                     </CardContent>

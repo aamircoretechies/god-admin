@@ -11,13 +11,11 @@ import {
 
 import { ViewChapterContent } from './ViewChapterContent';
 import { useLayout } from '@/providers';
-import { useNavigate } from "react-router-dom";
-
+import { useNavigate } from 'react-router-dom';
 
 const ViewChapterPage = () => {
   const { currentLayout } = useLayout();
   const navigate = useNavigate();
-
 
   return (
     <Fragment>
@@ -39,7 +37,6 @@ const ViewChapterPage = () => {
               >
                 Back to List
               </button>
-
             </ToolbarActions>
           </Toolbar>
         </Container>
@@ -53,4 +50,3 @@ const ViewChapterPage = () => {
 };
 
 export { ViewChapterPage };
-

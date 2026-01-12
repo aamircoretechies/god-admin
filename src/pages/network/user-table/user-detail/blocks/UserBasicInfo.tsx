@@ -75,7 +75,9 @@ const UserBasicInfo = () => {
     return (
       <div className="card">
         <div className="card-body">
-          <div className="alert alert-danger">User data structure is invalid. Missing basicUserInfo.</div>
+          <div className="alert alert-danger">
+            User data structure is invalid. Missing basicUserInfo.
+          </div>
         </div>
       </div>
     );
@@ -106,37 +108,66 @@ const UserBasicInfo = () => {
                 alt={userData.basicUserInfo.fullName}
               />
             </div>
-            <div className="text-center lg:text-left w-full overflow-hidden" style={{ maxWidth: '100%' }}>
+            <div
+              className="text-center lg:text-left w-full overflow-hidden"
+              style={{ maxWidth: '100%' }}
+            >
               {/* <h4 className="text-lg font-semibold text-gray-900 break-words overflow-hidden" style={{ wordBreak: 'break-word', overflowWrap: 'break-word', maxWidth: '100%', width: '100%' }}>{userData.basicUserInfo.fullName}</h4> */}
               {/* <p className="text-sm text-gray-600 break-words overflow-hidden">{memberSince}</p> */}
             </div>
           </div>
 
           {/* User Details */}
-          <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 min-w-0 overflow-hidden" style={{ width: '100%', maxWidth: '100%' }}>
-            <div className="space-y-3 min-w-0 overflow-hidden" style={{ width: '100%', maxWidth: '100%' }}>
+          <div
+            className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 min-w-0 overflow-hidden"
+            style={{ width: '100%', maxWidth: '100%' }}
+          >
+            <div
+              className="space-y-3 min-w-0 overflow-hidden"
+              style={{ width: '100%', maxWidth: '100%' }}
+            >
               <div className="min-w-0 overflow-hidden">
                 <label className="text-sm font-medium text-gray-700 block mb-1">User ID</label>
-                <p className="text-sm text-gray-900 font-mono bg-gray-50 dark:bg-card dark:text-white px-2 py-1 rounded break-all overflow-hidden" style={{ wordBreak: 'break-all', overflowWrap: 'break-word', maxWidth: '100%' }}>
+                <p
+                  className="text-sm text-gray-900 font-mono bg-gray-50 dark:bg-card dark:text-white px-2 py-1 rounded break-all overflow-hidden"
+                  style={{ wordBreak: 'break-all', overflowWrap: 'break-word', maxWidth: '100%' }}
+                >
                   {userData.basicUserInfo.userId}
                 </p>
               </div>
               <div className="min-w-0 overflow-hidden">
                 <label className="text-sm font-medium text-gray-700 block mb-1">Full Name</label>
-                <p className="text-sm text-gray-900 break-words overflow-hidden" style={{ wordBreak: 'break-word', overflowWrap: 'break-word', maxWidth: '100%' }}>{userData.basicUserInfo.fullName}</p>
+                <p
+                  className="text-sm text-gray-900 break-words overflow-hidden"
+                  style={{ wordBreak: 'break-word', overflowWrap: 'break-word', maxWidth: '100%' }}
+                >
+                  {userData.basicUserInfo.fullName}
+                </p>
               </div>
               <div className="min-w-0 overflow-hidden">
-                <label className="text-sm font-medium text-gray-700 block mb-1">Email / Login ID</label>
-                <p className="text-sm text-gray-900 break-all overflow-hidden" style={{ wordBreak: 'break-all', overflowWrap: 'break-word', maxWidth: '100%' }}>{userData.basicUserInfo.email}</p>
+                <label className="text-sm font-medium text-gray-700 block mb-1">
+                  Email / Login ID
+                </label>
+                <p
+                  className="text-sm text-gray-900 break-all overflow-hidden"
+                  style={{ wordBreak: 'break-all', overflowWrap: 'break-word', maxWidth: '100%' }}
+                >
+                  {userData.basicUserInfo.email}
+                </p>
               </div>
               <div className="min-w-0 overflow-hidden">
                 <label className="text-sm font-medium text-gray-700 block mb-1">Member Since</label>
                 <p className="text-sm text-gray-900 break-words overflow-hidden">{memberSince}</p>
               </div>
             </div>
-            <div className="space-y-3 min-w-0 overflow-hidden" style={{ width: '100%', maxWidth: '100%' }}>
+            <div
+              className="space-y-3 min-w-0 overflow-hidden"
+              style={{ width: '100%', maxWidth: '100%' }}
+            >
               <div className="min-w-0 overflow-hidden">
-                <label className="text-sm font-medium text-gray-700 block mb-1 ml-2">Account Type</label>
+                <label className="text-sm font-medium text-gray-700 block mb-1 ml-2">
+                  Account Type
+                </label>
                 <div className="flex items-center gap-2 overflow-hidden">
                   <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-primary/10 text-primary break-words max-w-full">
                     {userData.basicUserInfo.accountType}
@@ -146,25 +177,33 @@ const UserBasicInfo = () => {
               <div className="min-w-0 overflow-hidden">
                 <label className="text-sm font-medium text-gray-700 block mb-1 ml-2">Status</label>
                 <div className="flex items-center gap-2 overflow-hidden">
-                  <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium break-words max-w-full ${
-                    userData.basicUserInfo.status === 'active' 
-                      ? 'bg-success/10 text-success' 
-                      : 'bg-gray-100 text-gray-700'
-                  }`}>
+                  <span
+                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium break-words max-w-full ${
+                      userData.basicUserInfo.status === 'active'
+                        ? 'bg-success/10 text-success'
+                        : 'bg-gray-100 text-gray-700'
+                    }`}
+                  >
                     {userData.basicUserInfo.status}
                   </span>
                 </div>
               </div>
               {userData.basicUserInfo.phoneNumber && (
                 <div className="min-w-0 overflow-hidden">
-                  <label className="text-sm font-medium text-gray-700 block mb-1">Phone Number</label>
-                  <p className="text-sm text-gray-900 break-words overflow-hidden">{userData.basicUserInfo.phoneNumber}</p>
+                  <label className="text-sm font-medium text-gray-700 block mb-1">
+                    Phone Number
+                  </label>
+                  <p className="text-sm text-gray-900 break-words overflow-hidden">
+                    {userData.basicUserInfo.phoneNumber}
+                  </p>
                 </div>
               )}
               {userData.basicUserInfo.address && (
                 <div className="min-w-0 overflow-hidden">
                   <label className="text-sm font-medium text-gray-700 block mb-1">Address</label>
-                  <p className="text-sm text-gray-900 break-words overflow-hidden">{userData.basicUserInfo.address}</p>
+                  <p className="text-sm text-gray-900 break-words overflow-hidden">
+                    {userData.basicUserInfo.address}
+                  </p>
                 </div>
               )}
             </div>
@@ -176,4 +215,3 @@ const UserBasicInfo = () => {
 };
 
 export { UserBasicInfo };
-

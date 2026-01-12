@@ -20,7 +20,9 @@ const SubscriptionManagement = () => {
           <Toolbar>
             <ToolbarHeading>
               <ToolbarPageTitle />
-              <ToolbarDescription>Manage user subscriptions, roles, and billing information.</ToolbarDescription>
+              <ToolbarDescription>
+                Manage user subscriptions, roles, and billing information.
+              </ToolbarDescription>
             </ToolbarHeading>
             <ToolbarActions>
               <a href="#" className="btn btn-sm btn-light">

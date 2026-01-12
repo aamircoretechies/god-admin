@@ -6,7 +6,9 @@ import { fetchUserProfile, type UserProfileResponse } from '@/services/usersApi'
 const UserTechnicalDeviceInfo = () => {
   const { id } = useParams<{ id: string }>();
   const [loading, setLoading] = useState(true);
-  const [technicalData, setTechnicalData] = useState<UserProfileResponse['data']['technicalInfo'] | null>(null);
+  const [technicalData, setTechnicalData] = useState<
+    UserProfileResponse['data']['technicalInfo'] | null
+  >(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -45,9 +47,9 @@ const UserTechnicalDeviceInfo = () => {
   const getPlatformColor = (platform: string | undefined) => {
     if (!platform) return 'bg-gray-100 text-gray-800';
     const colors: { [key: string]: string } = {
-      'iOS': 'bg-blue-100 text-blue-800',
-      'Android': 'bg-green-100 text-green-800',
-      'Web': 'bg-purple-100 text-purple-800'
+      iOS: 'bg-blue-100 text-blue-800',
+      Android: 'bg-green-100 text-green-800',
+      Web: 'bg-purple-100 text-purple-800'
     };
     return colors[platform] || 'bg-gray-100 text-gray-800';
   };
@@ -98,7 +100,9 @@ const UserTechnicalDeviceInfo = () => {
         </div>
         <div className="card-body">
           <div className="text-center py-8">
-            <p className="text-sm text-gray-600">No technical information available for this user</p>
+            <p className="text-sm text-gray-600">
+              No technical information available for this user
+            </p>
           </div>
         </div>
       </div>
@@ -140,7 +144,9 @@ const UserTechnicalDeviceInfo = () => {
             <div className="space-y-3">
               <div className="flex flex-col space-y-1">
                 <label className="text-sm font-medium text-gray-700 ml-2">Platform</label>
-                <span className={`inline-flex w-fit items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getPlatformColor(technicalData.platform || technicalData.deviceModel)}`}>
+                <span
+                  className={`inline-flex w-fit items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getPlatformColor(technicalData.platform || technicalData.deviceModel)}`}
+                >
                   {technicalData.platform || technicalData.deviceModel}
                 </span>
               </div>
@@ -194,7 +200,10 @@ const UserTechnicalDeviceInfo = () => {
                 <label className="text-sm font-medium text-gray-700">Devices Used</label>
                 <div className="flex flex-wrap gap-2 mt-1">
                   {technicalData.devicesUsed.map((device, index) => (
-                    <span key={index} className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs -ml-2 font-medium ${getPlatformColor(device)}`}>
+                    <span
+                      key={index}
+                      className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs -ml-2 font-medium ${getPlatformColor(device)}`}
+                    >
                       {device}
                     </span>
                   ))}

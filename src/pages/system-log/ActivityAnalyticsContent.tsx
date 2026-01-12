@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { 
-  TrendingUp, 
-  TrendingDown, 
-  Users, 
+import {
+  TrendingUp,
+  TrendingDown,
+  Users,
   Activity,
   BookOpen,
   MessageSquare,
@@ -18,7 +18,7 @@ import {
 import { fetchActivityAnalytics, type ActivityAnalyticsResponse } from '@/services/activityLogsApi';
 
 // Simple chart components (placeholder for actual chart library)
-const SimpleBarChart = ({ data, title }: { data: any[], title: string }) => (
+const SimpleBarChart = ({ data, title }: { data: any[]; title: string }) => (
   <div className="space-y-2">
     <h4 className="text-sm font-medium text-gray-700">{title}</h4>
     <div className="space-y-1">
@@ -26,8 +26,8 @@ const SimpleBarChart = ({ data, title }: { data: any[], title: string }) => (
         <div key={index} className="flex items-center gap-2">
           <div className="w-20 text-xs text-gray-600">{item.label}</div>
           <div className="flex-1 bg-gray-200 rounded-full h-2">
-            <div 
-              className="bg-amber-500 h-2 rounded-full" 
+            <div
+              className="bg-amber-500 h-2 rounded-full"
               style={{ width: `${item.percentage}%` }}
             ></div>
           </div>
@@ -38,18 +38,18 @@ const SimpleBarChart = ({ data, title }: { data: any[], title: string }) => (
   </div>
 );
 
-const SimpleLineChart = ({ data, title }: { data: any[], title: string }) => {
+const SimpleLineChart = ({ data, title }: { data: any[]; title: string }) => {
   // Calculate max value for percentage calculation
-  const maxValue = Math.max(...data.map(item => item.value), 1);
-  
+  const maxValue = Math.max(...data.map((item) => item.value), 1);
+
   return (
     <div className="space-y-2">
       <h4 className="text-sm font-medium text-gray-700">{title}</h4>
       <div className="h-32 flex items-end gap-1">
         {data.map((item, index) => (
-          <div 
-            key={index} 
-            className="flex-1 bg-amber-500 rounded-t" 
+          <div
+            key={index}
+            className="flex-1 bg-amber-500 rounded-t"
             style={{ height: `${(item.value / maxValue) * 100}%` }}
           >
             <div className="text-xs text-white text-center mt-1">{item.value}</div>
@@ -68,7 +68,9 @@ const SimpleLineChart = ({ data, title }: { data: any[], title: string }) => {
 const ActivityAnalyticsContent: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [analyticsData, setAnalyticsData] = useState<ActivityAnalyticsResponse['data'] | null>(null);
+  const [analyticsData, setAnalyticsData] = useState<ActivityAnalyticsResponse['data'] | null>(
+    null
+  );
   const [days, setDays] = useState(7);
 
   useEffect(() => {
@@ -94,37 +96,41 @@ const ActivityAnalyticsContent: React.FC = () => {
   }, [days]);
 
   // Transform API data to component format
-  const activityTypeData = analyticsData?.activityTypesDistribution.map(item => {
-    const total = analyticsData.activityTypesDistribution.reduce((sum, i) => sum + i.count, 0);
-    return {
-      label: item.type,
-      value: item.count,
-      percentage: total > 0 ? Math.round((item.count / total) * 100) : 0
-    };
-  }) || [];
+  const activityTypeData =
+    analyticsData?.activityTypesDistribution.map((item) => {
+      const total = analyticsData.activityTypesDistribution.reduce((sum, i) => sum + i.count, 0);
+      return {
+        label: item.type,
+        value: item.count,
+        percentage: total > 0 ? Math.round((item.count / total) * 100) : 0
+      };
+    }) || [];
 
   // Transform daily active users - need day labels
   const dayLabels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-  const activeUsersData = analyticsData?.dailyActiveUsers.map((value, index) => ({
-    label: dayLabels[index % 7] || `Day ${index + 1}`,
-    value: value
-  })) || [];
+  const activeUsersData =
+    analyticsData?.dailyActiveUsers.map((value, index) => ({
+      label: dayLabels[index % 7] || `Day ${index + 1}`,
+      value: value
+    })) || [];
 
   // Transform top verses
-  const topVersesData = analyticsData?.topVerses.map(item => {
-    const total = analyticsData.topVerses.reduce((sum, i) => sum + i.count, 0);
-    return {
-      label: item.verse,
-      value: item.count,
-      percentage: total > 0 ? Math.round((item.count / total) * 100) : 0
-    };
-  }) || [];
+  const topVersesData =
+    analyticsData?.topVerses.map((item) => {
+      const total = analyticsData.topVerses.reduce((sum, i) => sum + i.count, 0);
+      return {
+        label: item.verse,
+        value: item.count,
+        percentage: total > 0 ? Math.round((item.count / total) * 100) : 0
+      };
+    }) || [];
 
   // Transform error rate trend
-  const errorRateData = analyticsData?.errorRateTrend.map((value, index) => ({
-    label: dayLabels[index % 7] || `Day ${index + 1}`,
-    value: value
-  })) || [];
+  const errorRateData =
+    analyticsData?.errorRateTrend.map((value, index) => ({
+      label: dayLabels[index % 7] || `Day ${index + 1}`,
+      value: value
+    })) || [];
 
   if (loading) {
     return (
@@ -161,7 +167,8 @@ const ActivityAnalyticsContent: React.FC = () => {
           <p className="text-sm text-gray-600">
             {analyticsData.period.startDate && analyticsData.period.endDate && (
               <>
-                {new Date(analyticsData.period.startDate).toLocaleDateString()} - {new Date(analyticsData.period.endDate).toLocaleDateString()}
+                {new Date(analyticsData.period.startDate).toLocaleDateString()} -{' '}
+                {new Date(analyticsData.period.endDate).toLocaleDateString()}
               </>
             )}
           </p>
@@ -188,15 +195,20 @@ const ActivityAnalyticsContent: React.FC = () => {
             </div>
             <div className="flex-1">
               <p className="text-sm text-gray-600">Active Users</p>
-              <p className="text-2xl font-bold">{analyticsData.metrics.activeUsers.value.toLocaleString()}</p>
+              <p className="text-2xl font-bold">
+                {analyticsData.metrics.activeUsers.value.toLocaleString()}
+              </p>
               <div className="flex items-center gap-1 mt-1">
                 {analyticsData.metrics.activeUsers.trend === 'up' ? (
                   <TrendingUp className="w-4 h-4 text-green-600" />
                 ) : (
                   <TrendingDown className="w-4 h-4 text-red-600" />
                 )}
-                <span className={`text-sm ${analyticsData.metrics.activeUsers.trend === 'up' ? 'text-green-600' : 'text-red-600'}`}>
-                  {analyticsData.metrics.activeUsers.growth > 0 ? '+' : ''}{analyticsData.metrics.activeUsers.growth.toFixed(1)}%
+                <span
+                  className={`text-sm ${analyticsData.metrics.activeUsers.trend === 'up' ? 'text-green-600' : 'text-red-600'}`}
+                >
+                  {analyticsData.metrics.activeUsers.growth > 0 ? '+' : ''}
+                  {analyticsData.metrics.activeUsers.growth.toFixed(1)}%
                 </span>
               </div>
             </div>
@@ -212,15 +224,20 @@ const ActivityAnalyticsContent: React.FC = () => {
             </div>
             <div className="flex-1">
               <p className="text-sm text-gray-600">Total Activities</p>
-              <p className="text-2xl font-bold">{analyticsData.metrics.totalActivities.value.toLocaleString()}</p>
+              <p className="text-2xl font-bold">
+                {analyticsData.metrics.totalActivities.value.toLocaleString()}
+              </p>
               <div className="flex items-center gap-1 mt-1">
                 {analyticsData.metrics.totalActivities.trend === 'up' ? (
                   <TrendingUp className="w-4 h-4 text-green-600" />
                 ) : (
                   <TrendingDown className="w-4 h-4 text-red-600" />
                 )}
-                <span className={`text-sm ${analyticsData.metrics.totalActivities.trend === 'up' ? 'text-green-600' : 'text-red-600'}`}>
-                  {analyticsData.metrics.totalActivities.growth > 0 ? '+' : ''}{analyticsData.metrics.totalActivities.growth.toFixed(1)}%
+                <span
+                  className={`text-sm ${analyticsData.metrics.totalActivities.trend === 'up' ? 'text-green-600' : 'text-red-600'}`}
+                >
+                  {analyticsData.metrics.totalActivities.growth > 0 ? '+' : ''}
+                  {analyticsData.metrics.totalActivities.growth.toFixed(1)}%
                 </span>
               </div>
             </div>
@@ -236,15 +253,20 @@ const ActivityAnalyticsContent: React.FC = () => {
             </div>
             <div className="flex-1">
               <p className="text-sm text-gray-600">Success Rate</p>
-              <p className="text-2xl font-bold">{analyticsData.metrics.successRate.value.toFixed(1)}%</p>
+              <p className="text-2xl font-bold">
+                {analyticsData.metrics.successRate.value.toFixed(1)}%
+              </p>
               <div className="flex items-center gap-1 mt-1">
                 {analyticsData.metrics.successRate.trend === 'up' ? (
                   <TrendingUp className="w-4 h-4 text-green-600" />
                 ) : (
                   <TrendingDown className="w-4 h-4 text-red-600" />
                 )}
-                <span className={`text-sm ${analyticsData.metrics.successRate.trend === 'up' ? 'text-green-600' : 'text-red-600'}`}>
-                  {analyticsData.metrics.successRate.growth > 0 ? '+' : ''}{analyticsData.metrics.successRate.growth.toFixed(1)}%
+                <span
+                  className={`text-sm ${analyticsData.metrics.successRate.trend === 'up' ? 'text-green-600' : 'text-red-600'}`}
+                >
+                  {analyticsData.metrics.successRate.growth > 0 ? '+' : ''}
+                  {analyticsData.metrics.successRate.growth.toFixed(1)}%
                 </span>
               </div>
             </div>
@@ -260,15 +282,20 @@ const ActivityAnalyticsContent: React.FC = () => {
             </div>
             <div className="flex-1">
               <p className="text-sm text-gray-600">Error Rate</p>
-              <p className="text-2xl font-bold">{analyticsData.metrics.errorRate.value.toFixed(1)}%</p>
+              <p className="text-2xl font-bold">
+                {analyticsData.metrics.errorRate.value.toFixed(1)}%
+              </p>
               <div className="flex items-center gap-1 mt-1">
                 {analyticsData.metrics.errorRate.trend === 'down' ? (
                   <TrendingDown className="w-4 h-4 text-green-600" />
                 ) : (
                   <TrendingUp className="w-4 h-4 text-red-600" />
                 )}
-                <span className={`text-sm ${analyticsData.metrics.errorRate.trend === 'down' ? 'text-green-600' : 'text-red-600'}`}>
-                  {analyticsData.metrics.errorRate.growth > 0 ? '+' : ''}{analyticsData.metrics.errorRate.growth.toFixed(1)}%
+                <span
+                  className={`text-sm ${analyticsData.metrics.errorRate.trend === 'down' ? 'text-green-600' : 'text-red-600'}`}
+                >
+                  {analyticsData.metrics.errorRate.growth > 0 ? '+' : ''}
+                  {analyticsData.metrics.errorRate.growth.toFixed(1)}%
                 </span>
               </div>
             </div>
@@ -346,10 +373,12 @@ const ActivityAnalyticsContent: React.FC = () => {
                     <CheckCircle className="w-5 h-5 text-green-600 mt-0.5" />
                     <div>
                       <p className="text-sm font-medium text-gray-900">
-                        Active Users {analyticsData.metrics.activeUsers.growth > 0 ? 'Up' : 'Down'} {Math.abs(analyticsData.metrics.activeUsers.growth).toFixed(1)}%
+                        Active Users {analyticsData.metrics.activeUsers.growth > 0 ? 'Up' : 'Down'}{' '}
+                        {Math.abs(analyticsData.metrics.activeUsers.growth).toFixed(1)}%
                       </p>
                       <p className="text-xs text-gray-600">
-                        {analyticsData.metrics.activeUsers.value.toLocaleString()} active users in the last {days} days
+                        {analyticsData.metrics.activeUsers.value.toLocaleString()} active users in
+                        the last {days} days
                       </p>
                     </div>
                   </div>
@@ -360,7 +389,9 @@ const ActivityAnalyticsContent: React.FC = () => {
                     <div>
                       <p className="text-sm font-medium text-gray-900">Success Rate Improved</p>
                       <p className="text-xs text-gray-600">
-                        {analyticsData.metrics.successRate.value.toFixed(1)}% success rate, {analyticsData.metrics.successRate.growth > 0 ? '+' : ''}{analyticsData.metrics.successRate.growth.toFixed(1)}% from previous period
+                        {analyticsData.metrics.successRate.value.toFixed(1)}% success rate,{' '}
+                        {analyticsData.metrics.successRate.growth > 0 ? '+' : ''}
+                        {analyticsData.metrics.successRate.growth.toFixed(1)}% from previous period
                       </p>
                     </div>
                   </div>
@@ -371,7 +402,9 @@ const ActivityAnalyticsContent: React.FC = () => {
                     <div>
                       <p className="text-sm font-medium text-gray-900">Error Rate Decreasing</p>
                       <p className="text-xs text-gray-600">
-                        Error rate at {analyticsData.metrics.errorRate.value.toFixed(1)}%, down {Math.abs(analyticsData.metrics.errorRate.growth).toFixed(1)}% from previous period
+                        Error rate at {analyticsData.metrics.errorRate.value.toFixed(1)}%, down{' '}
+                        {Math.abs(analyticsData.metrics.errorRate.growth).toFixed(1)}% from previous
+                        period
                       </p>
                     </div>
                   </div>
@@ -380,9 +413,12 @@ const ActivityAnalyticsContent: React.FC = () => {
                   <div className="flex items-start gap-3">
                     <CheckCircle className="w-5 h-5 text-green-600 mt-0.5" />
                     <div>
-                      <p className="text-sm font-medium text-gray-900">Total Activities Increased</p>
+                      <p className="text-sm font-medium text-gray-900">
+                        Total Activities Increased
+                      </p>
                       <p className="text-xs text-gray-600">
-                        {analyticsData.metrics.totalActivities.value.toLocaleString()} total activities, up {analyticsData.metrics.totalActivities.growth.toFixed(1)}%
+                        {analyticsData.metrics.totalActivities.value.toLocaleString()} total
+                        activities, up {analyticsData.metrics.totalActivities.growth.toFixed(1)}%
                       </p>
                     </div>
                   </div>
@@ -399,7 +435,9 @@ const ActivityAnalyticsContent: React.FC = () => {
                     <div>
                       <p className="text-sm font-medium text-gray-900">Active Users Declining</p>
                       <p className="text-xs text-gray-600">
-                        Active users decreased by {Math.abs(analyticsData.metrics.activeUsers.growth).toFixed(1)}% from previous period
+                        Active users decreased by{' '}
+                        {Math.abs(analyticsData.metrics.activeUsers.growth).toFixed(1)}% from
+                        previous period
                       </p>
                     </div>
                   </div>
@@ -410,7 +448,8 @@ const ActivityAnalyticsContent: React.FC = () => {
                     <div>
                       <p className="text-sm font-medium text-gray-900">Error Rate Present</p>
                       <p className="text-xs text-gray-600">
-                        {analyticsData.metrics.errorRate.value.toFixed(1)}% error rate detected in activities
+                        {analyticsData.metrics.errorRate.value.toFixed(1)}% error rate detected in
+                        activities
                       </p>
                     </div>
                   </div>
@@ -419,9 +458,13 @@ const ActivityAnalyticsContent: React.FC = () => {
                   <div className="flex items-start gap-3">
                     <AlertTriangle className="w-5 h-5 text-orange-600 mt-0.5" />
                     <div>
-                      <p className="text-sm font-medium text-gray-900">Activity Volume Decreasing</p>
+                      <p className="text-sm font-medium text-gray-900">
+                        Activity Volume Decreasing
+                      </p>
                       <p className="text-xs text-gray-600">
-                        Total activities decreased by {Math.abs(analyticsData.metrics.totalActivities.growth).toFixed(1)}% from previous period
+                        Total activities decreased by{' '}
+                        {Math.abs(analyticsData.metrics.totalActivities.growth).toFixed(1)}% from
+                        previous period
                       </p>
                     </div>
                   </div>
@@ -432,7 +475,9 @@ const ActivityAnalyticsContent: React.FC = () => {
                     <div>
                       <p className="text-sm font-medium text-gray-900">Success Rate Declining</p>
                       <p className="text-xs text-gray-600">
-                        Success rate decreased by {Math.abs(analyticsData.metrics.successRate.growth).toFixed(1)}% from previous period
+                        Success rate decreased by{' '}
+                        {Math.abs(analyticsData.metrics.successRate.growth).toFixed(1)}% from
+                        previous period
                       </p>
                     </div>
                   </div>
@@ -456,7 +501,7 @@ const ActivityAnalyticsContent: React.FC = () => {
                 const isMobile = device.device.includes('Mobile');
                 const isTablet = device.device.includes('Tablet');
                 const isWeb = device.device.includes('Web');
-                
+
                 let bgColor = 'bg-gray-50';
                 let textColor = 'text-gray-600';
                 if (isMobile) {
@@ -474,7 +519,9 @@ const ActivityAnalyticsContent: React.FC = () => {
                   <div key={index} className={`text-center p-4 ${bgColor} rounded-lg`}>
                     <div className={`text-2xl font-bold ${textColor}`}>{device.percentage}%</div>
                     <div className="text-sm text-gray-600">{device.device}</div>
-                    <div className="text-xs text-gray-500">{device.count.toLocaleString()} activities</div>
+                    <div className="text-xs text-gray-500">
+                      {device.count.toLocaleString()} activities
+                    </div>
                   </div>
                 );
               })}

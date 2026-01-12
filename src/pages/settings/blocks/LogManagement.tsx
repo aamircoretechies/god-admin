@@ -3,14 +3,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
-import { 
-  FileText, 
-  Trash2, 
-  Settings,
-  Save,
-  Download,
-  Eye
-} from 'lucide-react';
+import { FileText, Trash2, Settings, Save, Download, Eye } from 'lucide-react';
 
 const LogManagement = () => {
   return (
@@ -25,43 +18,25 @@ const LogManagement = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div className="space-y-2">
             <Label htmlFor="log_level">Log Level</Label>
-            <Input 
-              id="log_level" 
-              placeholder="INFO"
-              defaultValue="INFO"
-            />
+            <Input id="log_level" placeholder="INFO" defaultValue="INFO" />
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="log_retention">Log Retention (days)</Label>
-            <Input 
-              id="log_retention" 
-              type="number"
-              placeholder="90"
-              defaultValue="90"
-            />
+            <Input id="log_retention" type="number" placeholder="90" defaultValue="90" />
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="log_rotation">Log Rotation Size (MB)</Label>
-            <Input 
-              id="log_rotation" 
-              type="number"
-              placeholder="100"
-              defaultValue="100"
-            />
+            <Input id="log_rotation" type="number" placeholder="100" defaultValue="100" />
           </div>
-          
+
           <div className="space-y-2">
             <Label htmlFor="log_location">Log Location</Label>
-            <Input 
-              id="log_location" 
-              placeholder="/var/log/app"
-              defaultValue="/var/log/app"
-            />
+            <Input id="log_location" placeholder="/var/log/app" defaultValue="/var/log/app" />
           </div>
         </div>
-        
+
         <div className="space-y-4">
           <h4 className="font-medium text-gray-900">Log Types</h4>
           <div className="space-y-3">
@@ -72,7 +47,7 @@ const LogManagement = () => {
               </div>
               <Switch id="error_logs" defaultChecked />
             </div>
-            
+
             <div className="flex items-center justify-between">
               <div>
                 <Label htmlFor="access_logs">Access Logs</Label>
@@ -80,7 +55,7 @@ const LogManagement = () => {
               </div>
               <Switch id="access_logs" defaultChecked />
             </div>
-            
+
             <div className="flex items-center justify-between">
               <div>
                 <Label htmlFor="security_logs">Security Logs</Label>
@@ -88,7 +63,7 @@ const LogManagement = () => {
               </div>
               <Switch id="security_logs" defaultChecked />
             </div>
-            
+
             <div className="flex items-center justify-between">
               <div>
                 <Label htmlFor="performance_logs">Performance Logs</Label>
@@ -98,7 +73,7 @@ const LogManagement = () => {
             </div>
           </div>
         </div>
-        
+
         <div className="space-y-4">
           <h4 className="font-medium text-gray-900">Log Options</h4>
           <div className="space-y-3">
@@ -109,7 +84,7 @@ const LogManagement = () => {
               </div>
               <Switch id="log_compression" defaultChecked />
             </div>
-            
+
             <div className="flex items-center justify-between">
               <div>
                 <Label htmlFor="log_encryption">Log Encryption</Label>
@@ -117,7 +92,7 @@ const LogManagement = () => {
               </div>
               <Switch id="log_encryption" />
             </div>
-            
+
             <div className="flex items-center justify-between">
               <div>
                 <Label htmlFor="log_monitoring">Log Monitoring</Label>
@@ -127,7 +102,7 @@ const LogManagement = () => {
             </div>
           </div>
         </div>
-        
+
         <div className="flex items-center gap-3 pt-4">
           <Button className="flex items-center gap-2">
             <Save className="w-4 h-4" />

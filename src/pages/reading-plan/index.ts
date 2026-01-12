@@ -4,4 +4,4 @@ export * from './ReadingPlanAssignPage';
 export * from './ReadingPlanProgressPage';
 export * from './ReadingPlanContentPage';
 export * from './ReadingPlanAnalyticsPage';
-export * from './ReadingPlanNotificationsPage'; 
+export * from './ReadingPlanNotificationsPage';

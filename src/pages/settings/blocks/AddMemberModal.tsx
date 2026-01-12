@@ -2,26 +2,22 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { 
-  Select, 
-  SelectContent, 
-  SelectItem, 
-  SelectTrigger, 
-  SelectValue 
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
 } from '@/components/ui/select';
-import { 
+import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
+  DialogTrigger
 } from '@/components/ui/dialog';
-import { 
-  UserPlus, 
-  Eye, 
-  EyeOff 
-} from 'lucide-react';
+import { UserPlus, Eye, EyeOff } from 'lucide-react';
 
 interface AddMemberFormData {
   email: string;
@@ -35,9 +31,7 @@ interface AddMemberModalProps {
   trigger?: React.ReactNode;
 }
 
-const AddMemberModal: React.FC<AddMemberModalProps> = ({ 
-  trigger 
-}) => {
+const AddMemberModal: React.FC<AddMemberModalProps> = ({ trigger }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState<AddMemberFormData>({
@@ -50,7 +44,7 @@ const AddMemberModal: React.FC<AddMemberModalProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleInputChange = (field: keyof AddMemberFormData, value: string) => {
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [field]: value
     }));
@@ -62,10 +56,10 @@ const AddMemberModal: React.FC<AddMemberModalProps> = ({
 
     try {
       // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
+      await new Promise((resolve) => setTimeout(resolve, 1000));
+
       console.log('Adding member:', formData);
-      
+
       // Reset form
       setFormData({
         email: '',
@@ -74,12 +68,11 @@ const AddMemberModal: React.FC<AddMemberModalProps> = ({
         lastName: '',
         role: 'member'
       });
-      
+
       setIsOpen(false);
-      
+
       // Show success message (you can replace this with a toast notification)
       alert('Member added successfully!');
-      
     } catch (error) {
       console.error('Error adding member:', error);
       alert('Error adding member. Please try again.');
@@ -108,10 +101,8 @@ const AddMemberModal: React.FC<AddMemberModalProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
-        {trigger || defaultTrigger}
-      </DialogTrigger>
-      
+      <DialogTrigger asChild>{trigger || defaultTrigger}</DialogTrigger>
+
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Add New Member</DialogTitle>
@@ -119,7 +110,7 @@ const AddMemberModal: React.FC<AddMemberModalProps> = ({
             Create a new member account with appropriate role and permissions.
           </DialogDescription>
         </DialogHeader>
-        
+
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
@@ -133,7 +124,7 @@ const AddMemberModal: React.FC<AddMemberModalProps> = ({
                 required
               />
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="lastName">Last Name *</Label>
               <Input
@@ -178,11 +169,7 @@ const AddMemberModal: React.FC<AddMemberModalProps> = ({
                 className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
                 onClick={() => setShowPassword(!showPassword)}
               >
-                {showPassword ? (
-                  <EyeOff className="h-4 w-4" />
-                ) : (
-                  <Eye className="h-4 w-4" />
-                )}
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
               </Button>
             </div>
             <p className="text-xs text-gray-500">Minimum 6 characters</p>
@@ -190,9 +177,11 @@ const AddMemberModal: React.FC<AddMemberModalProps> = ({
 
           <div className="space-y-2">
             <Label htmlFor="role">Role *</Label>
-            <Select 
-              value={formData.role} 
-              onValueChange={(value: 'admin' | 'moderator' | 'member' | 'editor') => handleInputChange('role', value)}
+            <Select
+              value={formData.role}
+              onValueChange={(value: 'admin' | 'moderator' | 'member' | 'editor') =>
+                handleInputChange('role', value)
+              }
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select role" />
@@ -207,12 +196,7 @@ const AddMemberModal: React.FC<AddMemberModalProps> = ({
           </div>
 
           <div className="flex justify-end space-x-2 pt-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={handleClose}
-              disabled={isSubmitting}
-            >
+            <Button type="button" variant="outline" onClick={handleClose} disabled={isSubmitting}>
               Cancel
             </Button>
             <Button
@@ -230,4 +214,3 @@ const AddMemberModal: React.FC<AddMemberModalProps> = ({
 };
 
 export { AddMemberModal };
-

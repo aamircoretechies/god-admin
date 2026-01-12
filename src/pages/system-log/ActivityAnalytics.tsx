@@ -21,37 +21,55 @@ const ActivityAnalytics = () => {
       const response = await fetchActivityAnalytics(7);
       if (response.status === 1 && response.data) {
         const data = response.data;
-        
+
         // Prepare CSV headers
-        const csvHeaders = [
-          'Metric Type',
-          'Metric Name',
-          'Value',
-          'Growth',
-          'Trend'
-        ];
+        const csvHeaders = ['Metric Type', 'Metric Name', 'Value', 'Growth', 'Trend'];
 
         // Prepare CSV rows
         const csvRows: string[][] = [];
 
         // Add metrics
-        csvRows.push(['Metrics', 'Active Users', String(data.metrics.activeUsers.value), String(data.metrics.activeUsers.growth), data.metrics.activeUsers.trend]);
-        csvRows.push(['Metrics', 'Total Activities', String(data.metrics.totalActivities.value), String(data.metrics.totalActivities.growth), data.metrics.totalActivities.trend]);
-        csvRows.push(['Metrics', 'Success Rate', String(data.metrics.successRate.value), String(data.metrics.successRate.growth), data.metrics.successRate.trend]);
-        csvRows.push(['Metrics', 'Error Rate', String(data.metrics.errorRate.value), String(data.metrics.errorRate.growth), data.metrics.errorRate.trend]);
+        csvRows.push([
+          'Metrics',
+          'Active Users',
+          String(data.metrics.activeUsers.value),
+          String(data.metrics.activeUsers.growth),
+          data.metrics.activeUsers.trend
+        ]);
+        csvRows.push([
+          'Metrics',
+          'Total Activities',
+          String(data.metrics.totalActivities.value),
+          String(data.metrics.totalActivities.growth),
+          data.metrics.totalActivities.trend
+        ]);
+        csvRows.push([
+          'Metrics',
+          'Success Rate',
+          String(data.metrics.successRate.value),
+          String(data.metrics.successRate.growth),
+          data.metrics.successRate.trend
+        ]);
+        csvRows.push([
+          'Metrics',
+          'Error Rate',
+          String(data.metrics.errorRate.value),
+          String(data.metrics.errorRate.growth),
+          data.metrics.errorRate.trend
+        ]);
 
         // Add activity types distribution
-        data.activityTypesDistribution.forEach(item => {
+        data.activityTypesDistribution.forEach((item) => {
           csvRows.push(['Activity Type Distribution', item.type, String(item.count), '', '']);
         });
 
         // Add top verses
-        data.topVerses.forEach(item => {
+        data.topVerses.forEach((item) => {
           csvRows.push(['Top Verses', item.verse, String(item.count), '', '']);
         });
 
         // Add device breakdown
-        data.deviceBreakdown.forEach(item => {
+        data.deviceBreakdown.forEach((item) => {
           csvRows.push(['Device Breakdown', item.device, String(item.count), item.percentage, '']);
         });
 
@@ -77,7 +95,7 @@ const ActivityAnalytics = () => {
         // Build CSV content
         const csvContent = [
           csvHeaders.map(escapeCsvValue).join(','),
-          ...csvRows.map(row => row.map(cell => escapeCsvValue(String(cell || ''))).join(','))
+          ...csvRows.map((row) => row.map((cell) => escapeCsvValue(String(cell || ''))).join(','))
         ].join('\n');
 
         // Create and download CSV file
@@ -85,7 +103,10 @@ const ActivityAnalytics = () => {
         const link = document.createElement('a');
         const url = URL.createObjectURL(blob);
         link.setAttribute('href', url);
-        link.setAttribute('download', `activity_analytics_${new Date().toISOString().split('T')[0]}.csv`);
+        link.setAttribute(
+          'download',
+          `activity_analytics_${new Date().toISOString().split('T')[0]}.csv`
+        );
         link.style.visibility = 'hidden';
         document.body.appendChild(link);
         link.click();
@@ -98,7 +119,9 @@ const ActivityAnalytics = () => {
       }
     } catch (error: any) {
       console.error('Error exporting activity analytics:', error);
-      toast.error(error?.response?.data?.message || error?.message || 'Failed to export activity analytics');
+      toast.error(
+        error?.response?.data?.message || error?.message || 'Failed to export activity analytics'
+      );
     }
   };
 
@@ -109,13 +132,12 @@ const ActivityAnalytics = () => {
           <Toolbar>
             <ToolbarHeading>
               <ToolbarPageTitle />
-              <ToolbarDescription>Analytics and insights for user activity patterns.</ToolbarDescription>
+              <ToolbarDescription>
+                Analytics and insights for user activity patterns.
+              </ToolbarDescription>
             </ToolbarHeading>
             <ToolbarActions>
-              <button 
-                onClick={handleExportCSV}
-                className="btn btn-sm btn-light"
-              >
+              <button onClick={handleExportCSV} className="btn btn-sm btn-light">
                 Export CSV
               </button>
               {/* Export Excel - Commented out

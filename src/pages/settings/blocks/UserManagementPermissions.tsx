@@ -1,14 +1,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
-import { 
-  Shield, 
-  Lock, 
-  Eye,
-  Save,
-  CheckSquare,
-  Square
-} from 'lucide-react';
+import { Shield, Lock, Eye, Save, CheckSquare, Square } from 'lucide-react';
 
 const UserManagementPermissions = () => {
   return (
@@ -22,7 +15,7 @@ const UserManagementPermissions = () => {
       <CardContent className="space-y-6">
         <div className="space-y-4">
           <h4 className="font-medium text-gray-900">System Permissions</h4>
-          
+
           <div className="space-y-4">
             <div className="border rounded-lg p-4">
               <h5 className="font-medium mb-3">User Management</h5>
@@ -45,7 +38,7 @@ const UserManagementPermissions = () => {
                 </div>
               </div>
             </div>
-            
+
             <div className="border rounded-lg p-4">
               <h5 className="font-medium mb-3">Content Management</h5>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -67,7 +60,7 @@ const UserManagementPermissions = () => {
                 </div>
               </div>
             </div>
-            
+
             <div className="border rounded-lg p-4">
               <h5 className="font-medium mb-3">System Settings</h5>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
@@ -91,7 +84,7 @@ const UserManagementPermissions = () => {
             </div>
           </div>
         </div>
-        
+
         <div className="flex items-center gap-3 pt-4">
           <Button className="flex items-center gap-2">
             <Save className="w-4 h-4" />

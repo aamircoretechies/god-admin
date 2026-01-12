@@ -275,11 +275,12 @@ const StoreClients = () => {
     // Apply search filter
     if (debouncedSearch) {
       const searchLower = debouncedSearch.toLowerCase();
-      filtered = filtered.filter((client) =>
-        client.user.name.toLowerCase().includes(searchLower) ||
-        client.user.email?.toLowerCase().includes(searchLower) ||
-        client.clientId.toLowerCase().includes(searchLower) ||
-        client.location.name.toLowerCase().includes(searchLower)
+      filtered = filtered.filter(
+        (client) =>
+          client.user.name.toLowerCase().includes(searchLower) ||
+          client.user.email?.toLowerCase().includes(searchLower) ||
+          client.clientId.toLowerCase().includes(searchLower) ||
+          client.location.name.toLowerCase().includes(searchLower)
       );
     }
 

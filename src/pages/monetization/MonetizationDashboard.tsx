@@ -20,7 +20,9 @@ const MonetizationDashboard = () => {
           <Toolbar>
             <ToolbarHeading>
               <ToolbarPageTitle />
-              <ToolbarDescription>Monitor and manage subscription revenue and user monetization.</ToolbarDescription>
+              <ToolbarDescription>
+                Monitor and manage subscription revenue and user monetization.
+              </ToolbarDescription>
             </ToolbarHeading>
             <ToolbarActions>
               <a href="#" className="btn btn-sm btn-light">

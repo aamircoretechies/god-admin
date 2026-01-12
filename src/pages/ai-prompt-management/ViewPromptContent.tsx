@@ -3,9 +3,9 @@ import { useParams, Link, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { 
-  Edit, 
-  Copy, 
+import {
+  Edit,
+  Copy,
   FileText,
   AlertCircle,
   Calendar,
@@ -16,7 +16,13 @@ import {
   XCircle,
   Trash2
 } from 'lucide-react';
-import { fetchPromptDetail, deletePrompt, createPrompt, type PromptDetailResponse, type CreatePromptRequest } from '@/services/promptsApi';
+import {
+  fetchPromptDetail,
+  deletePrompt,
+  createPrompt,
+  type PromptDetailResponse,
+  type CreatePromptRequest
+} from '@/services/promptsApi';
 import { toast } from 'sonner';
 
 const ViewPromptContent: React.FC = () => {
@@ -42,34 +48,37 @@ const ViewPromptContent: React.FC = () => {
   // Clean and format markdown content for better display
   const cleanMarkdown = (content: string): string => {
     if (!content) return '';
-    
+
     let cleaned = content;
-    
+
     // Remove bold markers (**text** -> text)
     cleaned = cleaned.replace(/\*\*(.*?)\*\*/g, '$1');
-    
+
     // Remove italic markers (*text* -> text) - simple approach
     // First handle cases where * is not part of **
     cleaned = cleaned.replace(/([^*])\*([^*]+?)\*([^*])/g, '$1$2$3');
-    
+
     // Format numbered lists (keep the numbers, ensure proper spacing)
     cleaned = cleaned.replace(/^(\d+)\.\s+/gm, '$1. ');
-    
+
     // Format bullet lists (convert - to •)
     cleaned = cleaned.replace(/^-\s+/gm, '• ');
-    
+
     // Clean up multiple newlines (max 2 consecutive)
     cleaned = cleaned.replace(/\n{3,}/g, '\n\n');
-    
+
     // Trim each line but preserve structure
-    cleaned = cleaned.split('\n').map(line => {
-      // Don't trim list items or numbered items
-      if (line.match(/^[•\d]\.\s/) || line.trim() === '') {
-        return line;
-      }
-      return line.trim();
-    }).join('\n');
-    
+    cleaned = cleaned
+      .split('\n')
+      .map((line) => {
+        // Don't trim list items or numbered items
+        if (line.match(/^[•\d]\.\s/) || line.trim() === '') {
+          return line;
+        }
+        return line.trim();
+      })
+      .join('\n');
+
     return cleaned;
   };
 
@@ -77,27 +86,34 @@ const ViewPromptContent: React.FC = () => {
   const formatContent = (content: string): React.ReactNode => {
     const cleaned = cleanMarkdown(content);
     const lines = cleaned.split('\n');
-    
+
     return (
       <div className="space-y-3">
         {lines.map((line, index) => {
           const trimmedLine = line.trim();
-          
+
           // Skip empty lines (they'll create spacing naturally)
           if (!trimmedLine) {
             return null;
           }
-          
+
           // Check if it's a heading (all caps or ends with colon and is short)
-          if ((trimmedLine.match(/^[A-Z][A-Z\s:]+$/) && trimmedLine.length < 60) || 
-              (trimmedLine.endsWith(':') && trimmedLine.length < 50 && trimmedLine === trimmedLine.toUpperCase())) {
+          if (
+            (trimmedLine.match(/^[A-Z][A-Z\s:]+$/) && trimmedLine.length < 60) ||
+            (trimmedLine.endsWith(':') &&
+              trimmedLine.length < 50 &&
+              trimmedLine === trimmedLine.toUpperCase())
+          ) {
             return (
-              <h4 key={index} className="font-semibold text-gray-900 mt-6 mb-3 first:mt-0 text-base">
+              <h4
+                key={index}
+                className="font-semibold text-gray-900 mt-6 mb-3 first:mt-0 text-base"
+              >
                 {trimmedLine.replace(':', '')}
               </h4>
             );
           }
-          
+
           // Check if it's a numbered list item
           if (trimmedLine.match(/^\d+\.\s/)) {
             return (
@@ -106,7 +122,7 @@ const ViewPromptContent: React.FC = () => {
               </div>
             );
           }
-          
+
           // Check if it's a bullet list item
           if (trimmedLine.startsWith('•')) {
             return (
@@ -115,7 +131,7 @@ const ViewPromptContent: React.FC = () => {
               </div>
             );
           }
-          
+
           // Regular paragraph
           return (
             <p key={index} className="text-gray-700 leading-relaxed">
@@ -165,9 +181,9 @@ const ViewPromptContent: React.FC = () => {
       'Prayer Guide': 'bg-pink-100 text-pink-800',
       'Historical Context': 'bg-blue-100 text-blue-800',
       'Chapter Context': 'bg-indigo-100 text-indigo-800',
-      'Other': 'bg-gray-100 text-gray-800'
+      Other: 'bg-gray-100 text-gray-800'
     };
-    
+
     return (
       <Badge variant="default" className={colors[category] || 'bg-gray-100 text-gray-800'}>
         {category}
@@ -180,7 +196,11 @@ const ViewPromptContent: React.FC = () => {
       case 'All Users':
         return <Badge variant="outline">All Users</Badge>;
       case 'Premium Only':
-        return <Badge variant="default" className="bg-purple-100 text-purple-800">Premium Only</Badge>;
+        return (
+          <Badge variant="default" className="bg-purple-100 text-purple-800">
+            Premium Only
+          </Badge>
+        );
       case 'Admin Only':
         return <Badge variant="destructive">Admin Only</Badge>;
       default:
@@ -191,9 +211,17 @@ const ViewPromptContent: React.FC = () => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'Active':
-        return <Badge variant="default" className="bg-green-100 text-green-800">Active</Badge>;
+        return (
+          <Badge variant="default" className="bg-green-100 text-green-800">
+            Active
+          </Badge>
+        );
       case 'Inactive':
-        return <Badge variant="secondary" className="bg-gray-100 text-gray-600">Inactive</Badge>;
+        return (
+          <Badge variant="secondary" className="bg-gray-100 text-gray-600">
+            Inactive
+          </Badge>
+        );
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
@@ -256,7 +284,8 @@ const ViewPromptContent: React.FC = () => {
         throw new Error(response.message || 'Failed to duplicate prompt');
       }
     } catch (err: any) {
-      const errorMessage = err?.response?.data?.message || err?.message || 'Failed to duplicate prompt';
+      const errorMessage =
+        err?.response?.data?.message || err?.message || 'Failed to duplicate prompt';
       setError(errorMessage);
       toast.error(errorMessage);
     } finally {
@@ -312,11 +341,7 @@ const ViewPromptContent: React.FC = () => {
           <p className="text-gray-600 mt-1">{promptData.description}</p>
         </div>
         <div className="flex items-center gap-2">
-          <Button 
-            variant="outline" 
-            onClick={handleDuplicate}
-            disabled={duplicating}
-          >
+          <Button variant="outline" onClick={handleDuplicate} disabled={duplicating}>
             <Copy className="w-4 h-4 mr-2" />
             {duplicating ? 'Duplicating...' : 'Duplicate'}
           </Button>
@@ -350,9 +375,7 @@ const ViewPromptContent: React.FC = () => {
             </CardHeader>
             <CardContent>
               <div className="bg-gray-50 p-6 rounded-lg border border-gray-200">
-                <div className="prose prose-sm max-w-none">
-                  {formatContent(promptData.content)}
-                </div>
+                <div className="prose prose-sm max-w-none">{formatContent(promptData.content)}</div>
               </div>
             </CardContent>
           </Card>
@@ -391,7 +414,9 @@ const ViewPromptContent: React.FC = () => {
                   <TrendingUp className="w-4 h-4" />
                   Usage Count
                 </span>
-                <span className="text-sm font-semibold text-gray-900">{promptData.usage_count}</span>
+                <span className="text-sm font-semibold text-gray-900">
+                  {promptData.usage_count}
+                </span>
               </div>
               <div className="flex items-center justify-between">
                 <span className="text-sm font-medium">Public</span>
@@ -475,8 +500,8 @@ const ViewPromptContent: React.FC = () => {
                   Edit Prompt
                 </Link>
               </Button>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 className="w-full justify-start"
                 onClick={handleDuplicate}
                 disabled={duplicating}
@@ -492,8 +517,8 @@ const ViewPromptContent: React.FC = () => {
                 </Link>
               </Button>
               */}
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 className="w-full justify-start text-red-600 hover:text-red-700 hover:bg-red-50"
                 onClick={() => setShowDeleteConfirm(true)}
                 disabled={deleting}

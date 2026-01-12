@@ -2,14 +2,20 @@ import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { toAbsoluteUrl } from '@/utils';
-import { 
-  Users, 
-  BookOpen, 
-  Search, 
+import {
+  Users,
+  BookOpen,
+  Search,
   Filter,
   UserPlus,
   UserCheck,
@@ -109,9 +115,10 @@ const ReadingPlanAssignPage = () => {
   const [userTypeFilter, setUserTypeFilter] = useState<string>('all');
   const [showBulkAssign, setShowBulkAssign] = useState(false);
 
-  const filteredUsers = users.filter(user => {
-    const matchesSearch = user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         user.email.toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredUsers = users.filter((user) => {
+    const matchesSearch =
+      user.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      user.email.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesType = userTypeFilter === 'all' || user.userType === userTypeFilter;
     return matchesSearch && matchesType;
   });
@@ -120,13 +127,13 @@ const ReadingPlanAssignPage = () => {
     if (checked) {
       setSelectedUsers([...selectedUsers, userId]);
     } else {
-      setSelectedUsers(selectedUsers.filter(id => id !== userId));
+      setSelectedUsers(selectedUsers.filter((id) => id !== userId));
     }
   };
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      setSelectedUsers(filteredUsers.map(user => user.id));
+      setSelectedUsers(filteredUsers.map((user) => user.id));
     } else {
       setSelectedUsers([]);
     }
@@ -135,15 +142,17 @@ const ReadingPlanAssignPage = () => {
   const handleBulkAssign = () => {
     if (!selectedPlan || selectedUsers.length === 0) return;
 
-    setUsers(users.map(user => {
-      if (selectedUsers.includes(user.id)) {
-        return {
-          ...user,
-          assignedPlans: [...user.assignedPlans, selectedPlan]
-        };
-      }
-      return user;
-    }));
+    setUsers(
+      users.map((user) => {
+        if (selectedUsers.includes(user.id)) {
+          return {
+            ...user,
+            assignedPlans: [...user.assignedPlans, selectedPlan]
+          };
+        }
+        return user;
+      })
+    );
 
     setSelectedUsers([]);
     setSelectedPlan('');
@@ -151,15 +160,17 @@ const ReadingPlanAssignPage = () => {
   };
 
   const handleRemoveAssignment = (userId: string, planId: string) => {
-    setUsers(users.map(user => {
-      if (user.id === userId) {
-        return {
-          ...user,
-          assignedPlans: user.assignedPlans.filter(id => id !== planId)
-        };
-      }
-      return user;
-    }));
+    setUsers(
+      users.map((user) => {
+        if (user.id === userId) {
+          return {
+            ...user,
+            assignedPlans: user.assignedPlans.filter((id) => id !== planId)
+          };
+        }
+        return user;
+      })
+    );
   };
 
   const getUserTypeColor = (type: string) => {
@@ -178,7 +189,7 @@ const ReadingPlanAssignPage = () => {
   };
 
   const getAssignedPlanTitle = (planId: string) => {
-    const plan = readingPlans.find(p => p.id === planId);
+    const plan = readingPlans.find((p) => p.id === planId);
     return plan?.title || 'Unknown Plan';
   };
 
@@ -190,8 +201,8 @@ const ReadingPlanAssignPage = () => {
           <h1 className="text-3xl font-bold text-gray-900">Assign Reading Plans</h1>
           <p className="text-gray-600 mt-2">Manage user assignments to reading plans</p>
         </div>
-        <Button 
-          onClick={() => setShowBulkAssign(true)} 
+        <Button
+          onClick={() => setShowBulkAssign(true)}
           className="bg-primary hover:bg-primary-dark"
           disabled={selectedUsers.length === 0}
         >
@@ -235,15 +246,17 @@ const ReadingPlanAssignPage = () => {
               </div>
 
               <div>
-                <p className="text-sm text-gray-600 mb-2">
-                  Selected Users: {selectedUsers.length}
-                </p>
+                <p className="text-sm text-gray-600 mb-2">Selected Users: {selectedUsers.length}</p>
                 <div className="max-h-32 overflow-y-auto space-y-1">
-                  {selectedUsers.map(userId => {
-                    const user = users.find(u => u.id === userId);
+                  {selectedUsers.map((userId) => {
+                    const user = users.find((u) => u.id === userId);
                     return (
                       <div key={userId} className="flex items-center space-x-2 text-sm">
-                        <img src={toAbsoluteUrl(user?.avatar || '')} alt={user?.name} className="w-6 h-6 rounded-full" />
+                        <img
+                          src={toAbsoluteUrl(user?.avatar || '')}
+                          alt={user?.name}
+                          className="w-6 h-6 rounded-full"
+                        />
                         <span>{user?.name}</span>
                         <span className="text-gray-500">({user?.email})</span>
                       </div>
@@ -256,8 +269,8 @@ const ReadingPlanAssignPage = () => {
                 <Button variant="outline" onClick={() => setShowBulkAssign(false)}>
                   Cancel
                 </Button>
-                <Button 
-                  onClick={handleBulkAssign} 
+                <Button
+                  onClick={handleBulkAssign}
                   className="bg-primary hover:bg-primary-dark"
                   disabled={!selectedPlan}
                 >
@@ -301,9 +314,7 @@ const ReadingPlanAssignPage = () => {
                 checked={selectedUsers.length === filteredUsers.length && filteredUsers.length > 0}
                 onCheckedChange={handleSelectAll}
               />
-              <span className="text-sm text-gray-600">
-                Select All ({filteredUsers.length})
-              </span>
+              <span className="text-sm text-gray-600">Select All ({filteredUsers.length})</span>
             </div>
           </div>
         </CardContent>
@@ -325,9 +336,15 @@ const ReadingPlanAssignPage = () => {
                   <div className="flex items-center space-x-3">
                     <Checkbox
                       checked={selectedUsers.includes(user.id)}
-                      onCheckedChange={(checked) => handleUserSelection(user.id, checked as boolean)}
+                      onCheckedChange={(checked) =>
+                        handleUserSelection(user.id, checked as boolean)
+                      }
                     />
-                    <img src={toAbsoluteUrl(user.avatar)} alt={user.name} className="w-10 h-10 rounded-full" />
+                    <img
+                      src={toAbsoluteUrl(user.avatar)}
+                      alt={user.name}
+                      className="w-10 h-10 rounded-full"
+                    />
                     <div>
                       <h3 className="font-semibold text-gray-900">{user.name}</h3>
                       <p className="text-sm text-gray-600">{user.email}</p>
@@ -337,9 +354,7 @@ const ReadingPlanAssignPage = () => {
                     <Badge className={getUserTypeColor(user.userType)}>
                       {user.userType.charAt(0).toUpperCase() + user.userType.slice(1)}
                     </Badge>
-                    <span className="text-sm text-gray-500">
-                      Last active: {user.lastActive}
-                    </span>
+                    <span className="text-sm text-gray-500">Last active: {user.lastActive}</span>
                   </div>
                 </div>
 
@@ -351,7 +366,11 @@ const ReadingPlanAssignPage = () => {
                   <div className="flex flex-wrap gap-2">
                     {user.assignedPlans.length > 0 ? (
                       user.assignedPlans.map((planId) => (
-                        <Badge key={planId} variant="secondary" className="flex items-center space-x-1">
+                        <Badge
+                          key={planId}
+                          variant="secondary"
+                          className="flex items-center space-x-1"
+                        >
                           <span>{getAssignedPlanTitle(planId)}</span>
                           <button
                             onClick={() => handleRemoveAssignment(user.id, planId)}
@@ -397,7 +416,13 @@ const ReadingPlanAssignPage = () => {
               <div key={plan.id} className="p-4 border rounded-lg">
                 <div className="flex items-center justify-between mb-2">
                   <h3 className="font-semibold text-gray-900">{plan.title}</h3>
-                  <Badge className={plan.status === 'active' ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>
+                  <Badge
+                    className={
+                      plan.status === 'active'
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-gray-100 text-gray-800'
+                    }
+                  >
                     {plan.status.charAt(0).toUpperCase() + plan.status.slice(1)}
                   </Badge>
                 </div>
@@ -421,4 +446,4 @@ const ReadingPlanAssignPage = () => {
   );
 };
 
-export { ReadingPlanAssignPage }; 
+export { ReadingPlanAssignPage };

@@ -14,7 +14,6 @@ import { useLayout } from '@/providers';
 import { useEffect, useState } from 'react';
 import { fetchTeamMembers } from '@/services/dashboardApi';
 
-
 const NetworkSaasUsersPage = () => {
   const { currentLayout } = useLayout();
   // const totalMembers = 49053;
@@ -25,7 +24,7 @@ const NetworkSaasUsersPage = () => {
   //   const loadTeamMembers = async () => {
   //     try {
   //       const res = await fetchTeamMembers();
-  //       setTotalMembers(res.data.length); 
+  //       setTotalMembers(res.data.length);
   //     } catch (error) {
   //       console.error('Failed to fetch team members', error);
   //     }
@@ -35,21 +34,16 @@ const NetworkSaasUsersPage = () => {
   // }, []);
 
   useEffect(() => {
-  const loadTeamMembers = async () => {
-    try {
-      const res = await fetchTeamMembers();
-    
-      setTotalMembers(res.data.length);
-    } catch (error) {
+    const loadTeamMembers = async () => {
+      try {
+        const res = await fetchTeamMembers();
 
-    }
-  };
+        setTotalMembers(res.data.length);
+      } catch (error) {}
+    };
 
-  loadTeamMembers();
-}, []);
-
-
-
+    loadTeamMembers();
+  }, []);
 
   return (
     <Fragment>

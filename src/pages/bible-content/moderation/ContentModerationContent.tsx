@@ -3,12 +3,18 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { 
-  AlertCircle, 
-  CheckCircle, 
-  XCircle, 
+import {
+  AlertCircle,
+  CheckCircle,
+  XCircle,
   Clock,
   Eye,
   Edit,
@@ -42,7 +48,8 @@ const mockFlaggedContent: FlaggedContent[] = [
     id: '1',
     type: 'explanation',
     title: 'Genesis 1:1 - AI Explanation',
-    content: 'This verse establishes the fundamental truth that God is the Creator of all things. The Hebrew word "bara" (created) is used exclusively of God\'s creative activity and implies creation from nothing. This verse sets the foundation for all biblical theology.',
+    content:
+      'This verse establishes the fundamental truth that God is the Creator of all things. The Hebrew word "bara" (created) is used exclusively of God\'s creative activity and implies creation from nothing. This verse sets the foundation for all biblical theology.',
     reason: 'theological_error',
     severity: 'medium',
     status: 'pending',
@@ -54,7 +61,8 @@ const mockFlaggedContent: FlaggedContent[] = [
     id: '2',
     type: 'verse',
     title: 'John 3:16 - Translation Issue',
-    content: 'For God so loved the world, that he gave his only begotten Son, that whosoever believeth in him should not perish, but have everlasting life.',
+    content:
+      'For God so loved the world, that he gave his only begotten Son, that whosoever believeth in him should not perish, but have everlasting life.',
     reason: 'inaccurate',
     severity: 'low',
     status: 'under_review',
@@ -76,9 +84,10 @@ const ContentModerationContent = () => {
   const [reviewNotes, setReviewNotes] = useState('');
   const [selectedAction, setSelectedAction] = useState<string>('');
 
-  const filteredContent = flaggedContent.filter(content => {
-    const matchesSearch = content.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         content.content.toLowerCase().includes(searchTerm.toLowerCase());
+  const filteredContent = flaggedContent.filter((content) => {
+    const matchesSearch =
+      content.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      content.content.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesType = typeFilter === 'all' || content.type === typeFilter;
     const matchesStatus = statusFilter === 'all' || content.status === statusFilter;
     const matchesSeverity = severityFilter === 'all' || content.severity === severityFilter;
@@ -103,9 +112,9 @@ const ContentModerationContent = () => {
       action: selectedAction as any
     };
 
-    setFlaggedContent(flaggedContent.map(c => 
-      c.id === selectedContent.id ? updatedContent : c
-    ));
+    setFlaggedContent(
+      flaggedContent.map((c) => (c.id === selectedContent.id ? updatedContent : c))
+    );
 
     setSelectedContent(null);
     setReviewNotes('');
@@ -113,11 +122,11 @@ const ContentModerationContent = () => {
   };
 
   const handleAssign = (contentId: string, assignee: string) => {
-    setFlaggedContent(flaggedContent.map(c => 
-      c.id === contentId 
-        ? { ...c, assignedTo: assignee, status: 'under_review' as const }
-        : c
-    ));
+    setFlaggedContent(
+      flaggedContent.map((c) =>
+        c.id === contentId ? { ...c, assignedTo: assignee, status: 'under_review' as const } : c
+      )
+    );
   };
 
   const getStatusColor = (status: string) => {
@@ -206,7 +215,7 @@ const ContentModerationContent = () => {
               <div>
                 <p className="text-sm font-medium text-gray-600">Pending Review</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {flaggedContent.filter(c => c.status === 'pending').length}
+                  {flaggedContent.filter((c) => c.status === 'pending').length}
                 </p>
               </div>
               <div className="p-3 bg-yellow-100 rounded-full">
@@ -222,7 +231,7 @@ const ContentModerationContent = () => {
               <div>
                 <p className="text-sm font-medium text-gray-600">Under Review</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {flaggedContent.filter(c => c.status === 'under_review').length}
+                  {flaggedContent.filter((c) => c.status === 'under_review').length}
                 </p>
               </div>
               <div className="p-3 bg-blue-100 rounded-full">
@@ -238,7 +247,7 @@ const ContentModerationContent = () => {
               <div>
                 <p className="text-sm font-medium text-gray-600">Resolved</p>
                 <p className="text-2xl font-bold text-gray-900">
-                  {flaggedContent.filter(c => c.status === 'resolved').length}
+                  {flaggedContent.filter((c) => c.status === 'resolved').length}
                 </p>
               </div>
               <div className="p-3 bg-green-100 rounded-full">
@@ -337,9 +346,7 @@ const ContentModerationContent = () => {
               <div key={content.id} className="p-4 border rounded-lg">
                 <div className="flex items-center justify-between mb-3">
                   <div className="flex items-center space-x-3">
-                    <div className="p-2 bg-red-100 rounded-lg">
-                      {getTypeIcon(content.type)}
-                    </div>
+                    <div className="p-2 bg-red-100 rounded-lg">{getTypeIcon(content.type)}</div>
                     <div>
                       <h3 className="font-semibold text-gray-900">{content.title}</h3>
                       <p className="text-sm text-gray-600">Reported by {content.reportedBy}</p>
@@ -350,18 +357,18 @@ const ContentModerationContent = () => {
                       {content.severity.charAt(0).toUpperCase() + content.severity.slice(1)}
                     </Badge>
                     <Badge className={getReasonColor(content.reason)}>
-                      {content.reason.replace('_', ' ').charAt(0).toUpperCase() + content.reason.slice(1).replace('_', ' ')}
+                      {content.reason.replace('_', ' ').charAt(0).toUpperCase() +
+                        content.reason.slice(1).replace('_', ' ')}
                     </Badge>
                     <Badge className={getStatusColor(content.status)}>
-                      {content.status.replace('_', ' ').charAt(0).toUpperCase() + content.status.slice(1).replace('_', ' ')}
+                      {content.status.replace('_', ' ').charAt(0).toUpperCase() +
+                        content.status.slice(1).replace('_', ' ')}
                     </Badge>
                   </div>
                 </div>
 
                 <div className="mb-3">
-                  <p className="text-sm text-gray-700 line-clamp-3">
-                    {content.content}
-                  </p>
+                  <p className="text-sm text-gray-700 line-clamp-3">{content.content}</p>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-3 text-sm">
@@ -384,7 +391,10 @@ const ContentModerationContent = () => {
                   <div className="flex items-center space-x-2">
                     <MessageSquare className="w-4 h-4 text-gray-500" />
                     <span className="text-gray-600">
-                      Action: {content.action ? content.action.charAt(0).toUpperCase() + content.action.slice(1) : 'None'}
+                      Action:{' '}
+                      {content.action
+                        ? content.action.charAt(0).toUpperCase() + content.action.slice(1)
+                        : 'None'}
                     </span>
                   </div>
                 </div>
@@ -419,4 +429,4 @@ const ContentModerationContent = () => {
   );
 };
 
-export { ContentModerationContent }; 
+export { ContentModerationContent };

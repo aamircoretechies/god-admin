@@ -6,7 +6,9 @@ import { fetchUserProfile, type UserProfileResponse } from '@/services/usersApi'
 const UserActivityBehavior = () => {
   const { id } = useParams<{ id: string }>();
   const [loading, setLoading] = useState(true);
-  const [activityData, setActivityData] = useState<UserProfileResponse['data']['userActivity'] | null>(null);
+  const [activityData, setActivityData] = useState<
+    UserProfileResponse['data']['userActivity'] | null
+  >(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -80,7 +82,9 @@ const UserActivityBehavior = () => {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {/* Basic Activity Stats */}
           <div className="space-y-4">
-            <h4 className="text-sm font-semibold text-gray-900 border-b pb-2">Basic Activity Stats</h4>
+            <h4 className="text-sm font-semibold text-gray-900 border-b pb-2">
+              Basic Activity Stats
+            </h4>
             <div className="space-y-3">
               <div>
                 <label className="text-sm font-medium text-gray-700">Last Login Date</label>
@@ -105,27 +109,37 @@ const UserActivityBehavior = () => {
 
           {/* Content Engagement */}
           <div className="space-y-4">
-            <h4 className="text-sm font-semibold text-gray-900 border-b pb-2">Content Engagement</h4>
+            <h4 className="text-sm font-semibold text-gray-900 border-b pb-2">
+              Content Engagement
+            </h4>
             <div className="space-y-3">
               <div>
-                <label className="text-sm font-medium text-gray-700">Bookmarks / Favorites Count</label>
+                <label className="text-sm font-medium text-gray-700">
+                  Bookmarks / Favorites Count
+                </label>
                 <p className="text-lg font-semibold text-warning">
                   {activityData.contentEngagement.bookmarksFavoritesCount}
                 </p>
               </div>
               <div>
-                <label className="text-sm font-medium text-gray-700">Daily Verse Subscription Status</label>
-                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(activityData.contentEngagement.dailyVerseSubscriptionStatus)}`}>
+                <label className="text-sm font-medium text-gray-700">
+                  Daily Verse Subscription Status
+                </label>
+                <span
+                  className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(activityData.contentEngagement.dailyVerseSubscriptionStatus)}`}
+                >
                   {activityData.contentEngagement.dailyVerseSubscriptionStatus}
                 </span>
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700">Offline Access Usage</label>
-                <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                  activityData.contentEngagement.offlineAccessUsage 
-                    ? 'bg-success/10 text-success' 
-                    : 'bg-gray-100 text-gray-800'
-                }`}>
+                <span
+                  className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                    activityData.contentEngagement.offlineAccessUsage
+                      ? 'bg-success/10 text-success'
+                      : 'bg-gray-100 text-gray-800'
+                  }`}
+                >
                   {activityData.contentEngagement.offlineAccessUsage || 'No'}
                 </span>
               </div>

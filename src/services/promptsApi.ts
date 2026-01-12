@@ -81,9 +81,7 @@ export interface PromptDetailApiResponse {
 // Fetch prompt detail
 export const fetchPromptDetail = async (templateId: string): Promise<PromptDetailApiResponse> => {
   // Prompt detail endpoint is at /prompts/ not /admin/prompts/
-  const response = await axios.get<PromptDetailApiResponse>(
-    `${API_URL}/prompts/${templateId}`
-  );
+  const response = await axios.get<PromptDetailApiResponse>(`${API_URL}/prompts/${templateId}`);
   return response.data;
 };
 
@@ -101,7 +99,10 @@ export interface UpdatePromptRequest {
 }
 
 // Update prompt
-export const updatePrompt = async (templateId: string, data: UpdatePromptRequest): Promise<PromptDetailApiResponse> => {
+export const updatePrompt = async (
+  templateId: string,
+  data: UpdatePromptRequest
+): Promise<PromptDetailApiResponse> => {
   const response = await axios.patch<PromptDetailApiResponse>(
     `${API_URL}/prompts/${templateId}`,
     data
@@ -123,10 +124,7 @@ export interface CreatePromptRequest {
 
 // Create prompt
 export const createPrompt = async (data: CreatePromptRequest): Promise<PromptDetailApiResponse> => {
-  const response = await axios.post<PromptDetailApiResponse>(
-    `${API_URL}/admin/prompts`,
-    data
-  );
+  const response = await axios.post<PromptDetailApiResponse>(`${API_URL}/admin/prompts`, data);
   return response.data;
 };
 
@@ -138,9 +136,7 @@ export interface DeletePromptApiResponse {
 
 // Delete prompt
 export const deletePrompt = async (templateId: string): Promise<DeletePromptApiResponse> => {
-  const response = await axios.delete<DeletePromptApiResponse>(
-    `${API_URL}/prompts/${templateId}`
-  );
+  const response = await axios.delete<DeletePromptApiResponse>(`${API_URL}/prompts/${templateId}`);
   return response.data;
 };
 
@@ -167,4 +163,3 @@ export const updatePromptStatus = async (
   );
   return response.data;
 };
-

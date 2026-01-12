@@ -33,11 +33,7 @@ interface AuthContextProps {
   loginWithGithub?: () => Promise<void>;
   register: (email: string, password: string, password_confirmation: string) => Promise<void>;
   requestPasswordResetLink: (email: string) => Promise<void>;
-  changePassword: (
-    token: string,
-    new_password: string,
-    confirm_password: string
-  ) => Promise<void>;
+  changePassword: (token: string, new_password: string, confirm_password: string) => Promise<void>;
   verifyResetToken: (token: string) => Promise<{ valid: boolean; expiresAt?: string }>;
   getUser: () => Promise<AxiosResponse<any>>;
   logout: () => void;
@@ -61,7 +57,7 @@ const isValidToken = (token: string | undefined): boolean => {
   try {
     // Decode the payload (second part)
     const payload = JSON.parse(atob(parts[1]));
-    
+
     // Check if token has expiration
     if (payload.exp) {
       // Check if token is expired (exp is in seconds, Date.now() is in milliseconds)
@@ -70,7 +66,7 @@ const isValidToken = (token: string | undefined): boolean => {
         return false; // Token is expired
       }
     }
-    
+
     return true;
   } catch (error) {
     // If we can't decode the token, it's invalid
@@ -81,9 +77,7 @@ const isValidToken = (token: string | undefined): boolean => {
 const AuthProvider = ({ children }: PropsWithChildren) => {
   const [loading, setLoading] = useState(true);
   const [auth, setAuth] = useState<AuthModel | undefined>(authHelper.getAuth());
-  const [currentUser, setCurrentUser] = useState<UserModel | undefined>(
-    authHelper.getUser()
-  );
+  const [currentUser, setCurrentUser] = useState<UserModel | undefined>(authHelper.getUser());
 
   const verify = async () => {
     // Check if auth exists and token is valid
@@ -98,8 +92,8 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
     // Validate token format and expiration
     if (!isValidToken(auth.token)) {
       // Token is invalid or expired - clear auth
-        saveAuth(undefined);
-        setCurrentUser(undefined);
+      saveAuth(undefined);
+      setCurrentUser(undefined);
       authHelper.setUser(undefined);
       return;
     }
@@ -117,7 +111,7 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
     //   authHelper.setUser(undefined);
     //   return;
     // }
-    
+
     // For now, restore user from localStorage or use dummy data
     if (!currentUser) {
       const storedUser = authHelper.getUser();
@@ -163,13 +157,13 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
         email,
         password
       });
-      
+
       if (response.status === 1 && response.data) {
         const auth: AuthModel = {
           token: response.data.token,
           refreshToken: response.data.refreshToken
         };
-      saveAuth(auth);
+        saveAuth(auth);
         setCurrentUser(response.data.admin);
         authHelper.setUser(response.data.admin);
       } else {
@@ -194,7 +188,7 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
       // TODO: Uncomment when user API is ready
       // const { data: user } = await getUser();
       // setCurrentUser(user);
-      
+
       // For now, use dummy user data
       const dummyUser: UserModel = {
         user_id: 'dummy-id',
@@ -231,11 +225,7 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
     return response.data;
   };
 
-  const changePassword = async (
-    token: string,
-    new_password: string,
-    confirm_password: string
-  ) => {
+  const changePassword = async (token: string, new_password: string, confirm_password: string) => {
     const response = await axios.post(RESET_PASSWORD_URL, {
       token,
       new_password,
@@ -248,7 +238,9 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
     return response.data;
   };
 
-  const verifyResetToken = async (token: string): Promise<{ valid: boolean; expiresAt?: string }> => {
+  const verifyResetToken = async (
+    token: string
+  ): Promise<{ valid: boolean; expiresAt?: string }> => {
     try {
       const response = await axios.get(`${VERIFY_RESET_TOKEN_URL}/${token}`);
       if (response.data && response.data.status === 1) {
@@ -266,7 +258,7 @@ const AuthProvider = ({ children }: PropsWithChildren) => {
   const getUser = async () => {
     // TODO: Uncomment when user API is ready
     // return await axios.get<UserModel>(GET_USER_URL);
-    
+
     // Dummy implementation for now
     return {
       data: {

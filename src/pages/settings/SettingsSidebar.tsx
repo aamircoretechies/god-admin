@@ -2,7 +2,7 @@ import { IScrollspyMenuItems, ScrollspyMenu } from '@/partials/menu';
 
 const SettingsSidebar = () => {
   const items: IScrollspyMenuItems = [
-   /*  {
+    /*  {
       title: 'General Settings',
       target: 'general_settings',
       active: true

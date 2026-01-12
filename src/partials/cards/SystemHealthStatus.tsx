@@ -2,10 +2,10 @@ import React, { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { 
-  CheckCircle, 
-  AlertCircle, 
-  XCircle, 
+import {
+  CheckCircle,
+  AlertCircle,
+  XCircle,
   RefreshCw,
   Server,
   Brain,
@@ -71,11 +71,23 @@ const SystemHealthStatus = () => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'healthy':
-        return <Badge variant="default" className="bg-green-100 text-green-800">Healthy</Badge>;
+        return (
+          <Badge variant="default" className="bg-green-100 text-green-800">
+            Healthy
+          </Badge>
+        );
       case 'warning':
-        return <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">Slow</Badge>;
+        return (
+          <Badge variant="secondary" className="bg-yellow-100 text-yellow-800">
+            Slow
+          </Badge>
+        );
       case 'error':
-        return <Badge variant="destructive" className="bg-red-100 text-red-800">Down</Badge>;
+        return (
+          <Badge variant="destructive" className="bg-red-100 text-red-800">
+            Down
+          </Badge>
+        );
       default:
         return <Badge variant="outline">Unknown</Badge>;
     }
@@ -99,20 +111,25 @@ const SystemHealthStatus = () => {
   const refreshStatus = async () => {
     setIsRefreshing(true);
     // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000));
-    
+    await new Promise((resolve) => setTimeout(resolve, 1000));
+
     // Update systems with new data
-    setSystems(prev => prev.map(system => ({
-      ...system,
-      lastChecked: new Date().toISOString(),
-      responseTime: Math.floor(Math.random() * 2000) + 50
-    })));
-    
+    setSystems((prev) =>
+      prev.map((system) => ({
+        ...system,
+        lastChecked: new Date().toISOString(),
+        responseTime: Math.floor(Math.random() * 2000) + 50
+      }))
+    );
+
     setIsRefreshing(false);
   };
 
-  const overallStatus = systems.every(s => s.status === 'healthy') ? 'healthy' : 
-                       systems.some(s => s.status === 'error') ? 'error' : 'warning';
+  const overallStatus = systems.every((s) => s.status === 'healthy')
+    ? 'healthy'
+    : systems.some((s) => s.status === 'error')
+      ? 'error'
+      : 'warning';
 
   return (
     <Card>
@@ -125,12 +142,7 @@ const SystemHealthStatus = () => {
           <div className="flex items-center gap-2">
             {getStatusIcon(overallStatus)}
             {getStatusBadge(overallStatus)}
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={refreshStatus}
-              disabled={isRefreshing}
-            >
+            <Button variant="outline" size="sm" onClick={refreshStatus} disabled={isRefreshing}>
               <RefreshCw className={`w-4 h-4 ${isRefreshing ? 'animate-spin' : ''}`} />
             </Button>
           </div>
@@ -149,9 +161,7 @@ const SystemHealthStatus = () => {
               </div>
               <div className="flex items-center gap-3">
                 <div className="text-right">
-                  <div className="text-sm font-medium">
-                    {system.responseTime}ms
-                  </div>
+                  <div className="text-sm font-medium">{system.responseTime}ms</div>
                   <div className="text-xs text-gray-500">
                     {new Date(system.lastChecked).toLocaleTimeString()}
                   </div>
@@ -161,10 +171,11 @@ const SystemHealthStatus = () => {
             </div>
           ))}
         </div>
-        
+
         <div className="mt-4 p-3 bg-gray-50 rounded-lg">
           <div className="text-sm text-gray-600">
-            <strong>Overall Status:</strong> {systems.filter(s => s.status === 'healthy').length} of {systems.length} services healthy
+            <strong>Overall Status:</strong> {systems.filter((s) => s.status === 'healthy').length}{' '}
+            of {systems.length} services healthy
           </div>
         </div>
       </CardContent>
@@ -173,5 +184,3 @@ const SystemHealthStatus = () => {
 };
 
 export { SystemHealthStatus };
-
-

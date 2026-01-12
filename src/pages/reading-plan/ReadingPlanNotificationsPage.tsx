@@ -3,14 +3,20 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
-import { 
-  Bell, 
-  Plus, 
-  Edit, 
-  Trash2, 
+import {
+  Bell,
+  Plus,
+  Edit,
+  Trash2,
   Save,
   X,
   Mail,
@@ -55,7 +61,8 @@ const mockTemplates: NotificationTemplate[] = [
     name: 'Daily Reading Reminder',
     type: 'reminder',
     subject: 'Your Daily Bible Reading Awaits',
-    message: 'Hi {{user_name}},\n\nDon\'t forget to complete today\'s reading from {{plan_title}}. You\'re making great progress!\n\nToday\'s reading: {{today_chapter}}\n\nKeep up the great work!\n\nBlessings,\nThe Bible App Team',
+    message:
+      "Hi {{user_name}},\n\nDon't forget to complete today's reading from {{plan_title}}. You're making great progress!\n\nToday's reading: {{today_chapter}}\n\nKeep up the great work!\n\nBlessings,\nThe Bible App Team",
     frequency: 'daily',
     isActive: true,
     createdAt: '2024-01-15',
@@ -67,7 +74,8 @@ const mockTemplates: NotificationTemplate[] = [
     name: 'Weekly Progress Update',
     type: 'encouragement',
     subject: 'Your Weekly Reading Progress',
-    message: 'Hi {{user_name}},\n\nGreat news! You\'ve completed {{completed_chapters}} chapters this week in {{plan_title}}.\n\nYou\'re {{progress_percentage}}% through your reading plan. Keep going!\n\nThis week\'s highlight: {{weekly_highlight}}\n\nStay blessed!\n\nThe Bible App Team',
+    message:
+      "Hi {{user_name}},\n\nGreat news! You've completed {{completed_chapters}} chapters this week in {{plan_title}}.\n\nYou're {{progress_percentage}}% through your reading plan. Keep going!\n\nThis week's highlight: {{weekly_highlight}}\n\nStay blessed!\n\nThe Bible App Team",
     frequency: 'weekly',
     isActive: true,
     createdAt: '2024-01-15',
@@ -79,7 +87,8 @@ const mockTemplates: NotificationTemplate[] = [
     name: 'Milestone Achievement',
     type: 'milestone',
     subject: 'Congratulations on Your Milestone!',
-    message: 'Hi {{user_name}},\n\n🎉 Congratulations! You\'ve reached a major milestone in {{plan_title}}.\n\nYou\'ve completed {{milestone_chapters}} chapters - that\'s amazing!\n\nKeep up the excellent work and continue your spiritual journey.\n\nBlessings,\nThe Bible App Team',
+    message:
+      "Hi {{user_name}},\n\n🎉 Congratulations! You've reached a major milestone in {{plan_title}}.\n\nYou've completed {{milestone_chapters}} chapters - that's amazing!\n\nKeep up the excellent work and continue your spiritual journey.\n\nBlessings,\nThe Bible App Team",
     frequency: 'custom',
     isActive: true,
     createdAt: '2024-01-15',
@@ -91,7 +100,8 @@ const mockTemplates: NotificationTemplate[] = [
     name: 'Plan Completion',
     type: 'completion',
     subject: 'Congratulations on Completing Your Reading Plan!',
-    message: 'Hi {{user_name}},\n\n🎊 Amazing! You\'ve successfully completed {{plan_title}}!\n\nYou\'ve read {{total_chapters}} chapters and grown in your faith journey.\n\nWe\'re so proud of your dedication and commitment.\n\nWhat\'s next? Check out our other reading plans to continue your spiritual growth.\n\nBlessings,\nThe Bible App Team',
+    message:
+      "Hi {{user_name}},\n\n🎊 Amazing! You've successfully completed {{plan_title}}!\n\nYou've read {{total_chapters}} chapters and grown in your faith journey.\n\nWe're so proud of your dedication and commitment.\n\nWhat's next? Check out our other reading plans to continue your spiritual growth.\n\nBlessings,\nThe Bible App Team",
     frequency: 'custom',
     isActive: true,
     createdAt: '2024-01-15',
@@ -189,7 +199,13 @@ const ReadingPlanNotificationsPage = () => {
 
   const handleSaveTemplate = () => {
     if (editingTemplate) {
-      setTemplates(templates.map(t => t.id === editingTemplate.id ? { ...templateFormData, id: editingTemplate.id } as NotificationTemplate : t));
+      setTemplates(
+        templates.map((t) =>
+          t.id === editingTemplate.id
+            ? ({ ...templateFormData, id: editingTemplate.id } as NotificationTemplate)
+            : t
+        )
+      );
       setEditingTemplate(null);
     } else {
       const newTemplate: NotificationTemplate = {
@@ -232,14 +248,20 @@ const ReadingPlanNotificationsPage = () => {
 
   const handleSaveSchedule = () => {
     if (editingSchedule) {
-      setSchedules(schedules.map(s => s.id === editingSchedule.id ? { ...scheduleFormData, id: editingSchedule.id } as NotificationSchedule : s));
+      setSchedules(
+        schedules.map((s) =>
+          s.id === editingSchedule.id
+            ? ({ ...scheduleFormData, id: editingSchedule.id } as NotificationSchedule)
+            : s
+        )
+      );
       setEditingSchedule(null);
     } else {
       const newSchedule: NotificationSchedule = {
         ...scheduleFormData,
         id: Date.now().toString(),
-        planTitle: readingPlans.find(p => p.id === scheduleFormData.planId)?.title || '',
-        templateName: templates.find(t => t.id === scheduleFormData.templateId)?.name || '',
+        planTitle: readingPlans.find((p) => p.id === scheduleFormData.planId)?.title || '',
+        templateName: templates.find((t) => t.id === scheduleFormData.templateId)?.name || '',
         nextSend: new Date().toISOString(),
         recipients: 0
       } as NotificationSchedule;
@@ -263,11 +285,11 @@ const ReadingPlanNotificationsPage = () => {
   };
 
   const handleDeleteTemplate = (id: string) => {
-    setTemplates(templates.filter(t => t.id !== id));
+    setTemplates(templates.filter((t) => t.id !== id));
   };
 
   const handleDeleteSchedule = (id: string) => {
-    setSchedules(schedules.filter(s => s.id !== id));
+    setSchedules(schedules.filter((s) => s.id !== id));
   };
 
   const getTypeColor = (type: string) => {
@@ -291,7 +313,9 @@ const ReadingPlanNotificationsPage = () => {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">Notifications & Reminders</h1>
-          <p className="text-gray-600 mt-2">Manage reading plan notifications and reminder settings</p>
+          <p className="text-gray-600 mt-2">
+            Manage reading plan notifications and reminder settings
+          </p>
         </div>
         <div className="flex space-x-3">
           <Button onClick={handleCreateTemplate} className="bg-primary hover:bg-primary-dark">
@@ -328,19 +352,21 @@ const ReadingPlanNotificationsPage = () => {
                   </label>
                   <Input
                     value={templateFormData.name}
-                    onChange={(e) => setTemplateFormData({ ...templateFormData, name: e.target.value })}
+                    onChange={(e) =>
+                      setTemplateFormData({ ...templateFormData, name: e.target.value })
+                    }
                     placeholder="e.g., Daily Reading Reminder"
                   />
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Type
-                    </label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Type</label>
                     <Select
                       value={templateFormData.type}
-                      onValueChange={(value) => setTemplateFormData({ ...templateFormData, type: value as any })}
+                      onValueChange={(value) =>
+                        setTemplateFormData({ ...templateFormData, type: value as any })
+                      }
                     >
                       <SelectTrigger>
                         <SelectValue />
@@ -359,7 +385,9 @@ const ReadingPlanNotificationsPage = () => {
                     </label>
                     <Select
                       value={templateFormData.frequency}
-                      onValueChange={(value) => setTemplateFormData({ ...templateFormData, frequency: value as any })}
+                      onValueChange={(value) =>
+                        setTemplateFormData({ ...templateFormData, frequency: value as any })
+                      }
                     >
                       <SelectTrigger>
                         <SelectValue />
@@ -380,7 +408,9 @@ const ReadingPlanNotificationsPage = () => {
                   </label>
                   <Input
                     value={templateFormData.subject}
-                    onChange={(e) => setTemplateFormData({ ...templateFormData, subject: e.target.value })}
+                    onChange={(e) =>
+                      setTemplateFormData({ ...templateFormData, subject: e.target.value })
+                    }
                     placeholder="Enter email subject..."
                   />
                 </div>
@@ -388,11 +418,11 @@ const ReadingPlanNotificationsPage = () => {
                 <div className="flex items-center space-x-2">
                   <Switch
                     checked={templateFormData.isActive}
-                    onCheckedChange={(checked) => setTemplateFormData({ ...templateFormData, isActive: checked })}
+                    onCheckedChange={(checked) =>
+                      setTemplateFormData({ ...templateFormData, isActive: checked })
+                    }
                   />
-                  <label className="text-sm font-medium text-gray-700">
-                    Active Template
-                  </label>
+                  <label className="text-sm font-medium text-gray-700">Active Template</label>
                 </div>
               </div>
 
@@ -403,12 +433,15 @@ const ReadingPlanNotificationsPage = () => {
                   </label>
                   <Textarea
                     value={templateFormData.message}
-                    onChange={(e) => setTemplateFormData({ ...templateFormData, message: e.target.value })}
+                    onChange={(e) =>
+                      setTemplateFormData({ ...templateFormData, message: e.target.value })
+                    }
                     placeholder="Enter your message content..."
                     rows={12}
                   />
                   <p className="text-xs text-gray-500 mt-2">
-                    Available variables: {'{{user_name}}'}, {'{{plan_title}}'}, {'{{today_chapter}}'}, {'{{progress_percentage}}'}, {'{{completed_chapters}}'}
+                    Available variables: {'{{user_name}}'}, {'{{plan_title}}'},{' '}
+                    {'{{today_chapter}}'}, {'{{progress_percentage}}'}, {'{{completed_chapters}}'}
                   </p>
                 </div>
               </div>
@@ -450,7 +483,9 @@ const ReadingPlanNotificationsPage = () => {
                   </label>
                   <Select
                     value={scheduleFormData.planId}
-                    onValueChange={(value) => setScheduleFormData({ ...scheduleFormData, planId: value })}
+                    onValueChange={(value) =>
+                      setScheduleFormData({ ...scheduleFormData, planId: value })
+                    }
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select reading plan" />
@@ -471,7 +506,9 @@ const ReadingPlanNotificationsPage = () => {
                   </label>
                   <Select
                     value={scheduleFormData.templateId}
-                    onValueChange={(value) => setScheduleFormData({ ...scheduleFormData, templateId: value })}
+                    onValueChange={(value) =>
+                      setScheduleFormData({ ...scheduleFormData, templateId: value })
+                    }
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select template" />
@@ -493,7 +530,9 @@ const ReadingPlanNotificationsPage = () => {
                     </label>
                     <Select
                       value={scheduleFormData.frequency}
-                      onValueChange={(value) => setScheduleFormData({ ...scheduleFormData, frequency: value })}
+                      onValueChange={(value) =>
+                        setScheduleFormData({ ...scheduleFormData, frequency: value })
+                      }
                     >
                       <SelectTrigger>
                         <SelectValue />
@@ -506,13 +545,13 @@ const ReadingPlanNotificationsPage = () => {
                     </Select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Time
-                    </label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Time</label>
                     <Input
                       type="time"
                       value={scheduleFormData.time}
-                      onChange={(e) => setScheduleFormData({ ...scheduleFormData, time: e.target.value })}
+                      onChange={(e) =>
+                        setScheduleFormData({ ...scheduleFormData, time: e.target.value })
+                      }
                     />
                   </div>
                 </div>
@@ -520,11 +559,11 @@ const ReadingPlanNotificationsPage = () => {
                 <div className="flex items-center space-x-2">
                   <Switch
                     checked={scheduleFormData.isActive}
-                    onCheckedChange={(checked) => setScheduleFormData({ ...scheduleFormData, isActive: checked })}
+                    onCheckedChange={(checked) =>
+                      setScheduleFormData({ ...scheduleFormData, isActive: checked })
+                    }
                   />
-                  <label className="text-sm font-medium text-gray-700">
-                    Active Schedule
-                  </label>
+                  <label className="text-sm font-medium text-gray-700">Active Schedule</label>
                 </div>
               </div>
 
@@ -535,13 +574,15 @@ const ReadingPlanNotificationsPage = () => {
                     <div className="flex justify-between">
                       <span className="text-gray-600">Plan:</span>
                       <span className="font-medium">
-                        {readingPlans.find(p => p.id === scheduleFormData.planId)?.title || 'Not selected'}
+                        {readingPlans.find((p) => p.id === scheduleFormData.planId)?.title ||
+                          'Not selected'}
                       </span>
                     </div>
                     <div className="flex justify-between">
                       <span className="text-gray-600">Template:</span>
                       <span className="font-medium">
-                        {templates.find(t => t.id === scheduleFormData.templateId)?.name || 'Not selected'}
+                        {templates.find((t) => t.id === scheduleFormData.templateId)?.name ||
+                          'Not selected'}
                       </span>
                     </div>
                     <div className="flex justify-between">
@@ -596,7 +637,13 @@ const ReadingPlanNotificationsPage = () => {
                     <Badge className={getTypeColor(template.type)}>
                       {template.type.charAt(0).toUpperCase() + template.type.slice(1)}
                     </Badge>
-                    <Badge className={template.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>
+                    <Badge
+                      className={
+                        template.isActive
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-gray-100 text-gray-800'
+                      }
+                    >
                       {template.isActive ? 'Active' : 'Inactive'}
                     </Badge>
                   </div>
@@ -630,7 +677,11 @@ const ReadingPlanNotificationsPage = () => {
                       <Eye className="w-4 h-4 mr-1" />
                       Preview
                     </Button>
-                    <Button variant="outline" size="sm" onClick={() => handleEditTemplate(template)}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleEditTemplate(template)}
+                    >
                       <Edit className="w-4 h-4 mr-1" />
                       Edit
                     </Button>
@@ -638,8 +689,8 @@ const ReadingPlanNotificationsPage = () => {
                       <Copy className="w-4 h-4 mr-1" />
                       Duplicate
                     </Button>
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       size="sm"
                       onClick={() => handleDeleteTemplate(template.id)}
                     >
@@ -677,7 +728,13 @@ const ReadingPlanNotificationsPage = () => {
                     </div>
                   </div>
                   <div className="flex items-center space-x-2">
-                    <Badge className={schedule.isActive ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-800'}>
+                    <Badge
+                      className={
+                        schedule.isActive
+                          ? 'bg-green-100 text-green-800'
+                          : 'bg-gray-100 text-gray-800'
+                      }
+                    >
                       {schedule.isActive ? 'Active' : 'Inactive'}
                     </Badge>
                   </div>
@@ -711,8 +768,8 @@ const ReadingPlanNotificationsPage = () => {
                     <Edit className="w-4 h-4 mr-1" />
                     Edit
                   </Button>
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     size="sm"
                     onClick={() => handleDeleteSchedule(schedule.id)}
                   >
@@ -729,4 +786,4 @@ const ReadingPlanNotificationsPage = () => {
   );
 };
 
-export { ReadingPlanNotificationsPage }; 
+export { ReadingPlanNotificationsPage };

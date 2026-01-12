@@ -1,11 +1,22 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { fetchTranslations, updateTranslation, uploadTranslation, type TranslationResponse } from '@/services/translationsApi';
+import {
+  fetchTranslations,
+  updateTranslation,
+  uploadTranslation,
+  type TranslationResponse
+} from '@/services/translationsApi';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Switch } from '@/components/ui/switch';
 import {
@@ -23,9 +34,7 @@ import {
   AlertCircle,
   Clock
 } from 'lucide-react';
-import { toast } from "sonner";
-
-
+import { toast } from 'sonner';
 
 interface Translation {
   id: string;
@@ -58,7 +67,11 @@ const transformTranslation = (apiTranslation: TranslationResponse): Translation 
     version: apiTranslation.abbreviation || '', // Map abbreviation to version
     language: apiTranslation.language || '',
     description: '', // API doesn't provide description
-    status: (apiTranslation.status?.toLowerCase() || 'draft') as 'active' | 'inactive' | 'pending' | 'draft',
+    status: (apiTranslation.status?.toLowerCase() || 'draft') as
+      | 'active'
+      | 'inactive'
+      | 'pending'
+      | 'draft',
     verseCount: apiTranslation.total_verses || 0, // Map total_verses to verseCount
     lastUpdated: apiTranslation.last_updated
       ? new Date(apiTranslation.last_updated).toISOString().split('T')[0]
@@ -73,30 +86,30 @@ const transformTranslation = (apiTranslation: TranslationResponse): Translation 
 
 // Language mapping: code -> display name
 const languageMap: Record<string, string> = {
-  'en': 'English',
-  'es': 'Spanish',
-  'fr': 'French',
-  'de': 'German',
-  'pt': 'Portuguese',
-  'it': 'Italian',
-  'nl': 'Dutch',
-  'ru': 'Russian',
-  'zh': 'Chinese',
-  'ja': 'Japanese',
-  'ko': 'Korean',
-  'ar': 'Arabic',
-  'he': 'Hebrew',
-  'el': 'Greek',
-  'la': 'Latin',
-  'sv': 'Swedish',
-  'no': 'Norwegian',
-  'da': 'Danish',
-  'fi': 'Finnish',
-  'pl': 'Polish',
-  'cs': 'Czech',
-  'hu': 'Hungarian',
-  'ro': 'Romanian',
-  'bg': 'Bulgarian'
+  en: 'English',
+  es: 'Spanish',
+  fr: 'French',
+  de: 'German',
+  pt: 'Portuguese',
+  it: 'Italian',
+  nl: 'Dutch',
+  ru: 'Russian',
+  zh: 'Chinese',
+  ja: 'Japanese',
+  ko: 'Korean',
+  ar: 'Arabic',
+  he: 'Hebrew',
+  el: 'Greek',
+  la: 'Latin',
+  sv: 'Swedish',
+  no: 'Norwegian',
+  da: 'Danish',
+  fi: 'Finnish',
+  pl: 'Polish',
+  cs: 'Czech',
+  hu: 'Hungarian',
+  ro: 'Romanian',
+  bg: 'Bulgarian'
 };
 
 // Get display name for language code
@@ -138,7 +151,6 @@ const BibleTranslationsContent = () => {
   });
 
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
-
 
   // Fetch translations from API
   useEffect(() => {
@@ -190,10 +202,11 @@ const BibleTranslationsContent = () => {
           data: err?.response?.data
         });
 
-        const errorMessage = err?.response?.data?.message
-          || err?.response?.data?.error
-          || err?.message
-          || 'Failed to load translations';
+        const errorMessage =
+          err?.response?.data?.message ||
+          err?.response?.data?.error ||
+          err?.message ||
+          'Failed to load translations';
 
         setError(errorMessage);
         setTranslations([]);
@@ -208,7 +221,7 @@ const BibleTranslationsContent = () => {
   // Get unique languages from fetched translations
   const availableLanguages = useMemo(() => {
     const languagesSet = new Set<string>();
-    translations.forEach(t => {
+    translations.forEach((t) => {
       if (t.language) languagesSet.add(t.language);
     });
     return Array.from(languagesSet).sort();
@@ -384,56 +397,56 @@ const BibleTranslationsContent = () => {
       setSaving(true);
       setError(null);
 
-      const languageCode = getLanguageCode(formData.language || "");
+      const languageCode = getLanguageCode(formData.language || '');
 
       // CASE 1: Edit + File Upload
       if (editingTranslation && selectedFile) {
         const payload = {
-          name: formData.name || "",
-          abbreviation: formData.version || "",
+          name: formData.name || '',
+          abbreviation: formData.version || '',
           language: languageCode,
-          license: formData.license || "",
-          file: selectedFile,
+          license: formData.license || '',
+          file: selectedFile
         };
 
         const uploadRes = await uploadTranslation(payload);
 
-        toast.success(uploadRes.message || "File uploaded successfully ✅");
+        toast.success(uploadRes.message || 'File uploaded successfully ✅');
       }
 
       //  CASE 2: Edit without File
       else if (editingTranslation) {
         const updateData = {
-          name: formData.name || "",
-          abbreviation: formData.version || "",
+          name: formData.name || '',
+          abbreviation: formData.version || '',
           language: languageCode,
-          license: formData.license || "",
-          is_public: formData.isPublic ?? true,
+          license: formData.license || '',
+          is_public: formData.isPublic ?? true
         };
 
         const res = await updateTranslation(editingTranslation.id, updateData);
 
-        toast.success(res.message || "Translation updated successfully ✅");
+        toast.success(res.message || 'Translation updated successfully ✅');
       }
 
       //  CASE 3: Create New Translation
       else {
         if (!selectedFile) {
-          toast.error("Please select a file to upload");
+          toast.error('Please select a file to upload');
           return;
         }
 
         const payload = {
-          name: formData.name || "",
-          abbreviation: formData.version || "",
+          name: formData.name || '',
+          abbreviation: formData.version || '',
           language: languageCode,
-          license: formData.license || "",
-          file: selectedFile,
+          license: formData.license || '',
+          file: selectedFile
         };
 
         const uploadRes = await uploadTranslation(payload);
 
-        toast.success(uploadRes.message || "Translation created successfully ✅");
+        toast.success(uploadRes.message || 'Translation created successfully ✅');
       }
 
       //  Refresh list
@@ -447,25 +460,22 @@ const BibleTranslationsContent = () => {
       setIsCreating(false);
       setSelectedFile(null);
       setFormData({
-        name: "",
-        version: "",
-        language: "",
-        description: "",
-        status: "draft",
-        publisher: "",
-        year: "",
-        license: "",
-        isPublic: true,
+        name: '',
+        version: '',
+        language: '',
+        description: '',
+        status: 'draft',
+        publisher: '',
+        year: '',
+        license: '',
+        isPublic: true
       });
-
     } catch (err: any) {
-      toast.error(err?.response?.data?.message || "Something went wrong ❌");
+      toast.error(err?.response?.data?.message || 'Something went wrong ❌');
     } finally {
       setSaving(false);
     }
   };
-
-
 
   const handleCancel = () => {
     setIsCreating(false);
@@ -486,7 +496,7 @@ const BibleTranslationsContent = () => {
   const handleDelete = async (id: string) => {
     // TODO: Implement delete API call
     // For now, just remove from local state
-    setTranslations(translations.filter(t => t.id !== id));
+    setTranslations(translations.filter((t) => t.id !== id));
   };
 
   const handleSearchChange = (value: string) => {
@@ -728,7 +738,7 @@ const BibleTranslationsContent = () => {
                       onChange={(e) => {
                         if (e.target.files && e.target.files.length > 0) {
                           setSelectedFile(e.target.files[0]);
-                          console.log("Selected File:", e.target.files[0]);
+                          console.log('Selected File:', e.target.files[0]);
                         }
                       }}
                     />
@@ -765,7 +775,11 @@ const BibleTranslationsContent = () => {
                 disabled={saving}
               >
                 <Save className="w-4 h-4 mr-2" />
-                {saving ? 'Saving...' : (editingTranslation ? 'Update Translation' : 'Create Translation')}
+                {saving
+                  ? 'Saving...'
+                  : editingTranslation
+                    ? 'Update Translation'
+                    : 'Create Translation'}
               </Button>
             </div>
           </CardContent>
@@ -795,19 +809,17 @@ const BibleTranslationsContent = () => {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="all">All Languages</SelectItem>
-                  {availableLanguages.length > 0 ? (
-                    availableLanguages.map((language) => (
-                      <SelectItem key={language} value={language}>
-                        {language}
-                      </SelectItem>
-                    ))
-                  ) : (
-                    languages.map((language) => (
-                      <SelectItem key={language} value={language}>
-                        {language}
-                      </SelectItem>
-                    ))
-                  )}
+                  {availableLanguages.length > 0
+                    ? availableLanguages.map((language) => (
+                        <SelectItem key={language} value={language}>
+                          {language}
+                        </SelectItem>
+                      ))
+                    : languages.map((language) => (
+                        <SelectItem key={language} value={language}>
+                          {language}
+                        </SelectItem>
+                      ))}
                 </SelectContent>
               </Select>
             </div>
@@ -873,7 +885,9 @@ const BibleTranslationsContent = () => {
                       </div>
                       <div>
                         <h3 className="font-semibold text-gray-900">{translation.name}</h3>
-                        <p className="text-sm text-gray-600 line-clamp-1">{translation.description}</p>
+                        <p className="text-sm text-gray-600 line-clamp-1">
+                          {translation.description}
+                        </p>
                       </div>
                     </div>
                     {/* <div className="flex items-center space-x-2"> */}
@@ -890,11 +904,15 @@ const BibleTranslationsContent = () => {
                   <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-3 text-sm">
                     <div className="flex items-center space-x-2">
                       <Globe className="w-4 h-4 text-gray-500" />
-                      <span className="text-gray-600">{getLanguageName(translation.language) || translation.language}</span>
+                      <span className="text-gray-600">
+                        {getLanguageName(translation.language) || translation.language}
+                      </span>
                     </div>
                     <div className="flex items-center space-x-2">
                       <FileText className="w-4 h-4 text-gray-500" />
-                      <span className="text-gray-600">{translation.verseCount.toLocaleString()} verses</span>
+                      <span className="text-gray-600">
+                        {translation.verseCount.toLocaleString()} verses
+                      </span>
                     </div>
                     <div className="flex items-center space-x-2">
                       <Clock className="w-4 h-4 text-gray-500" />
@@ -913,17 +931,30 @@ const BibleTranslationsContent = () => {
                     </div>
                     {/* <div className="flex space-x-2"> */}
                     <div className="flex flex-wrap items-center gap-2">
-                      <Link to={`/bible-content/translations/view/${translation.id}`} className="flex-1 sm:flex-none">
+                      <Link
+                        to={`/bible-content/translations/view/${translation.id}`}
+                        className="flex-1 sm:flex-none"
+                      >
                         <Button variant="outline" size="sm" className="w-full">
                           <Eye className="w-4 h-4 mr-1" />
                           View
                         </Button>
                       </Link>
-                      <Button variant="outline" size="sm" onClick={() => handleEdit(translation)} className="flex-1 sm:flex-none">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleEdit(translation)}
+                        className="flex-1 sm:flex-none"
+                      >
                         <Edit className="w-4 h-4 mr-1" />
                         Edit
                       </Button>
-                      <Button variant="outline" size="sm" disabled={true} className="flex-1 sm:flex-none">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={true}
+                        className="flex-1 sm:flex-none"
+                      >
                         <Download className="w-4 h-4 mr-1" />
                         Download
                       </Button>
@@ -957,7 +988,7 @@ const BibleTranslationsContent = () => {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                  onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
                   disabled={currentPage === 1 || loading}
                   className="flex-1 sm:flex-none"
                 >
@@ -966,7 +997,7 @@ const BibleTranslationsContent = () => {
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                  onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
                   disabled={currentPage === totalPages || loading}
                   className="flex-1 sm:flex-none"
                 >

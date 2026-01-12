@@ -20,7 +20,9 @@ const NoteDetail = () => {
           <Toolbar>
             <ToolbarHeading>
               <ToolbarPageTitle />
-              <ToolbarDescription>Review and moderate individual notes and journal entries.</ToolbarDescription>
+              <ToolbarDescription>
+                Review and moderate individual notes and journal entries.
+              </ToolbarDescription>
             </ToolbarHeading>
             {/* ToolbarActions - Commented out (Export PDF and Approve Note buttons removed)
             <ToolbarActions>

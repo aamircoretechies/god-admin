@@ -15,4 +15,3 @@ export const getApiUrl = (endpoint: string): string => {
   const cleanEndpoint = endpoint.startsWith('/') ? endpoint.slice(1) : endpoint;
   return `${API_URL}/${cleanEndpoint}`;
 };
-

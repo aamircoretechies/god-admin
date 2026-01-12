@@ -13,18 +13,18 @@ export const MENU_SIDEBAR: TMenuConfig = [
     title: 'User Management',
     icon: 'people',
     children: [
-        {
-            title: 'End Users',
-            path: '/network/user-table/saas-users'
-          },
-        
-          {
-            title: 'Team Members',
-            path: '/account/members/team-members'
-          }
+      {
+        title: 'End Users',
+        path: '/network/user-table/saas-users'
+      },
+
+      {
+        title: 'Team Members',
+        path: '/account/members/team-members'
+      }
     ]
   },
-  
+
   {
     title: 'Bible Content',
     icon: 'book-square',
@@ -44,7 +44,7 @@ export const MENU_SIDEBAR: TMenuConfig = [
       {
         title: 'AI Explanations',
         path: '/bible-content/ai-explanations'
-      },
+      }
       // {
       //   title: 'Content Moderation',
       //   path: '/bible-content/moderation'
@@ -63,8 +63,8 @@ export const MENU_SIDEBAR: TMenuConfig = [
       {
         title: 'Add New Prompt',
         path: '/ai-prompt-management/add'
-      },
-     /*  {
+      }
+      /*  {
         title: 'View History',
         path: '/ai-prompt-management/history'
       } */
@@ -117,7 +117,7 @@ export const MENU_SIDEBAR: TMenuConfig = [
     ]
   }, */
 
-   {
+  {
     title: 'Notes & Journals',
     icon: 'message-edit',
     path: '/notes-journals'
@@ -126,8 +126,8 @@ export const MENU_SIDEBAR: TMenuConfig = [
   {
     heading: 'System Settings'
   },
-  
- /* {
+
+  /* {
     title: 'Monetization',
     icon: 'bill',
     children: [
@@ -144,9 +144,6 @@ export const MENU_SIDEBAR: TMenuConfig = [
      
     ]
   }, */
-  
-
- 
 
   /*  {
     title: 'Notifications Settings',
@@ -154,15 +151,13 @@ export const MENU_SIDEBAR: TMenuConfig = [
     path: '/notifications'
   }, */
 
-   {
+  {
     title: 'Settings',
     icon: 'setting',
     path: '/settings'
   },
 
-  
-
-   {
+  {
     title: 'System Log',
     icon: 'tablet-text-down',
     children: [
@@ -170,7 +165,7 @@ export const MENU_SIDEBAR: TMenuConfig = [
         title: 'Activity Logs',
         path: '/system-log'
       },
-     
+
       {
         title: 'Analytics',
         path: '/system-log/analytics'
@@ -180,9 +175,7 @@ export const MENU_SIDEBAR: TMenuConfig = [
         path: '/system-log/alerts'
       }
     ]
-  },
-
- 
+  }
 
   /* {
     title: 'Public Profile',
@@ -644,7 +637,6 @@ export const MENU_SIDEBAR: TMenuConfig = [
       }
     ]
   }, */
- 
 ];
 
 export const MENU_MEGA: TMenuConfig = [

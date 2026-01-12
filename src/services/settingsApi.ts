@@ -24,9 +24,7 @@ export interface SettingsResponse {
 
 // Fetch all settings
 export const fetchSettings = async (): Promise<SettingsResponse> => {
-  const response = await axios.get<SettingsResponse>(
-    `${API_URL}/admin/settings`
-  );
+  const response = await axios.get<SettingsResponse>(`${API_URL}/admin/settings`);
   return response.data;
 };
 
@@ -83,10 +81,11 @@ export const fetchApiConfiguration = async (): Promise<ApiConfigurationResponse>
 export const updateApiConfiguration = async (
   data: ApiConfigurationRequest
 ): Promise<{ status: number; message: string; data: { updated: string[] } }> => {
-  const response = await axios.post<{ status: number; message: string; data: { updated: string[] } }>(
-    `${API_URL}/admin/settings/api/configuration`,
-    data
-  );
+  const response = await axios.post<{
+    status: number;
+    message: string;
+    data: { updated: string[] };
+  }>(`${API_URL}/admin/settings/api/configuration`, data);
   return response.data;
 };
 
@@ -119,10 +118,10 @@ export const fetchCacheConfiguration = async (): Promise<CacheConfigurationRespo
 export const updateCacheConfiguration = async (
   data: CacheConfigurationRequest
 ): Promise<{ status: number; message: string; data: { updated: string[] } }> => {
-  const response = await axios.post<{ status: number; message: string; data: { updated: string[] } }>(
-    `${API_URL}/admin/settings/cache/configuration`,
-    data
-  );
+  const response = await axios.post<{
+    status: number;
+    message: string;
+    data: { updated: string[] };
+  }>(`${API_URL}/admin/settings/cache/configuration`, data);
   return response.data;
 };
-

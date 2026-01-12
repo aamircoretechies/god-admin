@@ -4,10 +4,16 @@ import { fetchChapterDetail, type ChapterDetailData } from '@/services/bibleBook
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
 import { VerseDetailModal } from '@/components/verse-detail-modal/VerseDetailModal';
-import { 
-  ArrowLeft, 
+import {
+  ArrowLeft,
   BookOpen,
   FileText,
   AlertCircle,
@@ -54,7 +60,10 @@ const transformChapterData = (apiData: ChapterDetailData) => {
     chapters: apiData.statistics.book_chapters,
     verses: 0, // Not provided in API
     description: apiData.chapter_overview.book_description,
-    status: (apiData.status_configuration.book_status?.toLowerCase() || 'active') as 'active' | 'inactive' | 'draft'
+    status: (apiData.status_configuration.book_status?.toLowerCase() || 'active') as
+      | 'active'
+      | 'inactive'
+      | 'draft'
   };
 
   const chapter: Chapter = {
@@ -62,7 +71,10 @@ const transformChapterData = (apiData: ChapterDetailData) => {
     bookId: apiData.book_id,
     number: apiData.chapter_overview.chapter_number,
     verses: apiData.statistics.total_verses,
-    status: (apiData.status_configuration.status?.toLowerCase() || 'active') as 'active' | 'inactive' | 'draft'
+    status: (apiData.status_configuration.status?.toLowerCase() || 'active') as
+      | 'active'
+      | 'inactive'
+      | 'draft'
   };
 
   const chapterVerses: Verse[] = apiData.verses.map((verse) => ({
@@ -107,7 +119,7 @@ const ViewChapterContent: React.FC = () => {
         setLoading(true);
         setError(null);
         const apiData = await fetchChapterDetail(bookId, chapterId, translationFilter);
-        
+
         if (apiData) {
           const transformed = transformChapterData(apiData);
           setBook(transformed.book);
@@ -130,7 +142,7 @@ const ViewChapterContent: React.FC = () => {
 
   const handleVerseClick = (verse: Verse) => {
     if (!book || !chapter) return;
-    
+
     const verseData = {
       id: verse.id,
       verseId: verse.verseId, // Pass verse_id UUID for API calls
@@ -167,8 +179,12 @@ const ViewChapterContent: React.FC = () => {
     return (
       <div className="text-center py-12">
         <AlertCircle className="w-12 h-12 text-gray-400 mx-auto mb-4" />
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">Chapter Not Found</h3>
-        <p className="text-gray-600 dark:text-gray-400 mb-4">{error || 'The chapter you\'re looking for doesn\'t exist.'}</p>
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+          Chapter Not Found
+        </h3>
+        <p className="text-gray-600 dark:text-gray-400 mb-4">
+          {error || "The chapter you're looking for doesn't exist."}
+        </p>
         <Button onClick={() => navigate('/bible-content/books-chapters')}>
           <ArrowLeft className="w-4 h-4 mr-2" />
           Back to Books & Chapters
@@ -180,11 +196,23 @@ const ViewChapterContent: React.FC = () => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'active':
-        return <Badge className="bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300">Active</Badge>;
+        return (
+          <Badge className="bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300">
+            Active
+          </Badge>
+        );
       case 'inactive':
-        return <Badge className="bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-300">Inactive</Badge>;
+        return (
+          <Badge className="bg-gray-100 dark:bg-gray-800 text-gray-800 dark:text-gray-300">
+            Inactive
+          </Badge>
+        );
       case 'draft':
-        return <Badge className="bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300">Draft</Badge>;
+        return (
+          <Badge className="bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300">
+            Draft
+          </Badge>
+        );
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
@@ -192,9 +220,13 @@ const ViewChapterContent: React.FC = () => {
 
   const getTestamentBadge = (testament: string) => {
     return testament === 'old' ? (
-      <Badge className="bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300">Old Testament</Badge>
+      <Badge className="bg-orange-100 dark:bg-orange-900/30 text-orange-800 dark:text-orange-300">
+        Old Testament
+      </Badge>
     ) : (
-      <Badge className="bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300">New Testament</Badge>
+      <Badge className="bg-amber-100 dark:bg-amber-900/30 text-amber-800 dark:text-amber-300">
+        New Testament
+      </Badge>
     );
   };
 
@@ -226,27 +258,15 @@ const ViewChapterContent: React.FC = () => {
               <SelectItem value="SV">SV</SelectItem>
             </SelectContent>
           </Select>
-          <Button 
-            variant="outline" 
-            disabled={true}
-            title="Duplicate not available"
-          >
+          <Button variant="outline" disabled={true} title="Duplicate not available">
             <Copy className="w-4 h-4 mr-2" />
             Duplicate
           </Button>
-          <Button 
-            variant="outline" 
-            disabled={true}
-            title="Download not available"
-          >
+          <Button variant="outline" disabled={true} title="Download not available">
             <Download className="w-4 h-4 mr-2" />
             Download
           </Button>
-          <Button 
-            variant="outline" 
-            disabled={true}
-            title="Edit not available"
-          >
+          <Button variant="outline" disabled={true} title="Edit not available">
             <Edit className="w-4 h-4 mr-2" />
             Edit Chapter
           </Button>
@@ -266,23 +286,29 @@ const ViewChapterContent: React.FC = () => {
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <h4 className="text-sm font-medium text-gray-700 dark:text-white mb-2">Book Description</h4>
+                <h4 className="text-sm font-medium text-gray-700 dark:text-white mb-2">
+                  Book Description
+                </h4>
                 <p className="text-gray-900 dark:text-white">{book.description}</p>
               </div>
-              
+
               <div className="grid grid-cols-2 gap-4 pt-4 border-t border-gray-200 dark:border-gray-700">
                 <div>
                   <h4 className="text-sm font-medium text-gray-700 dark:text-white mb-2">Book</h4>
                   <p className="text-gray-900 dark:text-white">{book.name}</p>
                 </div>
                 <div>
-                  <h4 className="text-sm font-medium text-gray-700 dark:text-white mb-2">Chapter Number</h4>
+                  <h4 className="text-sm font-medium text-gray-700 dark:text-white mb-2">
+                    Chapter Number
+                  </h4>
                   <p className="text-gray-900 dark:text-white">{chapter.number}</p>
                 </div>
               </div>
 
               <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
-                <h4 className="text-sm font-medium text-gray-700 dark:text-white mb-2">Total Verses</h4>
+                <h4 className="text-sm font-medium text-gray-700 dark:text-white mb-2">
+                  Total Verses
+                </h4>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">{chapter.verses}</p>
               </div>
             </CardContent>
@@ -300,23 +326,30 @@ const ViewChapterContent: React.FC = () => {
               <div className="space-y-4">
                 {chapterVerses.length > 0 ? (
                   chapterVerses.map((verse) => (
-                    <div 
-                      key={verse.id} 
+                    <div
+                      key={verse.id}
                       className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-coal-100 transition-colors border-gray-200 dark:border-gray-700"
                     >
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <div className="flex items-center space-x-2 mb-2">
-                            <Badge variant="default" className="dark:border-gray-600 dark:text-gray-300">
+                            <Badge
+                              variant="default"
+                              className="dark:border-gray-600 dark:text-gray-300"
+                            >
                               Verse {verse.number}
                             </Badge>
-                            <span className="text-xs text-gray-500 dark:text-white">{verse.translation}</span>
+                            <span className="text-xs text-gray-500 dark:text-white">
+                              {verse.translation}
+                            </span>
                           </div>
-                          <p className="text-gray-900 dark:text-white leading-relaxed">{verse.text}</p>
+                          <p className="text-gray-900 dark:text-white leading-relaxed">
+                            {verse.text}
+                          </p>
                         </div>
-                        <Button 
-                          variant="ghost" 
-                          size="sm" 
+                        <Button
+                          variant="ghost"
+                          size="sm"
                           className="ml-4"
                           onClick={() => handleVerseClick(verse)}
                         >
@@ -353,7 +386,9 @@ const ViewChapterContent: React.FC = () => {
                 {getTestamentBadge(book.testament)}
               </div>
               <div className="flex items-center justify-between">
-                <span className="text-sm font-medium text-gray-700 dark:text-white">Book Status</span>
+                <span className="text-sm font-medium text-gray-700 dark:text-white">
+                  Book Status
+                </span>
                 {getStatusBadge(book.status)}
               </div>
             </CardContent>
@@ -368,14 +403,18 @@ const ViewChapterContent: React.FC = () => {
               <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-100 dark:border-blue-800/30">
                 <div className="flex items-center space-x-2 mb-2">
                   <FileText className="w-5 h-5 text-blue-600 dark:text-blue-400" />
-                  <h4 className="text-sm font-medium text-gray-700 dark:text-white">Total Verses</h4>
+                  <h4 className="text-sm font-medium text-gray-700 dark:text-white">
+                    Total Verses
+                  </h4>
                 </div>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">{chapter.verses}</p>
               </div>
               <div className="p-4 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-100 dark:border-green-800/30">
                 <div className="flex items-center space-x-2 mb-2">
                   <BookOpen className="w-5 h-5 text-green-600 dark:text-green-400" />
-                  <h4 className="text-sm font-medium text-gray-700 dark:text-white">Book Chapters</h4>
+                  <h4 className="text-sm font-medium text-gray-700 dark:text-white">
+                    Book Chapters
+                  </h4>
                 </div>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white">{book.chapters}</p>
               </div>
@@ -388,17 +427,17 @@ const ViewChapterContent: React.FC = () => {
               <CardTitle>Quick Actions</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              <Button 
-                variant="outline" 
-                className="w-full justify-start" 
+              <Button
+                variant="outline"
+                className="w-full justify-start"
                 disabled={true}
                 title="Edit not available"
               >
                 <Edit className="w-4 h-4 mr-2" />
                 Edit Chapter
               </Button>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 className="w-full justify-start"
                 disabled={true}
                 title="Download not available"
@@ -406,8 +445,8 @@ const ViewChapterContent: React.FC = () => {
                 <Download className="w-4 h-4 mr-2" />
                 Download Chapter
               </Button>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 className="w-full justify-start"
                 disabled={true}
                 title="Upload not available"
@@ -415,8 +454,8 @@ const ViewChapterContent: React.FC = () => {
                 <Upload className="w-4 h-4 mr-2" />
                 Upload Verses
               </Button>
-              <Button 
-                variant="outline" 
+              <Button
+                variant="outline"
                 className="w-full justify-start"
                 disabled={true}
                 title="Duplicate not available"
@@ -443,4 +482,3 @@ const ViewChapterContent: React.FC = () => {
 };
 
 export { ViewChapterContent };
-

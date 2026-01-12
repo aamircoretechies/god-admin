@@ -51,7 +51,6 @@ const DropdownNotificationsItem1 = ({
             {specialist}
           </span>
         </div>
-
       </div>
     </div>
   );

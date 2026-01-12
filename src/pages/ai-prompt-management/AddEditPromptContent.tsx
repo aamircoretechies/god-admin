@@ -12,15 +12,15 @@ import {
   SelectValue
 } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
+import { Save, X, Eye, AlertCircle, CheckCircle } from 'lucide-react';
 import {
-  Save,
-  X,
-  Eye,
-  AlertCircle,
-  CheckCircle
-} from 'lucide-react';
-import { fetchPromptDetail, updatePrompt, createPrompt, type UpdatePromptRequest, type CreatePromptRequest } from '@/services/promptsApi';
-import { toast } from "sonner";
+  fetchPromptDetail,
+  updatePrompt,
+  createPrompt,
+  type UpdatePromptRequest,
+  type CreatePromptRequest
+} from '@/services/promptsApi';
+import { toast } from 'sonner';
 
 // Category options mapped to backend values
 const CATEGORY_OPTIONS = [
@@ -106,8 +106,8 @@ const AddEditPromptContent = forwardRef((props, ref) => {
   }, [id, isEditMode]);
 
   const handleInputChange = (field: string, value: string | boolean) => {
-    if (typeof value === "string") {
-      if (field === "title") {
+    if (typeof value === 'string') {
+      if (field === 'title') {
         const words = value.trim().split(/\s+/);
         const limit = 50;
 
@@ -116,7 +116,7 @@ const AddEditPromptContent = forwardRef((props, ref) => {
           return; // stop typing
         }
       }
-      if (field === "description") {
+      if (field === 'description') {
         const words = value.trim().split(/\s+/);
         const limit = 200;
 
@@ -126,7 +126,7 @@ const AddEditPromptContent = forwardRef((props, ref) => {
         }
       }
     }
-    setFormData(prev => ({
+    setFormData((prev) => ({
       ...prev,
       [field]: value
     }));
@@ -134,7 +134,13 @@ const AddEditPromptContent = forwardRef((props, ref) => {
 
   const handleSave = async () => {
     // Validate required fields
-    if (!formData.title || !formData.description || !formData.content || !formData.category || !formData.targetRole) {
+    if (
+      !formData.title ||
+      !formData.description ||
+      !formData.content ||
+      !formData.category ||
+      !formData.targetRole
+    ) {
       setError('Please fill in all required fields');
       return;
     }
@@ -190,9 +196,7 @@ const AddEditPromptContent = forwardRef((props, ref) => {
   useImperativeHandle(ref, () => ({
     submit: handleSave,
     cancel: handleCancel
-
   }));
-
 
   const handleCancel = () => {
     if (isEditMode && id) {
@@ -236,7 +240,6 @@ const AddEditPromptContent = forwardRef((props, ref) => {
               ? 'Update AI prompt template'
               : 'Design AI prompt templates for biblical content generation'}
           </p>
-
         </div>
         <div className="flex items-center gap-2">
           <Button variant="outline" onClick={handlePreview}>
@@ -310,7 +313,8 @@ const AddEditPromptContent = forwardRef((props, ref) => {
                   className="font-mono text-sm resize-none overflow-auto"
                 />
                 <p className="text-xs text-gray-500">
-                  Available placeholders: {'{verse}'}, {'{chapter}'}, {'{book}'}, {'{user_name}'}, {'{date}'}
+                  Available placeholders: {'{verse}'}, {'{chapter}'}, {'{book}'}, {'{user_name}'},{' '}
+                  {'{date}'}
                 </p>
               </div>
             </CardContent>
@@ -323,12 +327,15 @@ const AddEditPromptContent = forwardRef((props, ref) => {
                 <CardTitle>Preview</CardTitle>
               </CardHeader>
               <CardContent>
-
                 <div className="bg-card p-4 rounded-lg  border border-gray-300">
                   <h3 className="font-semibold mb-2">{formData.title || 'Prompt Title'}</h3>
-                  <p className="text-sm text-gray-600 mb-3">{formData.description || 'Description'}</p>
+                  <p className="text-sm text-gray-600 mb-3">
+                    {formData.description || 'Description'}
+                  </p>
                   <div className=" p-3 rounded border border-gray-900 bg-card">
-                    <p className="text-sm font-mono">{formData.content || 'Prompt content will appear here...'}</p>
+                    <p className="text-sm font-mono">
+                      {formData.content || 'Prompt content will appear here...'}
+                    </p>
                   </div>
                 </div>
               </CardContent>
@@ -346,7 +353,10 @@ const AddEditPromptContent = forwardRef((props, ref) => {
             <CardContent className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="category">Category/Context *</Label>
-                <Select value={formData.category} onValueChange={(value) => handleInputChange('category', value)}>
+                <Select
+                  value={formData.category}
+                  onValueChange={(value) => handleInputChange('category', value)}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Select category" />
                   </SelectTrigger>
@@ -362,7 +372,10 @@ const AddEditPromptContent = forwardRef((props, ref) => {
 
               <div className="space-y-2">
                 <Label htmlFor="targetRole">Target Role *</Label>
-                <Select value={formData.targetRole} onValueChange={(value) => handleInputChange('targetRole', value)}>
+                <Select
+                  value={formData.targetRole}
+                  onValueChange={(value) => handleInputChange('targetRole', value)}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Select target role" />
                   </SelectTrigger>
@@ -378,7 +391,10 @@ const AddEditPromptContent = forwardRef((props, ref) => {
 
               <div className="space-y-2">
                 <Label htmlFor="language">Language *</Label>
-                <Select value={formData.language} onValueChange={(value) => handleInputChange('language', value)}>
+                <Select
+                  value={formData.language}
+                  onValueChange={(value) => handleInputChange('language', value)}
+                >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -391,7 +407,10 @@ const AddEditPromptContent = forwardRef((props, ref) => {
 
               <div className="space-y-2">
                 <Label htmlFor="status">Status *</Label>
-                <Select value={formData.status} onValueChange={(value) => handleInputChange('status', value)}>
+                <Select
+                  value={formData.status}
+                  onValueChange={(value) => handleInputChange('status', value)}
+                >
                   <SelectTrigger>
                     <SelectValue />
                   </SelectTrigger>
@@ -410,20 +429,11 @@ const AddEditPromptContent = forwardRef((props, ref) => {
               <CardTitle>Actions</CardTitle>
             </CardHeader>
             <CardContent className="space-y-3">
-              <Button
-                onClick={handleSave}
-                className="w-full"
-                disabled={saving}
-              >
+              <Button onClick={handleSave} className="w-full" disabled={saving}>
                 <Save className="w-4 h-4 mr-2" />
                 {saving ? 'Saving...' : isEditMode ? 'Update Prompt' : 'Save Prompt'}
               </Button>
-              <Button
-                variant="outline"
-                onClick={handleCancel}
-                className="w-full"
-                disabled={saving}
-              >
+              <Button variant="outline" onClick={handleCancel} className="w-full" disabled={saving}>
                 <X className="w-4 h-4 mr-2" />
                 Cancel
               </Button>
@@ -437,32 +447,50 @@ const AddEditPromptContent = forwardRef((props, ref) => {
             </CardHeader>
             <CardContent className="space-y-2">
               <div className="flex items-center gap-2">
-                <CheckCircle className={`w-4 h-4 ${formData.title ? 'text-green-600' : 'text-gray-400'}`} />
+                <CheckCircle
+                  className={`w-4 h-4 ${formData.title ? 'text-green-600' : 'text-gray-400'}`}
+                />
                 <span className={`text-sm ${formData.title ? 'text-green-600' : 'text-gray-500'}`}>
                   Title is {formData.title ? 'valid' : 'required'}
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <CheckCircle className={`w-4 h-4 ${formData.description ? 'text-green-600' : 'text-gray-400'}`} />
-                <span className={`text-sm ${formData.description ? 'text-green-600' : 'text-gray-500'}`}>
+                <CheckCircle
+                  className={`w-4 h-4 ${formData.description ? 'text-green-600' : 'text-gray-400'}`}
+                />
+                <span
+                  className={`text-sm ${formData.description ? 'text-green-600' : 'text-gray-500'}`}
+                >
                   Description is {formData.description ? 'valid' : 'required'}
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <CheckCircle className={`w-4 h-4 ${formData.content ? 'text-green-600' : 'text-gray-400'}`} />
-                <span className={`text-sm ${formData.content ? 'text-green-600' : 'text-gray-500'}`}>
+                <CheckCircle
+                  className={`w-4 h-4 ${formData.content ? 'text-green-600' : 'text-gray-400'}`}
+                />
+                <span
+                  className={`text-sm ${formData.content ? 'text-green-600' : 'text-gray-500'}`}
+                >
                   Content is {formData.content ? 'valid' : 'required'}
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <CheckCircle className={`w-4 h-4 ${formData.category ? 'text-green-600' : 'text-gray-400'}`} />
-                <span className={`text-sm ${formData.category ? 'text-green-600' : 'text-gray-500'}`}>
+                <CheckCircle
+                  className={`w-4 h-4 ${formData.category ? 'text-green-600' : 'text-gray-400'}`}
+                />
+                <span
+                  className={`text-sm ${formData.category ? 'text-green-600' : 'text-gray-500'}`}
+                >
                   Category is {formData.category ? 'valid' : 'required'}
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <CheckCircle className={`w-4 h-4 ${formData.targetRole ? 'text-green-600' : 'text-gray-400'}`} />
-                <span className={`text-sm ${formData.targetRole ? 'text-green-600' : 'text-gray-500'}`}>
+                <CheckCircle
+                  className={`w-4 h-4 ${formData.targetRole ? 'text-green-600' : 'text-gray-400'}`}
+                />
+                <span
+                  className={`text-sm ${formData.targetRole ? 'text-green-600' : 'text-gray-500'}`}
+                >
                   Target role is {formData.targetRole ? 'valid' : 'required'}
                 </span>
               </div>
@@ -471,11 +499,8 @@ const AddEditPromptContent = forwardRef((props, ref) => {
         </div>
       </div>
     </div>
-
   );
 });
 
 // export { AddEditPromptContent };
 export default AddEditPromptContent;
-
-

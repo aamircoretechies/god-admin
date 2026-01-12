@@ -13,7 +13,7 @@ interface IColumnFilterProps<TData, TValue> {
 
 const BackupToolbar = () => {
   const { table } = useDataGrid();
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+   
   const isFiltered = table.getState().columnFilters.length > 0;
 
   return (

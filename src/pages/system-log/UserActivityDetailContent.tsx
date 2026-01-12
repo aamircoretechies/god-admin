@@ -8,8 +8,8 @@ import { toAbsoluteUrl } from '@/utils';
 import { fetchUserActivityLogs, type UserActivityLogResponse } from '@/services/activityLogsApi';
 import { fetchUserProfile } from '@/services/usersApi';
 import { AlertCircle } from 'lucide-react';
-import { 
-  Mail, 
+import {
+  Mail,
   Calendar,
   Shield,
   AlertTriangle,
@@ -51,7 +51,7 @@ const transformUserActivity = (apiData: UserActivityLogResponse): UserActivity =
   let bookReference: string | undefined;
   let chapterReference: string | undefined;
   let verseReference: string | undefined;
-  
+
   if (apiData.verseReference) {
     // Try to parse "John 3:16" or "Romans 8" format
     const match = apiData.verseReference.match(/^(\w+)\s+(\d+):(\d+)$/);
@@ -123,7 +123,7 @@ const UserActivityDetailContent: React.FC = () => {
       try {
         setLoading(true);
         setError(null);
-        
+
         // Fetch user profile and activity logs in parallel
         const [profileResponse, activityResponse] = await Promise.all([
           fetchUserProfile(userId),
@@ -138,7 +138,7 @@ const UserActivityDetailContent: React.FC = () => {
         if (profileResponse.status === 1 && profileResponse.data?.basicUserInfo) {
           const basicInfo = profileResponse.data.basicUserInfo;
           const avatarNumber = (parseInt(basicInfo.userId.replace(/-/g, ''), 16) % 34) + 1;
-          
+
           setUserData({
             id: basicInfo.userId,
             name: basicInfo.fullName,
@@ -207,17 +207,20 @@ const UserActivityDetailContent: React.FC = () => {
     const colors = {
       'Verse Read': 'bg-amber-100 text-amber-800',
       'AI Query': 'bg-purple-100 text-purple-800',
-      'Bookmark': 'bg-green-100 text-green-800',
-      'Share': 'bg-orange-100 text-orange-800',
+      Bookmark: 'bg-green-100 text-green-800',
+      Share: 'bg-orange-100 text-orange-800',
       'Feedback Submitted': 'bg-pink-100 text-pink-800',
-      'Login': 'bg-gray-100 text-gray-800',
-      'Logout': 'bg-gray-100 text-gray-800',
+      Login: 'bg-gray-100 text-gray-800',
+      Logout: 'bg-gray-100 text-gray-800',
       'Password Change': 'bg-red-100 text-red-800',
       'Profile Update': 'bg-indigo-100 text-indigo-800'
     };
-    
+
     return (
-      <Badge variant="default" className={colors[type as keyof typeof colors] || 'bg-gray-100 text-gray-800'}>
+      <Badge
+        variant="default"
+        className={colors[type as keyof typeof colors] || 'bg-gray-100 text-gray-800'}
+      >
         {type}
       </Badge>
     );
@@ -226,11 +229,19 @@ const UserActivityDetailContent: React.FC = () => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'Success':
-        return <Badge variant="default" className="bg-green-100 text-green-800">Success</Badge>;
+        return (
+          <Badge variant="default" className="bg-green-100 text-green-800">
+            Success
+          </Badge>
+        );
       case 'Error':
         return <Badge variant="destructive">Error</Badge>;
       case 'Warning':
-        return <Badge variant="default" className="bg-yellow-100 text-yellow-800">Warning</Badge>;
+        return (
+          <Badge variant="default" className="bg-yellow-100 text-yellow-800">
+            Warning
+          </Badge>
+        );
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
@@ -263,11 +274,19 @@ const UserActivityDetailContent: React.FC = () => {
       case 'FREE':
         return <Badge variant="outline">Free</Badge>;
       case 'PREMIUM':
-        return <Badge variant="default" className="bg-purple-100 text-purple-800">Premium</Badge>;
+        return (
+          <Badge variant="default" className="bg-purple-100 text-purple-800">
+            Premium
+          </Badge>
+        );
       case 'ADMIN':
         return <Badge variant="destructive">Admin</Badge>;
       case 'MODERATOR':
-        return <Badge variant="default" className="bg-amber-100 text-amber-800">Moderator</Badge>;
+        return (
+          <Badge variant="default" className="bg-amber-100 text-amber-800">
+            Moderator
+          </Badge>
+        );
       default:
         return <Badge variant="outline">{role}</Badge>;
     }
@@ -332,7 +351,9 @@ const UserActivityDetailContent: React.FC = () => {
                 <div className="flex items-center gap-2">
                   <Clock className="w-4 h-4 text-gray-400" />
                   <span className="text-sm text-gray-600">
-                    {userActivities.length > 0 ? formatDate(userActivities[0].timestamp) : 'No recent activity'}
+                    {userActivities.length > 0
+                      ? formatDate(userActivities[0].timestamp)
+                      : 'No recent activity'}
                   </span>
                 </div>
               </div>
@@ -427,60 +448,65 @@ const UserActivityDetailContent: React.FC = () => {
         <CardContent>
           {userActivities.length === 0 ? (
             <div className="text-center py-8">
-              <p className="text-sm text-gray-500">No activities found for the selected time range.</p>
+              <p className="text-sm text-gray-500">
+                No activities found for the selected time range.
+              </p>
             </div>
           ) : (
             <div className="space-y-4">
               {userActivities.map((activity, index) => (
-              <div key={activity.id} className="flex gap-4">
-                {/* Timeline Line */}
-                <div className="flex flex-col items-center">
-                  <div className="w-3 h-3 bg-amber-500 rounded-full"></div>
-                  {index < userActivities.length - 1 && (
-                    <div className="w-0.5 h-16 bg-gray-200 mt-2"></div>
-                  )}
-                </div>
-                
-                {/* Activity Content */}
-                <div className="flex-1 bg-card rounded-lg p-4 ">
-                  <div className="flex items-start justify-between mb-2">
-                    <div className="flex items-center gap-2">
-                      {getActivityIcon(activity.activityType)}
-                      {getActivityTypeBadge(activity.activityType)}
-                      {getStatusBadge(activity.status)}
-                    </div>
-                    <div className="flex items-center gap-2 text-sm text-gray-500">
-                      {getDeviceIcon(activity.device)}
-                      <span>{activity.device}</span>
-                    </div>
+                <div key={activity.id} className="flex gap-4">
+                  {/* Timeline Line */}
+                  <div className="flex flex-col items-center">
+                    <div className="w-3 h-3 bg-amber-500 rounded-full"></div>
+                    {index < userActivities.length - 1 && (
+                      <div className="w-0.5 h-16 bg-gray-200 mt-2"></div>
+                    )}
                   </div>
-                  
-                  <p className="text-sm font-medium text-gray-900 mb-2 break-all">{activity.details}</p>
-                  
-                  {activity.queryText && (
-                    <p className="text-sm text-gray-600 mb-2 italic">"{activity.queryText}"</p>
-                  )}
-                  
-                  {activity.bookReference && (
-                    <p className="text-sm text-amber-600 mb-2">
-                      {activity.bookReference} {activity.chapterReference}:{activity.verseReference}
+
+                  {/* Activity Content */}
+                  <div className="flex-1 bg-card rounded-lg p-4 ">
+                    <div className="flex items-start justify-between mb-2">
+                      <div className="flex items-center gap-2">
+                        {getActivityIcon(activity.activityType)}
+                        {getActivityTypeBadge(activity.activityType)}
+                        {getStatusBadge(activity.status)}
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-gray-500">
+                        {getDeviceIcon(activity.device)}
+                        <span>{activity.device}</span>
+                      </div>
+                    </div>
+
+                    <p className="text-sm font-medium text-gray-900 mb-2 break-all">
+                      {activity.details}
                     </p>
-                  )}
-                  
-                  {activity.errorMessage && (
-                    <p className="text-sm text-red-600 mb-2">{activity.errorMessage}</p>
-                  )}
-                  
-                  <div className="flex items-center justify-between text-xs text-gray-500">
-                    <div className="flex items-center gap-4">
-                      <span>{formatDate(activity.timestamp)}</span>
-                      <span>{activity.location}</span>
-                      <span>IP: {activity.ipAddress}</span>
+
+                    {activity.queryText && (
+                      <p className="text-sm text-gray-600 mb-2 italic">"{activity.queryText}"</p>
+                    )}
+
+                    {activity.bookReference && (
+                      <p className="text-sm text-amber-600 mb-2">
+                        {activity.bookReference} {activity.chapterReference}:
+                        {activity.verseReference}
+                      </p>
+                    )}
+
+                    {activity.errorMessage && (
+                      <p className="text-sm text-red-600 mb-2">{activity.errorMessage}</p>
+                    )}
+
+                    <div className="flex items-center justify-between text-xs text-gray-500">
+                      <div className="flex items-center gap-4">
+                        <span>{formatDate(activity.timestamp)}</span>
+                        <span>{activity.location}</span>
+                        <span>IP: {activity.ipAddress}</span>
+                      </div>
+                      <span>Session: {activity.sessionId}</span>
                     </div>
-                    <span>Session: {activity.sessionId}</span>
                   </div>
                 </div>
-              </div>
               ))}
             </div>
           )}

@@ -22,19 +22,19 @@ interface IHeaderLogoTeam {
   urlPartial: string;
   path: string;
 }
-interface IHeaderLogoTeams extends Array<IHeaderLogoTeam> { }
+interface IHeaderLogoTeams extends Array<IHeaderLogoTeam> {}
 
 interface IHeaderLogoItem {
   title: string;
   icon: string;
 }
-interface IHeaderLogoItems extends Array<IHeaderLogoItem> { }
+interface IHeaderLogoItems extends Array<IHeaderLogoItem> {}
 
 interface IHeaderLogoStaging {
   title: string;
   icon: string;
 }
-interface IHeaderLogoStagings extends Array<IHeaderLogoStaging> { }
+interface IHeaderLogoStagings extends Array<IHeaderLogoStaging> {}
 
 const HeaderLogo = () => {
   const desktopMode = useResponsive('up', 'lg');

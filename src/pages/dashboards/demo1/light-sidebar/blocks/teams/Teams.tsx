@@ -46,7 +46,7 @@ const TeamsToolbar = ({ setSearchQuery, searchQuery }: TeamsToolbarProps) => {
         // Add or update the 'query' filter
         table.setColumnFilters([
           ...table.getState().columnFilters.filter((filter) => filter.id !== 'query'), // Remove existing 'query' filter
-          { id: 'query', value: inputValue }, // Add the new filter
+          { id: 'query', value: inputValue } // Add the new filter
         ]);
       }
     }

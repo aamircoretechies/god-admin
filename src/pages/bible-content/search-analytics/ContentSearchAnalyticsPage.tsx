@@ -22,7 +22,9 @@ const ContentSearchAnalyticsPage = () => {
           <Toolbar>
             <ToolbarHeading>
               <ToolbarPageTitle />
-              <ToolbarDescription>Search Bible content and view engagement analytics.</ToolbarDescription>
+              <ToolbarDescription>
+                Search Bible content and view engagement analytics.
+              </ToolbarDescription>
             </ToolbarHeading>
             <ToolbarActions>
               <a href="#" className="btn btn-sm btn-light">
@@ -43,4 +45,4 @@ const ContentSearchAnalyticsPage = () => {
   );
 };
 
-export { ContentSearchAnalyticsPage }; 
+export { ContentSearchAnalyticsPage };

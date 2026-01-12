@@ -32,7 +32,9 @@ const UserSubscriptionMonetization = () => {
           <div className="space-y-3">
             <div>
               <label className="text-sm font-medium text-gray-700">Subscription Type</label>
-              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getSubscriptionTypeColor(subscriptionData.subscriptionType)}`}>
+              <span
+                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getSubscriptionTypeColor(subscriptionData.subscriptionType)}`}
+              >
                 {subscriptionData.subscriptionType}
               </span>
             </div>
@@ -58,7 +60,9 @@ const UserSubscriptionMonetization = () => {
           <div className="space-y-3">
             <div>
               <label className="text-sm font-medium text-gray-700">Payment Status</label>
-              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(subscriptionData.paymentStatus)}`}>
+              <span
+                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(subscriptionData.paymentStatus)}`}
+              >
                 {subscriptionData.paymentStatus}
               </span>
             </div>
@@ -68,7 +72,9 @@ const UserSubscriptionMonetization = () => {
           <div className="space-y-3">
             <div>
               <label className="text-sm font-medium text-gray-700">Auto Renewal</label>
-              <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${subscriptionData.autoRenewal === 'Yes' ? 'bg-success/10 text-success' : 'bg-gray-100 text-gray-800'}`}>
+              <span
+                className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${subscriptionData.autoRenewal === 'Yes' ? 'bg-success/10 text-success' : 'bg-gray-100 text-gray-800'}`}
+              >
                 {subscriptionData.autoRenewal}
               </span>
             </div>
@@ -80,7 +86,3 @@ const UserSubscriptionMonetization = () => {
 };
 
 export { UserSubscriptionMonetization };
-
-
-
-

@@ -4,7 +4,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { VerseDetailModal } from '@/components/verse-detail-modal/VerseDetailModal';
 import {
@@ -43,7 +49,6 @@ interface Chapter {
   verses: number; // Dummy - not in API
   status: 'active' | 'inactive' | 'draft'; // Dummy - not in API
 }
-
 
 const BibleBooksChaptersContent = () => {
   const [books, setBooks] = useState<BibleBook[]>([]);
@@ -89,10 +94,10 @@ const BibleBooksChaptersContent = () => {
       try {
         setLoadingBooks(true);
         setError(null);
-        const response = await fetchBibleBooks({ 
-          page: currentPage, 
+        const response = await fetchBibleBooks({
+          page: currentPage,
           limit: 20,
-          translation: translationFilter 
+          translation: translationFilter
         });
         if (response.status === 1) {
           const transformedBooks: BibleBook[] = response.data.map((book) => ({
@@ -128,7 +133,7 @@ const BibleBooksChaptersContent = () => {
     }
 
     try {
-      setLoadingChapters(prev => ({ ...prev, [bookId]: true }));
+      setLoadingChapters((prev) => ({ ...prev, [bookId]: true }));
       const response = await fetchBibleBookDetail(bookId, translationFilter);
       if (response.status === 1) {
         const transformedChapters: Chapter[] = response.data.chapters.map((chapter) => ({
@@ -138,31 +143,29 @@ const BibleBooksChaptersContent = () => {
           verses: 0, // Dummy - not in API
           status: 'active' as const // Dummy - not in API
         }));
-        setChapters(prev => ({ ...prev, [bookId]: transformedChapters }));
+        setChapters((prev) => ({ ...prev, [bookId]: transformedChapters }));
       }
     } catch (err: any) {
       console.error('Failed to load chapters:', err);
     } finally {
-      setLoadingChapters(prev => ({ ...prev, [bookId]: false }));
+      setLoadingChapters((prev) => ({ ...prev, [bookId]: false }));
     }
   };
 
-  const filteredBooks = books.filter(book => {
+  const filteredBooks = books.filter((book) => {
     const matchesSearch = book.name.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesTestament = testamentFilter === 'all' || book.testament === testamentFilter;
     return matchesSearch && matchesTestament;
   });
 
   const toggleBookExpansion = (bookId: string) => {
-    setExpandedBooks(prev => {
+    setExpandedBooks((prev) => {
       const isExpanded = prev.includes(bookId);
       if (!isExpanded) {
         // Load chapters when expanding
         loadChaptersForBook(bookId);
       }
-      return isExpanded
-        ? prev.filter(id => id !== bookId)
-        : [...prev, bookId];
+      return isExpanded ? prev.filter((id) => id !== bookId) : [...prev, bookId];
     });
   };
 
@@ -293,9 +296,7 @@ const BibleBooksChaptersContent = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-4">
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Book Name
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Book Name</label>
                   <Input
                     value={bookFormData.name}
                     onChange={(e) => setBookFormData({ ...bookFormData, name: e.target.value })}
@@ -310,7 +311,9 @@ const BibleBooksChaptersContent = () => {
                     </label>
                     <Select
                       value={bookFormData.testament}
-                      onValueChange={(value) => setBookFormData({ ...bookFormData, testament: value as any })}
+                      onValueChange={(value) =>
+                        setBookFormData({ ...bookFormData, testament: value as any })
+                      }
                     >
                       <SelectTrigger>
                         <SelectValue />
@@ -322,12 +325,12 @@ const BibleBooksChaptersContent = () => {
                     </Select>
                   </div>
                   <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-2">
-                      Status
-                    </label>
+                    <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
                     <Select
                       value={bookFormData.status}
-                      onValueChange={(value) => setBookFormData({ ...bookFormData, status: value as any })}
+                      onValueChange={(value) =>
+                        setBookFormData({ ...bookFormData, status: value as any })
+                      }
                     >
                       <SelectTrigger>
                         <SelectValue />
@@ -347,7 +350,9 @@ const BibleBooksChaptersContent = () => {
                   </label>
                   <Textarea
                     value={bookFormData.description}
-                    onChange={(e) => setBookFormData({ ...bookFormData, description: e.target.value })}
+                    onChange={(e) =>
+                      setBookFormData({ ...bookFormData, description: e.target.value })
+                    }
                     placeholder="Brief description of the book..."
                     rows={3}
                   />
@@ -363,7 +368,9 @@ const BibleBooksChaptersContent = () => {
                     <Input
                       type="number"
                       value={bookFormData.chapters}
-                      onChange={(e) => setBookFormData({ ...bookFormData, chapters: parseInt(e.target.value) })}
+                      onChange={(e) =>
+                        setBookFormData({ ...bookFormData, chapters: parseInt(e.target.value) })
+                      }
                       min="0"
                     />
                   </div>
@@ -374,7 +381,9 @@ const BibleBooksChaptersContent = () => {
                     <Input
                       type="number"
                       value={bookFormData.verses}
-                      onChange={(e) => setBookFormData({ ...bookFormData, verses: parseInt(e.target.value) })}
+                      onChange={(e) =>
+                        setBookFormData({ ...bookFormData, verses: parseInt(e.target.value) })
+                      }
                       min="0"
                     />
                   </div>
@@ -460,7 +469,7 @@ const BibleBooksChaptersContent = () => {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                    onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
                     disabled={currentPage === 1 || loadingBooks}
                   >
                     Previous
@@ -471,7 +480,7 @@ const BibleBooksChaptersContent = () => {
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                    onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
                     disabled={currentPage === totalPages || loadingBooks}
                   >
                     Next
@@ -553,7 +562,10 @@ const BibleBooksChaptersContent = () => {
                     {loadingChapters[book.id] ? (
                       <div className="flex items-center justify-center py-8">
                         <div className="text-center">
-                          <div className="spinner-border spinner-border-sm text-primary" role="status">
+                          <div
+                            className="spinner-border spinner-border-sm text-primary"
+                            role="status"
+                          >
                             <span className="visually-hidden">Loading...</span>
                           </div>
                           <p className="text-sm text-gray-600 mt-2">Loading chapters...</p>
@@ -561,36 +573,45 @@ const BibleBooksChaptersContent = () => {
                       </div>
                     ) : (
                       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">
-                        {(chapters[book.id] || [])
-                          .map((chapter) => (
-                            <div key={chapter.id} className="border rounded-lg p-3 bg-card">
-                              <div className="flex items-center justify-between mb-2">
-                                <h5 className="font-medium text-gray-900 dark:text-white">Chapter {chapter.number}</h5>
-                                <Badge className={getStatusColor(chapter.status)}>
-                                  {chapter.status.charAt(0).toUpperCase() + chapter.status.slice(1)}
-                                </Badge>
-                                <DummyDataIndicator text="Status" />
-                              </div>
-                              {/* Verse count removed - not available from API */}
-                              <div className="flex space-x-2">
-                                <Link to={`/bible-content/books-chapters/view/${book.id}/${chapter.id}`}>
-                                  <Button variant="outline" size="sm">
-                                    <Eye className="w-4 h-4 mr-1" />
-                                    View
-                                  </Button>
-                                </Link>
-                                <Button variant="outline" size="sm" disabled title="Content editing not available in Phase 1">
-                                  <Edit className="w-4 h-4 mr-1" />
-                                  Edit (Phase 2)
-                                </Button>
-                              </div>
+                        {(chapters[book.id] || []).map((chapter) => (
+                          <div key={chapter.id} className="border rounded-lg p-3 bg-card">
+                            <div className="flex items-center justify-between mb-2">
+                              <h5 className="font-medium text-gray-900 dark:text-white">
+                                Chapter {chapter.number}
+                              </h5>
+                              <Badge className={getStatusColor(chapter.status)}>
+                                {chapter.status.charAt(0).toUpperCase() + chapter.status.slice(1)}
+                              </Badge>
+                              <DummyDataIndicator text="Status" />
                             </div>
-                          ))}
-                        {(!chapters[book.id] || chapters[book.id].length === 0) && !loadingChapters[book.id] && (
-                          <p className="text-sm text-gray-500 col-span-full text-center py-4">
-                            No chapters found
-                          </p>
-                        )}
+                            {/* Verse count removed - not available from API */}
+                            <div className="flex space-x-2">
+                              <Link
+                                to={`/bible-content/books-chapters/view/${book.id}/${chapter.id}`}
+                              >
+                                <Button variant="outline" size="sm">
+                                  <Eye className="w-4 h-4 mr-1" />
+                                  View
+                                </Button>
+                              </Link>
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                disabled
+                                title="Content editing not available in Phase 1"
+                              >
+                                <Edit className="w-4 h-4 mr-1" />
+                                Edit (Phase 2)
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                        {(!chapters[book.id] || chapters[book.id].length === 0) &&
+                          !loadingChapters[book.id] && (
+                            <p className="text-sm text-gray-500 col-span-full text-center py-4">
+                              No chapters found
+                            </p>
+                          )}
                       </div>
                     )}
                   </div>
@@ -625,7 +646,9 @@ const BibleBooksChaptersContent = () => {
                   <Input
                     type="number"
                     value={chapterFormData.number}
-                    onChange={(e) => setChapterFormData({ ...chapterFormData, number: parseInt(e.target.value) })}
+                    onChange={(e) =>
+                      setChapterFormData({ ...chapterFormData, number: parseInt(e.target.value) })
+                    }
                     min="1"
                   />
                 </div>
@@ -637,18 +660,20 @@ const BibleBooksChaptersContent = () => {
                   <Input
                     type="number"
                     value={chapterFormData.verses}
-                    onChange={(e) => setChapterFormData({ ...chapterFormData, verses: parseInt(e.target.value) })}
+                    onChange={(e) =>
+                      setChapterFormData({ ...chapterFormData, verses: parseInt(e.target.value) })
+                    }
                     min="0"
                   />
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-2">
-                    Status
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-2">Status</label>
                   <Select
                     value={chapterFormData.status}
-                    onValueChange={(value) => setChapterFormData({ ...chapterFormData, status: value as any })}
+                    onValueChange={(value) =>
+                      setChapterFormData({ ...chapterFormData, status: value as any })
+                    }
                   >
                     <SelectTrigger>
                       <SelectValue />
@@ -702,4 +727,4 @@ const BibleBooksChaptersContent = () => {
   );
 };
 
-export { BibleBooksChaptersContent }; 
+export { BibleBooksChaptersContent };

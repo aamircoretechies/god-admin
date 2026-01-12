@@ -6,15 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { AlertCircle } from 'lucide-react';
 import { fetchApiConfiguration, updateApiConfiguration } from '@/services/settingsApi';
-import {
-  Key,
-  Eye,
-  EyeOff,
-  Save,
-  TestTube,
-  RefreshCw,
-  Lock
-} from 'lucide-react';
+import { Key, Eye, EyeOff, Save, TestTube, RefreshCw, Lock } from 'lucide-react';
 
 const SystemApiConfig = () => {
   const [config, setConfig] = useState<{
@@ -74,7 +66,7 @@ const SystemApiConfig = () => {
   }, []);
 
   const handleValueChange = (key: keyof typeof localValues, value: string) => {
-    setLocalValues(prev => ({ ...prev, [key]: value }));
+    setLocalValues((prev) => ({ ...prev, [key]: value }));
   };
 
   const handleSave = async () => {
@@ -176,9 +168,7 @@ const SystemApiConfig = () => {
               value={localValues.api_rate_limit}
               onChange={(e) => handleValueChange('api_rate_limit', e.target.value)}
             />
-            <p className="text-xs text-gray-500">
-              API rate limit per hour
-            </p>
+            <p className="text-xs text-gray-500">API rate limit per hour</p>
           </div>
 
           {/* API Timeout */}
@@ -191,9 +181,7 @@ const SystemApiConfig = () => {
               value={localValues.api_timeout}
               onChange={(e) => handleValueChange('api_timeout', e.target.value)}
             />
-            <p className="text-xs text-gray-500">
-              API timeout in milliseconds
-            </p>
+            <p className="text-xs text-gray-500">API timeout in milliseconds</p>
           </div>
 
           {/* OpenAI API */}
@@ -219,12 +207,10 @@ const SystemApiConfig = () => {
             <div className="relative">
               <Input
                 id="openai_api_key"
-                type={showOpenAIKey ? "text" : "password"}
+                type={showOpenAIKey ? 'text' : 'password'}
                 placeholder="sk-..."
                 value={localValues.openai_api_key}
-                onChange={(e) =>
-                  handleValueChange("openai_api_key", e.target.value)
-                }
+                onChange={(e) => handleValueChange('openai_api_key', e.target.value)}
                 className="pr-10"
               />
 
@@ -237,9 +223,7 @@ const SystemApiConfig = () => {
               </button>
             </div>
 
-            <p className="text-xs text-gray-500">
-              OpenAI API key for AI content generation
-            </p>
+            <p className="text-xs text-gray-500">OpenAI API key for AI content generation</p>
           </div>
 
           {/* Bible API */}
@@ -265,12 +249,10 @@ const SystemApiConfig = () => {
             <div className="relative">
               <Input
                 id="bible_api_key"
-                type={showBibleAPIKey ? "text" : "password"}
+                type={showBibleAPIKey ? 'text' : 'password'}
                 placeholder="Enter Bible API key"
                 value={localValues.bible_api_key}
-                onChange={(e) =>
-                  handleValueChange("bible_api_key", e.target.value)
-                }
+                onChange={(e) => handleValueChange('bible_api_key', e.target.value)}
                 className="pr-10"
               />
 
@@ -279,17 +261,11 @@ const SystemApiConfig = () => {
                 onClick={() => setShowBibleAPIKey(!showBibleAPIKey)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
               >
-                {showBibleAPIKey ? (
-                  <EyeOff className="w-4 h-4" />
-                ) : (
-                  <Eye className="w-4 h-4" />
-                )}
+                {showBibleAPIKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
 
-            <p className="text-xs text-gray-500">
-              Bible API key for verse retrieval
-            </p>
+            <p className="text-xs text-gray-500">Bible API key for verse retrieval</p>
           </div>
 
           {/* TTS API */}
@@ -315,12 +291,10 @@ const SystemApiConfig = () => {
             <div className="relative">
               <Input
                 id="tts_api_key"
-                type={showTTSAPIKey ? "text" : "password"}
+                type={showTTSAPIKey ? 'text' : 'password'}
                 placeholder="Enter TTS API key"
                 value={localValues.tts_api_key}
-                onChange={(e) =>
-                  handleValueChange("tts_api_key", e.target.value)
-                }
+                onChange={(e) => handleValueChange('tts_api_key', e.target.value)}
                 className="pr-10"
               />
 
@@ -329,17 +303,11 @@ const SystemApiConfig = () => {
                 onClick={() => setShowTTSAPIKey(!showTTSAPIKey)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
               >
-                {showTTSAPIKey ? (
-                  <EyeOff className="w-4 h-4" />
-                ) : (
-                  <Eye className="w-4 h-4" />
-                )}
+                {showTTSAPIKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
             </div>
 
-            <p className="text-xs text-gray-500">
-              Text-to-Speech API key
-            </p>
+            <p className="text-xs text-gray-500">Text-to-Speech API key</p>
           </div>
         </div>
 
@@ -352,11 +320,7 @@ const SystemApiConfig = () => {
             <Save className="w-4 h-4" />
             {saving ? 'Saving...' : 'Save Configuration'}
           </Button> */}
-          <Button
-            className="flex items-center gap-2"
-            onClick={handleSave}
-            disabled
-          >
+          <Button className="flex items-center gap-2" onClick={handleSave} disabled>
             <Save className="w-4 h-4" />
             Save Configuration
           </Button>

@@ -27,10 +27,14 @@ import {
   ChevronLeft,
   ChevronRight
 } from 'lucide-react';
-import { deleteNote, exportNotes, fetchNotes, flagNote, type NoteResponse } from '@/services/notesApi';
-import { toast } from "sonner";
-
-
+import {
+  deleteNote,
+  exportNotes,
+  fetchNotes,
+  flagNote,
+  type NoteResponse
+} from '@/services/notesApi';
+import { toast } from 'sonner';
 
 // Types
 interface Note {
@@ -103,14 +107,14 @@ const transformNote = (apiData: NoteResponse): Note => {
   // Clean emotion_tags - some might be JSON strings
   const cleanTags = (tags: string[]): string[] => {
     return tags
-      .filter(tag => {
+      .filter((tag) => {
         // Skip JSON strings and CONTINUE_READING entries
         if (tag.startsWith('{') || tag.startsWith('CONTINUE_READING')) {
           return false;
         }
         return true;
       })
-      .map(tag => {
+      .map((tag) => {
         // Capitalize first letter
         return tag.charAt(0).toUpperCase() + tag.slice(1).toLowerCase();
       });
@@ -133,8 +137,6 @@ const transformNote = (apiData: NoteResponse): Note => {
   // Generate avatar from user ID (same logic as UserBasicInfo)
   const avatarNumber = (parseInt(apiData.user_id.replace(/-/g, ''), 16) % 34) + 1;
   const userAvatar = toAbsoluteUrl(`/media/avatars/300-${avatarNumber}.png`);
-
-
 
   return {
     id: apiData.note_id,
@@ -176,7 +178,7 @@ const NotesOverviewContent: React.FC = () => {
       setError(null);
       try {
         // Fetch with a larger limit when filters are active to allow client-side filtering
-        const limit = (statusFilter !== 'all' || languageFilter !== 'all') ? 10000 : pageSize;
+        const limit = statusFilter !== 'all' || languageFilter !== 'all' ? 10000 : pageSize;
         const response = await fetchNotes({
           page: currentPage,
           limit: limit,
@@ -201,9 +203,12 @@ const NotesOverviewContent: React.FC = () => {
       }
     };
 
-    const debounceTimer = setTimeout(() => {
-      loadNotes();
-    }, searchTerm ? 500 : 0);
+    const debounceTimer = setTimeout(
+      () => {
+        loadNotes();
+      },
+      searchTerm ? 500 : 0
+    );
 
     return () => clearTimeout(debounceTimer);
   }, [currentPage, searchTerm, userFilter, statusFilter, languageFilter]);
@@ -215,7 +220,7 @@ const NotesOverviewContent: React.FC = () => {
 
   // Get unique user IDs for filter
   const uniqueUserIds = useMemo(() => {
-    const userIds = new Set(notes.map(n => n.userId));
+    const userIds = new Set(notes.map((n) => n.userId));
     return Array.from(userIds);
   }, [notes]);
 
@@ -225,29 +230,32 @@ const NotesOverviewContent: React.FC = () => {
 
     // Apply status filter
     if (statusFilter !== 'all') {
-      filtered = filtered.filter(note => note.status === statusFilter);
+      filtered = filtered.filter((note) => note.status === statusFilter);
     }
 
     // Apply language filter
     if (languageFilter !== 'all') {
-      filtered = filtered.filter(note => note.language === languageFilter);
+      filtered = filtered.filter((note) => note.language === languageFilter);
     }
 
     // Apply search filter (if not already handled by API)
     if (searchTerm) {
-      filtered = filtered.filter(note =>
-        note.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        note.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        note.userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        note.userEmail.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        note.linkedVerses.some(verse => verse.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        note.tags.some(tag => tag.toLowerCase().includes(searchTerm.toLowerCase()))
+      filtered = filtered.filter(
+        (note) =>
+          note.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          note.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          note.userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          note.userEmail.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          note.linkedVerses.some((verse) =>
+            verse.toLowerCase().includes(searchTerm.toLowerCase())
+          ) ||
+          note.tags.some((tag) => tag.toLowerCase().includes(searchTerm.toLowerCase()))
       );
     }
 
     // Apply user filter (if not already handled by API)
     if (userFilter !== 'all') {
-      filtered = filtered.filter(note => note.userId === userFilter);
+      filtered = filtered.filter((note) => note.userId === userFilter);
     }
 
     return filtered;
@@ -256,11 +264,19 @@ const NotesOverviewContent: React.FC = () => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'active':
-        return <Badge variant="default" className="bg-green-100 text-green-800">Active</Badge>;
+        return (
+          <Badge variant="default" className="bg-green-100 text-green-800">
+            Active
+          </Badge>
+        );
       case 'flagged':
         return <Badge variant="destructive">Flagged</Badge>;
       case 'deleted':
-        return <Badge variant="secondary" className="bg-gray-100 text-gray-600">Deleted</Badge>;
+        return (
+          <Badge variant="secondary" className="bg-gray-100 text-gray-600">
+            Deleted
+          </Badge>
+        );
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
@@ -313,9 +329,7 @@ const NotesOverviewContent: React.FC = () => {
               >
                 {row.original.userName}
               </Link>
-              <span className="text-2sm text-gray-700 font-normal">
-                {row.original.userEmail}
-              </span>
+              <span className="text-2sm text-gray-700 font-normal">{row.original.userEmail}</span>
               <Link
                 to={`/notes-journals/detail/${row.original.id}`}
                 className="text-xs text-primary hover:text-primary-active mt-1"
@@ -384,7 +398,11 @@ const NotesOverviewContent: React.FC = () => {
         cell: ({ row }) => (
           <div className="flex flex-wrap gap-1">
             {row.original.tags.map((tag, index) => (
-              <Badge key={index} variant="secondary" className="text-xs bg-gray-100 text-gray-800 border border-gray-300">
+              <Badge
+                key={index}
+                variant="secondary"
+                className="text-xs bg-gray-100 text-gray-800 border border-gray-300"
+              >
                 {tag}
               </Badge>
             ))}
@@ -426,9 +444,7 @@ const NotesOverviewContent: React.FC = () => {
         id: 'actions',
         // header: ({ column }) => <DataGridColumnHeader title="Actions" column={column} />,
         header: () => (
-          <span className="text-sm font-medium select-none cursor-default">
-            Actions
-          </span>
+          <span className="text-sm font-medium select-none cursor-default">Actions</span>
         ),
         enableSorting: false,
         cell: ({ row }) => (
@@ -464,7 +480,10 @@ const NotesOverviewContent: React.FC = () => {
                 <Flag className="w-4 h-4 mr-2" />
                 {row.original.status === 'flagged' ? 'Unflag' : 'Flag'}
               </DropdownMenuItem> */}
-              <DropdownMenuItem className="text-red-600" onClick={() => handleDelete(row.original.id)}>
+              <DropdownMenuItem
+                className="text-red-600"
+                onClick={() => handleDelete(row.original.id)}
+              >
                 <Trash2 className="w-4 h-4 mr-2" />
                 Delete
               </DropdownMenuItem>
@@ -486,7 +505,7 @@ const NotesOverviewContent: React.FC = () => {
     // console.log("Sending reason:", "Inappropriate content");
 
     try {
-      const res = await flagNote(id, "Inappropriate content");
+      const res = await flagNote(id, 'Inappropriate content');
 
       // Log full backend response
       // console.log("FLAG API SUCCESS RESPONSE:", res);
@@ -495,32 +514,23 @@ const NotesOverviewContent: React.FC = () => {
         // console.log("Flagging successful. Updating UI...");
 
         // Update UI instantly
-        setNotes(prev =>
-          prev.map(n =>
-            n.id === id ? { ...n, status: "flagged" } : n
-          )
-        );
+        setNotes((prev) => prev.map((n) => (n.id === id ? { ...n, status: 'flagged' } : n)));
 
         // console.log(" Updated notes state:", notes);
 
-        toast.success("Note flagged successfully!");
+        toast.success('Note flagged successfully!');
       } else {
         // console.warn(" FLAG API returned status 0:", res);
-        toast.error(res.message || "Failed to flag note");
+        toast.error(res.message || 'Failed to flag note');
       }
     } catch (error: any) {
       // console.error(" FLAG API ERROR:", error);
 
-      console.error("FLAG API ERROR RESPONSE:",
-        error?.response?.data || "No backend response"
-      );
+      console.error('FLAG API ERROR RESPONSE:', error?.response?.data || 'No backend response');
 
-      toast.error(error?.response?.data?.message || "Error flagging note");
+      toast.error(error?.response?.data?.message || 'Error flagging note');
     }
   };
-
-
-
 
   const handleDelete = async (id: string) => {
     try {
@@ -528,49 +538,44 @@ const NotesOverviewContent: React.FC = () => {
       const res = await deleteNote(id);
 
       if (res.status === 1) {
-        setNotes(prev => prev.filter(n => n.id !== id));
+        setNotes((prev) => prev.filter((n) => n.id !== id));
 
         // Backend success message toast
-        toast.success(res.message || "Note deleted successfully!");
+        toast.success(res.message || 'Note deleted successfully!');
       } else {
         //  Backend error message toast
-        toast.error(res.message || "Failed to delete note");
+        toast.error(res.message || 'Failed to delete note');
       }
-
     } catch (error: any) {
       //  API error toast
-      toast.error(error?.response?.data?.message || "Error deleting note");
+      toast.error(error?.response?.data?.message || 'Error deleting note');
     }
   };
 
   const handleExport = async (note: Note) => {
     try {
       const res = await exportNotes(
-        "json",                 // format: json OR csv
-        note.status || "Active", // status filter
-        note.userEmail           // export only this user's notes
+        'json', // format: json OR csv
+        note.status || 'Active', // status filter
+        note.userEmail // export only this user's notes
       );
 
       // Create file URL
       const blobUrl = window.URL.createObjectURL(new Blob([res.data]));
 
       // Create temp link to download
-      const link = document.createElement("a");
+      const link = document.createElement('a');
       link.href = blobUrl;
-      link.download = `notes-export.${"json"}`; // or csv based on format
+      link.download = `notes-export.${'json'}`; // or csv based on format
       document.body.appendChild(link);
       link.click();
       link.remove();
 
-      toast.success("Notes exported successfully!");
+      toast.success('Notes exported successfully!');
     } catch (error: any) {
-      toast.error(
-        error?.response?.data?.message || "Failed to export notes"
-      );
+      toast.error(error?.response?.data?.message || 'Failed to export notes');
     }
   };
-
-
 
   const toolbar = (
     // <div className="flex flex-col gap-4 p-5">
@@ -617,7 +622,7 @@ const NotesOverviewContent: React.FC = () => {
           >
             <option value="all">All Users</option>
             {uniqueUserIds.map((userId) => {
-              const note = notes.find(n => n.userId === userId);
+              const note = notes.find((n) => n.userId === userId);
               return (
                 <option key={userId} value={userId}>
                   {note?.userName || `User ${userId.slice(0, 8)}`}
@@ -696,7 +701,7 @@ const NotesOverviewContent: React.FC = () => {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+              onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
               disabled={currentPage === 1}
             >
               <ChevronLeft className="w-4 h-4" />
@@ -705,7 +710,7 @@ const NotesOverviewContent: React.FC = () => {
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+              onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
               disabled={currentPage === totalPages}
             >
               Next
@@ -719,4 +724,3 @@ const NotesOverviewContent: React.FC = () => {
 };
 
 export { NotesOverviewContent };
-

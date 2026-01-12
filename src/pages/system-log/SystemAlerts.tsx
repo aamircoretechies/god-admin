@@ -20,7 +20,9 @@ const SystemAlerts = () => {
           <Toolbar>
             <ToolbarHeading>
               <ToolbarPageTitle />
-              <ToolbarDescription>Monitor system alerts and unusual activity patterns.</ToolbarDescription>
+              <ToolbarDescription>
+                Monitor system alerts and unusual activity patterns.
+              </ToolbarDescription>
             </ToolbarHeading>
             {/* ToolbarActions - Commented out (all buttons removed)
             <ToolbarActions>

@@ -1,7 +1,12 @@
 import React, { useState, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { ColumnDef } from '@tanstack/react-table';
-import { DataGrid, DataGridColumnHeader, DataGridRowSelect, DataGridRowSelectAll } from '@/components/data-grid';
+import {
+  DataGrid,
+  DataGridColumnHeader,
+  DataGridRowSelect,
+  DataGridRowSelectAll
+} from '@/components/data-grid';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
@@ -137,14 +142,15 @@ const SubscriptionManagementContent: React.FC = () => {
 
   // Filter subscriptions
   const filteredSubscriptions = useMemo(() => {
-    return mockUserSubscriptions.filter(subscription => {
+    return mockUserSubscriptions.filter((subscription) => {
       const matchesSearch =
         subscription.userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
         subscription.userEmail.toLowerCase().includes(searchTerm.toLowerCase()) ||
         subscription.planType.toLowerCase().includes(searchTerm.toLowerCase());
 
       const matchesRole = roleFilter === 'all' || subscription.role === roleFilter;
-      const matchesStatus = statusFilter === 'all' || subscription.subscriptionStatus === statusFilter;
+      const matchesStatus =
+        statusFilter === 'all' || subscription.subscriptionStatus === statusFilter;
 
       return matchesSearch && matchesRole && matchesStatus;
     });
@@ -153,13 +159,25 @@ const SubscriptionManagementContent: React.FC = () => {
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'Active':
-        return <Badge variant="default" className="bg-green-100 text-green-800">Active</Badge>;
+        return (
+          <Badge variant="default" className="bg-green-100 text-green-800">
+            Active
+          </Badge>
+        );
       case 'Trial':
-        return <Badge variant="default" className="bg-yellow-100 text-yellow-800">Trial</Badge>;
+        return (
+          <Badge variant="default" className="bg-yellow-100 text-yellow-800">
+            Trial
+          </Badge>
+        );
       case 'Expired':
         return <Badge variant="destructive">Expired</Badge>;
       case 'Cancelled':
-        return <Badge variant="secondary" className="bg-gray-100 text-gray-600">Cancelled</Badge>;
+        return (
+          <Badge variant="secondary" className="bg-gray-100 text-gray-600">
+            Cancelled
+          </Badge>
+        );
       default:
         return <Badge variant="outline">{status}</Badge>;
     }
@@ -168,7 +186,11 @@ const SubscriptionManagementContent: React.FC = () => {
   const getRoleBadge = (role: string) => {
     switch (role) {
       case 'Premium':
-        return <Badge variant="default" className="bg-purple-100 text-purple-800">Premium</Badge>;
+        return (
+          <Badge variant="default" className="bg-purple-100 text-purple-800">
+            Premium
+          </Badge>
+        );
       case 'Free':
         return <Badge variant="secondary">Free</Badge>;
       default:
@@ -239,9 +261,7 @@ const SubscriptionManagementContent: React.FC = () => {
               >
                 {row.original.userName}
               </Link>
-              <span className="text-2sm text-gray-700 font-normal">
-                {row.original.userEmail}
-              </span>
+              <span className="text-2sm text-gray-700 font-normal">{row.original.userEmail}</span>
               <Link
                 to={`/network/user-table/user-detail/${row.original.userId}`}
                 className="text-xs text-primary hover:text-primary-active mt-1"
@@ -286,7 +306,9 @@ const SubscriptionManagementContent: React.FC = () => {
         cell: ({ row }) => (
           <div className="text-sm">
             <p className="font-medium">{row.original.planType}</p>
-            <p className="text-xs text-gray-500">{formatCurrency(row.original.monthlyAmount)}/month</p>
+            <p className="text-xs text-gray-500">
+              {formatCurrency(row.original.monthlyAmount)}/month
+            </p>
           </div>
         ),
         meta: {
@@ -314,7 +336,9 @@ const SubscriptionManagementContent: React.FC = () => {
           <div className="text-sm">
             <p>{formatDate(row.original.endDate)}</p>
             {row.original.trialEndDate && (
-              <p className="text-xs text-yellow-600">Trial: {formatDate(row.original.trialEndDate)}</p>
+              <p className="text-xs text-yellow-600">
+                Trial: {formatDate(row.original.trialEndDate)}
+              </p>
             )}
           </div>
         ),

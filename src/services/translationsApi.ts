@@ -54,11 +54,11 @@ export const fetchTranslations = async (
   params: FetchTranslationsParams = {}
 ): Promise<TranslationsListResponse> => {
   const { page = 1, limit = 10, search, language, status } = params;
-  
+
   const queryParams = new URLSearchParams();
   queryParams.append('page', page.toString());
   queryParams.append('limit', limit.toString());
-  
+
   if (search) {
     queryParams.append('search', search);
   }
@@ -76,23 +76,23 @@ export const fetchTranslations = async (
         // Prevent caching to avoid 304 responses
         headers: {
           'Cache-Control': 'no-cache',
-          'Pragma': 'no-cache'
+          Pragma: 'no-cache'
         }
       }
     );
-    
+
     // Log response for debugging
     console.log('Translations API Response:', response);
-    
+
     // API returns {success, data, metadata}
     if (!response.data || !response.data.success) {
       throw new Error('API request was not successful');
     }
-    
+
     if (!response.data.data || !Array.isArray(response.data.data)) {
       throw new Error('Invalid response format from API');
     }
-    
+
     return response.data;
   } catch (error: any) {
     console.error('Error fetching translations:', error);
@@ -115,8 +115,6 @@ export interface UploadTranslationResponse {
   message: string;
   data?: TranslationResponse;
 }
-
-
 
 export interface TranslationDetailData {
   overview: {
@@ -167,24 +165,24 @@ export const fetchTranslationById = async (
         }
       }
     );
-    
+
     console.log('Translation detail response:', response);
     console.log('Response data:', response.data);
-    
+
     // Check if response has data
     if (!response.data) {
       console.error('No response data received');
       throw new Error('No data received from server');
     }
-    
+
     const responseData = response.data;
-    
+
     // Check if status is 1 (success) and data exists
     if (responseData.status === 1 && responseData.data) {
       console.log('Found translation detail:', responseData.data);
       return responseData.data;
     }
-    
+
     console.error('Unexpected response structure:', JSON.stringify(responseData, null, 2));
     throw new Error('Unexpected response structure from API');
   } catch (error: any) {
@@ -211,13 +209,13 @@ export const updateTranslation = async (
       `${API_URL}/admin/bible/translations/${translationId}`,
       data
     );
-    
+
     console.log('Update translation response:', response);
-    
+
     if (!response.data || !response.data.success) {
       throw new Error('Failed to update translation');
     }
-    
+
     return response.data;
   } catch (error: any) {
     console.error('Error updating translation:', error);
@@ -226,8 +224,6 @@ export const updateTranslation = async (
     throw error;
   }
 };
-
-
 
 export const uploadTranslation = async (
   payload: UploadTranslationRequest
@@ -245,8 +241,8 @@ export const uploadTranslation = async (
       formData,
       {
         headers: {
-          'Content-Type': 'multipart/form-data',
-        },
+          'Content-Type': 'multipart/form-data'
+        }
       }
     );
 
@@ -264,5 +260,3 @@ export const uploadTranslation = async (
     throw error;
   }
 };
-
-

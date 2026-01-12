@@ -1,20 +1,13 @@
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { 
-  Users, 
-  UserPlus,
-  MoreVertical,
-  Edit,
-  Trash2,
-  Mail
-} from 'lucide-react';
+import { Users, UserPlus, MoreVertical, Edit, Trash2, Mail } from 'lucide-react';
 import { AddMemberModal } from './AddMemberModal';
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuTrigger,
+  DropdownMenuTrigger
 } from '@/components/ui/dropdown-menu';
 
 interface Member {
@@ -73,7 +66,7 @@ const getRoleBadge = (role: string) => {
     editor: 'bg-purple-100 text-purple-800',
     member: 'bg-gray-100 text-gray-800'
   };
-  
+
   return (
     <Badge className={colors[role as keyof typeof colors] || 'bg-gray-100 text-gray-800'}>
       {role.charAt(0).toUpperCase() + role.slice(1)}
@@ -111,11 +104,15 @@ const UserManagementMembers = () => {
       <CardContent>
         <div className="space-y-4">
           {mockMembers.map((member) => (
-            <div key={member.id} className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50">
+            <div
+              key={member.id}
+              className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50"
+            >
               <div className="flex items-center gap-4 flex-1">
                 <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
                   <span className="text-blue-600 font-semibold">
-                    {member.firstName[0]}{member.lastName[0]}
+                    {member.firstName[0]}
+                    {member.lastName[0]}
                   </span>
                 </div>
                 <div className="flex-1">
@@ -130,9 +127,7 @@ const UserManagementMembers = () => {
                     <Mail className="w-3 h-3" />
                     <span>{member.email}</span>
                   </div>
-                  <p className="text-xs text-gray-400 mt-1">
-                    Last active: {member.lastActive}
-                  </p>
+                  <p className="text-xs text-gray-400 mt-1">Last active: {member.lastActive}</p>
                 </div>
               </div>
               <DropdownMenu>
@@ -161,4 +156,3 @@ const UserManagementMembers = () => {
 };
 
 export { UserManagementMembers };
-

@@ -3,14 +3,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
-import { 
-  Bell, 
-  AlertTriangle, 
-  Settings,
-  Save,
-  TestTube,
-  RefreshCw
-} from 'lucide-react';
+import { Bell, AlertTriangle, Settings, Save, TestTube, RefreshCw } from 'lucide-react';
 
 const NotificationsSystemAlerts = () => {
   return (
@@ -32,7 +25,7 @@ const NotificationsSystemAlerts = () => {
               </div>
               <Switch id="security_alerts" defaultChecked />
             </div>
-            
+
             <div className="flex items-center justify-between">
               <div>
                 <Label htmlFor="performance_alerts">Performance Alerts</Label>
@@ -40,7 +33,7 @@ const NotificationsSystemAlerts = () => {
               </div>
               <Switch id="performance_alerts" defaultChecked />
             </div>
-            
+
             <div className="flex items-center justify-between">
               <div>
                 <Label htmlFor="error_alerts">Error Alerts</Label>
@@ -48,7 +41,7 @@ const NotificationsSystemAlerts = () => {
               </div>
               <Switch id="error_alerts" defaultChecked />
             </div>
-            
+
             <div className="flex items-center justify-between">
               <div>
                 <Label htmlFor="maintenance_alerts">Maintenance Alerts</Label>
@@ -58,32 +51,22 @@ const NotificationsSystemAlerts = () => {
             </div>
           </div>
         </div>
-        
+
         <div className="space-y-4">
           <h4 className="font-medium text-gray-900">Alert Settings</h4>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
               <Label htmlFor="alert_threshold">Alert Threshold</Label>
-              <Input 
-                id="alert_threshold" 
-                type="number"
-                placeholder="5"
-                defaultValue="5"
-              />
+              <Input id="alert_threshold" type="number" placeholder="5" defaultValue="5" />
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="alert_cooldown">Alert Cooldown (minutes)</Label>
-              <Input 
-                id="alert_cooldown" 
-                type="number"
-                placeholder="30"
-                defaultValue="30"
-              />
+              <Input id="alert_cooldown" type="number" placeholder="30" defaultValue="30" />
             </div>
           </div>
         </div>
-        
+
         <div className="space-y-4">
           <h4 className="font-medium text-gray-900">Notification Channels</h4>
           <div className="space-y-3">
@@ -94,7 +77,7 @@ const NotificationsSystemAlerts = () => {
               </div>
               <Switch id="email_alerts" defaultChecked />
             </div>
-            
+
             <div className="flex items-center justify-between">
               <div>
                 <Label htmlFor="sms_alerts">SMS Alerts</Label>
@@ -102,7 +85,7 @@ const NotificationsSystemAlerts = () => {
               </div>
               <Switch id="sms_alerts" />
             </div>
-            
+
             <div className="flex items-center justify-between">
               <div>
                 <Label htmlFor="webhook_alerts">Webhook Alerts</Label>
@@ -110,7 +93,7 @@ const NotificationsSystemAlerts = () => {
               </div>
               <Switch id="webhook_alerts" />
             </div>
-            
+
             <div className="flex items-center justify-between">
               <div>
                 <Label htmlFor="dashboard_alerts">Dashboard Alerts</Label>
@@ -120,7 +103,7 @@ const NotificationsSystemAlerts = () => {
             </div>
           </div>
         </div>
-        
+
         <div className="flex items-center gap-3 pt-4">
           <Button className="flex items-center gap-2">
             <Save className="w-4 h-4" />

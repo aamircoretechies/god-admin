@@ -22,7 +22,9 @@ const TheologicalInsightsPage = () => {
           <Toolbar>
             <ToolbarHeading>
               <ToolbarPageTitle />
-              <ToolbarDescription>Manage theological insights, reflections, and devotional content.</ToolbarDescription>
+              <ToolbarDescription>
+                Manage theological insights, reflections, and devotional content.
+              </ToolbarDescription>
             </ToolbarHeading>
             <ToolbarActions>
               <a href="#" className="btn btn-sm btn-light">
@@ -43,4 +45,4 @@ const TheologicalInsightsPage = () => {
   );
 };
 
-export { TheologicalInsightsPage }; 
+export { TheologicalInsightsPage };

@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { 
-  Users, 
-  MessageSquare, 
-  Flag, 
+import {
+  Users,
+  MessageSquare,
+  Flag,
   BookOpen,
   TrendingUp,
   TrendingDown,
@@ -26,9 +26,18 @@ interface KPICardWithNavigation extends KPICardProps {
   navigationPath?: string;
 }
 
-const KPICard: React.FC<KPICardWithNavigation> = ({ title, value, change, changeType, icon, description, period, navigationPath }) => {
+const KPICard: React.FC<KPICardWithNavigation> = ({
+  title,
+  value,
+  change,
+  changeType,
+  icon,
+  description,
+  period,
+  navigationPath
+}) => {
   const navigate = useNavigate();
-  
+
   const handleClick = () => {
     if (navigationPath) {
       navigate(navigationPath);
@@ -36,14 +45,12 @@ const KPICard: React.FC<KPICardWithNavigation> = ({ title, value, change, change
   };
 
   return (
-    <Card 
-      className={navigationPath ? "cursor-pointer hover:shadow-md transition-shadow" : ""}
+    <Card
+      className={navigationPath ? 'cursor-pointer hover:shadow-md transition-shadow' : ''}
       onClick={handleClick}
     >
       <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-        <CardTitle className="text-sm font-medium text-gray-600">
-          {title}
-        </CardTitle>
+        <CardTitle className="text-sm font-medium text-gray-600">{title}</CardTitle>
         {icon}
       </CardHeader>
       <CardContent>
@@ -76,10 +83,10 @@ const BibleKPICards = () => {
         setLoading(true);
         setError(null);
         const response = await fetchDashboardAnalytics('30d');
-        
+
         if (response.status === 1 && response.data) {
           const { mainKPIs } = response.data;
-          
+
           const transformedData: KPICardWithNavigation[] = [
             {
               title: mainKPIs.totalUsers.label,
@@ -122,7 +129,7 @@ const BibleKPICards = () => {
               navigationPath: '/bible-content/translations'
             }
           ];
-          
+
           setKpiData(transformedData);
         } else {
           throw new Error(response.message || 'Failed to fetch dashboard analytics');
@@ -192,4 +199,3 @@ const BibleKPICards = () => {
 };
 
 export { BibleKPICards };
-
