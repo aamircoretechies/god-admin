@@ -7,6 +7,11 @@ export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
   const apiUrl = env.VITE_APP_API_URL || 'http://127.0.0.1:3000';
   
+ 
+  // console.log('\n📡 API Proxy Configuration:');
+  // console.log(`   Target: ${apiUrl}`);
+  // console.log(`   Proxy: /api/* → ${apiUrl}/api/*\n`);
+  
   return {
     plugins: [react()],
     css: {
@@ -31,14 +36,24 @@ export default defineConfig(({ mode }) => {
           secure: apiUrl.startsWith('https'),
           rewrite: (path) => path.replace(/^\/api/, '/api'),
           configure: (proxy, _options) => {
-            proxy.on('error', (err, _req, _res) => {
-              console.log('proxy error', err);
+            proxy.on('error', (err, req, res) => {
+              console.error('\n Proxy Error:', err.code);
+              if (err.code === 'ECONNREFUSED') {
+                // console.error(`   Cannot connect to backend API at ${apiUrl}`);
+                // console.error('   Make sure your backend server is running on port 3000\n');
+              }
+              if (!res.headersSent) {
+                res.writeHead(500, {
+                  'Content-Type': 'text/plain',
+                });
+                res.end('Proxy error: Backend server not available. Make sure your API server is running on port 3000.');
+              }
             });
             proxy.on('proxyReq', (proxyReq, req, _res) => {
-              console.log('Sending Request to the Target:', req.method, req.url);
+              console.log(`→ ${req.method} ${req.url} → ${apiUrl}${req.url}`);
             });
             proxy.on('proxyRes', (proxyRes, req, _res) => {
-              console.log('Received Response from the Target:', proxyRes.statusCode, req.url);
+              console.log(`← ${proxyRes.statusCode} ${req.url}`);
             });
           }
         }

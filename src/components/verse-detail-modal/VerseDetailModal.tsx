@@ -460,88 +460,88 @@ const VerseDetailModal: React.FC<VerseDetailModalProps> = ({ isOpen, onClose, ve
 
       {/* Edit Explanation Dialog */}
       <Dialog open={!!editingExplanation} onOpenChange={handleCancelEdit}>
-    <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
-      <DialogHeader>
-        <DialogTitle>Edit Explanation</DialogTitle>
-        <DialogDescription>
-          Update the explanation content, experience level, and other details.
-        </DialogDescription>
-      </DialogHeader>
+        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto p-4 sm:p-6 w-[95vw] sm:w-full">
+          <DialogHeader className="pr-8 sm:pr-6">
+            <DialogTitle className="pr-2">Edit Explanation</DialogTitle>
+            <DialogDescription>
+              Update the explanation content, experience level, and other details.
+            </DialogDescription>
+          </DialogHeader>
 
-      {editFormData && (
-        <div className="space-y-4 py-4">
-          <div className="space-y-2">
-            <Label htmlFor="explanation_type">Explanation Type</Label>
-            <Input
-              id="explanation_type"
-              value={editFormData.explanation_type}
-              onChange={(e) => setEditFormData({ ...editFormData, explanation_type: e.target.value })}
-              placeholder="e.g., theological, historical, cultural"
-            />
-          </div>
+          {editFormData && (
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <Label htmlFor="explanation_type">Explanation Type</Label>
+                <Input
+                  id="explanation_type"
+                  value={editFormData.explanation_type}
+                  onChange={(e) => setEditFormData({ ...editFormData, explanation_type: e.target.value })}
+                  placeholder="e.g., theological, historical, cultural"
+                />
+              </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="experience_level">Experience Level</Label>
-            <Select
-              value={editFormData.experience_level}
-              onValueChange={(value) => setEditFormData({ ...editFormData, experience_level: value })}
-            >
-              <SelectTrigger id="experience_level">
-                <SelectValue placeholder="Select experience level" />
-              </SelectTrigger>
-              <SelectContent>
-                {VALID_EXPERIENCE_LEVELS.map((level) => (
-                  <SelectItem key={level} value={level}>
-                    {mapExperienceLevel(level)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+              <div className="space-y-2">
+                <Label htmlFor="experience_level">Experience Level</Label>
+                <Select
+                  value={editFormData.experience_level}
+                  onValueChange={(value) => setEditFormData({ ...editFormData, experience_level: value })}
+                >
+                  <SelectTrigger id="experience_level">
+                    <SelectValue placeholder="Select experience level" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {VALID_EXPERIENCE_LEVELS.map((level) => (
+                      <SelectItem key={level} value={level}>
+                        {mapExperienceLevel(level)}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="content">Content</Label>
-            <Textarea
-              id="content"
-              value={editFormData.content}
-              onChange={(e) => setEditFormData({ ...editFormData, content: e.target.value })}
-              placeholder="Enter explanation content..."
-              rows={8}
-              className="resize-none"
-            />
-          </div>
+              <div className="space-y-2">
+                <Label htmlFor="content">Content</Label>
+                <Textarea
+                  id="content"
+                  value={editFormData.content}
+                  onChange={(e) => setEditFormData({ ...editFormData, content: e.target.value })}
+                  placeholder="Enter explanation content..."
+                  rows={8}
+                  className="resize-none"
+                />
+              </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="sources">Sources (comma-separated)</Label>
-            <Input
-              id="sources"
-              value={editFormData.sources?.join(', ') || ''}
-              onChange={(e) => {
-                const sources = e.target.value.split(',').map(s => s.trim()).filter(Boolean);
-                setEditFormData({ ...editFormData, sources });
-              }}
-              placeholder="Source 1, Source 2, Source 3"
-            />
-          </div>
+              <div className="space-y-2">
+                <Label htmlFor="sources">Sources (comma-separated)</Label>
+                <Input
+                  id="sources"
+                  value={editFormData.sources?.join(', ') || ''}
+                  onChange={(e) => {
+                    const sources = e.target.value.split(',').map(s => s.trim()).filter(Boolean);
+                    setEditFormData({ ...editFormData, sources });
+                  }}
+                  placeholder="Source 1, Source 2, Source 3"
+                />
+              </div>
 
-          <div className="flex justify-end gap-2 pt-4">
-            <Button variant="outline" onClick={handleCancelEdit} disabled={saving}>
-              Cancel
-            </Button>
-            <Button onClick={handleSaveEdit} disabled={saving || !editFormData.content.trim()}>
-              {saving ? (
-                <>
-                  <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-                  Saving...
-                </>
-              ) : (
-                'Save Changes'
-              )}
-            </Button>
-          </div>
-        </div>
-      )}
-    </DialogContent>
+              <div className="flex flex-col sm:flex-row justify-end gap-2 pt-4">
+                <Button variant="outline" onClick={handleCancelEdit} disabled={saving} className="w-full sm:w-auto">
+                  Cancel
+                </Button>
+                <Button onClick={handleSaveEdit} disabled={saving || !editFormData.content.trim()} className="w-full sm:w-auto">
+                  {saving ? (
+                    <>
+                      <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                      Saving...
+                    </>
+                  ) : (
+                    'Save Changes'
+                  )}
+                </Button>
+              </div>
+            </div>
+          )}
+        </DialogContent>
       </Dialog>
     </Dialog>
   );

@@ -21,7 +21,9 @@ import {
   Edit,
   Copy,
   Download,
-  Upload
+  Upload,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 
 interface BibleBook {
@@ -106,6 +108,7 @@ const ViewChapterContent: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [translationFilter, setTranslationFilter] = useState<string>('KJV');
+  const [currentPage, setCurrentPage] = useState(1);
 
   useEffect(() => {
     const loadChapter = async () => {
@@ -138,6 +141,7 @@ const ViewChapterContent: React.FC = () => {
     };
 
     loadChapter();
+    setCurrentPage(1); // Reset to first page when chapter changes
   }, [bookId, chapterId, translationFilter]);
 
   const handleVerseClick = (verse: Verse) => {
@@ -229,6 +233,13 @@ const ViewChapterContent: React.FC = () => {
       </Badge>
     );
   };
+
+  // Pagination logic
+  const versesPerPage = 10;
+  const totalPages = Math.ceil(chapterVerses.length / versesPerPage);
+  const startIndex = (currentPage - 1) * versesPerPage;
+  const endIndex = startIndex + versesPerPage;
+  const paginatedVerses = chapterVerses.slice(startIndex, endIndex);
 
   return (
     <div className="space-y-6">
@@ -325,39 +336,69 @@ const ViewChapterContent: React.FC = () => {
             <CardContent>
               <div className="space-y-4">
                 {chapterVerses.length > 0 ? (
-                  chapterVerses.map((verse) => (
-                    <div
-                      key={verse.id}
-                      className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-coal-100 transition-colors border-gray-200 dark:border-gray-700"
-                    >
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center space-x-2 mb-2">
-                            <Badge
-                              variant="default"
-                              className="dark:border-gray-600 dark:text-gray-300"
-                            >
-                              Verse {verse.number}
-                            </Badge>
-                            <span className="text-xs text-gray-500 dark:text-white">
-                              {verse.translation}
-                            </span>
+                  <>
+                    {paginatedVerses.map((verse) => (
+                      <div
+                        key={verse.id}
+                        className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-coal-100 transition-colors border-gray-200 dark:border-gray-700"
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="flex items-center space-x-2 mb-2">
+                              <Badge
+                                variant="default"
+                                className="dark:border-gray-600 dark:text-gray-300"
+                              >
+                                Verse {verse.number}
+                              </Badge>
+                              <span className="text-xs text-gray-500 dark:text-white">
+                                {verse.translation}
+                              </span>
+                            </div>
+                            <p className="text-gray-900 dark:text-white leading-relaxed">
+                              {verse.text}
+                            </p>
                           </div>
-                          <p className="text-gray-900 dark:text-white leading-relaxed">
-                            {verse.text}
-                          </p>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="ml-4"
+                            onClick={() => handleVerseClick(verse)}
+                          >
+                            <Eye className="w-4 h-4" />
+                          </Button>
                         </div>
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          className="ml-4"
-                          onClick={() => handleVerseClick(verse)}
-                        >
-                          <Eye className="w-4 h-4" />
-                        </Button>
                       </div>
-                    </div>
-                  ))
+                    ))}
+                    {/* Pagination Controls */}
+                    {totalPages > 1 && (
+                      <div className="flex items-center justify-between mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+                        <div className="text-sm text-gray-600 dark:text-gray-400">
+                          Showing page {currentPage} of {totalPages}
+                        </div>
+                        <div className="flex items-center space-x-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                            disabled={currentPage === 1}
+                          >
+                            <ChevronLeft className="w-4 h-4" />
+                            Previous
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                            disabled={currentPage === totalPages}
+                          >
+                            Next
+                            <ChevronRight className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    )}
+                  </>
                 ) : (
                   <div className="text-center py-8 text-gray-500 dark:text-gray-400">
                     <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
