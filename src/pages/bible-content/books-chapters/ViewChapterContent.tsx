@@ -12,6 +12,10 @@ import {
   SelectValue
 } from '@/components/ui/select';
 import { VerseDetailModal } from '@/components/verse-detail-modal/VerseDetailModal';
+import { ChapterDetailModal } from '@/components/chapter-detail-modal/ChapterDetailModal';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
+import { VALID_EXPERIENCE_LEVELS } from '@/components/verse-detail-modal/VerseDetailModal';
 import {
   ArrowLeft,
   BookOpen,
@@ -109,6 +113,15 @@ const ViewChapterContent: React.FC = () => {
   const [error, setError] = useState<string | null>(null);
   const [translationFilter, setTranslationFilter] = useState<string>('KJV');
   const [currentPage, setCurrentPage] = useState(1);
+  const [isChapterDeepStudy, setIsChapterDeepStudy] = useState(false);
+  const [selectedChapterTab, setSelectedChapterTab] = useState<{
+    book: string;
+    chapter: number;
+    tabName: string;
+    experienceLevel?: string;
+  } | null>(null);
+  const [isChapterModalOpen, setIsChapterModalOpen] = useState(false);
+  const [selectedExperienceLevel, setSelectedExperienceLevel] = useState<string>('NEW_TO_BIBLE');
 
   useEffect(() => {
     const loadChapter = async () => {
@@ -162,6 +175,50 @@ const ViewChapterContent: React.FC = () => {
     setSelectedVerse(verseData);
     setIsVerseModalOpen(true);
   };
+
+  const handleChapterTabClick = (tabName: string) => {
+    if (!book || !chapter) return;
+
+    const chapterTabData = {
+      book: book.name,
+      chapter: chapter.number,
+      tabName: tabName,
+      experienceLevel: selectedExperienceLevel
+    };
+    setSelectedChapterTab(chapterTabData);
+    setIsChapterModalOpen(true);
+  };
+
+  // Map experience_level to UI labels
+  const mapExperienceLevel = (level: string): string => {
+    const levelMap: Record<string, string> = {
+      'NEW_TO_BIBLE': 'First Time',
+      'SOME_KNOWLEDGE': 'Some Knowledge',
+      'REGULAR_READER': 'Regular Reader',
+      'REGULAR': 'Regular Reader',
+      'OCCASIONAL': 'Occasionally',
+      'OCCASIONALLY': 'Occasionally',
+      'ADVANCED_STUDENT': 'Advanced Student',
+      'THEOLOGICAL': 'Theological',
+      'ADVANCED': 'Advanced Student',
+      'SCHOLAR': 'Scholar'
+    };
+    return levelMap[level.toUpperCase()] || level;
+  };
+
+  const chapterDeepStudyTabs = [
+    'Explanation',
+    'Original',
+    'Source',
+    'Historical Context',
+    'Ground Text Analysis',
+    'Special Insights',
+    'Daily Life Application',
+    'Cross-References',
+    'Commentary Insights',
+    'Key Takeaways',
+    'Reflection Prompts'
+  ];
 
   if (loading) {
     return (
@@ -325,87 +382,243 @@ const ViewChapterContent: React.FC = () => {
             </CardContent>
           </Card>
 
-          {/* Verses List */}
+          {/* Verses List / Chapter Deep Study */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <FileText className="w-5 h-5" />
-                Verses ({chapterVerses.length})
-              </CardTitle>
+              <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-2">
+                  <FileText className="w-5 h-5" />
+                  Verses ({chapterVerses.length})
+                </CardTitle>
+                <div className="flex items-center gap-2">
+                  <Label htmlFor="deep-study-toggle" className="text-sm text-gray-600 dark:text-gray-400">
+                    Deep Study
+                  </Label>
+                  <Switch
+                    id="deep-study-toggle"
+                    checked={isChapterDeepStudy}
+                    onCheckedChange={setIsChapterDeepStudy}
+                  />
+                </div>
+              </div>
             </CardHeader>
             <CardContent>
-              <div className="space-y-4">
-                {chapterVerses.length > 0 ? (
-                  <>
-                    {paginatedVerses.map((verse) => (
+              {!isChapterDeepStudy ? (
+                <div className="space-y-4">
+                  {chapterVerses.length > 0 ? (
+                    <>
+                      {paginatedVerses.map((verse) => (
+                        <div
+                          key={verse.id}
+                          className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-coal-100 transition-colors border-gray-200 dark:border-gray-700"
+                        >
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <div className="flex items-center space-x-2 mb-2">
+                                <Badge
+                                  variant="default"
+                                  className="dark:border-gray-600 dark:text-gray-300"
+                                >
+                                  Verse {verse.number}
+                                </Badge>
+                                <span className="text-xs text-gray-500 dark:text-white">
+                                  {verse.translation}
+                                </span>
+                              </div>
+                              <p className="text-gray-900 dark:text-white leading-relaxed">
+                                {verse.text}
+                              </p>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="ml-4"
+                              onClick={() => handleVerseClick(verse)}
+                            >
+                              <Eye className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                      {/* Pagination Controls */}
+                      {totalPages > 1 && (
+                        <div className="flex items-center justify-between mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+                          <div className="text-sm text-gray-600 dark:text-gray-400">
+                            Showing page {currentPage} of {totalPages}
+                          </div>
+                          <div className="flex items-center space-x-2">
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                              disabled={currentPage === 1}
+                            >
+                              <ChevronLeft className="w-4 h-4" />
+                              Previous
+                            </Button>
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                              disabled={currentPage === totalPages}
+                            >
+                              Next
+                              <ChevronRight className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                      <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                      <p>No verses available for this chapter</p>
+                    </div>
+                  )}
+                </div>
+              ) : (
+                <div className="space-y-4">
+                  {/* Experience Level Selector */}
+                  <div className="flex items-center gap-2 pb-4 border-b border-gray-200 dark:border-gray-700">
+                    <Label htmlFor="experience-level-select" className="text-sm font-medium text-gray-700 dark:text-white">
+                      Experience Level:
+                    </Label>
+                    <Select value={selectedExperienceLevel} onValueChange={setSelectedExperienceLevel}>
+                      <SelectTrigger id="experience-level-select" className="w-[200px]">
+                        <SelectValue placeholder="Select experience level" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {VALID_EXPERIENCE_LEVELS.map((level) => (
+                          <SelectItem key={level} value={level}>
+                            {mapExperienceLevel(level)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  {chapterDeepStudyTabs.map((tabName) => {
+                    // Get content based on experience level - matches the logic in ChapterDetailModal
+                    const getTabPreview = (tab: string, level: string) => {
+                      const baseContent: Record<string, Record<string, string>> = {
+                        'Explanation': {
+                          'NEW_TO_BIBLE': 'A simple, easy-to-understand explanation perfect for those new to Bible study.',
+                          'SOME_KNOWLEDGE': 'A more detailed explanation that builds on basic Bible knowledge.',
+                          'REGULAR_READER': 'A comprehensive explanation for regular Bible readers with deeper insights.',
+                          'ADVANCED_STUDENT': 'An advanced theological explanation for serious Bible students.',
+                          'SCHOLAR': 'A scholarly, academic-level explanation with detailed analysis.'
+                        },
+                        'Original': {
+                          'NEW_TO_BIBLE': 'A simple introduction to the original language of this chapter.',
+                          'SOME_KNOWLEDGE': 'An overview of the original Hebrew or Greek text with key terms.',
+                          'REGULAR_READER': 'A detailed analysis of the original text and linguistic nuances.',
+                          'ADVANCED_STUDENT': 'An in-depth examination of the original language and textual variants.',
+                          'SCHOLAR': 'A comprehensive scholarly analysis of the original text and manuscripts.'
+                        },
+                        'Source': {
+                          'NEW_TO_BIBLE': 'Basic information about where this chapter comes from.',
+                          'SOME_KNOWLEDGE': 'Historical sources and references that help understand this chapter.',
+                          'REGULAR_READER': 'Detailed historical sources including ancient manuscripts and research.',
+                          'ADVANCED_STUDENT': 'Comprehensive source analysis including manuscript evidence.',
+                          'SCHOLAR': 'Complete scholarly source documentation and academic research.'
+                        },
+                        'Historical Context': {
+                          'NEW_TO_BIBLE': 'A simple explanation of when and where this chapter was written.',
+                          'SOME_KNOWLEDGE': 'The historical background including time period and cultural setting.',
+                          'REGULAR_READER': 'Detailed historical context including political and social environment.',
+                          'ADVANCED_STUDENT': 'Comprehensive historical analysis with archaeological evidence.',
+                          'SCHOLAR': 'Advanced historical-critical analysis with detailed reconstruction.'
+                        },
+                        'Ground Text Analysis': {
+                          'NEW_TO_BIBLE': 'A simple breakdown of the main words and phrases.',
+                          'SOME_KNOWLEDGE': 'An analysis of key words and phrases and their meanings.',
+                          'REGULAR_READER': 'Detailed word-by-word analysis examining meanings and structures.',
+                          'ADVANCED_STUDENT': 'In-depth textual analysis including word studies and syntax.',
+                          'SCHOLAR': 'Comprehensive textual-critical analysis with advanced linguistic methods.'
+                        },
+                        'Special Insights': {
+                          'NEW_TO_BIBLE': 'Helpful insights that make this chapter easier to understand.',
+                          'SOME_KNOWLEDGE': 'Unique observations that provide deeper understanding.',
+                          'REGULAR_READER': 'Special insights from biblical scholars and theologians.',
+                          'ADVANCED_STUDENT': 'Advanced insights including theological connections.',
+                          'SCHOLAR': 'Scholarly insights including advanced theological analysis.'
+                        },
+                        'Daily Life Application': {
+                          'NEW_TO_BIBLE': 'Simple, practical ways to apply what this chapter teaches.',
+                          'SOME_KNOWLEDGE': 'Practical applications for modern life situations.',
+                          'REGULAR_READER': 'Thoughtful applications connecting principles to contemporary life.',
+                          'ADVANCED_STUDENT': 'Advanced applications exploring ethics and theology.',
+                          'SCHOLAR': 'Scholarly applications examining systematic theology and ethics.'
+                        },
+                        'Cross-References': {
+                          'NEW_TO_BIBLE': 'A few related verses that help explain what this chapter means.',
+                          'SOME_KNOWLEDGE': 'Related verses and passages that connect with this chapter.',
+                          'REGULAR_READER': 'Comprehensive cross-references showing scriptural connections.',
+                          'ADVANCED_STUDENT': 'Detailed cross-references including intertextual links.',
+                          'SCHOLAR': 'Comprehensive cross-references with detailed intertextual analysis.'
+                        },
+                        'Commentary Insights': {
+                          'NEW_TO_BIBLE': 'Simple explanations from Bible teachers.',
+                          'SOME_KNOWLEDGE': 'Insights from Bible commentaries explaining meaning.',
+                          'REGULAR_READER': 'Commentary insights from respected theologians.',
+                          'ADVANCED_STUDENT': 'Advanced commentary insights from theological scholars.',
+                          'SCHOLAR': 'Scholarly commentary insights including critical analysis.'
+                        },
+                        'Key Takeaways': {
+                          'NEW_TO_BIBLE': 'The main things to remember from this chapter in simple terms.',
+                          'SOME_KNOWLEDGE': 'The key points and important lessons to remember.',
+                          'REGULAR_READER': 'Essential takeaways including main themes and practical lessons.',
+                          'ADVANCED_STUDENT': 'Advanced takeaways including theological themes.',
+                          'SCHOLAR': 'Scholarly takeaways including advanced theological themes.'
+                        },
+                        'Reflection Prompts': {
+                          'NEW_TO_BIBLE': 'Simple questions to help you think about what this chapter means.',
+                          'SOME_KNOWLEDGE': 'Thoughtful questions to help you reflect on meaning and application.',
+                          'REGULAR_READER': 'Reflection prompts designed to deepen understanding.',
+                          'ADVANCED_STUDENT': 'Advanced reflection prompts exploring theological implications.',
+                          'SCHOLAR': 'Scholarly reflection prompts examining critical questions.'
+                        }
+                      };
+                      const tabContent = baseContent[tab];
+                      if (tabContent && tabContent[level]) {
+                        return tabContent[level];
+                      }
+                      return 'Content for this section is being prepared.';
+                    };
+
+                    return (
                       <div
-                        key={verse.id}
+                        key={tabName}
                         className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-coal-100 transition-colors border-gray-200 dark:border-gray-700"
                       >
                         <div className="flex items-start justify-between">
                           <div className="flex-1">
-                            <div className="flex items-center space-x-2 mb-2">
-                              <Badge
-                                variant="default"
-                                className="dark:border-gray-600 dark:text-gray-300"
-                              >
-                                Verse {verse.number}
+                            <div className="flex items-center gap-2 mb-2">
+                              <h4 className="font-medium text-gray-900 dark:text-white">
+                                {tabName}
+                              </h4>
+                              <Badge className="bg-blue-100 text-blue-800 dark:bg-sand dark:text-white text-xs">
+                                {mapExperienceLevel(selectedExperienceLevel)}
                               </Badge>
-                              <span className="text-xs text-gray-500 dark:text-white">
-                                {verse.translation}
-                              </span>
                             </div>
-                            <p className="text-gray-900 dark:text-white leading-relaxed">
-                              {verse.text}
+                            <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                              {getTabPreview(tabName, selectedExperienceLevel)}
                             </p>
                           </div>
                           <Button
                             variant="ghost"
                             size="sm"
                             className="ml-4"
-                            onClick={() => handleVerseClick(verse)}
+                            onClick={() => handleChapterTabClick(tabName)}
                           >
                             <Eye className="w-4 h-4" />
                           </Button>
                         </div>
                       </div>
-                    ))}
-                    {/* Pagination Controls */}
-                    {totalPages > 1 && (
-                      <div className="flex items-center justify-between mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
-                        <div className="text-sm text-gray-600 dark:text-gray-400">
-                          Showing page {currentPage} of {totalPages}
-                        </div>
-                        <div className="flex items-center space-x-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
-                            disabled={currentPage === 1}
-                          >
-                            <ChevronLeft className="w-4 h-4" />
-                            Previous
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-                            disabled={currentPage === totalPages}
-                          >
-                            Next
-                            <ChevronRight className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </div>
-                    )}
-                  </>
-                ) : (
-                  <div className="text-center py-8 text-gray-500 dark:text-gray-400">
-                    <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
-                    <p>No verses available for this chapter</p>
-                  </div>
-                )}
-              </div>
+                    );
+                  })}
+                </div>
+              )}
             </CardContent>
           </Card>
         </div>
@@ -517,6 +730,16 @@ const ViewChapterContent: React.FC = () => {
           setSelectedVerse(null);
         }}
         verse={selectedVerse}
+      />
+
+      {/* Chapter Detail Modal */}
+      <ChapterDetailModal
+        isOpen={isChapterModalOpen}
+        onClose={() => {
+          setIsChapterModalOpen(false);
+          setSelectedChapterTab(null);
+        }}
+        chapter={selectedChapterTab}
       />
     </div>
   );

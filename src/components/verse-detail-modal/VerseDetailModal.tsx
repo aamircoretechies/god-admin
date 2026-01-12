@@ -272,7 +272,7 @@ const VerseDetailModal: React.FC<VerseDetailModalProps> = ({ isOpen, onClose, ve
                 <Brain className="w-5 h-5" />
                 AI Explanation History
                 {aiExplanationHistory && (
-                  <Badge variant="secondary" className="ml-2">
+                  <Badge variant="outline" className="ml-2">
                     {aiExplanationHistory.total_explanations} total
                   </Badge>
                 )}
@@ -341,7 +341,7 @@ const VerseDetailModal: React.FC<VerseDetailModalProps> = ({ isOpen, onClose, ve
                                   </Badge>
                                 )}
                                 {explanation.experience_level && (
-                                  <Badge className="bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 text-xs">
+                                  <Badge  className="bg-blue-100 text-blue-800 dark:bg-gray-300 dark:text-blue-300 text-xs ">
                                     {mapExperienceLevel(explanation.experience_level)}
                                   </Badge>
                                 )}

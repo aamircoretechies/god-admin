@@ -1,0 +1,2 @@
+export { ChapterDetailModal } from './ChapterDetailModal';
+
