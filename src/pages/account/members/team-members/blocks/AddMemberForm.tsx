@@ -133,9 +133,9 @@ const AddMemberForm = () => {
       }
 
       const response = await createTeamMember(requestData);
-
+    
       if (response.status === 1) {
-        toast.success(response.message || 'Member added successfully!');
+        toast.success('Member added successfully!');
 
         // Reset form
         setFormData({

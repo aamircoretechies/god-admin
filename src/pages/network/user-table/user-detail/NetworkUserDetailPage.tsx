@@ -54,6 +54,10 @@ const NetworkUserDetailPage = () => {
     // Edit Profile functionality is disabled
     toast.info('Edit Profile functionality is currently disabled');
   };
+  const handleDeleteUser = () => {
+    toast.info('Delete functionality will be added later');
+  };
+
 
   return (
     <Fragment>
@@ -65,6 +69,13 @@ const NetworkUserDetailPage = () => {
               <ToolbarDescription>User Profile & Analytics Dashboard</ToolbarDescription>
             </ToolbarHeading>
             <ToolbarActions>
+              <button
+                onClick={handleDeleteUser}
+                className="btn btn-sm btn-light text-danger"
+              >
+                Delete User
+              </button>
+
               <button onClick={handleExportData} className="btn btn-sm btn-light">
                 Export Data
               </button>

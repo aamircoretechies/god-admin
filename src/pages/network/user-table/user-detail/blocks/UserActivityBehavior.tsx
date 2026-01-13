@@ -125,23 +125,27 @@ const UserActivityBehavior = () => {
                 <label className="text-sm font-medium text-gray-700">
                   Daily Verse Subscription Status
                 </label>
-                <span
-                  className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(activityData.contentEngagement.dailyVerseSubscriptionStatus)}`}
-                >
-                  {activityData.contentEngagement.dailyVerseSubscriptionStatus}
-                </span>
+                <div className='mt-1'>
+                  <span
+                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(activityData.contentEngagement.dailyVerseSubscriptionStatus)}`}
+                  >
+                    {activityData.contentEngagement.dailyVerseSubscriptionStatus}
+                  </span>
+                </div>
               </div>
               <div>
                 <label className="text-sm font-medium text-gray-700">Offline Access Usage</label>
+                <div className='mt-1'>
+
                 <span
-                  className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                    activityData.contentEngagement.offlineAccessUsage
-                      ? 'bg-success/10 text-success'
-                      : 'bg-gray-100 text-gray-800'
-                  }`}
+                  className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${activityData.contentEngagement.offlineAccessUsage
+                    ? 'bg-success/10 text-success'
+                    : 'bg-gray-100 text-gray-800'
+                    }`}
                 >
                   {activityData.contentEngagement.offlineAccessUsage || 'No'}
                 </span>
+                </div>
               </div>
             </div>
           </div>

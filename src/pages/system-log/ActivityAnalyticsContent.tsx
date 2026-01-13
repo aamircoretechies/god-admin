@@ -27,7 +27,7 @@ const SimpleBarChart = ({ data, title }: { data: any[]; title: string }) => (
           <div className="w-20 text-xs text-gray-500 dark:text-gray-400">{item.label}</div>
           <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
             <div
-              className="bg-amber-500 h-2 rounded-full"
+              className="bg-amber-500 h-2 rounded-full min-w-[10px]"
               style={{ width: `${item.percentage}%` }}
             ></div>
           </div>
