@@ -7,7 +7,6 @@ import {
   ToolbarHeading,
   ToolbarPageTitle
 } from '@/partials/toolbar';
-import { PageNavbar } from '@/pages/account';
 
 import { AccountUserProfileContent } from '.';
 import { useLayout } from '@/providers';
@@ -17,7 +16,7 @@ const AccountUserProfilePage = () => {
 
   return (
     <Fragment>
-      <PageNavbar />
+      {/* PageNavbar removed for User Profile page only */}
 
       {currentLayout?.name === 'demo1-layout' && (
         <Container>

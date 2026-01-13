@@ -6,6 +6,7 @@ import { Column, ColumnDef, RowSelectionState } from '@tanstack/react-table';
 import { DataGrid, DataGridColumnHeader, DataGridColumnVisibility, DataGridRowSelect, DataGridRowSelectAll, KeenIcon, useDataGrid } from '@/components';
 import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
+import { Checkbox } from '@/components/ui/checkbox';
 // import { DropdownCard1 } from '@/partials/dropdowns/general'; // Commented out - menu column is hidden
 import { fetchAdminCreatedUsers, deleteMultipleTeamMembers, deleteTeamMember, type TeamMember } from '@/services/usersApi';
 import { IMembersData } from '.';
@@ -80,12 +81,55 @@ const Members = () => {
     );
   };
 
+  // Custom row select components that check member column visibility
+  const CustomDataGridRowSelectAll = () => {
+    const { table } = useDataGrid();
+    const memberColumn = table.getColumn('member');
+    const isMemberVisible = memberColumn?.getIsVisible() ?? true;
+    
+    return (
+      <Checkbox
+        checked={
+          table.getIsAllPageRowsSelected() || (table.getIsSomePageRowsSelected() && 'indeterminate')
+        }
+        onCheckedChange={(value) => {
+          if (isMemberVisible) {
+            table.toggleAllPageRowsSelected(!!value);
+          }
+        }}
+        disabled={!isMemberVisible}
+        aria-label="Select all"
+        className="align-[inherit]"
+      />
+    );
+  };
+
+  const CustomDataGridRowSelect = ({ row }: { row: any }) => {
+    const { table } = useDataGrid();
+    const memberColumn = table.getColumn('member');
+    const isMemberVisible = memberColumn?.getIsVisible() ?? true;
+    
+    return (
+      <Checkbox
+        checked={row.getIsSelected()}
+        onCheckedChange={(value) => {
+          if (isMemberVisible) {
+            row.toggleSelected(!!value);
+          }
+        }}
+        disabled={!isMemberVisible}
+        aria-label="Select row"
+        className="align-[inherit]"
+      />
+    );
+  };
+
   const columns = useMemo<ColumnDef<IMembersData>[]>(
     () => [
       {
         accessorKey: 'id',
-        header: () => <DataGridRowSelectAll />,
-        cell: ({ row }) => <DataGridRowSelect row={row} />,
+        header: () => <CustomDataGridRowSelectAll />,
+        cell: ({ row }) => <CustomDataGridRowSelect row={row} />,
         enableSorting: false,
         enableHiding: false,
         meta: {
@@ -470,6 +514,27 @@ const Members = () => {
     }
   };
 
+  // Component to monitor member column visibility and clear selection when hidden
+  const MemberColumnVisibilityMonitor = () => {
+    const { table } = useDataGrid();
+    const memberColumn = table.getColumn('member');
+    const isMemberVisible = memberColumn?.getIsVisible() ?? true;
+    
+    useEffect(() => {
+      if (!isMemberVisible) {
+        // Clear selection when member column is hidden
+        const currentSelection = table.getState().rowSelection;
+        if (Object.keys(currentSelection).length > 0) {
+          setRowSelection({});
+          table.resetRowSelection();
+        }
+      }
+      // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [isMemberVisible]);
+    
+    return null; // This component doesn't render anything
+  };
+
   // TeamMembersToolbar extracted to top level
 
   if (isLoading) {
@@ -498,7 +563,9 @@ const Members = () => {
       sorting={[{ id: 'member', desc: false }]}
       toolbar={<TeamMembersToolbar searchTerm={searchTerm} setSearchTerm={setSearchTerm} selectedCount={Object.keys(rowSelection).length} handleDeleteSelected={handleDeleteSelected} isLoading={isLoading} />}
       layout={{ card: true }}
-    />
+    >
+      <MemberColumnVisibilityMonitor />
+    </DataGrid>
   );
 };
 

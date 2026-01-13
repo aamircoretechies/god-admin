@@ -70,8 +70,7 @@ const DropdownUser = ({ menuItemRef }: IDropdownUserProps) => {
           />
           <div className="flex flex-col gap-1.5">
             <Link
-              // to="/account"
-              to="#"
+              to="/account/home/user-profile"
               className="text-sm text-gray-800 hover:text-primary font-semibold leading-none"
             >
               {userName}
@@ -98,22 +97,13 @@ const DropdownUser = ({ menuItemRef }: IDropdownUserProps) => {
       <Fragment>
         <MenuSeparator />
         <div className="flex flex-col">
-          <MenuItem
-            toggle="dropdown"
-            trigger="hover"
-            dropdownProps={{
-              placement: isRTL() ? 'left-start' : 'right-start',
-              modifiers: [
-                {
-                  name: 'offset',
-                  options: {
-                    offset: isRTL() ? [50, 0] : [-50, 0] // [skid, distance]
-                  }
-                }
-              ]
-            }}
-          >
-            {/*  <MenuLink>
+          <MenuItem>
+            <MenuLink path="/account/home/user-profile">
+              <MenuIcon>
+                <KeenIcon icon="profile-circle" />
+              </MenuIcon>
+              <MenuTitle>My Profile</MenuTitle>
+               {/*  <MenuLink>
               <MenuIcon>
                 <KeenIcon icon="setting-2" />
               </MenuIcon>
@@ -164,6 +154,7 @@ const DropdownUser = ({ menuItemRef }: IDropdownUserProps) => {
                 </MenuLink>
               </MenuItem>
             </MenuSub> */}
+            </MenuLink>
           </MenuItem>
 
           <DropdownUserLanguages menuItemRef={menuItemRef} />
