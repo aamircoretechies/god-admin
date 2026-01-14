@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { toast } from 'sonner';
 
 import { Container } from '@/components/container';
+import { KeenIcon } from '@/components';
 import {
   Toolbar,
   ToolbarActions,
@@ -80,7 +81,7 @@ const NetworkUserDetailPage = () => {
     } catch (error: any) {
       console.error('Error deleting user:', error);
       const errorMessage = error?.response?.data?.message || error?.message || 'Failed to delete user';
-      
+
       // Handle authorization errors
       if (error?.response?.status === 403 || errorMessage.toLowerCase().includes('forbidden') || errorMessage.toLowerCase().includes('unauthorized')) {
         toast.error('You are not authorized to delete users. Please contact a super admin.');
@@ -97,7 +98,15 @@ const NetworkUserDetailPage = () => {
         <Container>
           <Toolbar>
             <ToolbarHeading>
-              <ToolbarPageTitle />
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => navigate(-1)}
+                  className="btn btn-sm btn-icon btn-light"
+                >
+                  <KeenIcon icon="black-left" />
+                </button>
+                <ToolbarPageTitle />
+              </div>
               <ToolbarDescription>User Profile & Analytics Dashboard</ToolbarDescription>
             </ToolbarHeading>
             <ToolbarActions>

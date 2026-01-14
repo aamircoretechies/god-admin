@@ -108,7 +108,7 @@ const UserActivityBehavior = () => {
           </div>
 
           {/* Content Engagement */}
-          <div className="space-y-4">
+          {/* <div className="space-y-4">
             <h4 className="text-sm font-semibold text-gray-900 border-b pb-2">
               Content Engagement
             </h4>
@@ -121,9 +121,8 @@ const UserActivityBehavior = () => {
                   {activityData.contentEngagement.bookmarksFavoritesCount}
                 </p>
               </div>
-              {/* Removed unsupported fields: Daily Verse Subscription Status, Offline Access Usage */}
             </div>
-          </div>
+          </div> */}
         </div>
       </div>
     </div>
