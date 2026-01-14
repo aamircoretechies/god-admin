@@ -130,13 +130,17 @@ const Users = () => {
 
             <div className="flex items-center gap-4">
               <img
-                src={toAbsoluteUrl(`/media/avatars/${row.original.user.avatar}`)}
+                src={
+                  row.original.user.avatar.startsWith('http')
+                    ? row.original.user.avatar
+                    : toAbsoluteUrl(`/media/avatars/${row.original.user.avatar}`)
+                }
                 className="rounded-full size-9 shrink-0"
                 alt={`${row.original.user.userName}`}
               />
 
               <div className="flex flex-col gap-0.5">
-                <Link to="/network/user-table/user-detail" className="text-sm font-medium text-gray-900 hover:text-primary-active mb-px">
+                <Link to={`/network/user-table/user-detail/${row.original.user.id}`} className="text-sm font-medium text-gray-900 hover:text-primary-active mb-px">
                   {row.original.user.userName}
                 </Link>
 
@@ -145,7 +149,7 @@ const Users = () => {
                 </Link>
 
                 <Link
-                  to="/network/user-table/user-detail"
+                  to={`/network/user-table/user-detail/${row.original.user.id}`}
                   className="text-xs text-primary hover:text-primary-active mt-1"
                 >
                   View Details →
@@ -227,14 +231,20 @@ const Users = () => {
         id: 'edit',
         header: () => '',
         enableSorting: false,
-        cell: () => {
+        cell: ({ row }) => {
           return (
             <div className="flex gap-2">
               <Link
-                to="/network/user-table/user-detail"
+                to={`/network/user-table/user-detail/${row.original.user.id}`}
                 className="btn btn-sm btn-outline btn-primary"
               >
                 View Details
+              </Link>
+              <Link
+                to={`/system-log/user/${row.original.user.id}`}
+                className="btn btn-sm btn-outline btn-secondary"
+              >
+                Activity
               </Link>
               <button className="btn btn-sm btn-icon btn-clear btn-light">
                 <KeenIcon icon="dots-vertical" />

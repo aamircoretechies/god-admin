@@ -1,6 +1,8 @@
 import { useRef } from 'react';
 import { KeenIcon } from '@/components/keenicons';
 import { toAbsoluteUrl } from '@/utils';
+import { getUploadedFileUrl } from '@/utils/Api';
+import { useAuthContext } from '@/auth';
 import { Menu, MenuItem, MenuToggle } from '@/components';
 import { DropdownUser } from '@/partials/dropdowns/user';
 import { DropdownNotifications } from '@/partials/dropdowns/notifications';
@@ -12,6 +14,13 @@ const HeaderTopbar = () => {
   const itemUserRef = useRef<any>(null);
   const itemNotificationsRef = useRef<any>(null);
   const { isRTL } = useLanguage();
+  const { currentUser } = useAuthContext();
+  
+  // Get user avatar URL
+  const userAvatarPath = currentUser?.profile_picture || currentUser?.pic || '/media/avatars/gray/5.png';
+  const userAvatar = userAvatarPath.startsWith('/uploads')
+    ? getUploadedFileUrl(userAvatarPath)
+    : toAbsoluteUrl(userAvatarPath);
 
   const handleDropdownChatShow = () => {
     window.dispatchEvent(new Event('resize'));
@@ -91,8 +100,8 @@ const HeaderTopbar = () => {
           <MenuToggle className="btn btn-icon rounded-full">
             <img
               className="size-9 rounded-full justify-center border border-gray-500 shrink-0"
-              src={toAbsoluteUrl('/media/avatars/gray/5.png')}
-              alt=""
+              src={userAvatar}
+              alt={currentUser?.fullname || 'User'}
             />
           </MenuToggle>
           {DropdownUser({ menuItemRef: itemUserRef })}

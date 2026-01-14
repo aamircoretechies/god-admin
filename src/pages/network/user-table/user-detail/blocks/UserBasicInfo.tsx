@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import { toAbsoluteUrl } from '@/utils';
+import { getUploadedFileUrl } from '@/utils/Api';
 import { KeenIcon } from '@/components';
 import { fetchUserProfile, type UserProfileResponse } from '@/services/usersApi';
 
@@ -86,6 +87,10 @@ const UserBasicInfo = () => {
   // Generate avatar from user ID
   const avatarNumber = (parseInt(userData.basicUserInfo.userId.replace(/-/g, ''), 16) % 34) + 1;
 
+  const avatarSrc = userData.basicUserInfo.profile_picture
+    ? getUploadedFileUrl(userData.basicUserInfo.profile_picture)
+    : toAbsoluteUrl(`/media/avatars/300-${avatarNumber}.png`);
+
   // memberSince is already formatted in the API response
   const memberSince = userData.basicUserInfo.memberSince || 'N/A';
 
@@ -103,7 +108,7 @@ const UserBasicInfo = () => {
           <div className="flex flex-col items-center lg:items-start gap-4 flex-shrink-0 lg:max-w-[280px] w-full lg:w-auto overflow-hidden">
             <div className="relative flex-shrink-0">
               <img
-                src={toAbsoluteUrl(`/media/avatars/300-${avatarNumber}.png`)}
+                src={avatarSrc}
                 className="size-20 rounded-full"
                 alt={userData.basicUserInfo.fullName}
               />
@@ -178,11 +183,10 @@ const UserBasicInfo = () => {
                 <label className="text-sm font-medium text-gray-700 block mb-1 ml-2">Status</label>
                 <div className="flex items-center gap-2 overflow-hidden">
                   <span
-                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium break-words max-w-full ${
-                      userData.basicUserInfo.status === 'active'
+                    className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium break-words max-w-full ${userData.basicUserInfo.status === 'active'
                         ? 'bg-success/10 text-success'
                         : 'bg-gray-100 text-gray-700'
-                    }`}
+                      }`}
                   >
                     {userData.basicUserInfo.status}
                   </span>

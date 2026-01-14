@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Avatar } from '@/components/ui/avatar';
-import { toAbsoluteUrl } from '@/utils';
+import { toAbsoluteUrl, getUploadedFileUrl } from '@/utils';
 import { fetchUserActivityLogs, type UserActivityLogResponse } from '@/services/activityLogsApi';
 import { fetchUserProfile } from '@/services/usersApi';
 import { AlertCircle } from 'lucide-react';
@@ -143,7 +143,7 @@ const UserActivityDetailContent: React.FC = () => {
             id: basicInfo.userId,
             name: basicInfo.fullName,
             email: basicInfo.email,
-            avatar: `/media/avatars/300-${avatarNumber}.png`,
+            avatar: basicInfo.profile_picture ? getUploadedFileUrl(basicInfo.profile_picture) : `/media/avatars/300-${(parseInt(basicInfo.userId.replace(/-/g, ''), 16) % 34) + 1}.png`,
             role: basicInfo.accountType,
             joinDate: basicInfo.memberSince,
             status: basicInfo.status === 'active' ? 'Active' : 'Inactive'
@@ -325,7 +325,7 @@ const UserActivityDetailContent: React.FC = () => {
         <CardContent className="p-6">
           <div className="flex items-start gap-6">
             <Avatar className="w-20 h-20">
-              <img src={toAbsoluteUrl(userData.avatar)} alt={userData.name} />
+              <img src={userData.avatar.startsWith('http') ? userData.avatar : toAbsoluteUrl(userData.avatar)} alt={userData.name} />
             </Avatar>
             <div className="flex-1">
               <div className="flex items-center gap-4 mb-4">

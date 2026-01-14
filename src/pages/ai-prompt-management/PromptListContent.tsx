@@ -126,7 +126,12 @@ const PromptListContent: React.FC = () => {
         if (response.status === 1 && response.data) {
           const transformed = response.data.map(transformPrompt);
           setPrompts(transformed);
-          setTotalCount(transformed.length); // Note: API might return total count separately
+          // Use pagination metadata from API if available, otherwise use data length
+          if (response.metadata) {
+            setTotalCount(response.metadata.total);
+          } else {
+            setTotalCount(transformed.length);
+          }
         } else {
           throw new Error(response.message || 'Failed to fetch prompts');
         }

@@ -1,6 +1,8 @@
 import { useRef, useState } from 'react';
 import { KeenIcon } from '@/components/keenicons';
 import { toAbsoluteUrl } from '@/utils';
+import { getUploadedFileUrl } from '@/utils/Api';
+import { useAuthContext } from '@/auth';
 import { Menu, MenuItem, MenuToggle } from '@/components';
 import { DropdownUser } from '@/partials/dropdowns/user';
 import { DropdownNotifications } from '@/partials/dropdowns/notifications';
@@ -11,10 +13,17 @@ import { useLanguage } from '@/i18n';
 
 const HeaderTopbar = () => {
   const { isRTL } = useLanguage();
+  const { currentUser } = useAuthContext();
   const itemChatRef = useRef<any>(null);
   const itemAppsRef = useRef<any>(null);
   const itemUserRef = useRef<any>(null);
   const itemNotificationsRef = useRef<any>(null);
+  
+  // Get user avatar URL
+  const userAvatarPath = currentUser?.profile_picture || currentUser?.pic || '/media/avatars/300-2.png';
+  const userAvatar = userAvatarPath.startsWith('/uploads')
+    ? getUploadedFileUrl(userAvatarPath)
+    : toAbsoluteUrl(userAvatarPath);
 
   const handleShow = () => {
     window.dispatchEvent(new Event('resize'));
@@ -133,8 +142,8 @@ const HeaderTopbar = () => {
           <MenuToggle className="btn btn-icon rounded-full">
             <img
               className="size-9 rounded-full border-2 border-success shrink-0"
-              src={toAbsoluteUrl('/media/avatars/300-2.png')}
-              alt=""
+              src={userAvatar}
+              alt={currentUser?.fullname || 'User'}
             />
           </MenuToggle>
           {DropdownUser({ menuItemRef: itemUserRef })}

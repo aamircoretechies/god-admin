@@ -1,5 +1,6 @@
 interface IUsersData {
   user: {
+    id?: string;
     avatar: string;
     userName: string;
     userGmail: string;

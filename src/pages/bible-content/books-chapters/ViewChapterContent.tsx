@@ -16,6 +16,7 @@ import { ChapterDetailModal } from '@/components/chapter-detail-modal/ChapterDet
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { VALID_EXPERIENCE_LEVELS } from '@/components/verse-detail-modal/VerseDetailModal';
+import { fetchChapterAIExplanationHistory, type ChapterAIExplanationHistoryResponse } from '@/services/aiExplanationsApi';
 import {
   ArrowLeft,
   BookOpen,
@@ -27,7 +28,8 @@ import {
   Download,
   Upload,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  Loader2
 } from 'lucide-react';
 
 interface BibleBook {
@@ -115,6 +117,7 @@ const ViewChapterContent: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [isChapterDeepStudy, setIsChapterDeepStudy] = useState(false);
   const [selectedChapterTab, setSelectedChapterTab] = useState<{
+    chapterId: string;
     book: string;
     chapter: number;
     tabName: string;
@@ -122,6 +125,8 @@ const ViewChapterContent: React.FC = () => {
   } | null>(null);
   const [isChapterModalOpen, setIsChapterModalOpen] = useState(false);
   const [selectedExperienceLevel, setSelectedExperienceLevel] = useState<string>('NEW_TO_BIBLE');
+  const [chapterExplanations, setChapterExplanations] = useState<ChapterAIExplanationHistoryResponse['data'] | null>(null);
+  const [loadingExplanations, setLoadingExplanations] = useState(false);
 
   useEffect(() => {
     const loadChapter = async () => {
@@ -157,6 +162,33 @@ const ViewChapterContent: React.FC = () => {
     setCurrentPage(1); // Reset to first page when chapter changes
   }, [bookId, chapterId, translationFilter]);
 
+  // Load chapter explanations when chapter is loaded and deep study is enabled
+  const loadChapterExplanations = async () => {
+    if (!chapter?.id || !isChapterDeepStudy) {
+      setChapterExplanations(null);
+      return;
+    }
+
+    try {
+      setLoadingExplanations(true);
+      const response = await fetchChapterAIExplanationHistory(chapter.id);
+      if (response.status === 1 && response.data) {
+        setChapterExplanations(response.data);
+      } else {
+        setChapterExplanations(null);
+      }
+    } catch (error: any) {
+      console.error('Error loading chapter explanations:', error);
+      setChapterExplanations(null);
+    } finally {
+      setLoadingExplanations(false);
+    }
+  };
+
+  useEffect(() => {
+    loadChapterExplanations();
+  }, [chapter?.id, isChapterDeepStudy]);
+
   const handleVerseClick = (verse: Verse) => {
     if (!book || !chapter) return;
 
@@ -180,6 +212,7 @@ const ViewChapterContent: React.FC = () => {
     if (!book || !chapter) return;
 
     const chapterTabData = {
+      chapterId: chapter.id, // Pass chapter_id UUID for API calls
       book: book.name,
       chapter: chapter.number,
       tabName: tabName,
@@ -497,126 +530,127 @@ const ViewChapterContent: React.FC = () => {
                     </Select>
                   </div>
 
-                  {chapterDeepStudyTabs.map((tabName) => {
-                    // Get content based on experience level - matches the logic in ChapterDetailModal
-                    const getTabPreview = (tab: string, level: string) => {
-                      const baseContent: Record<string, Record<string, string>> = {
-                        'Explanation': {
-                          'NEW_TO_BIBLE': 'A simple, easy-to-understand explanation perfect for those new to Bible study.',
-                          'SOME_KNOWLEDGE': 'A more detailed explanation that builds on basic Bible knowledge.',
-                          'REGULAR_READER': 'A comprehensive explanation for regular Bible readers with deeper insights.',
-                          'ADVANCED_STUDENT': 'An advanced theological explanation for serious Bible students.',
-                          'SCHOLAR': 'A scholarly, academic-level explanation with detailed analysis.'
-                        },
-                        'Original': {
-                          'NEW_TO_BIBLE': 'A simple introduction to the original language of this chapter.',
-                          'SOME_KNOWLEDGE': 'An overview of the original Hebrew or Greek text with key terms.',
-                          'REGULAR_READER': 'A detailed analysis of the original text and linguistic nuances.',
-                          'ADVANCED_STUDENT': 'An in-depth examination of the original language and textual variants.',
-                          'SCHOLAR': 'A comprehensive scholarly analysis of the original text and manuscripts.'
-                        },
-                        'Source': {
-                          'NEW_TO_BIBLE': 'Basic information about where this chapter comes from.',
-                          'SOME_KNOWLEDGE': 'Historical sources and references that help understand this chapter.',
-                          'REGULAR_READER': 'Detailed historical sources including ancient manuscripts and research.',
-                          'ADVANCED_STUDENT': 'Comprehensive source analysis including manuscript evidence.',
-                          'SCHOLAR': 'Complete scholarly source documentation and academic research.'
-                        },
-                        'Historical Context': {
-                          'NEW_TO_BIBLE': 'A simple explanation of when and where this chapter was written.',
-                          'SOME_KNOWLEDGE': 'The historical background including time period and cultural setting.',
-                          'REGULAR_READER': 'Detailed historical context including political and social environment.',
-                          'ADVANCED_STUDENT': 'Comprehensive historical analysis with archaeological evidence.',
-                          'SCHOLAR': 'Advanced historical-critical analysis with detailed reconstruction.'
-                        },
-                        'Ground Text Analysis': {
-                          'NEW_TO_BIBLE': 'A simple breakdown of the main words and phrases.',
-                          'SOME_KNOWLEDGE': 'An analysis of key words and phrases and their meanings.',
-                          'REGULAR_READER': 'Detailed word-by-word analysis examining meanings and structures.',
-                          'ADVANCED_STUDENT': 'In-depth textual analysis including word studies and syntax.',
-                          'SCHOLAR': 'Comprehensive textual-critical analysis with advanced linguistic methods.'
-                        },
-                        'Special Insights': {
-                          'NEW_TO_BIBLE': 'Helpful insights that make this chapter easier to understand.',
-                          'SOME_KNOWLEDGE': 'Unique observations that provide deeper understanding.',
-                          'REGULAR_READER': 'Special insights from biblical scholars and theologians.',
-                          'ADVANCED_STUDENT': 'Advanced insights including theological connections.',
-                          'SCHOLAR': 'Scholarly insights including advanced theological analysis.'
-                        },
-                        'Daily Life Application': {
-                          'NEW_TO_BIBLE': 'Simple, practical ways to apply what this chapter teaches.',
-                          'SOME_KNOWLEDGE': 'Practical applications for modern life situations.',
-                          'REGULAR_READER': 'Thoughtful applications connecting principles to contemporary life.',
-                          'ADVANCED_STUDENT': 'Advanced applications exploring ethics and theology.',
-                          'SCHOLAR': 'Scholarly applications examining systematic theology and ethics.'
-                        },
-                        'Cross-References': {
-                          'NEW_TO_BIBLE': 'A few related verses that help explain what this chapter means.',
-                          'SOME_KNOWLEDGE': 'Related verses and passages that connect with this chapter.',
-                          'REGULAR_READER': 'Comprehensive cross-references showing scriptural connections.',
-                          'ADVANCED_STUDENT': 'Detailed cross-references including intertextual links.',
-                          'SCHOLAR': 'Comprehensive cross-references with detailed intertextual analysis.'
-                        },
-                        'Commentary Insights': {
-                          'NEW_TO_BIBLE': 'Simple explanations from Bible teachers.',
-                          'SOME_KNOWLEDGE': 'Insights from Bible commentaries explaining meaning.',
-                          'REGULAR_READER': 'Commentary insights from respected theologians.',
-                          'ADVANCED_STUDENT': 'Advanced commentary insights from theological scholars.',
-                          'SCHOLAR': 'Scholarly commentary insights including critical analysis.'
-                        },
-                        'Key Takeaways': {
-                          'NEW_TO_BIBLE': 'The main things to remember from this chapter in simple terms.',
-                          'SOME_KNOWLEDGE': 'The key points and important lessons to remember.',
-                          'REGULAR_READER': 'Essential takeaways including main themes and practical lessons.',
-                          'ADVANCED_STUDENT': 'Advanced takeaways including theological themes.',
-                          'SCHOLAR': 'Scholarly takeaways including advanced theological themes.'
-                        },
-                        'Reflection Prompts': {
-                          'NEW_TO_BIBLE': 'Simple questions to help you think about what this chapter means.',
-                          'SOME_KNOWLEDGE': 'Thoughtful questions to help you reflect on meaning and application.',
-                          'REGULAR_READER': 'Reflection prompts designed to deepen understanding.',
-                          'ADVANCED_STUDENT': 'Advanced reflection prompts exploring theological implications.',
-                          'SCHOLAR': 'Scholarly reflection prompts examining critical questions.'
-                        }
+                  {loadingExplanations ? (
+                    <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                      <Loader2 className="w-8 h-8 mx-auto mb-4 animate-spin" />
+                      <p>Loading chapter explanations...</p>
+                    </div>
+                  ) : chapterExplanations && chapterExplanations.explanations && chapterExplanations.explanations.length > 0 ? (
+                    chapterDeepStudyTabs.map((tabName) => {
+                      // Map tab name to explanation type
+                      const mapTabNameToExplanationType = (tab: string): string => {
+                        const mapping: Record<string, string> = {
+                          'Explanation': 'explanation',
+                          'Original': 'original',
+                          'Source': 'source',
+                          'Historical Context': 'historical_context',
+                          'Ground Text Analysis': 'ground_text_analysis',
+                          'Special Insights': 'special_insights',
+                          'Daily Life Application': 'daily_life_application',
+                          'Cross-References': 'cross_references',
+                          'Commentary Insights': 'commentary_insights',
+                          'Key Takeaways': 'key_takeaways',
+                          'Reflection Prompts': 'reflection_prompts',
+                          'Context': 'context'
+                        };
+                        return mapping[tab] || tab.toLowerCase().replace(/\s+/g, '_');
                       };
-                      const tabContent = baseContent[tab];
-                      if (tabContent && tabContent[level]) {
-                        return tabContent[level];
-                      }
-                      return 'Content for this section is being prepared.';
-                    };
 
-                    return (
-                      <div
-                        key={tabName}
-                        className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-coal-100 transition-colors border-gray-200 dark:border-gray-700"
-                      >
-                        <div className="flex items-start justify-between">
-                          <div className="flex-1">
-                            <div className="flex items-center gap-2 mb-2">
-                              <h4 className="font-medium text-gray-900 dark:text-white">
-                                {tabName}
-                              </h4>
-                              <Badge className="bg-blue-100 text-blue-800 dark:bg-sand dark:text-white text-xs">
-                                {mapExperienceLevel(selectedExperienceLevel)}
-                              </Badge>
+                      // Find the explanation for this tab and experience level
+                      const explanationType = mapTabNameToExplanationType(tabName);
+                      const explanation = chapterExplanations.explanations.find(
+                        (exp: any) => {
+                          const expType = exp.explanation_type || exp.context_type || exp.field_name;
+                          return expType === explanationType && exp.experience_level === selectedExperienceLevel;
+                        }
+                      );
+
+                      const hasContent = explanation?.has_content || (explanation?.content && explanation.content.trim().length > 0);
+
+                      // Get preview text (first 150 characters of content or placeholder)
+                      const getPreviewText = () => {
+                        if (hasContent && explanation?.content) {
+                          const content = explanation.content;
+                          return content.length > 150 ? content.substring(0, 150) + '...' : content;
+                        }
+                        // Format: "TabName ExperienceLevel Not Created Content for this section is being prepared. Click to view or create."
+                        return `${tabName} ${mapExperienceLevel(selectedExperienceLevel)} Not Created Content for this section is being prepared. Click to view or create.`;
+                      };
+
+                      return (
+                        <div
+                          key={tabName}
+                          className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-coal-100 transition-colors border-gray-200 dark:border-gray-700"
+                        >
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-2">
+                                <h4 className="font-medium text-gray-900 dark:text-white">
+                                  {tabName}
+                                </h4>
+                                <Badge className="bg-blue-100 text-blue-800 dark:bg-sand dark:text-white text-xs">
+                                  {mapExperienceLevel(selectedExperienceLevel)}
+                                </Badge>
+                                {!hasContent && (
+                                  <Badge variant="outline" className="text-xs">
+                                    Not Created
+                                  </Badge>
+                                )}
+                              </div>
+                              <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                                {getPreviewText()}
+                              </p>
                             </div>
-                            <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-                              {getTabPreview(tabName, selectedExperienceLevel)}
-                            </p>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="ml-4"
+                              onClick={() => handleChapterTabClick(tabName)}
+                            >
+                              <Eye className="w-4 h-4" />
+                            </Button>
                           </div>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            className="ml-4"
-                            onClick={() => handleChapterTabClick(tabName)}
-                          >
-                            <Eye className="w-4 h-4" />
-                          </Button>
                         </div>
-                      </div>
-                    );
-                  })}
+                      );
+                    })
+                  ) : (
+                    // Show all tabs with "No content available" message when no data exists
+                    chapterDeepStudyTabs.map((tabName) => {
+                      return (
+                        <div
+                          key={tabName}
+                          className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-coal-100 transition-colors border-gray-200 dark:border-gray-700"
+                        >
+                          <div className="flex items-start justify-between">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-2">
+                                <h4 className="font-medium text-gray-900 dark:text-white">
+                                  {tabName}
+                                </h4>
+                                <Badge className="bg-blue-100 text-blue-800 dark:bg-sand dark:text-white text-xs">
+                                  {mapExperienceLevel(selectedExperienceLevel)}
+                                </Badge>
+                                <Badge variant="outline" className="text-xs">
+                                  Not Created
+                                </Badge>
+                              </div>
+                              <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
+                                {tabName} {mapExperienceLevel(selectedExperienceLevel)} Not Created Content for this section is being prepared. Click to view or create.
+                              </p>
+                            </div>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="ml-4"
+                              onClick={() => handleChapterTabClick(tabName)}
+                            >
+                              <Eye className="w-4 h-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
                 </div>
               )}
             </CardContent>
@@ -740,6 +774,7 @@ const ViewChapterContent: React.FC = () => {
           setSelectedChapterTab(null);
         }}
         chapter={selectedChapterTab}
+        onRefresh={loadChapterExplanations}
       />
     </div>
   );

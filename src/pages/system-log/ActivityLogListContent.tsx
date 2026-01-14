@@ -11,7 +11,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Avatar } from '@/components/ui/avatar';
-import { toAbsoluteUrl } from '@/utils';
+import { toAbsoluteUrl, getUploadedFileUrl } from '@/utils';
 import {
   blockUser,
   fetchActivityLogs,
@@ -67,9 +67,10 @@ interface UserActivityLog {
 
 // Transform API response to component format
 const transformActivityLog = (apiData: ActivityLogResponse): UserActivityLog => {
-  // Generate avatar from user ID
-  const avatarNumber = (parseInt(apiData.user.userId.replace(/-/g, ''), 16) % 34) + 1;
-  const userAvatar = `/media/avatars/300-${avatarNumber}.png`;
+  // Use real avatar if available, otherwise fallback to random
+  const userAvatar = apiData.user.profile_picture
+    ? getUploadedFileUrl(apiData.user.profile_picture)
+    : `/media/avatars/300-${(parseInt(apiData.user.userId.replace(/-/g, ''), 16) % 34) + 1}.png`;
 
   // Map role from API format to component format
   const mapRole = (role: string): UserActivityLog['userRole'] => {
@@ -143,15 +144,91 @@ const ActivityLogListContent: React.FC = () => {
   // SELECTED USER
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
 
-  // Fetch activity logs from API
+  // Fetch activity logs from API with filters
   useEffect(() => {
     const loadActivityLogs = async () => {
       try {
         setLoading(true);
         setError(null);
-        const response = await fetchActivityLogs();
+
+        // Build API params from filters
+        const apiParams: {
+          page?: number;
+          limit?: number;
+          activityType?: string;
+          status?: string;
+          startDate?: string;
+          endDate?: string;
+          search?: string;
+        } = {
+          limit: 1000 // Get more records for client-side filtering if needed
+        };
+
+        // Map activity type filter
+        if (activityTypeFilter !== 'all') {
+          apiParams.activityType = activityTypeFilter;
+        }
+
+        // Map status filter
+        if (statusFilter !== 'all') {
+          apiParams.status = statusFilter;
+        }
+
+        // Map date range filter
+        if (dateRangeFilter !== 'all') {
+          const now = new Date();
+          const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+          let startDate: Date;
+
+          switch (dateRangeFilter) {
+            case 'today':
+              startDate = today;
+              break;
+            case 'week':
+              startDate = new Date(today);
+              startDate.setDate(startDate.getDate() - 7);
+              break;
+            case 'month':
+              startDate = new Date(today);
+              startDate.setMonth(startDate.getMonth() - 1);
+              break;
+            case 'year':
+              startDate = new Date(today);
+              startDate.setFullYear(startDate.getFullYear() - 1);
+              break;
+            default:
+              startDate = today;
+          }
+          apiParams.startDate = startDate.toISOString();
+          apiParams.endDate = now.toISOString();
+        }
+
+        // Map search term
+        if (searchTerm) {
+          apiParams.search = searchTerm;
+        }
+
+        const response = await fetchActivityLogs(apiParams);
         if (response.status === 1 && response.data) {
-          const transformedLogs = response.data.map(transformActivityLog);
+          let transformedLogs = response.data.map(transformActivityLog);
+
+          // Apply user role filter on client side (since API doesn't support it directly)
+          if (userFilter !== 'all') {
+            transformedLogs = transformedLogs.filter((log) => {
+              const normalizedLogRole = log.userRole.toUpperCase();
+              const normalizedFilterRole = userFilter.toUpperCase();
+              // Map both formats
+              const roleMap: { [key: string]: string[] } = {
+                'FREE': ['FREE'],
+                'PREMIUM': ['PREMIUM'],
+                'ADMIN': ['ADMIN'],
+                'MODERATOR': ['MODERATOR']
+              };
+              const filterRoles = roleMap[normalizedFilterRole] || [normalizedFilterRole];
+              return filterRoles.includes(normalizedLogRole);
+            });
+          }
+
           setActivityLogs(transformedLogs);
         } else {
           setError(response.message || 'Failed to load activity logs');
@@ -165,61 +242,14 @@ const ActivityLogListContent: React.FC = () => {
     };
 
     loadActivityLogs();
-  }, []);
+  }, [activityTypeFilter, statusFilter, dateRangeFilter, searchTerm, userFilter]);
 
-  // Filter logs
+  // Filter logs (now mostly done server-side, but keep for any remaining client-side filtering)
   const filteredLogs = useMemo(() => {
-    return activityLogs.filter((log) => {
-      const matchesSearch =
-        log.userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        log.userEmail.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        log.details.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (log.queryText && log.queryText.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (log.bookReference && log.bookReference.toLowerCase().includes(searchTerm.toLowerCase())) ||
-        (log.verseReference && log.verseReference.toLowerCase().includes(searchTerm.toLowerCase()));
-
-      const matchesUser =
-        userFilter === 'all' ||
-        log.userRole === userFilter ||
-        log.userRole.toLowerCase() === userFilter.toLowerCase();
-      const matchesActivityType =
-        activityTypeFilter === 'all' || log.activityType === activityTypeFilter;
-      const matchesStatus = statusFilter === 'all' || log.status === statusFilter;
-
-      // Date range filter
-      let matchesDateRange = true;
-      if (dateRangeFilter !== 'all') {
-        const logDate = new Date(log.timestamp);
-        const now = new Date();
-        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-
-        switch (dateRangeFilter) {
-          case 'today':
-            matchesDateRange = logDate >= today;
-            break;
-          case 'week':
-            const weekAgo = new Date(today);
-            weekAgo.setDate(weekAgo.getDate() - 7);
-            matchesDateRange = logDate >= weekAgo;
-            break;
-          case 'month':
-            const monthAgo = new Date(today);
-            monthAgo.setMonth(monthAgo.getMonth() - 1);
-            matchesDateRange = logDate >= monthAgo;
-            break;
-          case 'year':
-            const yearAgo = new Date(today);
-            yearAgo.setFullYear(yearAgo.getFullYear() - 1);
-            matchesDateRange = logDate >= yearAgo;
-            break;
-        }
-      }
-
-      return (
-        matchesSearch && matchesUser && matchesActivityType && matchesStatus && matchesDateRange
-      );
-    });
-  }, [activityLogs, searchTerm, userFilter, activityTypeFilter, statusFilter, dateRangeFilter]);
+    // Since we're applying most filters server-side, just return the logs
+    // Only apply additional client-side filtering if needed
+    return activityLogs;
+  }, [activityLogs]);
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -351,7 +381,10 @@ const ActivityLogListContent: React.FC = () => {
         cell: ({ row }) => (
           <div className="flex items-center gap-3">
             <Avatar className="w-8 h-8">
-              <img src={toAbsoluteUrl(row.original.userAvatar)} alt={row.original.userName} />
+              <img
+                src={row.original.userAvatar.startsWith('http') ? row.original.userAvatar : toAbsoluteUrl(row.original.userAvatar)}
+                alt={row.original.userName}
+              />
             </Avatar>
             <div className="flex flex-col">
               <Link

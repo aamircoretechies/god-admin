@@ -1,102 +1,369 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { KeenIcon } from '@/components';
-import { CrudAvatarUpload } from '@/partials/crud';
 import { useAuthContext } from '@/auth';
 import { toAbsoluteUrl } from '@/utils';
+import { getUploadedFileUrl } from '@/utils/Api';
 import { ImageInput } from '@/components/image-input';
 import type { IImageInputFile } from '@/components/image-input';
+import { getAdminProfile, updateAdminProfile, updateAdminProfilePicture } from '@/services/adminApi';
+import { toast } from 'sonner';
+
+// Helper to get full URL for profile picture
+const getProfilePictureUrl = (path: string | null | undefined): string => {
+  if (!path) return toAbsoluteUrl('/media/avatars/300-2.png');
+  // If path starts with /uploads, it's from the backend
+  if (path.startsWith('/uploads')) {
+    return getUploadedFileUrl(path);
+  }
+  // Otherwise, treat as local asset
+  return toAbsoluteUrl(path);
+};
 
 const PersonalInfo = () => {
-  const { currentUser } = useAuthContext();
-  const [isEditingName, setIsEditingName] = useState(false);
-  const [isEditingPhone, setIsEditingPhone] = useState(false);
+  const { currentUser, setCurrentUser } = useAuthContext();
+  const [isEditing, setIsEditing] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const initialName = currentUser?.fullname ||
-    (currentUser?.first_name && currentUser?.last_name
-      ? `${currentUser.first_name} ${currentUser.last_name}`
-      : currentUser?.first_name || '');
-  const initialPhone = currentUser?.phone || '';
-
-  const [nameValue, setNameValue] = useState(initialName);
-  const [phoneValue, setPhoneValue] = useState(initialPhone);
-  const [originalName, setOriginalName] = useState(initialName);
-  const [originalPhone, setOriginalPhone] = useState(initialPhone);
+  const [nameValue, setNameValue] = useState('');
+  const [phoneValue, setPhoneValue] = useState('');
+  const [originalName, setOriginalName] = useState('');
+  const [originalPhone, setOriginalPhone] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
+  const [nameError, setNameError] = useState<string | null>(null);
+  const [phoneError, setPhoneError] = useState<string | null>(null);
 
   const [avatar, setAvatar] = useState<IImageInputFile[]>(() => {
-    const userAvatar = currentUser?.profile_picture || currentUser?.pic || '/media/avatars/300-2.png';
-    return [{ dataURL: toAbsoluteUrl(userAvatar) }];
+    return [{ dataURL: getProfilePictureUrl(null) }];
+  });
+  const [originalAvatar, setOriginalAvatar] = useState<IImageInputFile[]>(() => {
+    return [{ dataURL: getProfilePictureUrl(null) }];
   });
 
+  // Phone regex validation (supports international formats)
+  const phoneRegex = /^[+]?[(]?[0-9]{1,4}[)]?[-\s.]?[(]?[0-9]{1,4}[)]?[-\s.]?[0-9]{1,9}$/;
+
   const handleNameChange = (value: string) => {
+    // Limit to 20 characters
+    if (value.length > 20) {
+      setNameError('Name must be 20 characters or less');
+      return;
+    }
     setNameValue(value);
-    setHasChanges(true);
+    setNameError(null);
+    checkForChanges(value, phoneValue, avatar);
   };
 
   const handlePhoneChange = (value: string) => {
     setPhoneValue(value);
-    setHasChanges(true);
+    // Validate phone format if not empty
+    if (value && !phoneRegex.test(value)) {
+      setPhoneError('Please enter a valid phone number');
+    } else {
+      setPhoneError(null);
+    }
+    checkForChanges(nameValue, value, avatar);
   };
 
-  const handleCancelName = () => {
-    setNameValue(originalName);
-    setIsEditingName(false);
-    setHasChanges(phoneValue !== originalPhone);
+  const checkForChanges = (name: string, phone: string, currentAvatar: IImageInputFile[]) => {
+    const nameChanged = name !== originalName;
+    const phoneChanged = phone !== originalPhone;
+    const avatarChanged = JSON.stringify(currentAvatar) !== JSON.stringify(originalAvatar);
+    setHasChanges(nameChanged || phoneChanged || avatarChanged);
   };
 
-  const handleCancelPhone = () => {
-    setPhoneValue(originalPhone);
-    setIsEditingPhone(false);
-    setHasChanges(nameValue !== originalName);
-  };
-
-  const handleNameBlur = () => {
-    handleCancelName();
-  };
-
-  const handlePhoneBlur = () => {
-    handleCancelPhone();
-  };
-
-  const handleStartEditName = () => {
+  const handleStartEdit = () => {
     setOriginalName(nameValue);
-    setIsEditingName(true);
+    setOriginalPhone(phoneValue);
+    setOriginalAvatar(avatar);
+    setIsEditing(true);
+    setHasChanges(false);
+    setNameError(null);
+    setPhoneError(null);
   };
 
-  const handleStartEditPhone = () => {
-    setOriginalPhone(phoneValue);
-    setIsEditingPhone(true);
+  const handleCancelEdit = () => {
+    setNameValue(originalName);
+    setPhoneValue(originalPhone);
+    setAvatar(originalAvatar);
+    setNameError(null);
+    setPhoneError(null);
+    setIsEditing(false);
+    setHasChanges(false);
   };
 
   const handleAvatarChange = (selectedAvatar: IImageInputFile[]) => {
+    // Only allow changes when in edit mode
+    if (!isEditing) return;
+    // Just update the local state - don't upload yet
     setAvatar(selectedAvatar);
-    setHasChanges(true);
+    checkForChanges(nameValue, phoneValue, selectedAvatar);
   };
+
+  const loadProfile = async () => {
+    try {
+      const response = await getAdminProfile();
+      if (response.status === 1 && response.data) {
+        // Update name values
+        const fullName = response.data.first_name && response.data.last_name
+          ? `${response.data.first_name} ${response.data.last_name}`
+          : response.data.first_name || '';
+        setNameValue(fullName);
+        setOriginalName(fullName);
+        
+        // Update phone from API response or currentUser
+        const phone = response.data.phone || currentUser?.phone || '';
+        setPhoneValue(phone);
+        setOriginalPhone(phone);
+        
+        // Update avatar with latest profile picture
+        const userAvatar = response.data.profile_picture;
+        const avatarUrl = getProfilePictureUrl(userAvatar);
+        setAvatar([{ dataURL: avatarUrl }]);
+        setOriginalAvatar([{ dataURL: avatarUrl }]);
+        
+        // Update auth context with new profile data
+        if (setCurrentUser) {
+          setCurrentUser({
+            ...currentUser,
+            ...response.data,
+            phone: response.data.phone || currentUser?.phone, // Include phone in context
+            fullname: fullName || response.data.email || 'User'
+          } as any);
+        }
+      }
+    } catch (error) {
+      console.error('Error loading profile:', error);
+    }
+  };
+
+  // Load profile on mount
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        setIsLoading(true);
+        const response = await getAdminProfile();
+        if (response.status === 1 && response.data) {
+          // Update name values
+          const fullName = response.data.first_name && response.data.last_name
+            ? `${response.data.first_name} ${response.data.last_name}`
+            : response.data.first_name || '';
+          setNameValue(fullName);
+          setOriginalName(fullName);
+          
+          // Update phone from API response or currentUser
+          const phone = response.data.phone || currentUser?.phone || '';
+          setPhoneValue(phone);
+          setOriginalPhone(phone);
+          
+          // Update avatar with latest profile picture
+          const userAvatar = response.data.profile_picture;
+          const avatarUrl = getProfilePictureUrl(userAvatar);
+          setAvatar([{ dataURL: avatarUrl }]);
+          setOriginalAvatar([{ dataURL: avatarUrl }]);
+          
+          // Update auth context with new profile data
+          if (setCurrentUser) {
+            setCurrentUser({
+              ...currentUser,
+              ...response.data,
+              profile_picture: response.data.profile_picture, // Ensure profile_picture is included
+              fullname: fullName || response.data.email || 'User'
+            } as any);
+          }
+        } else {
+          // If API fails, use currentUser as fallback
+          const fallbackName = currentUser?.fullname ||
+            (currentUser?.first_name && currentUser?.last_name
+              ? `${currentUser.first_name} ${currentUser.last_name}`
+              : currentUser?.first_name || '');
+          setNameValue(fallbackName);
+          setOriginalName(fallbackName);
+          
+          // Get phone from currentUser
+          const fallbackPhone = currentUser?.phone || '';
+          setPhoneValue(fallbackPhone);
+          setOriginalPhone(fallbackPhone);
+          
+          const userAvatar = currentUser?.profile_picture || currentUser?.pic;
+          const avatarUrl = getProfilePictureUrl(userAvatar);
+          setAvatar([{ dataURL: avatarUrl }]);
+          setOriginalAvatar([{ dataURL: avatarUrl }]);
+        }
+      } catch (error) {
+        console.error('Error loading profile:', error);
+        // Fallback to currentUser if API fails
+        const fallbackName = currentUser?.fullname ||
+          (currentUser?.first_name && currentUser?.last_name
+            ? `${currentUser.first_name} ${currentUser.last_name}`
+            : currentUser?.first_name || '');
+        setNameValue(fallbackName);
+        setOriginalName(fallbackName);
+        
+        // Get phone from currentUser
+        const fallbackPhone = currentUser?.phone || '';
+        setPhoneValue(fallbackPhone);
+        setOriginalPhone(fallbackPhone);
+        
+        const userAvatar = currentUser?.profile_picture || currentUser?.pic;
+        const avatarUrl = getProfilePictureUrl(userAvatar);
+        setAvatar([{ dataURL: avatarUrl }]);
+        setOriginalAvatar([{ dataURL: avatarUrl }]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+    fetchProfile();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleSave = async () => {
+    // Validate before saving
+    if (nameValue.length > 20) {
+      setNameError('Name must be 20 characters or less');
+      toast.error('Please fix validation errors before saving');
+      return;
+    }
+
+    if (phoneValue && !phoneRegex.test(phoneValue)) {
+      setPhoneError('Please enter a valid phone number');
+      toast.error('Please fix validation errors before saving');
+      return;
+    }
+
     setIsSaving(true);
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 500));
-    setIsSaving(false);
-    setHasChanges(false);
-    setIsEditingName(false);
-    setIsEditingPhone(false);
-    setOriginalName(nameValue);
-    setOriginalPhone(phoneValue);
+    try {
+      // Parse name into first_name and last_name
+      const nameParts = nameValue.trim().split(' ');
+      const first_name = nameParts[0] || '';
+      const last_name = nameParts.slice(1).join(' ') || '';
+
+      // Prepare update data
+      const updateData: {
+        first_name?: string;
+        last_name?: string;
+      } = {};
+
+      if (first_name) {
+        updateData.first_name = first_name;
+      }
+      if (last_name) {
+        updateData.last_name = last_name;
+      }
+
+      // Update profile picture if changed
+      let profilePictureUpdated = false;
+      if (avatar.length > 0 && avatar[0].file) {
+        try {
+          const pictureResponse = await updateAdminProfilePicture(avatar[0].file);
+          if (pictureResponse.status === 1 && pictureResponse.data) {
+            profilePictureUpdated = true;
+            // Update avatar URL with server response
+            if (pictureResponse.data.user.profile_picture) {
+              const newAvatarUrl = getProfilePictureUrl(pictureResponse.data.user.profile_picture);
+              setAvatar([{ dataURL: newAvatarUrl }]);
+              // Update auth context immediately so navbar updates
+              if (setCurrentUser) {
+                setCurrentUser({
+                  ...currentUser,
+                  profile_picture: pictureResponse.data.user.profile_picture
+                } as any);
+              }
+            }
+          } else {
+            throw new Error(pictureResponse.message || 'Failed to update profile picture');
+          }
+        } catch (error: any) {
+          console.error('Error updating profile picture:', error);
+          toast.error(error?.response?.data?.message || error?.message || 'Failed to update profile picture');
+          setIsSaving(false);
+          return;
+        }
+      }
+
+      // Update profile data (name, etc.) if there are changes
+      if (Object.keys(updateData).length > 0 || nameValue !== originalName) {
+        const response = await updateAdminProfile(updateData);
+
+        if (response.status === 1) {
+          // Success - update local state
+          setOriginalName(nameValue);
+          setOriginalPhone(phoneValue);
+          setOriginalAvatar(avatar);
+          setHasChanges(false);
+          setIsEditing(false);
+          setNameError(null);
+          setPhoneError(null);
+          
+          // Show success message
+          if (profilePictureUpdated) {
+            toast.success('Profile and picture updated successfully');
+          } else {
+            toast.success('Profile updated successfully');
+          }
+          
+          // Refresh profile data
+          await loadProfile();
+        } else {
+          toast.error(response.message || 'Failed to update profile');
+          setIsSaving(false);
+          return;
+        }
+      } else if (profilePictureUpdated) {
+        // Only picture was updated
+        setOriginalAvatar(avatar);
+        setHasChanges(false);
+        toast.success('Profile picture updated successfully');
+        await loadProfile();
+      }
+
+      setIsSaving(false);
+    } catch (error: any) {
+      console.error('Error updating profile:', error);
+      toast.error(error?.response?.data?.message || error?.message || 'Failed to update profile');
+      setIsSaving(false);
+    }
   };
 
-  const userName = currentUser?.fullname ||
+  const userName = nameValue || currentUser?.fullname ||
     (currentUser?.first_name && currentUser?.last_name
       ? `${currentUser.first_name} ${currentUser.last_name}`
       : currentUser?.first_name || 'User');
   const userRole = currentUser?.role || 'USER';
   const userStatus = 'ACTIVE'; // This would come from user data or be derived
 
+  if (isLoading) {
+    return (
+      <div className="card min-w-full">
+        <div className="card-header">
+          <h3 className="card-title">Personal Info</h3>
+        </div>
+        <div className="card-body">
+          <div className="flex items-center justify-center py-8">
+            <span className="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+            <span>Loading profile...</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="card min-w-full">
       <div className="card-header">
-        <h3 className="card-title">Personal Info</h3>
+        <div className="flex items-center justify-between">
+          <h3 className="card-title">Personal Info</h3>
+          {!isEditing && (
+            <button
+              className="btn btn-sm btn-icon btn-clear btn-primary"
+              onClick={handleStartEdit}
+              disabled={isSaving}
+              title="Edit profile"
+            >
+              <KeenIcon icon="notepad-edit" />
+            </button>
+          )}
+        </div>
       </div>
       <div className="card-table scrollable-x-auto pb-3">
         <table className="table align-middle text-sm text-gray-500">
@@ -110,17 +377,26 @@ const PersonalInfo = () => {
                 <div className="flex justify-center items-center">
                   <ImageInput value={avatar} onChange={handleAvatarChange}>
                     {({ onImageUpload }) => (
-                      <div className="image-input size-[60px]" onClick={onImageUpload}>
-                        <div
-                          className="btn btn-icon btn-icon-xs btn-light shadow-default absolute z-1 size-5 -top-0.5 -end-0.5 rounded-full"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setAvatar([]);
-                            setHasChanges(true);
-                          }}
-                        >
-                          <KeenIcon icon="cross" />
-                        </div>
+                      <div 
+                        className={`image-input size-[60px] ${!isEditing ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}`} 
+                        onClick={isEditing ? onImageUpload : undefined}
+                      >
+                        {isEditing && (
+                          <div
+                            className="btn btn-icon btn-icon-xs btn-light shadow-default absolute z-1 size-5 -top-0.5 -end-0.5 rounded-full"
+                            onClick={async (e) => {
+                              e.stopPropagation();
+                              // Remove avatar - set to default
+                              const defaultAvatar = '/media/avatars/300-2.png';
+                              setAvatar([{ dataURL: toAbsoluteUrl(defaultAvatar) }]);
+                              // Note: To actually remove profile picture from server, you'd need a delete endpoint
+                              // For now, just update UI
+                              checkForChanges(nameValue, phoneValue, [{ dataURL: toAbsoluteUrl(defaultAvatar) }]);
+                            }}
+                          >
+                            <KeenIcon icon="cross" />
+                          </div>
+                        )}
                         <span className="tooltip" id="image_input_tooltip">
                           Click to remove or revert
                         </span>
@@ -157,99 +433,61 @@ const PersonalInfo = () => {
             <tr>
               <td className="py-2 text-gray-600 font-normal">Name</td>
               <td className="py-2 text-gray-800 font-normal text-sm">
-                {isEditingName ? (
-                  <input
-                    type="text"
-                    value={nameValue}
-                    onChange={(e) => handleNameChange(e.target.value)}
-                    className="input input-sm w-full max-w-xs"
-                    autoFocus
-                    maxLength={40}
-                    onBlur={handleNameBlur}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        setIsEditingName(false);
-                      } else if (e.key === 'Escape') {
-                        handleCancelName();
-                      }
-                    }}
-                  />
+                {isEditing ? (
+                  <div className="w-full max-w-xs">
+                    <input
+                      type="text"
+                      value={nameValue}
+                      onChange={(e) => handleNameChange(e.target.value)}
+                      className={`input input-sm w-full ${nameError ? 'border-red-500' : ''}`}
+                      autoFocus
+                      maxLength={20}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Escape') {
+                          handleCancelEdit();
+                        }
+                      }}
+                    />
+                    {nameError && (
+                      <p className="text-xs text-red-500 mt-1">{nameError}</p>
+                    )}
+                    <p className="text-xs text-gray-500 mt-1">{nameValue.length}/20 characters</p>
+                  </div>
                 ) : (
                   nameValue || userName
                 )}
               </td>
-              <td className="py-2 text-center">
-                {isEditingName ? (
-                  <button
-                    key="cancel-name"
-                    className="btn btn-sm btn-icon btn-clear btn-primary"
-                    onMouseDown={(e) => e.preventDefault()}
-                    onClick={handleCancelName}
-                    disabled={isSaving}
-                    title="Cancel editing"
-                  >
-                    <KeenIcon icon="cross" />
-                  </button>
-                ) : (
-                  <button
-                    key="edit-name"
-                    className="btn btn-sm btn-icon btn-clear btn-primary"
-                    onClick={handleStartEditName}
-                    disabled={isSaving}
-                    title="Edit name"
-                  >
-                    <KeenIcon icon="notepad-edit" />
-                  </button>
-                )}
-              </td>
+              <td className="py-2 text-center"></td>
             </tr>
             <tr>
               <td className="py-2 text-gray-600 font-normal">Phone</td>
               <td className="py-2 text-gray-800 font-normal text-sm">
-                {isEditingPhone ? (
-                  <input
-                    type="tel"
-                    value={phoneValue}
-                    onChange={(e) => handlePhoneChange(e.target.value)}
-                    className="input input-sm w-full max-w-xs"
-                    autoFocus
-                    onBlur={handlePhoneBlur}
-                    onKeyDown={(e) => {
-                      if (e.key === 'Enter') {
-                        setIsEditingPhone(false);
-                      } else if (e.key === 'Escape') {
-                        handleCancelPhone();
-                      }
-                    }}
-                  />
+                {isEditing ? (
+                  <div className="w-full max-w-xs">
+                    <input
+                      type="tel"
+                      value={phoneValue}
+                      onChange={(e) => handlePhoneChange(e.target.value)}
+                      className={`input input-sm w-full ${phoneError ? 'border-red-500' : ''}`}
+                      placeholder="+1234567890"
+                      onKeyDown={(e) => {
+                        if (e.key === 'Escape') {
+                          handleCancelEdit();
+                        }
+                      }}
+                    />
+                    {phoneError && (
+                      <p className="text-xs text-red-500 mt-1">{phoneError}</p>
+                    )}
+                    {!phoneError && phoneValue && (
+                      <p className="text-xs text-gray-500 mt-1">Format: +1234567890 or (123) 456-7890</p>
+                    )}
+                  </div>
                 ) : (
                   phoneValue || '-'
                 )}
               </td>
-              <td className="py-2 text-center">
-                {isEditingPhone ? (
-                  <button
-                    key="cancel-phone"
-                    className="btn btn-sm btn-icon btn-clear btn-primary"
-                    onMouseDown={(e) => e.preventDefault()}
-                    onClick={handleCancelPhone}
-                    disabled={isSaving}
-                    title="Cancel editing"
-                  >
-                    <KeenIcon icon="cross" />
-                  </button>
-                ) : (
-                  <button
-                    key="edit-phone"
-                    className="btn btn-sm btn-icon btn-clear btn-primary"
-                    onClick={handleStartEditPhone}
-                    disabled={isSaving}
-                    title="Edit phone"
-                  >
-                    <KeenIcon icon="notepad-edit" />
-                  </button>
-                )}
-              </td>
+              <td className="py-2 text-center"></td>
             </tr>
             <tr>
               <td className="py-2 text-gray-600 font-normal">Role</td>
@@ -268,12 +506,19 @@ const PersonalInfo = () => {
           </tbody>
         </table>
       </div>
-      {hasChanges && (
+      {isEditing && (
         <div className="card-footer flex justify-end gap-2">
+          <button
+            className="btn btn-sm btn-light"
+            onClick={handleCancelEdit}
+            disabled={isSaving}
+          >
+            Cancel
+          </button>
           <button
             className="btn btn-sm btn-primary"
             onClick={handleSave}
-            disabled={isSaving}
+            disabled={isSaving || (!hasChanges && JSON.stringify(avatar) === JSON.stringify(originalAvatar))}
           >
             {isSaving ? (
               <>

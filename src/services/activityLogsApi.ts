@@ -7,6 +7,7 @@ export interface ActivityLogUser {
   name: string;
   email: string;
   role: string;
+  profile_picture?: string;
 }
 
 export interface ActivityLogResponse {

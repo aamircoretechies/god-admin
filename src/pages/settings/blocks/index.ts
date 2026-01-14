@@ -5,3 +5,6 @@ export * from './CacheOfflineControl';
 export * from './NotificationsEmail';
 export * from './AddMemberModal';
 export * from './UserManagementMembers';
+export * from './UserManagementRoles';
+export * from './RolesManagement';
+export * from './PermissionsManagement';

@@ -23,6 +23,7 @@ import {
   type PromptDetailResponse,
   type CreatePromptRequest
 } from '@/services/promptsApi';
+import { PromptSourceFilters } from '@/components/prompt-source-filters/PromptSourceFilters';
 import { toast } from 'sonner';
 
 const ViewPromptContent: React.FC = () => {
@@ -379,6 +380,9 @@ const ViewPromptContent: React.FC = () => {
               </div>
             </CardContent>
           </Card>
+
+          {/* Source Filters */}
+          {id && <PromptSourceFilters templateId={id} readOnly={true} />}
         </div>
 
         {/* Sidebar */}

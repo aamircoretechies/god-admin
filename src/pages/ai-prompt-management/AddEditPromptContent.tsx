@@ -20,6 +20,7 @@ import {
   type UpdatePromptRequest,
   type CreatePromptRequest
 } from '@/services/promptsApi';
+import { PromptSourceFilters } from '@/components/prompt-source-filters/PromptSourceFilters';
 import { toast } from 'sonner';
 
 // Category options mapped to backend values
@@ -340,6 +341,11 @@ const AddEditPromptContent = forwardRef((props, ref) => {
                 </div>
               </CardContent>
             </Card>
+          )}
+
+          {/* Source Filters - Only show in edit mode */}
+          {isEditMode && id && (
+            <PromptSourceFilters templateId={id} readOnly={false} />
           )}
         </div>
 

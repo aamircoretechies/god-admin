@@ -1,5 +1,6 @@
 /* eslint-disable prettier/prettier */
 import { useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useLanguage } from '@/i18n';
 import { toAbsoluteUrl } from '@/utils';
 import { Column, ColumnDef, RowSelectionState } from '@tanstack/react-table';
@@ -86,7 +87,7 @@ const Members = () => {
     const { table } = useDataGrid();
     const memberColumn = table.getColumn('member');
     const isMemberVisible = memberColumn?.getIsVisible() ?? true;
-    
+
     return (
       <Checkbox
         checked={
@@ -108,7 +109,7 @@ const Members = () => {
     const { table } = useDataGrid();
     const memberColumn = table.getColumn('member');
     const isMemberVisible = memberColumn?.getIsVisible() ?? true;
-    
+
     return (
       <Checkbox
         checked={row.getIsSelected()}
@@ -232,39 +233,33 @@ const Members = () => {
           cellClassName: 'text-gray-700 font-normal'
         },
       },
-      // Three dots menu column - commented out to hide from UI
-      /* {
-        id: 'click',
-        header: () => '',
+      {
+        id: 'actions',
+        header: ({ column }) => <DataGridColumnHeader title='Actions' column={column} />,
         enableSorting: false,
-        cell: () => (
-          <Menu className="items-stretch">
-            <MenuItem
-              toggle="dropdown"
-              trigger="click"
-              dropdownProps={{
-                placement: isRTL() ? 'bottom-start' : 'bottom-end',
-                modifiers: [
-                  {
-                    name: 'offset',
-                    options: {
-                      offset: isRTL() ? [0, -10] : [0, 10] // [skid, distance]
-                    }
-                  }
-                ]
-              }}
-            >
-              <MenuToggle className="btn btn-sm btn-icon btn-light btn-clear">
-                <KeenIcon icon="dots-vertical" />
-              </MenuToggle>
-              {DropdownCard1()}
-            </MenuItem>
-          </Menu>
-        ),
-        meta: {
-          headerClassName: 'w-[60px]',
+        cell: ({ row }) => {
+          return (
+            <div className="flex gap-2">
+              <Link
+                to={`/network/user-table/user-detail/${row.original.id}`}
+                className="btn btn-sm btn-outline btn-primary"
+              >
+                View Details
+              </Link>
+              <Link
+                to={`/system-log/user/${row.original.id}`}
+                className="btn btn-sm btn-outline btn-secondary"
+              >
+                Activity
+              </Link>
+            </div>
+          );
         },
-      }, */
+        meta: {
+          headerClassName: 'min-w-[200px]',
+          cellClassName: 'text-gray-700 font-normal'
+        },
+      },
     ],
     [isRTL]
   );
@@ -519,7 +514,7 @@ const Members = () => {
     const { table } = useDataGrid();
     const memberColumn = table.getColumn('member');
     const isMemberVisible = memberColumn?.getIsVisible() ?? true;
-    
+
     useEffect(() => {
       if (!isMemberVisible) {
         // Clear selection when member column is hidden
@@ -531,7 +526,7 @@ const Members = () => {
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [isMemberVisible]);
-    
+
     return null; // This component doesn't render anything
   };
 

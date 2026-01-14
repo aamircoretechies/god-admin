@@ -129,7 +129,11 @@ const Users = () => {
           return (
             <div className="flex items-center gap-2.5">
               <img
-                src={toAbsoluteUrl(`/media/avatars/${row.original.user.avatar}`)}
+                src={
+                  row.original.user.avatar.startsWith('http')
+                    ? row.original.user.avatar
+                    : toAbsoluteUrl(`/media/avatars/${row.original.user.avatar}`)
+                }
                 className="rounded-full size-7 shrink-0"
                 alt={`${row.original.user.userName}`}
               />

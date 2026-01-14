@@ -1,5 +1,5 @@
 import axios from 'axios';
-import { API_URL } from '@/utils/Api';
+import { API_URL, getUploadedFileUrl } from '@/utils/Api';
 import { TDataGridRequestParams } from '@/components/data-grid';
 
 export interface UserListItem {
@@ -8,6 +8,7 @@ export interface UserListItem {
   email: string;
   created_at: string;
   last_login: string | null;
+  avatar?: string;
 }
 
 export interface UsersListResponse {
@@ -35,6 +36,7 @@ export interface UserProfileResponse {
       memberSince: string;
       accountType: string;
       status: string;
+      profile_picture?: string;
       phoneNumber?: string;
       address?: string;
     };
@@ -150,9 +152,16 @@ export const fetchUserProfile = async (userId: string): Promise<UserProfileRespo
  * Transform API user data to match UI format
  */
 export const transformUserData = (user: UserListItem): TransformedUserData => {
-  // Generate a random avatar from available avatars
-  const avatarNumber = Math.floor(Math.random() * 34) + 1;
-  const avatar = `300-${avatarNumber}.png`;
+  // Use real avatar if available, otherwise fallback to random
+  let avatar: string;
+
+  if (user.avatar) {
+    avatar = getUploadedFileUrl(user.avatar);
+  } else {
+    // Generate a random avatar from available avatars
+    const avatarNumber = Math.floor(Math.random() * 34) + 1;
+    avatar = `300-${avatarNumber}.png`;
+  }
 
   // Format date
   const formatDate = (dateString: string) => {
@@ -270,9 +279,9 @@ export interface TeamMember {
 
 export interface CreateTeamMemberRequest {
   email: string;
-  password: string;
-  first_name: string;
-  last_name: string;
+  password?: string;
+  first_name?: string;
+  last_name?: string;
   role: string;
   custom_role_id?: string;
 }
@@ -398,6 +407,20 @@ export const updateUserProfile = async (
   const response = await axios.put<UpdateUserProfileResponse>(
     `${API_URL}/admin/users/${userId}/profile`,
     data
+  );
+  return response.data;
+};
+
+// Delete User API
+export interface DeleteUserResponse {
+  status: number;
+  message: string;
+  data: null;
+}
+
+export const deleteUser = async (userId: string): Promise<DeleteUserResponse> => {
+  const response = await axios.delete<DeleteUserResponse>(
+    `${API_URL}/admin/users/${userId}`
   );
   return response.data;
 };

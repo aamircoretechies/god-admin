@@ -22,6 +22,12 @@ export interface PromptsListResponse {
   status: number;
   message: string;
   data: PromptResponse[];
+  metadata?: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
 }
 
 // API call
@@ -160,6 +166,94 @@ export const updatePromptStatus = async (
   const response = await axios.patch<UpdatePromptStatusResponse>(
     `${API_URL}/admin/prompts/${templateId}`,
     { status }
+  );
+  return response.data;
+};
+
+// Source Filter Interfaces
+export interface SourceOption {
+  value: string;
+  label: string;
+}
+
+export interface SourceFilter {
+  filter_id: string;
+  sources: string[];
+  custom_sources: string[];
+  notes?: string;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface SourceFiltersResponse {
+  status: number;
+  message: string;
+  data: {
+    template_id: string;
+    whitelist: SourceFilter | null;
+    blacklist: SourceFilter | null;
+  };
+}
+
+export interface SourceOptionsResponse {
+  status: number;
+  message: string;
+  data: SourceOption[];
+}
+
+export interface UpsertSourceFilterRequest {
+  filter_type: 'whitelist' | 'blacklist';
+  sources: string[];
+  custom_sources?: string[];
+  notes?: string;
+}
+
+export interface UpsertSourceFilterResponse {
+  status: number;
+  message: string;
+  data: SourceFilter;
+}
+
+export interface DeleteSourceFilterResponse {
+  status: number;
+  message: string;
+}
+
+// Get source options
+export const fetchSourceOptions = async (): Promise<SourceOptionsResponse> => {
+  const response = await axios.get<SourceOptionsResponse>(
+    `${API_URL}/admin/prompts/source-options`
+  );
+  return response.data;
+};
+
+// Get source filters for a prompt template
+export const fetchSourceFilters = async (templateId: string): Promise<SourceFiltersResponse> => {
+  const response = await axios.get<SourceFiltersResponse>(
+    `${API_URL}/admin/prompts/${templateId}/source-filters`
+  );
+  return response.data;
+};
+
+// Create or update source filter
+export const upsertSourceFilter = async (
+  templateId: string,
+  data: UpsertSourceFilterRequest
+): Promise<UpsertSourceFilterResponse> => {
+  const response = await axios.post<UpsertSourceFilterResponse>(
+    `${API_URL}/admin/prompts/${templateId}/source-filters`,
+    data
+  );
+  return response.data;
+};
+
+// Delete source filter
+export const deleteSourceFilter = async (
+  templateId: string,
+  filterType: 'whitelist' | 'blacklist'
+): Promise<DeleteSourceFilterResponse> => {
+  const response = await axios.delete<DeleteSourceFilterResponse>(
+    `${API_URL}/admin/prompts/${templateId}/source-filters/${filterType}`
   );
   return response.data;
 };

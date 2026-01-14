@@ -4,6 +4,7 @@ import { FormattedMessage } from 'react-intl';
 import { useAuthContext } from '@/auth';
 import { useLanguage } from '@/i18n';
 import { toAbsoluteUrl } from '@/utils';
+import { getUploadedFileUrl } from '@/utils/Api';
 import { DropdownUserLanguages } from './DropdownUserLanguages';
 import { useSettings } from '@/providers/SettingsProvider';
 import { DefaultTooltip, KeenIcon } from '@/components';
@@ -57,15 +58,20 @@ const DropdownUser = ({ menuItemRef }: IDropdownUserProps) => {
         : currentUser?.first_name || 'User');
     const userEmail = currentUser?.email || '';
     const userRole = currentUser?.role || 'USER';
-    const userAvatar =
+    const userAvatarPath =
       currentUser?.profile_picture || currentUser?.pic || '/media/avatars/300-2.png';
+    
+    // Get the correct URL for the avatar
+    const userAvatar = userAvatarPath.startsWith('/uploads')
+      ? getUploadedFileUrl(userAvatarPath)
+      : toAbsoluteUrl(userAvatarPath);
 
     return (
       <div className="flex items-center justify-between px-5 py-1.5 gap-1.5">
         <div className="flex items-center gap-2">
           <img
             className="size-9 rounded-full border-2 border-success"
-            src={toAbsoluteUrl(userAvatar)}
+            src={userAvatar}
             alt={userName}
           />
           <div className="flex flex-col gap-1.5">

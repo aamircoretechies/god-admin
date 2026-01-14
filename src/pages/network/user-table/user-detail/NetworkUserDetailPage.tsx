@@ -13,11 +13,13 @@ import {
 
 import { NetworkUserDetailContent } from '.';
 import { useLayout } from '@/providers';
-import { exportUserData } from '@/services/usersApi';
+import { exportUserData, deleteUser } from '@/services/usersApi';
+import { useNavigate } from 'react-router-dom';
 
 const NetworkUserDetailPage = () => {
   const { currentLayout } = useLayout();
   const { id } = useParams<{ id: string }>();
+  const navigate = useNavigate();
 
   const handleExportData = async () => {
     if (!id) {
@@ -54,8 +56,38 @@ const NetworkUserDetailPage = () => {
     // Edit Profile functionality is disabled
     toast.info('Edit Profile functionality is currently disabled');
   };
-  const handleDeleteUser = () => {
-    toast.info('Delete functionality will be added later');
+
+  const handleDeleteUser = async () => {
+    if (!id) {
+      toast.error('User ID is required');
+      return;
+    }
+
+    // Confirm deletion
+    if (!window.confirm('Are you sure you want to delete this user? This action cannot be undone and will delete all user data including activities, bookmarks, and preferences.')) {
+      return;
+    }
+
+    try {
+      const response = await deleteUser(id);
+      if (response.status === 1) {
+        toast.success('User deleted successfully');
+        // Navigate back to user list
+        navigate('/network/user-table/saas-users');
+      } else {
+        toast.error(response.message || 'Failed to delete user');
+      }
+    } catch (error: any) {
+      console.error('Error deleting user:', error);
+      const errorMessage = error?.response?.data?.message || error?.message || 'Failed to delete user';
+      
+      // Handle authorization errors
+      if (error?.response?.status === 403 || errorMessage.toLowerCase().includes('forbidden') || errorMessage.toLowerCase().includes('unauthorized')) {
+        toast.error('You are not authorized to delete users. Please contact a super admin.');
+      } else {
+        toast.error(errorMessage);
+      }
+    }
   };
 
 

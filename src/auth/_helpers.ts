@@ -82,7 +82,7 @@ export function setupAxios(axios: any) {
     async (err: any) => await Promise.reject(err)
   );
 
-  // Response interceptor - handle 401 unauthorized errors
+  // Response interceptor - handle 401 unauthorized and 403 forbidden errors
   axios.interceptors.response.use(
     (response: any) => response,
     (error: any) => {
@@ -99,6 +99,17 @@ export function setupAxios(axios: any) {
           const loginPath = `${basePath}/auth/login`;
           // Force redirect to login page
           window.location.href = loginPath;
+        }
+      }
+
+      // If we get a 403 (Forbidden), show proper error message
+      if (error?.response?.status === 403) {
+        const errorMessage = error?.response?.data?.message || 'Access forbidden. You do not have permission to perform this action.';
+        // Show toast notification if available
+        if (typeof window !== 'undefined' && (window as any).toast) {
+          (window as any).toast.error(errorMessage);
+        } else {
+          console.error('Forbidden:', errorMessage);
         }
       }
 

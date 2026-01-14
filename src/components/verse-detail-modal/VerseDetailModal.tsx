@@ -18,12 +18,14 @@ import {
   Edit,
   Trash2,
   ChevronLeft,
-  ChevronRight
+  ChevronRight,
+  RotateCcw
 } from 'lucide-react';
 import {
   fetchVerseAIExplanationHistory,
   deleteAIExplanation,
   updateAIExplanation,
+  regenerateVerseAIExplanation,
   type VerseAIExplanationHistoryResponse,
   type UpdateAIExplanationRequest
 } from '@/services/aiExplanationsApi';
@@ -85,6 +87,7 @@ const VerseDetailModal: React.FC<VerseDetailModalProps> = ({ isOpen, onClose, ve
   const [editingExplanation, setEditingExplanation] = useState<any | null>(null);
   const [editFormData, setEditFormData] = useState<UpdateAIExplanationRequest | null>(null);
   const [saving, setSaving] = useState(false);
+  const [regeneratingId, setRegeneratingId] = useState<string | null>(null);
 
   const loadAIExplanationHistory = useCallback(async () => {
     if (!verse?.verseId) return;
@@ -199,6 +202,40 @@ const VerseDetailModal: React.FC<VerseDetailModalProps> = ({ isOpen, onClose, ve
       toast.error(error?.response?.data?.message || error?.message || 'Failed to delete explanation');
     } finally {
       setDeletingId(null);
+    }
+  };
+
+  const handleRegenerateExplanation = async (explanation: any) => {
+    if (!verse?.verseId) return;
+
+    // Confirm regeneration
+    if (!window.confirm('Are you sure you want to regenerate this explanation? This will replace the current content with a new AI-generated explanation.')) {
+      return;
+    }
+
+    try {
+      // Get explanation_type and experience_level
+      const explanationType = explanation.explanation_type || explanation.context_type || explanation.category || 'general';
+      const experienceLevel = explanation.experience_level || 'NEW_TO_BIBLE';
+
+      setRegeneratingId(explanation.explanation_id);
+      const response = await regenerateVerseAIExplanation(verse.verseId, {
+        explanation_type: explanationType,
+        experience_level: experienceLevel
+      });
+
+      if (response.status === 1) {
+        toast.success('Explanation regenerated successfully');
+        // Reload the explanation history
+        await loadAIExplanationHistory();
+      } else {
+        toast.error(response.message || 'Failed to regenerate explanation');
+      }
+    } catch (error: any) {
+      console.error('Error regenerating explanation:', error);
+      toast.error(error?.response?.data?.message || error?.message || 'Failed to regenerate explanation');
+    } finally {
+      setRegeneratingId(null);
     }
   };
 
@@ -359,7 +396,22 @@ const VerseDetailModal: React.FC<VerseDetailModalProps> = ({ isOpen, onClose, ve
                                 <Button
                                   variant="outline"
                                   size="sm"
+                                  onClick={() => handleRegenerateExplanation(explanation)}
+                                  disabled={regeneratingId === explanation.explanation_id || editingExplanation?.explanation_id === explanation.explanation_id}
+                                  title="Regenerate explanation using AI"
+                                >
+                                  {regeneratingId === explanation.explanation_id ? (
+                                    <Loader2 className="w-3 h-3 mr-1 animate-spin" />
+                                  ) : (
+                                    <RotateCcw className="w-3 h-3 mr-1" />
+                                  )}
+                                  Regenerate
+                                </Button>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
                                   onClick={() => handleEditExplanation(explanation)}
+                                  disabled={regeneratingId === explanation.explanation_id}
                                 >
                                   <Edit className="w-3 h-3 mr-1" />
                                   Edit
@@ -368,7 +420,7 @@ const VerseDetailModal: React.FC<VerseDetailModalProps> = ({ isOpen, onClose, ve
                                   variant="outline"
                                   size="sm"
                                   onClick={() => handleDeleteExplanation(explanation)}
-                                  disabled={deletingId === explanation.explanation_id}
+                                  disabled={deletingId === explanation.explanation_id || regeneratingId === explanation.explanation_id}
                                   className="text-red-600 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/20"
                                 >
                                   {deletingId === explanation.explanation_id ? (

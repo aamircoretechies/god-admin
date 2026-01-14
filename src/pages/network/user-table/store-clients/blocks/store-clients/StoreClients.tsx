@@ -139,7 +139,11 @@ const StoreClients = () => {
         cell: (info: any) => (
           <div className="flex items-center gap-2.5">
             <img
-              src={toAbsoluteUrl(`/media/avatars/${info.row.original.user.avatar}`)}
+              src={
+                info.row.original.user.avatar.startsWith('http')
+                  ? info.row.original.user.avatar
+                  : toAbsoluteUrl(`/media/avatars/${info.row.original.user.avatar}`)
+              }
               className="size-7 rounded-full shrink-0"
               alt=""
             />
