@@ -60,11 +60,13 @@ const DropdownUser = ({ menuItemRef }: IDropdownUserProps) => {
     const userRole = currentUser?.role || 'USER';
     const userAvatarPath =
       currentUser?.profile_picture || currentUser?.pic || '/media/avatars/300-2.png';
-    
-    // Get the correct URL for the avatar
+
     const userAvatar = userAvatarPath.startsWith('/uploads')
       ? getUploadedFileUrl(userAvatarPath)
       : toAbsoluteUrl(userAvatarPath);
+
+    const displayName = userName.length > 15 ? `${userName.substring(0, 15)}...` : userName;
+    const displayEmail = userEmail.length > 25 ? `${userEmail.substring(0, 25)}...` : userEmail;
 
     return (
       <div className="flex items-center justify-between px-5 py-1.5 gap-1.5">
@@ -79,14 +81,14 @@ const DropdownUser = ({ menuItemRef }: IDropdownUserProps) => {
               to="/account/home/user-profile"
               className="text-sm text-gray-800 hover:text-primary font-semibold leading-none"
             >
-              {userName}
+              {displayName}
             </Link>
             {userEmail && (
               <a
                 href={`mailto:${userEmail}`}
                 className="text-xs text-gray-600 hover:text-primary font-medium leading-none"
               >
-                {userEmail}
+                {displayEmail}
               </a>
             )}
           </div>
@@ -109,7 +111,7 @@ const DropdownUser = ({ menuItemRef }: IDropdownUserProps) => {
                 <KeenIcon icon="profile-circle" />
               </MenuIcon>
               <MenuTitle>My Profile</MenuTitle>
-               {/*  <MenuLink>
+              {/*  <MenuLink>
               <MenuIcon>
                 <KeenIcon icon="setting-2" />
               </MenuIcon>
