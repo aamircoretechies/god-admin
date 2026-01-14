@@ -24,12 +24,19 @@ export interface AIExplanationResponse {
     chapter: number;
     verse: number;
   };
+  experience_level?: string;
 }
 
 export interface AIExplanationsListResponse {
   status: number;
   message: string;
   data: AIExplanationResponse[];
+  metadata?: {
+    total: number;
+    page: number;
+    limit: number;
+    totalPages: number;
+  };
 }
 
 // Interfaces for verse AI explanation history
@@ -71,6 +78,7 @@ export const fetchAIExplanations = async (params: {
   status?: string;
   category?: string;
   search?: string;
+  experience_level?: string;
 }): Promise<AIExplanationsListResponse> => {
   const queryParams = new URLSearchParams();
   queryParams.append('page', String(params.page));
@@ -78,6 +86,7 @@ export const fetchAIExplanations = async (params: {
   if (params.status) queryParams.append('status', params.status);
   if (params.category) queryParams.append('category', params.category);
   if (params.search) queryParams.append('search', params.search);
+  if (params.experience_level) queryParams.append('experience_level', params.experience_level);
 
   const response = await axios.get<AIExplanationsListResponse>(
     `${API_URL}/admin/bible/ai-explanations?${queryParams.toString()}`

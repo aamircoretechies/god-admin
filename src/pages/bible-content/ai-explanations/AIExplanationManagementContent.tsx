@@ -27,20 +27,22 @@ import {
   ChevronLeft,
   ChevronRight
 } from 'lucide-react';
-import { fetchAIExplanations, fetchVerseAIExplanationHistory, updateAIExplanation, type AIExplanationResponse } from '@/services/aiExplanationsApi';
+import { fetchAIExplanations, fetchVerseAIExplanationHistory, updateAIExplanation, updateChapterAIExplanation, deleteAIExplanation, deleteChapterAIExplanation, fetchChapterAIExplanationHistory, type AIExplanationResponse, type AIExplanationsListResponse } from '@/services/aiExplanationsApi';
 import { DummyDataIndicator } from '@/components/dummy-data-indicator';
 import { toast } from "sonner";
 
 
 interface AIExplanation {
   id: string;
-  verseId: string;
+  contentId: string;
+  contentType: 'verse' | 'chapter';
+  verseId?: string; // Legacy field
   book: string;
   chapter: number;
   verse: number;
   verseText: string; // Dummy - not in API
   explanation: string;
-  status: 'pending' | 'approved' | 'rejected' | 'needs_review';
+  status: 'pending' | 'approved' | 'rejected' | 'needs_review' | 'Approved' | 'Rejected' | 'UnderReview';
   aiGenerated: boolean;
   theologicalAccuracy: number; // Dummy - not in API
   clarity: number; // Dummy - not in API
@@ -48,20 +50,27 @@ interface AIExplanation {
   updatedAt: string;
   reviewer?: string;
   feedback?: string; // Dummy - not in API
-  category: 'theological' | 'historical' | 'cultural' | 'linguistic' | 'general';
+  category: string;
   translation?: {
     full_name: string;
     abbreviation: string;
   };
   fieldName: string;
+  experienceLevel?: string;
+  label?: string;
+  hasContent?: boolean;
+  sources?: string[];
 }
 
 // Transform API response to component format
 const transformExplanation = (apiData: AIExplanationResponse): AIExplanation => {
+  const contentType = (apiData as any).content_type || (apiData.verse && apiData.verse.verse ? 'verse' : 'chapter');
   return {
     id: apiData.explanation_id,
-    verseId: apiData.verse.verse_id,
-    book: apiData.verse.book,
+    contentId: apiData.verse?.verse_id || (apiData as any).content_id || apiData.explanation_id.split('_')[0],
+    contentType: contentType as 'verse' | 'chapter',
+    verseId: apiData.verse?.verse_id,
+    book: apiData.verse?.book || (apiData as any).book?.long_name || '',
     chapter: apiData.verse.chapter,
     verse: apiData.verse.verse,
     verseText: '', // Dummy - not in API
@@ -82,9 +91,13 @@ const transformExplanation = (apiData: AIExplanationResponse): AIExplanation => 
     }),
     reviewer: apiData.reviewed_by || undefined,
     feedback: undefined, // Dummy - not in API
-    category: (apiData.category.toLowerCase() as any) || 'general',
+    category: apiData.category || 'general',
     translation: apiData.translation,
-    fieldName: apiData.field_name
+    fieldName: apiData.field_name,
+    experienceLevel: apiData.experience_level,
+    label: (apiData as any).label,
+    hasContent: (apiData as any).has_content,
+    sources: (apiData as any).sources
   };
 };
 
@@ -103,6 +116,7 @@ const AIExplanationManagementContent = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [categoryFilter, setCategoryFilter] = useState<string>('all');
+  const [experienceLevelFilter, setExperienceLevelFilter] = useState<string>('all');
 
 
 
@@ -112,7 +126,7 @@ const AIExplanationManagementContent = () => {
   // Reset to page 1 when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [statusFilter, categoryFilter, searchTerm]);
+  }, [statusFilter, categoryFilter, searchTerm, experienceLevelFilter]);
 
   // Fetch explanations from API (with debounce for search)
   useEffect(() => {
@@ -125,16 +139,22 @@ const AIExplanationManagementContent = () => {
           limit: pageSize,
           status: statusFilter !== 'all' ? statusFilter : undefined,
           category: categoryFilter !== 'all' ? categoryFilter : undefined,
+          experience_level: experienceLevelFilter !== 'all' ? experienceLevelFilter : undefined,
           search: searchTerm || undefined
         });
 
         if (response.status === 1 && response.data) {
           const transformed = response.data.map(transformExplanation);
           setExplanations(transformed);
-          // Note: API doesn't return pagination info in the example, so we'll estimate
-          // If API returns pagination, update this
-          setTotalCount(transformed.length);
-          setTotalPages(Math.ceil(transformed.length / pageSize) || 1);
+
+          if (response.metadata) {
+            setTotalCount(response.metadata.total);
+            setTotalPages(response.metadata.totalPages);
+          } else {
+            // Fallback for unexpected response structure
+            setTotalCount(transformed.length);
+            setTotalPages(Math.ceil(transformed.length / pageSize) || 1);
+          }
         } else {
           throw new Error(response.message || 'Failed to fetch explanations');
         }
@@ -151,7 +171,7 @@ const AIExplanationManagementContent = () => {
     }, searchTerm ? 500 : 0);
 
     return () => clearTimeout(debounceTimer);
-  }, [currentPage, statusFilter, categoryFilter, searchTerm]);
+  }, [currentPage, statusFilter, categoryFilter, searchTerm, experienceLevelFilter]);
 
   // Fetch verse text when modal opens
   useEffect(() => {
@@ -215,6 +235,11 @@ const AIExplanationManagementContent = () => {
       filtered = filtered.filter(e => e.category === categoryFilter);
     }
 
+    // Filter by experience level
+    if (experienceLevelFilter !== 'all') {
+      filtered = filtered.filter(e => e.experienceLevel === experienceLevelFilter);
+    }
+
     // Filter by search term
     if (searchTerm) {
       const searchLower = searchTerm.toLowerCase();
@@ -266,13 +291,16 @@ const AIExplanationManagementContent = () => {
       const explanationToUpdate = explanations.find(e => e.id === isEditing);
       if (!explanationToUpdate) return;
 
-      // const updatePromise = updateAIExplanation(`${explanationToUpdate.verseId}_${explanationToUpdate.fieldName}`, {
-      const updatePromise = updateAIExplanation(explanationToUpdate.verseId, {
+      const updatePayload = {
         explanation_type: explanationToUpdate.fieldName || explanationToUpdate.category || 'general',
-        experience_level: 'NEW_TO_BIBLE',
+        experience_level: explanationToUpdate.experienceLevel || 'NEW_TO_BIBLE',
         content: formData.explanation || '',
-        sources: []
-      });
+        sources: explanationToUpdate.sources || []
+      };
+
+      const updatePromise = explanationToUpdate.contentType === 'chapter'
+        ? updateChapterAIExplanation(explanationToUpdate.contentId, updatePayload)
+        : updateAIExplanation(explanationToUpdate.contentId, updatePayload);
 
       toast.promise(updatePromise, {
         loading: 'Updating explanation...',
@@ -326,21 +354,37 @@ const AIExplanationManagementContent = () => {
     ));
   };
 
-  const handleDelete = (id: string) => {
-    setExplanations(explanations.filter(e => e.id !== id));
-    // Also clear selected explanation if it was deleted
-    if (selectedExplanation?.id === id) {
-      setSelectedExplanation(null);
-    }
-    // Clear editing state if the deleted item was being edited
-    if (isEditing === id) {
-      setIsEditing(null);
-    }
-    toast.success("Deleted successfully!");
+  const handleDelete = async (id: string) => {
+    const explanationToDelete = explanations.find(e => e.id === id);
+    if (!explanationToDelete) return;
+
+    const deletePromise = explanationToDelete.contentType === 'chapter'
+      ? deleteChapterAIExplanation(explanationToDelete.contentId, explanationToDelete.fieldName, explanationToDelete.experienceLevel || 'NEW_TO_BIBLE')
+      : deleteAIExplanation(explanationToDelete.contentId, explanationToDelete.fieldName, explanationToDelete.experienceLevel || 'NEW_TO_BIBLE');
+
+    toast.promise(deletePromise, {
+      loading: 'Deleting explanation...',
+      success: () => {
+        setExplanations(explanations.filter(e => e.id !== id));
+        // Also clear selected explanation if it was deleted
+        if (selectedExplanation?.id === id) {
+          setSelectedExplanation(null);
+        }
+        // Clear editing state if the deleted item was being edited
+        if (isEditing === id) {
+          setIsEditing(null);
+        }
+        return 'Deleted successfully!';
+      },
+      error: (err) => {
+        return err?.response?.data?.message || err.message || 'Failed to delete explanation';
+      }
+    });
   };
 
   const getStatusColor = (status: string) => {
-    switch (status) {
+    const s = status.toLowerCase();
+    switch (s) {
       case 'approved':
         return 'bg-green-100 text-green-800';
       case 'rejected':
@@ -348,6 +392,8 @@ const AIExplanationManagementContent = () => {
       case 'pending':
         return 'bg-yellow-100 text-yellow-800';
       case 'needs_review':
+      case 'underreview':
+      case 'under_review':
         return 'bg-orange-100 text-orange-800';
       default:
         return 'bg-gray-100 text-gray-800';
@@ -355,7 +401,8 @@ const AIExplanationManagementContent = () => {
   };
 
   const getStatusIcon = (status: string) => {
-    switch (status) {
+    const s = status.toLowerCase();
+    switch (s) {
       case 'approved':
         return <CheckCircle className="w-4 h-4 text-green-600" />;
       case 'rejected':
@@ -363,6 +410,8 @@ const AIExplanationManagementContent = () => {
       case 'pending':
         return <Clock className="w-4 h-4 text-yellow-600" />;
       case 'needs_review':
+      case 'underreview':
+      case 'under_review':
         return <AlertCircle className="w-4 h-4 text-orange-600" />;
       default:
         return <Clock className="w-4 h-4 text-gray-600" />;
@@ -690,6 +739,19 @@ const AIExplanationManagementContent = () => {
                 </SelectContent>
               </Select>
             </div>
+            <div>
+              <Select value={experienceLevelFilter} onValueChange={setExperienceLevelFilter}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Experience level" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="all">All Levels</SelectItem>
+                  <SelectItem value="NEW_TO_BIBLE">New to Bible</SelectItem>
+                  <SelectItem value="REGULAR_READER">Regular Reader</SelectItem>
+                  <SelectItem value="SCHOLARLY">Scholarly</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
             <div className="flex items-center space-x-2">
               <Filter className="w-4 h-4 text-gray-500" />
               <span className="text-sm text-gray-600">
@@ -749,8 +811,13 @@ const AIExplanationManagementContent = () => {
                         {explanation.status.replace('_', ' ').charAt(0).toUpperCase() + explanation.status.slice(1).replace('_', ' ')}
                       </Badge>
                       <Badge className="bg-purple-100 text-purple-800">
-                        {explanation.category.charAt(0).toUpperCase() + explanation.category.slice(1)}
+                        {explanation.label || (explanation.category.charAt(0).toUpperCase() + explanation.category.slice(1))}
                       </Badge>
+                      {explanation.experienceLevel && (
+                        <Badge variant="outline" className="bg-gray-50 text-gray-700 border-gray-200">
+                          {explanation.experienceLevel.replace(/_/g, ' ')}
+                        </Badge>
+                      )}
                     </div>
                   </div>
 
@@ -900,13 +967,15 @@ const AIExplanationManagementContent = () => {
                     </div>
                   </div>
                   <div className="space-y-1.5">
-                    <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Category</label>
-                    <div>
-                      <Badge className="bg-purple-100 text-purple-800 hover:bg-purple-200">
-                        {selectedExplanation.category.charAt(0).toUpperCase() + selectedExplanation.category.slice(1)}
-                      </Badge>
-                    </div>
+                    <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Type</label>
+                    <p className="text-sm text-gray-900 font-medium">{selectedExplanation.label || (selectedExplanation.category.charAt(0).toUpperCase() + selectedExplanation.category.slice(1))}</p>
                   </div>
+                  {selectedExplanation.experienceLevel && (
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Experience Level</label>
+                      <p className="text-sm text-gray-900 font-medium">{selectedExplanation.experienceLevel.replace(/_/g, ' ')}</p>
+                    </div>
+                  )}
                   {selectedExplanation.translation && (
                     <div className="space-y-1.5">
                       <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Translation</label>
@@ -939,11 +1008,23 @@ const AIExplanationManagementContent = () => {
               <div className="space-y-2 pt-2 border-t border-gray-200">
                 <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Explanation</label>
                 <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                  <p className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap">
-                    {selectedExplanation.explanation}
-                  </p>
+                  <div className="text-sm text-gray-700 leading-relaxed whitespace-pre-wrap prose prose-sm max-w-none" dangerouslySetInnerHTML={{ __html: selectedExplanation.explanation }} />
                 </div>
               </div>
+
+              {/* Sources Section */}
+              {selectedExplanation.sources && selectedExplanation.sources.length > 0 && (
+                <div className="space-y-2 pt-2 border-t border-gray-200">
+                  <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Sources</label>
+                  <div className="flex flex-wrap gap-2">
+                    {selectedExplanation.sources.map((source, index) => (
+                      <Badge key={index} variant="secondary" className="bg-blue-50 text-blue-700 border-blue-100">
+                        {source.replace(/_/g, ' ')}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
 
               {/* Timestamps Section */}
               <div className="grid grid-cols-2 gap-4 pt-2 border-t border-gray-200">
@@ -958,10 +1039,10 @@ const AIExplanationManagementContent = () => {
               </div>
             </div>
           )}
-                </DialogContent>
-              </Dialog>
-            </div>
-          );
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
 };
 
 export { AIExplanationManagementContent };
