@@ -342,10 +342,10 @@ const ViewPromptContent: React.FC = () => {
           <p className="text-gray-600 mt-1">{promptData.description}</p>
         </div>
         <div className="flex items-center gap-2">
-          <Button variant="outline" onClick={handleDuplicate} disabled={duplicating}>
+          {/* <Button variant="outline" onClick={handleDuplicate} disabled={duplicating}>
             <Copy className="w-4 h-4 mr-2" />
             {duplicating ? 'Duplicating...' : 'Duplicate'}
-          </Button>
+          </Button> */}
           {/* View History - Commented out
           <Button variant="outline" asChild>
             <Link to={`/ai-prompt-management/history/${promptData.template_id}`}>
@@ -504,7 +504,7 @@ const ViewPromptContent: React.FC = () => {
                   Edit Prompt
                 </Link>
               </Button>
-              <Button
+              {/* <Button
                 variant="outline"
                 className="w-full justify-start"
                 onClick={handleDuplicate}
@@ -512,7 +512,7 @@ const ViewPromptContent: React.FC = () => {
               >
                 <Copy className="w-4 h-4 mr-2" />
                 {duplicating ? 'Duplicating...' : 'Duplicate Prompt'}
-              </Button>
+              </Button> */}
               {/* View History - Commented out
               <Button variant="outline" className="w-full justify-start" asChild>
                 <Link to={`/ai-prompt-management/history/${promptData.template_id}`}>

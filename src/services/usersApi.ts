@@ -219,7 +219,7 @@ export const fetchUsersForDataGrid = async (
     sortOrder = 'desc';
     sortBy = 'joinedAt';
   } else if (sortFilter === 'older') {
-    sortOrder = 'desc';
+    sortOrder = 'asc';
     sortBy = 'joinedAt';
   }
 

@@ -104,7 +104,7 @@ const SaaSUsersToolbar = ({
             <SelectContent className="w-32">
               <SelectItem value="latest">Latest</SelectItem>
               <SelectItem value="older">Older</SelectItem>
-              <SelectItem value="oldest">Oldest</SelectItem>
+              {/* <SelectItem value="oldest">Oldest</SelectItem> */}
             </SelectContent>
           </Select>
         </div>
@@ -114,16 +114,16 @@ const SaaSUsersToolbar = ({
 };
 
 const Users = ({ hideRowsPerPage = false }: UsersProps) => {
-  const ColumnInputFilter = <TData, TValue>({ column }: IColumnFilterProps<TData, TValue>) => {
-    return (
-      <Input
-        placeholder="Filter..."
-        value={(column.getFilterValue() as string) ?? ''}
-        onChange={(event) => column.setFilterValue(event.target.value)}
-        className="h-9 w-full max-w-40"
-      />
-    );
-  };
+  // const ColumnInputFilter = <TData, TValue>({ column }: IColumnFilterProps<TData, TValue>) => {
+  // return (
+  //   <Input
+  //     placeholder="Filter..."
+  //     value={(column.getFilterValue() as string) ?? ''}
+  //     onChange={(event) => column.setFilterValue(event.target.value)}
+  //     className="h-9 w-full max-w-40"
+  //   />
+  // );
+  // };
 
   const columns = useMemo<ColumnDef<IUsersData>[]>(
     () => [
@@ -140,14 +140,20 @@ const Users = ({ hideRowsPerPage = false }: UsersProps) => {
       {
         accessorFn: (row: IUsersData) => row.user,
         id: 'user',
-        header: ({ column }) => (
-          <DataGridColumnHeader
-            title="New User"
-            filter={<ColumnInputFilter column={column} />}
-            column={column}
-          />
+        // header: ({ column }) => (
+        //   <DataGridColumnHeader
+        //     title="New User"
+        //     filter={<ColumnInputFilter column={column} />}
+        //     column={column}
+        //   />
+        // ),
+        header: () => (
+          <span className="font-medium text-sm text-gray-900 ml-2">
+            New User
+          </span>
         ),
-        enableSorting: true,
+
+        enableSorting: false,
         cell: (info: any) => (
           <div className="flex items-center gap-2.5">
             <img
@@ -202,8 +208,8 @@ const Users = ({ hideRowsPerPage = false }: UsersProps) => {
       {
         accessorFn: (row: IUsersData) => row.joinDate || '2024-01-15',
         id: 'joinDate',
-        header: ({ column }) => <DataGridColumnHeader title="Join Date" column={column} />,
-        enableSorting: true,
+        // header: ({ column }) => <DataGridColumnHeader title="Join Date" column={column} />,
+        enableSorting: false,
         cell: (info: any) => (
           <span className="text-sm text-gray-800 font-medium">
             {info.row.original.joinDate || 'N/A'}

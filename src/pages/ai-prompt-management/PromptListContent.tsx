@@ -420,13 +420,13 @@ const PromptListContent: React.FC = () => {
                   View History
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem
+              {/* <DropdownMenuItem
                 onClick={() => handleDuplicate(row.original.id)}
                 disabled={duplicatingId === row.original.id}
               >
                 <Copy className="w-4 h-4 mr-2" />
                 {duplicatingId === row.original.id ? 'Duplicating...' : 'Duplicate Prompt'}
-              </DropdownMenuItem>
+              </DropdownMenuItem> */}
               <DropdownMenuItem
                 onClick={() => handleToggleStatus(row.original.id, row.original.status)}
               >
