@@ -518,15 +518,15 @@ const ChapterDetailModal: React.FC<ChapterDetailModalProps> = ({ isOpen, onClose
                     </p>
                   </div>
                 ) : (
-                  <div className="bg-gray-50 dark:bg-gray-800/50 p-4 rounded-lg">
+                  <div className="bg-gray-50 dark:bg-gray-300 p-4 rounded-lg">
                     <div 
-                      className="text-gray-900 dark:text-black leading-relaxed prose prose-sm max-w-none prose-headings:font-semibold prose-p:mb-4 prose-strong:font-semibold prose-code:bg-gray-200 prose-code:px-1 prose-code:rounded prose-pre:bg-gray-100 prose-pre:p-4 prose-pre:rounded prose-ul:list-disc prose-ol:list-decimal prose-li:ml-4"
+                      className="text-gray-900 dark:bg-gray-300 dark:text-white leading-relaxed prose prose-sm max-w-none prose-headings:font-semibold prose-p:mb-4 prose-strong:font-semibold prose-code:bg-gray-200 prose-code:px-1 prose-code:rounded prose-pre:bg-gray-100 prose-pre:p-4 prose-pre:rounded prose-ul:list-disc prose-ol:list-decimal prose-li:ml-4"
                       dangerouslySetInnerHTML={{ __html: markdownToHtml(currentExplanation?.content) || 'No content available' }}
                     />
                     {currentExplanation?.sources && currentExplanation.sources.length > 0 && (
                       <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                        <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Sources:</p>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
+                        <p className="text-sm font-medium text-gray-700 dark:text-white mb-2">Sources:</p>
+                        <p className="text-sm text-gray-600 dark:text-white">
                           {Array.isArray(currentExplanation.sources) 
                             ? currentExplanation.sources.join(', ')
                             : currentExplanation.sources}

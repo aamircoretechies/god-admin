@@ -24,14 +24,14 @@ const PersonalInfo = () => {
   const [isEditing, setIsEditing] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
 
-  const [nameValue, setNameValue] = useState('');
-  const [phoneValue, setPhoneValue] = useState('');
-  const [originalName, setOriginalName] = useState('');
-  const [originalPhone, setOriginalPhone] = useState('');
+  const [firstNameValue, setFirstNameValue] = useState('');
+  const [lastNameValue, setLastNameValue] = useState('');
+  const [originalFirstName, setOriginalFirstName] = useState('');
+  const [originalLastName, setOriginalLastName] = useState('');
   const [isSaving, setIsSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);
-  const [nameError, setNameError] = useState<string | null>(null);
-  const [phoneError, setPhoneError] = useState<string | null>(null);
+  const [firstNameError, setFirstNameError] = useState<string | null>(null);
+  const [lastNameError, setLastNameError] = useState<string | null>(null);
 
   const [avatar, setAvatar] = useState<IImageInputFile[]>(() => {
     return [{ dataURL: getProfilePictureUrl(null) }];
@@ -40,54 +40,51 @@ const PersonalInfo = () => {
     return [{ dataURL: getProfilePictureUrl(null) }];
   });
 
-  // Phone regex validation (supports international formats)
-  const phoneRegex = /^[+]?[(]?[0-9]{1,4}[)]?[-\s.]?[(]?[0-9]{1,4}[)]?[-\s.]?[0-9]{1,9}$/;
-
-  const handleNameChange = (value: string) => {
+  const handleFirstNameChange = (value: string) => {
     // Limit to 20 characters
     if (value.length > 20) {
-      setNameError('Name must be 20 characters or less');
+      setFirstNameError('First name must be 20 characters or less');
       return;
     }
-    setNameValue(value);
-    setNameError(null);
-    checkForChanges(value, phoneValue, avatar);
+    setFirstNameValue(value);
+    setFirstNameError(null);
+    checkForChanges(value, lastNameValue, avatar);
   };
 
-  const handlePhoneChange = (value: string) => {
-    setPhoneValue(value);
-    // Validate phone format if not empty
-    if (value && !phoneRegex.test(value)) {
-      setPhoneError('Please enter a valid phone number');
-    } else {
-      setPhoneError(null);
+  const handleLastNameChange = (value: string) => {
+    // Limit to 20 characters
+    if (value.length > 20) {
+      setLastNameError('Last name must be 20 characters or less');
+      return;
     }
-    checkForChanges(nameValue, value, avatar);
+    setLastNameValue(value);
+    setLastNameError(null);
+    checkForChanges(firstNameValue, value, avatar);
   };
 
-  const checkForChanges = (name: string, phone: string, currentAvatar: IImageInputFile[]) => {
-    const nameChanged = name !== originalName;
-    const phoneChanged = phone !== originalPhone;
+  const checkForChanges = (firstName: string, lastName: string, currentAvatar: IImageInputFile[]) => {
+    const firstNameChanged = firstName !== originalFirstName;
+    const lastNameChanged = lastName !== originalLastName;
     const avatarChanged = JSON.stringify(currentAvatar) !== JSON.stringify(originalAvatar);
-    setHasChanges(nameChanged || phoneChanged || avatarChanged);
+    setHasChanges(firstNameChanged || lastNameChanged || avatarChanged);
   };
 
   const handleStartEdit = () => {
-    setOriginalName(nameValue);
-    setOriginalPhone(phoneValue);
+    setOriginalFirstName(firstNameValue);
+    setOriginalLastName(lastNameValue);
     setOriginalAvatar(avatar);
     setIsEditing(true);
     setHasChanges(false);
-    setNameError(null);
-    setPhoneError(null);
+    setFirstNameError(null);
+    setLastNameError(null);
   };
 
   const handleCancelEdit = () => {
-    setNameValue(originalName);
-    setPhoneValue(originalPhone);
+    setFirstNameValue(originalFirstName);
+    setLastNameValue(originalLastName);
     setAvatar(originalAvatar);
-    setNameError(null);
-    setPhoneError(null);
+    setFirstNameError(null);
+    setLastNameError(null);
     setIsEditing(false);
     setHasChanges(false);
   };
@@ -97,7 +94,7 @@ const PersonalInfo = () => {
     if (!isEditing) return;
     // Just update the local state - don't upload yet
     setAvatar(selectedAvatar);
-    checkForChanges(nameValue, phoneValue, selectedAvatar);
+    checkForChanges(firstNameValue, lastNameValue, selectedAvatar);
   };
 
   const loadProfile = async () => {
@@ -105,30 +102,27 @@ const PersonalInfo = () => {
       const response = await getAdminProfile();
       if (response.status === 1 && response.data) {
         // Update name values
-        const fullName = response.data.first_name && response.data.last_name
-          ? `${response.data.first_name} ${response.data.last_name}`
-          : response.data.first_name || '';
-        setNameValue(fullName);
-        setOriginalName(fullName);
-        
-        // Update phone from API response or currentUser
-        const phone = response.data.phone || currentUser?.phone || '';
-        setPhoneValue(phone);
-        setOriginalPhone(phone);
-        
+        const firstName = response.data.first_name || '';
+        const lastName = response.data.last_name || '';
+
+        setFirstNameValue(firstName);
+        setOriginalFirstName(firstName);
+        setLastNameValue(lastName);
+        setOriginalLastName(lastName);
+
         // Update avatar with latest profile picture
         const userAvatar = response.data.profile_picture;
         const avatarUrl = getProfilePictureUrl(userAvatar);
         setAvatar([{ dataURL: avatarUrl }]);
         setOriginalAvatar([{ dataURL: avatarUrl }]);
-        
+
         // Update auth context with new profile data
         if (setCurrentUser) {
+          const fullName = firstName && lastName ? `${firstName} ${lastName}` : firstName || lastName || response.data.email || 'User';
           setCurrentUser({
             ...currentUser,
             ...response.data,
-            phone: response.data.phone || currentUser?.phone, // Include phone in context
-            fullname: fullName || response.data.email || 'User'
+            fullname: fullName
           } as any);
         }
       }
@@ -144,47 +138,40 @@ const PersonalInfo = () => {
         setIsLoading(true);
         const response = await getAdminProfile();
         if (response.status === 1 && response.data) {
-          // Update name values
-          const fullName = response.data.first_name && response.data.last_name
-            ? `${response.data.first_name} ${response.data.last_name}`
-            : response.data.first_name || '';
-          setNameValue(fullName);
-          setOriginalName(fullName);
-          
-          // Update phone from API response or currentUser
-          const phone = response.data.phone || currentUser?.phone || '';
-          setPhoneValue(phone);
-          setOriginalPhone(phone);
-          
+          const firstName = response.data.first_name || '';
+          const lastName = response.data.last_name || '';
+
+          setFirstNameValue(firstName);
+          setOriginalFirstName(firstName);
+          setLastNameValue(lastName);
+          setOriginalLastName(lastName);
+
           // Update avatar with latest profile picture
           const userAvatar = response.data.profile_picture;
           const avatarUrl = getProfilePictureUrl(userAvatar);
           setAvatar([{ dataURL: avatarUrl }]);
           setOriginalAvatar([{ dataURL: avatarUrl }]);
-          
+
           // Update auth context with new profile data
           if (setCurrentUser) {
+            const fullName = firstName && lastName ? `${firstName} ${lastName}` : firstName || lastName || response.data.email || 'User';
             setCurrentUser({
               ...currentUser,
               ...response.data,
-              profile_picture: response.data.profile_picture, // Ensure profile_picture is included
-              fullname: fullName || response.data.email || 'User'
+              profile_picture: response.data.profile_picture,
+              fullname: fullName
             } as any);
           }
         } else {
           // If API fails, use currentUser as fallback
-          const fallbackName = currentUser?.fullname ||
-            (currentUser?.first_name && currentUser?.last_name
-              ? `${currentUser.first_name} ${currentUser.last_name}`
-              : currentUser?.first_name || '');
-          setNameValue(fallbackName);
-          setOriginalName(fallbackName);
-          
-          // Get phone from currentUser
-          const fallbackPhone = currentUser?.phone || '';
-          setPhoneValue(fallbackPhone);
-          setOriginalPhone(fallbackPhone);
-          
+          const firstName = currentUser?.first_name || '';
+          const lastName = currentUser?.last_name || '';
+
+          setFirstNameValue(firstName);
+          setOriginalFirstName(firstName);
+          setLastNameValue(lastName);
+          setOriginalLastName(lastName);
+
           const userAvatar = currentUser?.profile_picture || currentUser?.pic;
           const avatarUrl = getProfilePictureUrl(userAvatar);
           setAvatar([{ dataURL: avatarUrl }]);
@@ -193,18 +180,14 @@ const PersonalInfo = () => {
       } catch (error) {
         console.error('Error loading profile:', error);
         // Fallback to currentUser if API fails
-        const fallbackName = currentUser?.fullname ||
-          (currentUser?.first_name && currentUser?.last_name
-            ? `${currentUser.first_name} ${currentUser.last_name}`
-            : currentUser?.first_name || '');
-        setNameValue(fallbackName);
-        setOriginalName(fallbackName);
-        
-        // Get phone from currentUser
-        const fallbackPhone = currentUser?.phone || '';
-        setPhoneValue(fallbackPhone);
-        setOriginalPhone(fallbackPhone);
-        
+        const firstName = currentUser?.first_name || '';
+        const lastName = currentUser?.last_name || '';
+
+        setFirstNameValue(firstName);
+        setOriginalFirstName(firstName);
+        setLastNameValue(lastName);
+        setOriginalLastName(lastName);
+
         const userAvatar = currentUser?.profile_picture || currentUser?.pic;
         const avatarUrl = getProfilePictureUrl(userAvatar);
         setAvatar([{ dataURL: avatarUrl }]);
@@ -219,37 +202,28 @@ const PersonalInfo = () => {
 
   const handleSave = async () => {
     // Validate before saving
-    if (nameValue.length > 20) {
-      setNameError('Name must be 20 characters or less');
+    if (firstNameValue.length > 20) {
+      setFirstNameError('First name must be 20 characters or less');
       toast.error('Please fix validation errors before saving');
       return;
     }
 
-    if (phoneValue && !phoneRegex.test(phoneValue)) {
-      setPhoneError('Please enter a valid phone number');
+    if (lastNameValue.length > 20) {
+      setLastNameError('Last name must be 20 characters or less');
       toast.error('Please fix validation errors before saving');
       return;
     }
 
     setIsSaving(true);
     try {
-      // Parse name into first_name and last_name
-      const nameParts = nameValue.trim().split(' ');
-      const first_name = nameParts[0] || '';
-      const last_name = nameParts.slice(1).join(' ') || '';
-
       // Prepare update data
       const updateData: {
         first_name?: string;
         last_name?: string;
-      } = {};
-
-      if (first_name) {
-        updateData.first_name = first_name;
-      }
-      if (last_name) {
-        updateData.last_name = last_name;
-      }
+      } = {
+        first_name: firstNameValue,
+        last_name: lastNameValue
+      };
 
       // Update profile picture if changed
       let profilePictureUpdated = false;
@@ -282,26 +256,26 @@ const PersonalInfo = () => {
       }
 
       // Update profile data (name, etc.) if there are changes
-      if (Object.keys(updateData).length > 0 || nameValue !== originalName) {
+      if (firstNameValue !== originalFirstName || lastNameValue !== originalLastName) {
         const response = await updateAdminProfile(updateData);
 
         if (response.status === 1) {
           // Success - update local state
-          setOriginalName(nameValue);
-          setOriginalPhone(phoneValue);
+          setOriginalFirstName(firstNameValue);
+          setOriginalLastName(lastNameValue);
           setOriginalAvatar(avatar);
           setHasChanges(false);
           setIsEditing(false);
-          setNameError(null);
-          setPhoneError(null);
-          
+          setFirstNameError(null);
+          setLastNameError(null);
+
           // Show success message
           if (profilePictureUpdated) {
             toast.success('Profile and picture updated successfully');
           } else {
             toast.success('Profile updated successfully');
           }
-          
+
           // Refresh profile data
           await loadProfile();
         } else {
@@ -325,10 +299,9 @@ const PersonalInfo = () => {
     }
   };
 
-  const userName = nameValue || currentUser?.fullname ||
-    (currentUser?.first_name && currentUser?.last_name
-      ? `${currentUser.first_name} ${currentUser.last_name}`
-      : currentUser?.first_name || 'User');
+  const userName = firstNameValue
+    ? (lastNameValue ? `${firstNameValue} ${lastNameValue}` : firstNameValue)
+    : (currentUser?.fullname || 'User');
   const userRole = currentUser?.role || 'USER';
   const userStatus = 'ACTIVE'; // This would come from user data or be derived
 
@@ -377,8 +350,8 @@ const PersonalInfo = () => {
                 <div className="flex justify-center items-center">
                   <ImageInput value={avatar} onChange={handleAvatarChange}>
                     {({ onImageUpload }) => (
-                      <div 
-                        className={`image-input size-[60px] ${!isEditing ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}`} 
+                      <div
+                        className={`image-input size-[60px] ${!isEditing ? 'opacity-60 cursor-not-allowed' : 'cursor-pointer'}`}
                         onClick={isEditing ? onImageUpload : undefined}
                       >
                         {isEditing && (
@@ -391,7 +364,7 @@ const PersonalInfo = () => {
                               setAvatar([{ dataURL: toAbsoluteUrl(defaultAvatar) }]);
                               // Note: To actually remove profile picture from server, you'd need a delete endpoint
                               // For now, just update UI
-                              checkForChanges(nameValue, phoneValue, [{ dataURL: toAbsoluteUrl(defaultAvatar) }]);
+                              checkForChanges(firstNameValue, lastNameValue, [{ dataURL: toAbsoluteUrl(defaultAvatar) }]);
                             }}
                           >
                             <KeenIcon icon="cross" />
@@ -431,15 +404,15 @@ const PersonalInfo = () => {
               </td>
             </tr>
             <tr>
-              <td className="py-2 text-gray-600 font-normal">Name</td>
+              <td className="py-2 text-gray-600 font-normal">First Name</td>
               <td className="py-2 text-gray-800 font-normal text-sm">
                 {isEditing ? (
                   <div className="w-full max-w-xs">
                     <input
                       type="text"
-                      value={nameValue}
-                      onChange={(e) => handleNameChange(e.target.value)}
-                      className={`input input-sm w-full ${nameError ? 'border-red-500' : ''}`}
+                      value={firstNameValue}
+                      onChange={(e) => handleFirstNameChange(e.target.value)}
+                      className={`input input-sm w-full ${firstNameError ? 'border-red-500' : ''}`}
                       autoFocus
                       maxLength={20}
                       onKeyDown={(e) => {
@@ -448,43 +421,41 @@ const PersonalInfo = () => {
                         }
                       }}
                     />
-                    {nameError && (
-                      <p className="text-xs text-red-500 mt-1">{nameError}</p>
+                    {firstNameError && (
+                      <p className="text-xs text-red-500 mt-1">{firstNameError}</p>
                     )}
-                    <p className="text-xs text-gray-500 mt-1">{nameValue.length}/20 characters</p>
+                    <p className="text-xs text-gray-500 mt-1">{firstNameValue.length}/20 characters</p>
                   </div>
                 ) : (
-                  nameValue || userName
+                  firstNameValue || '-'
                 )}
               </td>
               <td className="py-2 text-center"></td>
             </tr>
             <tr>
-              <td className="py-2 text-gray-600 font-normal">Phone</td>
+              <td className="py-2 text-gray-600 font-normal">Last Name</td>
               <td className="py-2 text-gray-800 font-normal text-sm">
                 {isEditing ? (
                   <div className="w-full max-w-xs">
                     <input
-                      type="tel"
-                      value={phoneValue}
-                      onChange={(e) => handlePhoneChange(e.target.value)}
-                      className={`input input-sm w-full ${phoneError ? 'border-red-500' : ''}`}
-                      placeholder="+1234567890"
+                      type="text"
+                      value={lastNameValue}
+                      onChange={(e) => handleLastNameChange(e.target.value)}
+                      className={`input input-sm w-full ${lastNameError ? 'border-red-500' : ''}`}
+                      maxLength={20}
                       onKeyDown={(e) => {
                         if (e.key === 'Escape') {
                           handleCancelEdit();
                         }
                       }}
                     />
-                    {phoneError && (
-                      <p className="text-xs text-red-500 mt-1">{phoneError}</p>
+                    {lastNameError && (
+                      <p className="text-xs text-red-500 mt-1">{lastNameError}</p>
                     )}
-                    {!phoneError && phoneValue && (
-                      <p className="text-xs text-gray-500 mt-1">Format: +1234567890 or (123) 456-7890</p>
-                    )}
+                    <p className="text-xs text-gray-500 mt-1">{lastNameValue.length}/20 characters</p>
                   </div>
                 ) : (
-                  phoneValue || '-'
+                  lastNameValue || '-'
                 )}
               </td>
               <td className="py-2 text-center"></td>

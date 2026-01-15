@@ -416,16 +416,16 @@ const VerseDetailModal: React.FC<VerseDetailModalProps> = ({ isOpen, onClose, ve
                   </div>
                 ) : aiExplanationHistory ? (
                   <div className="space-y-4">
-                    <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 dark:bg-gray-800/50 rounded-lg">
+                    <div className="grid grid-cols-2 gap-4 p-4 bg-gray-50 dark:bg-gray-300 rounded-lg">
                       <div>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">Total Explanations</p>
-                        <p className="text-2xl font-bold text-gray-900 dark:text-black">
+                        <p className="text-sm text-gray-600 dark:text-white">Total Explanations</p>
+                        <p className="text-2xl font-bold text-gray-900 dark:text-white">
                           {aiExplanationHistory.total_explanations}
                         </p>
                       </div>
                       <div>
-                        <p className="text-sm text-gray-600 dark:text-gray-400">With Content</p>
-                        <p className="text-2xl font-bold text-gray-900 dark:text-black">
+                        <p className="text-sm text-gray-600 dark:text-white">With Content</p>
+                        <p className="text-2xl font-bold text-gray-900 dark:text-white">
                           {aiExplanationHistory.explanations_with_content}
                         </p>
                       </div>
@@ -448,7 +448,7 @@ const VerseDetailModal: React.FC<VerseDetailModalProps> = ({ isOpen, onClose, ve
                         {paginatedExplanations.map((explanation, index) => (
                           <div
                             key={explanation.explanation_id || index}
-                            className="p-4 border rounded-lg border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-800/50"
+                            className="p-4 border rounded-lg border-gray-200 dark:border-gray-700  dark:hover:bg-gray-800/50"
                           >
                             <div className="flex items-start justify-between mb-2">
                               <div className="flex items-center gap-2">
@@ -516,17 +516,17 @@ const VerseDetailModal: React.FC<VerseDetailModalProps> = ({ isOpen, onClose, ve
                               </div>
                             </div>
                             {explanation.content && (
-                              <div className="mt-2 bg-gray-50 dark:bg-gray-800/50 p-4 rounded-lg">
+                              <div className="mt-2 bg-gray-50 dark:bg-gray-300 p-4 rounded-lg">
                                 <div 
-                                  className="text-gray-900 dark:text-black leading-relaxed prose prose-sm max-w-none prose-headings:font-semibold prose-p:mb-4 prose-strong:font-semibold prose-code:bg-gray-200 prose-code:px-1 prose-code:rounded prose-pre:bg-gray-100 prose-pre:p-4 prose-pre:rounded prose-ul:list-disc prose-ol:list-decimal prose-li:ml-4"
+                                  className="text-gray-900 dark:text-white leading-relaxed prose prose-sm max-w-none prose-headings:font-semibold prose-p:mb-4 prose-strong:font-semibold prose-code:bg-gray-200 prose-code:px-1 prose-code:rounded prose-pre:bg-gray-100 prose-pre:p-4 prose-pre:rounded prose-ul:list-disc prose-ol:list-decimal prose-li:ml-4"
                                   dangerouslySetInnerHTML={{ __html: markdownToHtml(explanation.content) || 'No content available' }}
                                 />
                               </div>
                             )}
                             {explanation.sources && explanation.sources.length > 0 && (
                               <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                                <p className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">Sources:</p>
-                                <p className="text-sm text-gray-600 dark:text-gray-400">
+                                <p className="text-sm font-medium text-gray-700 dark:text-white mb-2">Sources:</p>
+                                <p className="text-sm text-gray-600 dark:text-white">
                                   {Array.isArray(explanation.sources) 
                                     ? explanation.sources.join(', ')
                                     : explanation.sources}

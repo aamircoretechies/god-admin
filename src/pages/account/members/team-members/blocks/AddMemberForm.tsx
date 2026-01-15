@@ -281,7 +281,7 @@ const AddMemberForm = () => {
                   value={formData.password}
                   onChange={(e) => handleInputChange('password', e.target.value)}
                   required
-                  minLength={6}
+                  minLength={8}
                   className="h-10 pr-10"
                 />
                 <Button

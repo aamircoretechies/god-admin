@@ -140,7 +140,7 @@ const Members = () => {
       {
         accessorFn: (row) => row.member,
         id: 'member',
-        header: ({ column }) => <DataGridColumnHeader title='Member' filter={<ColumnInputFilter column={column} />} column={column} />,
+        // header: ({ column }) => <DataGridColumnHeader title='Member' filter={<ColumnInputFilter column={column} />} column={column} />,
         enableSorting: true,
         cell: (info) => (
           <div className="flex items-center gap-2.5">
@@ -169,10 +169,10 @@ const Members = () => {
       {
         accessorFn: (row) => row.roles,
         id: 'roles',
-        header: ({ column }) => <DataGridColumnHeader title='Roles' column={column} />,
+        // header: ({ column }) => <DataGridColumnHeader title='Roles' column={column} />,
         enableSorting: true,
         cell: (info) => (
-          <div className="flex flex-wrap gap-2.5 mb-2">
+          <div className="flex flex-wrap gap-2.5 mb-3">
             {info.row.original.roles.map((role: string, index: number) => (
               <span key={index} className="badge badge-sm badge-light badge-outline">
                 {role}
@@ -209,7 +209,7 @@ const Members = () => {
       {
         accessorFn: (row) => row.status,
         id: 'status',
-        header: ({ column }) => <DataGridColumnHeader title='Status' column={column} />,
+        // header: ({ column }) => <DataGridColumnHeader title='Status' column={column} />,
         enableSorting: true,
         cell: (info) => (
           <span className={`badge badge-sm badge-outline  ${info.row.original.status.variant}`}>
@@ -224,7 +224,7 @@ const Members = () => {
       {
         accessorFn: (row) => row.recentlyActivity,
         id: 'recentlyActivity',
-        header: ({ column }) => <DataGridColumnHeader title='Recent activity' column={column} />,
+        // header: ({ column }) => <DataGridColumnHeader title='Recent activity' column={column} />,
         enableSorting: true,
         cell: (info) => info.getValue(),
         meta: {
@@ -235,7 +235,13 @@ const Members = () => {
       },
       {
         id: 'actions',
-        header: ({ column }) => <DataGridColumnHeader title='Actions' column={column} />,
+        // header: ({ column }) => <DataGridColumnHeader title='Actions' column={column} />,
+        header: () => (
+          <div className="px-3 py-2 text-sm font-medium text-gray-600 dark:text-gray-600">
+            Actions
+          </div>
+        ),
+
         enableSorting: false,
         cell: ({ row }) => {
           return (

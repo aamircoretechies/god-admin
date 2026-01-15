@@ -276,18 +276,18 @@ const ActivityLogListContent: React.FC = () => {
     const normalizedRole = role.toUpperCase();
     switch (normalizedRole) {
       case 'FREE':
-        return <Badge variant="secondary">Free</Badge>;
+        return <Badge variant="outline" className="inline-flex w-fit">Free</Badge>;
       case 'PREMIUM':
         return (
-          <Badge variant="default" className="bg-purple-100 text-purple-800">
+          <Badge variant="default" className="bg-purple-100 text-purple-800 inline-flex w-fit">
             Premium
           </Badge>
         );
       case 'ADMIN':
-        return <Badge variant="destructive">Admin</Badge>;
+        return <Badge variant="destructive" className="inline-flex w-fit">Admin</Badge>;
       case 'MODERATOR':
         return (
-          <Badge variant="default" className="bg-amber-100 text-amber-800">
+          <Badge variant="default" className="bg-amber-100 text-amber-800 inline-flex w-fit">
             Moderator
           </Badge>
         );
@@ -384,6 +384,7 @@ const ActivityLogListContent: React.FC = () => {
               <img
                 src={row.original.userAvatar.startsWith('http') ? row.original.userAvatar : toAbsoluteUrl(row.original.userAvatar)}
                 alt={row.original.userName}
+                className="w-full h-full object-cover rounded-full"
               />
             </Avatar>
             <div className="flex flex-col">

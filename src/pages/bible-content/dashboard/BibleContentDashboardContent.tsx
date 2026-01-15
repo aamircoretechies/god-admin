@@ -498,7 +498,7 @@ const BibleContentDashboardContent = () => {
 
       {/* Recent Activity */}
       {/* <div className="grid grid-cols-1 lg:grid-cols-2 gap-6"> */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+      <div className="grid grid-cols-1  gap-4 md:gap-6">
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
@@ -543,15 +543,15 @@ const BibleContentDashboardContent = () => {
           </CardContent>
         </Card>
 
-        <Card>
-          <CardHeader>
+        {/* <Card> */}
+          {/* <CardHeader>
             <CardTitle className="flex items-center">
               <Brain className="w-5 h-5 mr-2 text-purple-600" />
               Recent AI Explanations ({dashboardData.recentActivity.aiExplanations.length})
             </CardTitle>
           </CardHeader>
-          <CardContent>
-            <div className="space-y-3">
+          <CardContent> */}
+            {/* <div className="space-y-3">
               {dashboardData.recentActivity.aiExplanations.length > 0 ? (
                 dashboardData.recentActivity.aiExplanations.slice(0, 5).map((explanation) => (
                   <div
@@ -566,7 +566,7 @@ const BibleContentDashboardContent = () => {
                       <p className="text-sm text-gray-600">
                         {new Date(explanation.created_at).toLocaleDateString()}
                       </p>
-                    </div>
+                    </div> */}
                     {/* <Button 
                       variant="outline" 
                       size="sm"
@@ -576,7 +576,7 @@ const BibleContentDashboardContent = () => {
                     >
                       <Eye className="w-4 h-4" />
                     </Button> */}
-                  </div>
+                  {/* </div>
                 ))
               ) : (
                 <div className="text-center py-8 text-gray-500 dark:text-gray-400">
@@ -586,7 +586,7 @@ const BibleContentDashboardContent = () => {
               )}
             </div>
           </CardContent>
-        </Card>
+        </Card> */}
       </div>
 
       {/* Quick Actions */}
