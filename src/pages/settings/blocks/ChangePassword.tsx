@@ -94,10 +94,23 @@ const ChangePassword = () => {
       }
     } catch (err: any) {
       console.error('Error changing password:', err);
-      const errorMessage =
-        err?.response?.data?.message ||
-        err?.message ||
-        'Failed to change password. Please try again.';
+      
+      // Check if it's a password-related error (404/401/403 with "Route not found" or similar)
+      const statusCode = err?.response?.status;
+      const backendMessage = err?.response?.data?.message || err?.response?.data?.error || '';
+      const isPasswordError = 
+        (statusCode === 404 || statusCode === 401 || statusCode === 403) &&
+        (backendMessage.toLowerCase().includes('route not found') ||
+         backendMessage.toLowerCase().includes('not found') ||
+         backendMessage.toLowerCase().includes('unauthorized') ||
+         backendMessage.toLowerCase().includes('forbidden'));
+      
+      const errorMessage = isPasswordError
+        ? 'Current password is incorrect'
+        : err?.response?.data?.message ||
+          err?.message ||
+          'Failed to change password. Please try again.';
+      
       setError(errorMessage);
       toast.error(errorMessage);
     } finally {

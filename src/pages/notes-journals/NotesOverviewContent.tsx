@@ -253,13 +253,14 @@ const NotesOverviewContent: React.FC = () => {
   // Update total pages based on filtered results
   useEffect(() => {
     setTotalPages(Math.ceil(filteredNotes.length / pageSize));
-  }, [filteredNotes]);
+  }, [filteredNotes, pageSize]);
 
   // Get current paginated notes
   const paginatedNotes = useMemo(() => {
     const start = (currentPage - 1) * pageSize;
-    return filteredNotes.slice(start, start + pageSize);
-  }, [filteredNotes, currentPage]);
+    const end = start + pageSize;
+    return filteredNotes.slice(start, end);
+  }, [filteredNotes, currentPage, pageSize]);
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -390,11 +391,15 @@ const NotesOverviewContent: React.FC = () => {
         enableSorting: true,
         cell: ({ row }) => (
           <div className="flex flex-wrap gap-1">
-            {row.original.linkedVerses.map((verse, index) => (
-              <Badge key={index} variant="outline" className="text-xs">
-                {verse}
-              </Badge>
-            ))}
+            {row.original.linkedVerses && row.original.linkedVerses.length > 0 ? (
+              row.original.linkedVerses.map((verse, index) => (
+                <Badge key={index} variant="outline" className="text-xs">
+                  {verse}
+                </Badge>
+              ))
+            ) : (
+              <span className="text-xs text-gray-500">N/A</span>
+            )}
           </div>
         ),
         meta: {
@@ -409,15 +414,19 @@ const NotesOverviewContent: React.FC = () => {
         enableSorting: true,
         cell: ({ row }) => (
           <div className="flex flex-wrap gap-1">
-            {row.original.tags.map((tag, index) => (
-              <Badge
-                key={index}
-                variant="secondary"
-                className="text-xs bg-gray-100 text-gray-800 border border-gray-300"
-              >
-                {tag}
-              </Badge>
-            ))}
+            {row.original.tags && row.original.tags.length > 0 ? (
+              row.original.tags.map((tag, index) => (
+                <Badge
+                  key={index}
+                  variant="secondary"
+                  className="text-xs bg-gray-100 text-gray-800 border border-gray-300"
+                >
+                  {tag}
+                </Badge>
+              ))
+            ) : (
+              <span className="text-xs text-gray-500">N/A</span>
+            )}
           </div>
         ),
         meta: {
@@ -552,9 +561,11 @@ const NotesOverviewContent: React.FC = () => {
       if (res.status === 1) {
         // Backend success message toast
         toast.success(res.message || 'Note deleted successfully!');
-
+        
         // Refresh the page immediately after successful deletion
-        window.location.reload();
+        setTimeout(() => {
+          window.location.reload();
+        }, 100);
       } else {
         //  Backend error message toast
         toast.error(res.message || 'Failed to delete note');
@@ -706,7 +717,7 @@ const NotesOverviewContent: React.FC = () => {
       <DataGrid
         columns={columns}
         data={paginatedNotes}
-        pagination={{ size: 10 }}
+        pagination={{ size: Math.max(1, paginatedNotes.length), hideRowsPerPage: true }}
         sorting={[{ id: 'createdAt', desc: true }]}
         toolbar={toolbar}
         layout={{ card: true }}
