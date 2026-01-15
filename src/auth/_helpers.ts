@@ -3,29 +3,41 @@ import { User as Auth0UserModel } from '@auth0/auth0-spa-js';
 import { getData, setData } from '@/utils';
 import { type AuthModel, type UserModel } from './_models';
 
-const AUTH_LOCAL_STORAGE_KEY = `${import.meta.env.VITE_APP_NAME}-auth-v${
-  import.meta.env.VITE_APP_VERSION
-}`;
-const USER_LOCAL_STORAGE_KEY = `${import.meta.env.VITE_APP_NAME}-user-v${
-  import.meta.env.VITE_APP_VERSION
-}`;
+// Use the actual localStorage key format: metronic-tailwind-react-auth-v1=9.1.1
+const APP_NAME = import.meta.env.VITE_APP_NAME || 'metronic-tailwind-react';
+const APP_VERSION = import.meta.env.VITE_APP_VERSION || '9.1.1';
+
+// Try both key formats for compatibility
+const AUTH_LOCAL_STORAGE_KEY = `${APP_NAME}-auth-v${APP_VERSION}`;
+const AUTH_LOCAL_STORAGE_KEY_ALT = `${APP_NAME}-auth-v1=${APP_VERSION}`; // Actual format in localStorage
+const USER_LOCAL_STORAGE_KEY = `${APP_NAME}-user-v${APP_VERSION}`;
+const USER_LOCAL_STORAGE_KEY_ALT = `${APP_NAME}-user-v1=${APP_VERSION}`;
 
 const getAuth = (): AuthModel | undefined => {
   try {
-    const auth = getData(AUTH_LOCAL_STORAGE_KEY) as AuthModel | undefined;
-
-    if (auth) {
-      return auth;
-    } else {
-      return undefined;
+    // First try the alternative format (actual format in localStorage)
+    let auth = getData(AUTH_LOCAL_STORAGE_KEY_ALT) as AuthModel | undefined;
+    
+    // If not found, try the standard format
+    if (!auth || !auth.token) {
+      auth = getData(AUTH_LOCAL_STORAGE_KEY) as AuthModel | undefined;
     }
+
+    if (auth && auth.token) {
+      return auth;
+    }
+
+    return undefined;
   } catch (error) {
     console.error('AUTH LOCAL STORAGE PARSE ERROR', error);
+    return undefined;
   }
 };
 
 const setAuth = (auth: AuthModel | Auth0UserModel) => {
-  setData(AUTH_LOCAL_STORAGE_KEY, auth);
+  // Store in both formats for compatibility
+  setData(AUTH_LOCAL_STORAGE_KEY_ALT, auth); // Primary format (matches existing localStorage)
+  setData(AUTH_LOCAL_STORAGE_KEY, auth); // Also store in standard format
 };
 
 const removeAuth = () => {
@@ -34,8 +46,11 @@ const removeAuth = () => {
   }
 
   try {
+    // Remove both key formats
     localStorage.removeItem(AUTH_LOCAL_STORAGE_KEY);
+    localStorage.removeItem(AUTH_LOCAL_STORAGE_KEY_ALT);
     localStorage.removeItem(USER_LOCAL_STORAGE_KEY);
+    localStorage.removeItem(USER_LOCAL_STORAGE_KEY_ALT);
   } catch (error) {
     console.error('AUTH LOCAL STORAGE REMOVE ERROR', error);
   }
@@ -70,14 +85,32 @@ export function setupAxios(axios: any) {
 
   // Request interceptor - add auth token to requests
   axios.interceptors.request.use(
-    (config: { headers: { Authorization: string } }) => {
-      const auth = getAuth();
+    (config: any) => {
+      try {
+        // Ensure headers object exists
+        if (!config.headers) {
+          config.headers = {};
+        }
 
-      if (auth?.token) {
-        config.headers.Authorization = `Bearer ${auth.token}`;
+        // Get auth token from localStorage
+        const auth = getAuth();
+
+        if (auth?.token && typeof auth.token === 'string' && auth.token.trim() !== '') {
+          config.headers.Authorization = `Bearer ${auth.token}`;
+        } else {
+          // Debug logging in development
+          if (import.meta.env.DEV) {
+            console.warn('[Axios Interceptor] No valid auth token found');
+            console.warn('[Axios Interceptor] Tried keys:', AUTH_LOCAL_STORAGE_KEY_ALT, AUTH_LOCAL_STORAGE_KEY);
+            console.warn('[Axios Interceptor] Available localStorage keys:', Object.keys(localStorage).filter(k => k.includes('auth')));
+          }
+        }
+
+        return config;
+      } catch (error) {
+        console.error('[Axios Interceptor] Error setting auth token:', error);
+        return config;
       }
-
-      return config;
     },
     async (err: any) => await Promise.reject(err)
   );
