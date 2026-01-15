@@ -623,7 +623,7 @@ const ActivityLogListContent: React.FC = () => {
               <option value="Admin">Admin</option>
               <option value="Moderator">Moderator</option>
             </select>
-            <select
+            {/* <select
               value={activityTypeFilter}
               onChange={(e) => setActivityTypeFilter(e.target.value)}
               className="px-3 py-2 border border-gray-300 rounded-md text-sm bg-card w-full md:w-auto"
@@ -636,7 +636,7 @@ const ActivityLogListContent: React.FC = () => {
               <option value="Feedback Submitted">Feedback</option>
               <option value="Login">Login</option>
               <option value="Logout">Logout</option>
-            </select>
+            </select> */}
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
@@ -699,7 +699,7 @@ const ActivityLogListContent: React.FC = () => {
   }
 
   return (
-    <>
+    <div className="[&_[data-container]]:overflow-y-auto [&_[data-container]]:max-h-[calc(100vh-250px)]">
       {showBlockModal && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
           {/* <div className="bg-white p-6 rounded-lg w-[400px] space-y-4"> */}
@@ -780,7 +780,7 @@ const ActivityLogListContent: React.FC = () => {
         toolbar={toolbar}
         layout={{ card: true }}
       />
-    </>
+    </div>
   );
 };
 

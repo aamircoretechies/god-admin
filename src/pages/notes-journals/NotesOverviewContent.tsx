@@ -713,7 +713,7 @@ const NotesOverviewContent: React.FC = () => {
   }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 [&_[data-container]]:overflow-y-auto [&_[data-container]]:max-h-[calc(100vh-250px)]">
       <DataGrid
         columns={columns}
         data={paginatedNotes}
