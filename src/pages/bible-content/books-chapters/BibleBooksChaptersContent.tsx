@@ -112,6 +112,22 @@ const BibleBooksChaptersContent = () => {
             bookOrder: book.book_order
           }));
           setBooks(transformedBooks);
+          
+          // Update pagination metadata
+          if (response.pagination) {
+            setTotalPages(response.pagination.totalPages || 1);
+          } else {
+            // Fallback: if we got exactly 20 books, assume there might be more pages
+            // Otherwise, assume this is the last page
+            if (response.data.length === 20) {
+              // If we have 20 books, there might be more pages
+              // Set to at least currentPage + 1 to show pagination
+              setTotalPages(Math.max(currentPage + 1, currentPage));
+            } else {
+              // Less than 20 books means this is likely the last page
+              setTotalPages(currentPage);
+            }
+          }
         } else {
           setError('Failed to load books');
         }
@@ -428,13 +444,12 @@ const BibleBooksChaptersContent = () => {
                 placeholder="Search books..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                // className="pl-10"
                 className="pl-10 w-full"
               />
             </div>
-            {/* <div>
+            <div>
               <Select value={translationFilter} onValueChange={setTranslationFilter}>
-                <SelectTrigger>
+                <SelectTrigger className="w-full">
                   <SelectValue placeholder="Select translation" />
                 </SelectTrigger>
                 <SelectContent>
@@ -442,7 +457,7 @@ const BibleBooksChaptersContent = () => {
                   <SelectItem value="SV">SV</SelectItem>
                 </SelectContent>
               </Select>
-            </div> */}
+            </div>
             <div>
               <Select value={testamentFilter} onValueChange={setTestamentFilter}>
                 <SelectTrigger className="w-full">
@@ -455,16 +470,15 @@ const BibleBooksChaptersContent = () => {
                 </SelectContent>
               </Select>
             </div>
-            {/* <div className="flex items-center space-x-2"> */}
-            <div className="flex flex-wrap items-center gap-4 sm:col-span-2 lg:col-span-1">
+            <div className="flex flex-wrap items-center gap-4 md:col-span-3">
               <div className="flex items-center space-x-2">
                 <Filter className="w-4 h-4 text-gray-500 dark:text-gray-400" />
                 <span className="text-sm text-gray-600 dark:text-gray-400 whitespace-nowrap">
                   {filteredBooks.length} books
                 </span>
               </div>
-              {totalPages > 1 && (
-                // <div className="flex items-center gap-2 ml-4">
+              {/* Show pagination if we have multiple pages OR if we have 20 books (indicating more might exist) */}
+              {(totalPages > 1 || books.length === 20) && (
                 <div className="flex items-center gap-2 flex-grow justify-end">
                   <Button
                     variant="outline"
@@ -475,13 +489,20 @@ const BibleBooksChaptersContent = () => {
                     Previous
                   </Button>
                   <span className="text-sm text-gray-600 whitespace-nowrap">
-                    Page {currentPage} of {totalPages}
+                    Page {currentPage} of {totalPages > 1 ? totalPages : '...'}
                   </span>
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
-                    disabled={currentPage === totalPages || loadingBooks}
+                    onClick={() => {
+                      if (totalPages > 1) {
+                        setCurrentPage((prev) => Math.min(totalPages, prev + 1));
+                      } else {
+                        // If totalPages is unknown but we have 20 books, try next page
+                        setCurrentPage((prev) => prev + 1);
+                      }
+                    }}
+                    disabled={(totalPages > 1 && currentPage === totalPages) || loadingBooks}
                   >
                     Next
                   </Button>
@@ -587,7 +608,7 @@ const BibleBooksChaptersContent = () => {
                             {/* Verse count removed - not available from API */}
                             <div className="flex space-x-2">
                               <Link
-                                to={`/bible-content/books-chapters/view/${book.id}/${chapter.id}`}
+                                to={`/bible-content/books-chapters/view/${book.id}/${chapter.id}?translation=${translationFilter}`}
                               >
                                 <Button variant="outline" size="sm">
                                   <Eye className="w-4 h-4 mr-1" />

@@ -17,6 +17,12 @@ export interface BibleBookListItem {
 export interface BibleBooksListResponse {
   status: number;
   data: BibleBookListItem[];
+  pagination?: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+  };
 }
 
 export interface Chapter {

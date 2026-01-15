@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { fetchChapterDetail, type ChapterDetailData } from '@/services/bibleBooksApi';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -106,6 +106,14 @@ const transformChapterData = (apiData: ChapterDetailData) => {
 const ViewChapterContent: React.FC = () => {
   const { bookId, chapterId } = useParams<{ bookId: string; chapterId: string }>();
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  
+  // Get translation from URL query parameter, default to 'KJV' if not provided
+  const getTranslationFromUrl = () => {
+    const translation = searchParams.get('translation');
+    return (translation === 'KJV' || translation === 'SV') ? translation : 'KJV';
+  };
+  
   const [selectedVerse, setSelectedVerse] = useState<any>(null);
   const [isVerseModalOpen, setIsVerseModalOpen] = useState(false);
   const [book, setBook] = useState<BibleBook | null>(null);
@@ -119,7 +127,7 @@ const ViewChapterContent: React.FC = () => {
   } | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [translationFilter, setTranslationFilter] = useState<string>('KJV');
+  const [translationFilter, setTranslationFilter] = useState<string>(() => getTranslationFromUrl());
   const [currentPage, setCurrentPage] = useState(1);
   const [isChapterDeepStudy, setIsChapterDeepStudy] = useState(false);
   const [selectedChapterTab, setSelectedChapterTab] = useState<{
@@ -133,6 +141,18 @@ const ViewChapterContent: React.FC = () => {
   const [selectedExperienceLevel, setSelectedExperienceLevel] = useState<string>('NEW_TO_BIBLE');
   const [chapterExplanations, setChapterExplanations] = useState<ChapterAIExplanationHistoryResponse['data'] | null>(null);
   const [loadingExplanations, setLoadingExplanations] = useState(false);
+
+  // Sync translationFilter with URL parameter when it changes
+  useEffect(() => {
+    const urlTranslation = getTranslationFromUrl();
+    // Update if different to ensure it's always in sync with URL
+    setTranslationFilter((prev) => {
+      if (urlTranslation !== prev) {
+        return urlTranslation;
+      }
+      return prev;
+    });
+  }, [searchParams]);
 
   useEffect(() => {
     const loadChapter = async () => {
