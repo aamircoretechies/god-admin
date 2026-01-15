@@ -177,21 +177,18 @@ const NotesOverviewContent: React.FC = () => {
       setLoading(true);
       setError(null);
       try {
-        // Fetch with a larger limit when filters are active to allow client-side filtering
-        const limit = statusFilter !== 'all' || languageFilter !== 'all' ? 10000 : pageSize;
+        // Fetch a large enough dataset for client-side filtering since API current structure is limited
         const response = await fetchNotes({
-          page: currentPage,
-          limit: limit,
-          search: searchTerm || undefined,
-          user_id: userFilter !== 'all' ? userFilter : undefined
+          page: 1,
+          limit: 1000, // Fetch top 1000 notes to enable reliable client-side filtering
+          search: undefined,
+          user_id: undefined
         });
 
         if (response.status === 1 && response.data) {
           const transformed = response.data.map(transformNote);
           setNotes(transformed);
-          // Calculate pagination from data length (API doesn't provide metadata in new structure)
           setTotalCount(response.data.length);
-          setTotalPages(Math.ceil(response.data.length / pageSize));
         } else {
           throw new Error(response.message || 'Failed to fetch notes');
         }
@@ -203,28 +200,21 @@ const NotesOverviewContent: React.FC = () => {
       }
     };
 
-    const debounceTimer = setTimeout(
-      () => {
-        loadNotes();
-      },
-      searchTerm ? 500 : 0
-    );
-
-    return () => clearTimeout(debounceTimer);
-  }, [currentPage, searchTerm, userFilter, statusFilter, languageFilter]);
+    loadNotes();
+  }, []); // Only fetch once on mount
 
   // Reset to page 1 when filters change
   useEffect(() => {
     setCurrentPage(1);
   }, [statusFilter, userFilter, languageFilter, searchTerm]);
 
-  // Get unique user IDs for filter
+  // Get unique user IDs for filter from ALL notes
   const uniqueUserIds = useMemo(() => {
     const userIds = new Set(notes.map((n) => n.userId));
     return Array.from(userIds);
   }, [notes]);
 
-  // Filter notes (client-side filtering for status and language since API may not support them)
+  // Filter notes (client-side filtering)
   const filteredNotes = useMemo(() => {
     let filtered = notes;
 
@@ -238,28 +228,38 @@ const NotesOverviewContent: React.FC = () => {
       filtered = filtered.filter((note) => note.language === languageFilter);
     }
 
-    // Apply search filter (if not already handled by API)
-    if (searchTerm) {
-      filtered = filtered.filter(
-        (note) =>
-          note.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          note.content.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          note.userName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          note.userEmail.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          note.linkedVerses.some((verse) =>
-            verse.toLowerCase().includes(searchTerm.toLowerCase())
-          ) ||
-          note.tags.some((tag) => tag.toLowerCase().includes(searchTerm.toLowerCase()))
-      );
-    }
-
-    // Apply user filter (if not already handled by API)
+    // Apply user filter
     if (userFilter !== 'all') {
       filtered = filtered.filter((note) => note.userId === userFilter);
     }
 
+    // Apply search filter
+    if (searchTerm) {
+      const lowerSearch = searchTerm.toLowerCase();
+      filtered = filtered.filter(
+        (note) =>
+          note.title.toLowerCase().includes(lowerSearch) ||
+          note.content.toLowerCase().includes(lowerSearch) ||
+          note.userName.toLowerCase().includes(lowerSearch) ||
+          note.userEmail.toLowerCase().includes(lowerSearch) ||
+          note.linkedVerses.some((verse) => verse.toLowerCase().includes(lowerSearch)) ||
+          note.tags.some((tag) => tag.toLowerCase().includes(lowerSearch))
+      );
+    }
+
     return filtered;
   }, [notes, searchTerm, statusFilter, userFilter, languageFilter]);
+
+  // Update total pages based on filtered results
+  useEffect(() => {
+    setTotalPages(Math.ceil(filteredNotes.length / pageSize));
+  }, [filteredNotes]);
+
+  // Get current paginated notes
+  const paginatedNotes = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    return filteredNotes.slice(start, start + pageSize);
+  }, [filteredNotes, currentPage]);
 
   const getStatusBadge = (status: string) => {
     switch (status) {
@@ -662,7 +662,15 @@ const NotesOverviewContent: React.FC = () => {
         {/* <div className="flex items-center gap-2"> */}
         <div className="flex items-center gap-2 justify-end">
           <span className="text-sm text-gray-600">
-            Showing {filteredNotes.length} of {totalCount || notes.length} notes
+            {filteredNotes.length !== notes.length ? (
+              <>
+                Showing <b>{filteredNotes.length}</b> matching notes (from {totalCount} total)
+              </>
+            ) : (
+              <>
+                Showing <b>{totalCount}</b> total notes
+              </>
+            )}
           </span>
         </div>
       </div>
@@ -697,7 +705,7 @@ const NotesOverviewContent: React.FC = () => {
     <div className="space-y-4">
       <DataGrid
         columns={columns}
-        data={filteredNotes}
+        data={paginatedNotes}
         pagination={{ size: 10 }}
         sorting={[{ id: 'createdAt', desc: true }]}
         toolbar={toolbar}
@@ -708,7 +716,7 @@ const NotesOverviewContent: React.FC = () => {
       {totalPages > 1 && (
         <div className="flex items-center justify-between p-4 border-t">
           <div className="text-sm text-gray-600">
-            Showing page {currentPage} of {totalPages} ({totalCount} total notes)
+            Showing page {currentPage} of {totalPages} ({filteredNotes.length} matching results)
           </div>
           <div className="flex items-center space-x-2">
             <Button
