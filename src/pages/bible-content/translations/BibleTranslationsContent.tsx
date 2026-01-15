@@ -832,7 +832,7 @@ const BibleTranslationsContent = () => {
                   <SelectItem value="active">Active</SelectItem>
                   <SelectItem value="inactive">Inactive</SelectItem>
                   <SelectItem value="pending">Pending</SelectItem>
-                  <SelectItem value="draft">Draft</SelectItem>
+                  {/* <SelectItem value="draft">Draft</SelectItem> */}
                 </SelectContent>
               </Select>
             </div>

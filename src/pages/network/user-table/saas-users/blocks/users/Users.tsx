@@ -87,8 +87,8 @@ const SaaSUsersToolbar = ({
               <SelectItem value="all">All</SelectItem>
               <SelectItem value="active">Active</SelectItem>
               <SelectItem value="inactive">Inactive</SelectItem>
-              <SelectItem value="disabled">Disabled</SelectItem>
-              <SelectItem value="pending">Pending</SelectItem>
+              {/* <SelectItem value="disabled">Disabled</SelectItem> */}
+              {/* <SelectItem value="pending">Pending</SelectItem> */}
             </SelectContent>
           </Select>
 

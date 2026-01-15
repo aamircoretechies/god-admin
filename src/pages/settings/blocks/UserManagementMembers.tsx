@@ -71,7 +71,7 @@ const UserManagementMembers = () => {
             const nameParts = member.name.split(' ');
             const firstName = nameParts[0] || '';
             const lastName = nameParts.slice(1).join(' ') || '';
-            
+
             return {
               id: member.id,
               firstName,
@@ -113,7 +113,7 @@ const UserManagementMembers = () => {
             const nameParts = member.name.split(' ');
             const firstName = nameParts[0] || '';
             const lastName = nameParts.slice(1).join(' ') || '';
-            
+
             return {
               id: member.id,
               firstName,
@@ -132,7 +132,7 @@ const UserManagementMembers = () => {
     } catch (err: any) {
       console.error('Error deleting team member:', err);
       const errorMessage = err?.response?.data?.message || err?.message || 'Failed to remove team member';
-      
+
       if (err?.response?.status === 403 || errorMessage.toLowerCase().includes('forbidden') || errorMessage.toLowerCase().includes('unauthorized')) {
         toast.error('You are not authorized to remove team members. Please contact a super admin.');
       } else {
@@ -176,66 +176,66 @@ const UserManagementMembers = () => {
             <Users className="w-5 h-5" />
             Team Members
           </CardTitle>
-                 <div className="flex items-center gap-2">
-                   {canCreate && (
-                     <AddMemberModal
-                       trigger={
-                         <Button size="sm" className="btn btn-sm btn-primary">
-                           <UserPlus className="w-4 h-4 mr-2" />
-                           Add Member
-                         </Button>
-                       }
-                       onMemberAdded={async () => {
-              // Reload members after adding
-              const response = await fetchTeamMembers();
-              if (response.status === 1 && response.data) {
-                const transformedMembers: Member[] = response.data.map((member: TeamMember) => {
-                  const nameParts = member.name.split(' ');
-                  const firstName = nameParts[0] || '';
-                  const lastName = nameParts.slice(1).join(' ') || '';
-                  
-                  return {
-                    id: member.id,
-                    firstName,
-                    lastName,
-                    email: member.email,
-                    role: (member.role?.toLowerCase() || 'member') as 'admin' | 'moderator' | 'member' | 'editor',
-                    status: (member.status?.toLowerCase() || 'inactive') as 'active' | 'inactive',
-                    lastActive: 'N/A'
-                  };
-                });
-                setMembers(transformedMembers);
-              }
-            }}
-          />
-                   )}
-                   {canCreate && (
-                     <AddExistingUserModal
-                       onMemberAdded={async () => {
-              // Reload members after adding
-              const response = await fetchTeamMembers();
-              if (response.status === 1 && response.data) {
-                const transformedMembers: Member[] = response.data.map((member: TeamMember) => {
-                  const nameParts = member.name.split(' ');
-                  const firstName = nameParts[0] || '';
-                  const lastName = nameParts.slice(1).join(' ') || '';
-                  
-                  return {
-                    id: member.id,
-                    firstName,
-                    lastName,
-                    email: member.email,
-                    role: (member.role?.toLowerCase() || 'member') as 'admin' | 'moderator' | 'member' | 'editor',
-                    status: (member.status?.toLowerCase() || 'inactive') as 'active' | 'inactive',
-                    lastActive: 'N/A'
-                  };
-                });
-                setMembers(transformedMembers);
-              }
-            }}
-          />
-                   )}
-        </div>
+          <div className="flex items-center gap-2">
+            {/* {canCreate && (
+              <AddMemberModal
+                trigger={
+                  <Button size="sm" className="btn btn-sm btn-primary">
+                    <UserPlus className="w-4 h-4 mr-2" />
+                    Add Member
+                  </Button>
+                }
+                onMemberAdded={async () => {
+                  // Reload members after adding
+                  const response = await fetchTeamMembers();
+                  if (response.status === 1 && response.data) {
+                    const transformedMembers: Member[] = response.data.map((member: TeamMember) => {
+                      const nameParts = member.name.split(' ');
+                      const firstName = nameParts[0] || '';
+                      const lastName = nameParts.slice(1).join(' ') || '';
+
+                      return {
+                        id: member.id,
+                        firstName,
+                        lastName,
+                        email: member.email,
+                        role: (member.role?.toLowerCase() || 'member') as 'admin' | 'moderator' | 'member' | 'editor',
+                        status: (member.status?.toLowerCase() || 'inactive') as 'active' | 'inactive',
+                        lastActive: 'N/A'
+                      };
+                    });
+                    setMembers(transformedMembers);
+                  }
+                }}
+              />
+            )} */}
+            {canCreate && (
+              <AddExistingUserModal
+                onMemberAdded={async () => {
+                  // Reload members after adding
+                  const response = await fetchTeamMembers();
+                  if (response.status === 1 && response.data) {
+                    const transformedMembers: Member[] = response.data.map((member: TeamMember) => {
+                      const nameParts = member.name.split(' ');
+                      const firstName = nameParts[0] || '';
+                      const lastName = nameParts.slice(1).join(' ') || '';
+
+                      return {
+                        id: member.id,
+                        firstName,
+                        lastName,
+                        email: member.email,
+                        role: (member.role?.toLowerCase() || 'member') as 'admin' | 'moderator' | 'member' | 'editor',
+                        status: (member.status?.toLowerCase() || 'inactive') as 'active' | 'inactive',
+                        lastActive: 'N/A'
+                      };
+                    });
+                    setMembers(transformedMembers);
+                  }
+                }}
+              />
+            )}
+          </div>
         </div>
       </CardHeader>
       <CardContent>
@@ -256,54 +256,54 @@ const UserManagementMembers = () => {
           ) : (
             members.map((member) => (
               <div
-              key={member.id}
-              className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
-            >
-              <div className="flex items-center gap-4 flex-1">
-                <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
-                  <span className="text-blue-600 font-semibold">
-                    {member.firstName[0]}
-                    {member.lastName[0]}
-                  </span>
-                </div>
-                <div className="flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <h4 className="font-medium text-gray-900">
-                      {member.firstName} {member.lastName}
-                    </h4>
-                    {getRoleBadge(member.role)}
-                    {getStatusBadge(member.status)}
+                key={member.id}
+                className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
+              >
+                <div className="flex items-center gap-4 flex-1">
+                  <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
+                    <span className="text-blue-600 font-semibold">
+                      {member.firstName[0]}
+                      {member.lastName[0]}
+                    </span>
                   </div>
-                  <div className="flex items-center gap-2 text-sm text-gray-500">
-                    <Mail className="w-3 h-3" />
-                    <span>{member.email}</span>
+                  <div className="flex-1">
+                    <div className="flex items-center gap-2 mb-1">
+                      <h4 className="font-medium text-gray-900">
+                        {member.firstName} {member.lastName}
+                      </h4>
+                      {getRoleBadge(member.role)}
+                      {getStatusBadge(member.status)}
+                    </div>
+                    <div className="flex items-center gap-2 text-sm text-gray-500">
+                      <Mail className="w-3 h-3" />
+                      <span>{member.email}</span>
+                    </div>
+                    <p className="text-xs text-gray-400 mt-1">Last active: {member.lastActive}</p>
                   </div>
-                  <p className="text-xs text-gray-400 mt-1">Last active: {member.lastActive}</p>
                 </div>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="sm">
+                      <MoreVertical className="w-4 h-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem>
+                      <Edit className="w-4 h-4 mr-2" />
+                      Edit Member
+                    </DropdownMenuItem>
+                    <DropdownMenuItem
+                      className="text-red-600"
+                      onClick={() => handleDeleteMember(member.id)}
+                      disabled={!canDelete}
+                      title={!canDelete ? 'You do not have permission to delete team members' : ''}
+                    >
+                      <Trash2 className="w-4 h-4 mr-2" />
+                      Remove Member
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
               </div>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="sm">
-                    <MoreVertical className="w-4 h-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end">
-                  <DropdownMenuItem>
-                    <Edit className="w-4 h-4 mr-2" />
-                    Edit Member
-                  </DropdownMenuItem>
-                           <DropdownMenuItem 
-                             className="text-red-600"
-                             onClick={() => handleDeleteMember(member.id)}
-                             disabled={!canDelete}
-                             title={!canDelete ? 'You do not have permission to delete team members' : ''}
-                           >
-                             <Trash2 className="w-4 h-4 mr-2" />
-                             Remove Member
-                           </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
-            </div>
             ))
           )}
         </div>

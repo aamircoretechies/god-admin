@@ -34,12 +34,12 @@ import { toast } from "sonner";
 // Convert markdown to HTML for proper display (same as ChapterDetailModal)
 const markdownToHtml = (content: string | null | undefined): string => {
   if (!content) return '';
-  
+
   let html = content;
-  
+
   // First, clean up any existing HTML tags that shouldn't be there
   html = html.replace(/<\/?p>/g, '\n');
-  
+
   // Decode HTML entities first
   html = html.replace(/&nbsp;/g, ' ');
   html = html.replace(/&amp;/g, '&');
@@ -47,7 +47,7 @@ const markdownToHtml = (content: string | null | undefined): string => {
   html = html.replace(/&gt;/g, '>');
   html = html.replace(/&quot;/g, '"');
   html = html.replace(/&#39;/g, "'");
-  
+
   // Convert markdown headings to HTML
   html = html.replace(/^######\s+(.*)$/gm, '<h6>$1</h6>');
   html = html.replace(/^#####\s+(.*)$/gm, '<h5>$1</h5>');
@@ -55,43 +55,43 @@ const markdownToHtml = (content: string | null | undefined): string => {
   html = html.replace(/^###\s+(.*)$/gm, '<h3>$1</h3>');
   html = html.replace(/^##\s+(.*)$/gm, '<h2>$1</h2>');
   html = html.replace(/^#\s+(.*)$/gm, '<h1>$1</h1>');
-  
+
   // Convert markdown bold (**text** or __text__) - do this first
   html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
   html = html.replace(/__(.*?)__/g, '<strong>$1</strong>');
-  
+
   // Convert markdown italic (*text* or _text_) - do this after bold
   // Since bold is already converted, remaining single asterisks/underscores are italic
   html = html.replace(/\*([^*\n]+?)\*/g, '<em>$1</em>');
   html = html.replace(/_([^_\n]+?)_/g, '<em>$1</em>');
-  
+
   // Convert markdown links [text](url)
   html = html.replace(/\[([^\]]+)\]\(([^\)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
-  
+
   // Convert markdown code blocks (```code```)
   html = html.replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>');
   html = html.replace(/`([^`\n]+)`/g, '<code>$1</code>');
-  
+
   // Convert markdown horizontal rules
   html = html.replace(/^[-*]{3,}$/gm, '<hr />');
-  
+
   // Convert line breaks first (split by double newlines for paragraphs)
   const paragraphs = html.split(/\n\s*\n/);
   html = paragraphs.map(para => {
     para = para.trim();
     if (!para) return '';
-    
+
     // Check if it's a heading (already converted)
     if (para.match(/^<h[1-6]>/)) {
       return para;
     }
-    
+
     // Check if it's a list
     const listItems = para.split('\n').filter(line => {
       const trimmed = line.trim();
       return trimmed.match(/^[-*+]\s+/) || trimmed.match(/^\d+\.\s+/);
     });
-    
+
     if (listItems.length > 0) {
       // It's a list
       const isOrdered = listItems[0].trim().match(/^\d+\./);
@@ -102,15 +102,15 @@ const markdownToHtml = (content: string | null | undefined): string => {
       }).join('\n');
       return `<${tag}>${items}</${tag}>`;
     }
-    
+
     // Regular paragraph - convert single newlines to <br />
     para = para.replace(/\n/g, '<br />');
     return `<p>${para}</p>`;
   }).filter(p => p).join('\n');
-  
+
   // Clean up multiple spaces
   html = html.replace(/[ \t]{2,}/g, ' ');
-  
+
   return html;
 };
 
@@ -1048,7 +1048,7 @@ const AIExplanationManagementContent = () => {
               <Brain className="w-5 h-5 text-purple-600" />
               AI Explanation Details
             </DialogTitle>
-            <DialogDescription className="text-sm text-gray-600 mt-1.5">
+            <DialogDescription className="text-sm text-gray-600 mt-3">
               {selectedExplanation && `${selectedExplanation.book} ${selectedExplanation.chapter}:${selectedExplanation.verse || 'no'}`}
             </DialogDescription>
           </DialogHeader>
@@ -1120,7 +1120,7 @@ const AIExplanationManagementContent = () => {
               <div className="space-y-2 pt-2 border-t border-gray-200">
                 <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Explanation</label>
                 <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
-                  <div 
+                  <div
                     className="text-sm text-gray-700 leading-relaxed prose prose-sm max-w-none prose-headings:font-semibold prose-p:mb-4 prose-strong:font-semibold prose-code:bg-gray-200 prose-code:px-1 prose-code:rounded prose-pre:bg-gray-100 prose-pre:p-4 prose-pre:rounded prose-ul:list-disc prose-ol:list-decimal prose-li:ml-4"
                     dangerouslySetInnerHTML={{ __html: markdownToHtml(selectedExplanation.explanation) || 'No content available' }}
                   />

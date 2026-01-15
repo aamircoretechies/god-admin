@@ -16,11 +16,15 @@ import { NetworkUserDetailContent } from '.';
 import { useLayout } from '@/providers';
 import { exportUserData, deleteUser } from '@/services/usersApi';
 import { useNavigate } from 'react-router-dom';
+import { DeleteUserModal } from './blocks/DeleteUserModal';
+import { useState } from 'react';
 
 const NetworkUserDetailPage = () => {
   const { currentLayout } = useLayout();
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
 
   const handleExportData = async () => {
     if (!id) {
@@ -58,21 +62,24 @@ const NetworkUserDetailPage = () => {
     toast.info('Edit Profile functionality is currently disabled');
   };
 
-  const handleDeleteUser = async () => {
+  const handleDeleteUser = () => {
     if (!id) {
       toast.error('User ID is required');
       return;
     }
 
-    // Confirm deletion
-    if (!window.confirm('Are you sure you want to delete this user? This action cannot be undone and will delete all user data including activities, bookmarks, and preferences.')) {
-      return;
-    }
+    setIsDeleteModalOpen(true);
+  };
 
+  const onConfirmDelete = async () => {
+    if (!id) return;
+
+    setIsDeleting(true);
     try {
       const response = await deleteUser(id);
       if (response.status === 1) {
         toast.success('User deleted successfully');
+        setIsDeleteModalOpen(false);
         // Navigate back to user list
         navigate('/network/user-table/saas-users');
       } else {
@@ -88,6 +95,8 @@ const NetworkUserDetailPage = () => {
       } else {
         toast.error(errorMessage);
       }
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -120,14 +129,14 @@ const NetworkUserDetailPage = () => {
               <button onClick={handleExportData} className="btn btn-sm btn-light">
                 Export Data
               </button>
-              <button
+              {/* <button
                 onClick={handleEditProfile}
                 className="btn btn-sm btn-primary"
                 disabled
                 style={{ opacity: 0.6, cursor: 'not-allowed' }}
               >
                 Edit Profile
-              </button>
+              </button> */}
             </ToolbarActions>
           </Toolbar>
         </Container>
@@ -136,6 +145,13 @@ const NetworkUserDetailPage = () => {
       <Container>
         <NetworkUserDetailContent />
       </Container>
+
+      <DeleteUserModal
+        isOpen={isDeleteModalOpen}
+        onOpenChange={setIsDeleteModalOpen}
+        onConfirm={onConfirmDelete}
+        isDeleting={isDeleting}
+      />
     </Fragment>
   );
 };

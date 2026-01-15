@@ -44,6 +44,8 @@ const AddMemberForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [availableRoles, setAvailableRoles] = useState<Role[]>([]);
   const [isLoadingRoles, setIsLoadingRoles] = useState(false);
+  const [emailError, setEmailError] = useState<string | null>(null);
+  const [passwordError, setPasswordError] = useState<string | null>(null);
 
   // Fetch available roles from API
   useEffect(() => {
@@ -80,10 +82,38 @@ const AddMemberForm = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setEmailError(null);
+    setPasswordError(null);
 
     // Validation
     const trimmedFirstName = formData.first_name.trim();
     const trimmedLastName = formData.last_name.trim();
+
+    // Email validation
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(formData.email)) {
+      setEmailError('Please enter a valid email address');
+      setIsSubmitting(false);
+      return;
+    }
+
+    // Password validation
+    const password = formData.password;
+    const hasUpperCase = /[A-Z]/.test(password);
+    const hasLowerCase = /[a-z]/.test(password);
+    const hasNumber = /\d/.test(password);
+    const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+
+    if (password.length < 8) {
+      setPasswordError('Password must be at least 8 characters long');
+      setIsSubmitting(false);
+      return;
+    }
+    if (!hasUpperCase || !hasLowerCase || !hasNumber || !hasSpecialChar) {
+      setPasswordError('Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character');
+      setIsSubmitting(false);
+      return;
+    }
 
     // Check for white-space-only input
     if (trimmedFirstName.length === 0) {
@@ -133,7 +163,7 @@ const AddMemberForm = () => {
       }
 
       const response = await createTeamMember(requestData);
-    
+
       if (response.status === 1) {
         toast.success('Member added successfully!');
 
@@ -146,6 +176,8 @@ const AddMemberForm = () => {
           role: 'FREE',
           custom_role_id: undefined
         });
+        setEmailError(null);
+        setPasswordError(null);
 
         setIsOpen(false);
 
@@ -177,6 +209,8 @@ const AddMemberForm = () => {
       role: 'FREE',
       custom_role_id: undefined
     });
+    setEmailError(null);
+    setPasswordError(null);
   };
 
   const handleOpenDialog = () => {
@@ -201,7 +235,7 @@ const AddMemberForm = () => {
         </DialogHeader>
 
         <div className="px-6 pb-6">
-          <form onSubmit={handleSubmit} className="space-y-5">
+          <form onSubmit={handleSubmit} noValidate className="space-y-5">
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
                 <Label htmlFor="first_name" className="text-sm font-medium text-gray-700">
@@ -263,10 +297,16 @@ const AddMemberForm = () => {
                 type="email"
                 placeholder="Enter email address"
                 value={formData.email}
-                onChange={(e) => handleInputChange('email', e.target.value)}
+                onChange={(e) => {
+                  handleInputChange('email', e.target.value);
+                  if (emailError) setEmailError(null);
+                }}
                 required
-                className="h-10"
+                className={`h-10 ${emailError ? 'border-red-500' : ''}`}
               />
+              {emailError && (
+                <p className="text-xs text-red-500 mt-1">{emailError}</p>
+              )}
             </div>
 
             <div className="space-y-1.5">
@@ -279,10 +319,13 @@ const AddMemberForm = () => {
                   type={showPassword ? 'text' : 'password'}
                   placeholder="Enter password"
                   value={formData.password}
-                  onChange={(e) => handleInputChange('password', e.target.value)}
+                  onChange={(e) => {
+                    handleInputChange('password', e.target.value);
+                    if (passwordError) setPasswordError(null);
+                  }}
                   required
                   minLength={8}
-                  className="h-10 pr-10"
+                  className={`h-10 pr-10 ${passwordError ? 'border-red-500' : ''}`}
                 />
                 <Button
                   type="button"
@@ -298,6 +341,9 @@ const AddMemberForm = () => {
                   )}
                 </Button>
               </div>
+              {passwordError && (
+                <p className="text-xs text-red-500 mt-1">{passwordError}</p>
+              )}
             </div>
 
             <div className="space-y-1.5">
