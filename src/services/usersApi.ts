@@ -201,17 +201,7 @@ export const fetchUsersForDataGrid = async (
   let sortBy = 'joinedAt';
   let sortOrder: 'asc' | 'desc' = 'desc';
 
-  if (params.sorting && params.sorting.length > 0) {
-    const sort = params.sorting[0];
-    if (sort.id === 'joinDate') {
-      sortBy = 'joinedAt';
-    } else if (sort.id === 'user') {
-      sortBy = 'name';
-    }
-    sortOrder = sort.desc ? 'desc' : 'asc';
-  }
-
-  // Handle sort filter from UI
+  // Handle sort filter from UI - prioritize sortFilter over DataGrid sorting
   if (sortFilter === 'oldest') {
     sortOrder = 'asc';
     sortBy = 'joinedAt';
@@ -219,8 +209,18 @@ export const fetchUsersForDataGrid = async (
     sortOrder = 'desc';
     sortBy = 'joinedAt';
   } else if (sortFilter === 'older') {
-    sortOrder = 'asc';
+    // For "older", use desc to show previous/middle users (descending from newest)
+    sortOrder = 'desc';
     sortBy = 'joinedAt';
+  } else if (params.sorting && params.sorting.length > 0) {
+    // Only use DataGrid sorting if sortFilter is not set
+    const sort = params.sorting[0];
+    if (sort.id === 'joinDate') {
+      sortBy = 'joinedAt';
+    } else if (sort.id === 'user') {
+      sortBy = 'name';
+    }
+    sortOrder = sort.desc ? 'desc' : 'asc';
   }
 
   const response = await fetchUsers({

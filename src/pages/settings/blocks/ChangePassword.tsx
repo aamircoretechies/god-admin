@@ -7,6 +7,7 @@ import { Lock, Eye, EyeOff, Save, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
 import axios from 'axios';
 import { useAuthContext } from '@/auth';
+import { API_URL } from '@/utils/Api';
 
 const ChangePassword = () => {
   const { auth } = useAuthContext();
@@ -44,8 +45,8 @@ const ChangePassword = () => {
       return;
     }
 
-    if (formData.newPassword.length < 6) {
-      setError('New password must be at least 6 characters long');
+    if (formData.newPassword.length < 8) {
+      setError('New password must be at least 8 characters long');
       setSaving(false);
       return;
     }
@@ -63,10 +64,8 @@ const ChangePassword = () => {
     }
 
     try {
-      // Construct the API URL - endpoint is /api/auth/change-password (without /v1)
-      const apiUrl = import.meta.env.DEV
-        ? '/api/auth/change-password'
-        : `${import.meta.env.VITE_APP_API_URL || 'https://api.growondaily.com'}/api/auth/change-password`;
+      // Use the API_URL utility to construct the correct endpoint
+      const apiUrl = `${API_URL}/admin/auth/change-password`;
 
       const response = await axios.put(
         apiUrl,
@@ -165,7 +164,7 @@ const ChangePassword = () => {
                 value={formData.newPassword}
                 onChange={(e) => handleInputChange('newPassword', e.target.value)}
                 required
-                minLength={6}
+                minLength={8}
                 className="h-10 pr-10"
               />
               <Button
@@ -197,7 +196,7 @@ const ChangePassword = () => {
                 value={formData.confirmPassword}
                 onChange={(e) => handleInputChange('confirmPassword', e.target.value)}
                 required
-                minLength={6}
+                minLength={8}
                 className="h-10 pr-10"
               />
               <Button

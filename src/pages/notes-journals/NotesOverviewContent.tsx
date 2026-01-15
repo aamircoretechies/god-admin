@@ -308,13 +308,19 @@ const NotesOverviewContent: React.FC = () => {
       {
         accessorFn: (row: Note) => row,
         id: 'user',
-        header: ({ column }) => (
-          <DataGridColumnHeader
-            title="User"
-            // filter={<ColumnInputFilter column={column} />}
-            column={column}
-          />
+        // header: ({ column }) => (
+        //   <DataGridColumnHeader
+        //     title="User"
+        //     filter={<ColumnInputFilter column={column} />}
+        //     column={column}
+        //   />
+        // ),
+        header: () => (
+          <span className="text-sm font-medium select-none cursor-default">
+            User
+          </span>
         ),
+
         enableSorting: true,
         cell: ({ row }) => (
           <div className="flex items-center gap-2.5">
@@ -347,13 +353,19 @@ const NotesOverviewContent: React.FC = () => {
       {
         accessorFn: (row: Note) => row,
         id: 'content',
-        header: ({ column }) => (
-          <DataGridColumnHeader
-            title="Title / Content"
-            // filter={<ColumnInputFilter column={column} />}
-            column={column}
-          />
+        // header: ({ column }) => (
+        //   <DataGridColumnHeader
+        //     title="Title / Content"
+        //     filter={<ColumnInputFilter column={column} />}
+        //     column={column}
+        //   />
+        // ),
+        header: () => (
+          <span className="text-sm font-medium select-none cursor-default">
+            Title / Content
+          </span>
         ),
+
         enableSorting: true,
         cell: ({ row }) => (
           <div className="max-w-xs">
@@ -374,7 +386,7 @@ const NotesOverviewContent: React.FC = () => {
       {
         accessorFn: (row: Note) => row.linkedVerses,
         id: 'linkedVerses',
-        header: ({ column }) => <DataGridColumnHeader title="Linked Verses" column={column} />,
+        // header: ({ column }) => <DataGridColumnHeader title="Linked Verses" column={column} />,
         enableSorting: true,
         cell: ({ row }) => (
           <div className="flex flex-wrap gap-1">
@@ -393,7 +405,7 @@ const NotesOverviewContent: React.FC = () => {
       {
         accessorFn: (row: Note) => row.tags,
         id: 'tags',
-        header: ({ column }) => <DataGridColumnHeader title="Tags" column={column} />,
+        // header: ({ column }) => <DataGridColumnHeader title="Tags" column={column} />,
         enableSorting: true,
         cell: ({ row }) => (
           <div className="flex flex-wrap gap-1">
@@ -416,7 +428,7 @@ const NotesOverviewContent: React.FC = () => {
       {
         accessorFn: (row: Note) => row.status,
         id: 'status',
-        header: ({ column }) => <DataGridColumnHeader title="Status" column={column} />,
+        // header: ({ column }) => <DataGridColumnHeader title="Status" column={column} />,
         enableSorting: true,
         cell: ({ row }) => getStatusBadge(row.original.status),
         meta: {
@@ -427,7 +439,7 @@ const NotesOverviewContent: React.FC = () => {
       {
         accessorFn: (row: Note) => row.createdAt,
         id: 'createdAt',
-        header: ({ column }) => <DataGridColumnHeader title="Created" column={column} />,
+        // header: ({ column }) => <DataGridColumnHeader title="Created" column={column} />,
         enableSorting: true,
         cell: ({ row }) => (
           <div className="text-sm">
@@ -538,10 +550,11 @@ const NotesOverviewContent: React.FC = () => {
       const res = await deleteNote(id);
 
       if (res.status === 1) {
-        setNotes((prev) => prev.filter((n) => n.id !== id));
-
         // Backend success message toast
         toast.success(res.message || 'Note deleted successfully!');
+
+        // Refresh the page immediately after successful deletion
+        window.location.reload();
       } else {
         //  Backend error message toast
         toast.error(res.message || 'Failed to delete note');
@@ -608,7 +621,7 @@ const NotesOverviewContent: React.FC = () => {
             <option value="all">All Status</option>
             <option value="active">Active</option>
             <option value="flagged">Flagged</option>
-            <option value="deleted">Deleted</option>
+            {/* <option value="deleted">Deleted</option> */}
           </select>
           {/* <select
             value={userFilter}
@@ -635,7 +648,7 @@ const NotesOverviewContent: React.FC = () => {
             onChange={(e) => setLanguageFilter(e.target.value)}
             className="px-3 py-2 border border-gray-300 rounded-md text-sm dark:bg-card dark:text-white"
           > */}
-          <select
+          {/* <select
             value={languageFilter}
             onChange={(e) => setLanguageFilter(e.target.value)}
             className="px-3 py-2 border border-gray-300 rounded-md text-sm dark:bg-card dark:text-white w-full md:w-auto"
@@ -644,7 +657,7 @@ const NotesOverviewContent: React.FC = () => {
             <option value="English">English</option>
             <option value="Spanish">Spanish</option>
             <option value="French">French</option>
-          </select>
+          </select> */}
         </div>
         {/* <div className="flex items-center gap-2"> */}
         <div className="flex items-center gap-2 justify-end">

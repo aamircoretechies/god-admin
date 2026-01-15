@@ -24,7 +24,9 @@ const SimpleBarChart = ({ data, title }: { data: any[]; title: string }) => (
     <div className="space-y-1">
       {data.map((item, index) => (
         <div key={index} className="flex items-center gap-2">
-          <div className="w-20 text-xs text-gray-500 dark:text-gray-400">{item.label}</div>
+          <div className="w-20 text-xs text-gray-500 dark:text-gray-400">
+            {item.label || ''}
+          </div>
           <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
             <div
               className="bg-amber-500 h-2 rounded-full min-w-[10px]"
@@ -118,16 +120,46 @@ const ActivityAnalyticsContent: React.FC = () => {
       value: value
     })) || [];
 
-  // Transform top verses
+  // Helper function to check if a verse string is a valid, readable verse reference
+  const isValidVerseReference = (verse: string): boolean => {
+    if (!verse || typeof verse !== 'string') return false;
+    
+    // Check if it's a UUID (contains hyphens and matches UUID pattern)
+    const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i;
+    if (uuidPattern.test(verse.trim())) return false;
+    
+    // Check if it contains common Bible book names (case-insensitive)
+    const bibleBooks = [
+      'genesis', 'exodus', 'leviticus', 'numbers', 'deuteronomy', 'joshua', 'judges', 'ruth',
+      'samuel', 'kings', 'chronicles', 'ezra', 'nehemiah', 'esther', 'job', 'psalm', 'psalms',
+      'proverbs', 'ecclesiastes', 'song', 'isaiah', 'jeremiah', 'lamentations', 'ezekiel',
+      'daniel', 'hosea', 'joel', 'amos', 'obadiah', 'jonah', 'micah', 'nahum', 'habakkuk',
+      'zephaniah', 'haggai', 'zechariah', 'malachi', 'matthew', 'mark', 'luke', 'john',
+      'acts', 'romans', 'corinthians', 'galatians', 'ephesians', 'philippians', 'colossians',
+      'thessalonians', 'timothy', 'titus', 'philemon', 'hebrews', 'james', 'peter', 'jude',
+      'revelation'
+    ];
+    
+    const verseLower = verse.toLowerCase();
+    const containsBookName = bibleBooks.some(book => verseLower.includes(book));
+    
+    // Valid if it contains a book name or looks like a proper verse reference (has numbers and text)
+    return containsBookName || (verse.length > 3 && /[a-zA-Z]/.test(verse) && /[0-9]/.test(verse));
+  };
+
+  // Transform top verses - only show valid verse references
   const topVersesData =
-    analyticsData?.topVerses.map((item) => {
-      const total = analyticsData.topVerses.reduce((sum, i) => sum + i.count, 0);
-      return {
-        label: item.verse,
-        value: item.count,
-        percentage: total > 0 ? Math.round((item.count / total) * 100) : 0
-      };
-    }) || [];
+    analyticsData?.topVerses
+      .map((item) => {
+        const total = analyticsData.topVerses.reduce((sum, i) => sum + i.count, 0);
+        const isValid = isValidVerseReference(item.verse);
+        return {
+          label: isValid ? item.verse : null,
+          value: item.count,
+          percentage: total > 0 ? Math.round((item.count / total) * 100) : 0
+        };
+      })
+      .filter((item) => item.label !== null) || [];
 
   // Transform error rate trend
   const errorRateData =
@@ -378,7 +410,7 @@ const ActivityAnalyticsContent: React.FC = () => {
                     <div>
                       <p className="text-sm font-medium text-gray-900">
                         Active Users {analyticsData.metrics.activeUsers.growth > 0 ? 'Up' : 'Down'}{' '}
-                        {Math.abs(analyticsData.metrics.activeUsers.growth).toFixed(1)}%
+                        {Math.abs(analyticsData.metrics.activeUsers.growth).toFixed(1)}%  
                       </p>
                       <p className="text-xs text-gray-600">
                         {analyticsData.metrics.activeUsers.value.toLocaleString()} active users in

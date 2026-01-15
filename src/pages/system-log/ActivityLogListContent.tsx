@@ -5,7 +5,8 @@ import {
   DataGrid,
   DataGridColumnHeader,
   DataGridRowSelect,
-  DataGridRowSelectAll
+  DataGridRowSelectAll,
+  useDataGrid
 } from '@/components/data-grid';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -370,13 +371,13 @@ const ActivityLogListContent: React.FC = () => {
       {
         accessorFn: (row: UserActivityLog) => row,
         id: 'user',
-        header: ({ column }) => (
-          <DataGridColumnHeader
-            title="User"
-            filter={<ColumnInputFilter column={column} />}
-            column={column}
-          />
-        ),
+        // header: ({ column }) => (
+        //   <DataGridColumnHeader
+        //     title="User"
+        //     filter={<ColumnInputFilter column={column} />}
+        //     column={column}
+        //   />
+        // ),
         enableSorting: true,
         cell: ({ row }) => (
           <div className="flex items-center gap-3">
@@ -407,7 +408,7 @@ const ActivityLogListContent: React.FC = () => {
       {
         accessorFn: (row: UserActivityLog) => row.activityType,
         id: 'activityType',
-        header: ({ column }) => <DataGridColumnHeader title="Activity Type" column={column} />,
+        // header: ({ column }) => <DataGridColumnHeader title="Activity Type" column={column} />,
         enableSorting: true,
         cell: ({ row }) => getActivityTypeBadge(row.original.activityType),
         meta: {
@@ -418,13 +419,13 @@ const ActivityLogListContent: React.FC = () => {
       {
         accessorFn: (row: UserActivityLog) => row.details,
         id: 'details',
-        header: ({ column }) => (
-          <DataGridColumnHeader
-            title="Details"
-            filter={<ColumnInputFilter column={column} />}
-            column={column}
-          />
-        ),
+        // header: ({ column }) => (
+        //   <DataGridColumnHeader
+        //     title="Details"
+        //     filter={<ColumnInputFilter column={column} />}
+        //     column={column}
+        //   />
+        // ),
         enableSorting: true,
         cell: ({ row }) => (
           <div className="max-w-xs">
@@ -448,7 +449,7 @@ const ActivityLogListContent: React.FC = () => {
       {
         accessorFn: (row: UserActivityLog) => row.device,
         id: 'device',
-        header: ({ column }) => <DataGridColumnHeader title="Device" column={column} />,
+        // header: ({ column }) => <DataGridColumnHeader title="Device" column={column} />,
         enableSorting: true,
         cell: ({ row }) => (
           <div className="flex items-center gap-2">
@@ -464,7 +465,7 @@ const ActivityLogListContent: React.FC = () => {
       {
         accessorFn: (row: UserActivityLog) => row.timestamp,
         id: 'timestamp',
-        header: ({ column }) => <DataGridColumnHeader title="Date & Time" column={column} />,
+        // header: ({ column }) => <DataGridColumnHeader title="Date & Time" column={column} />,
         enableSorting: true,
         cell: ({ row }) => (
           <div className="text-sm">
@@ -480,7 +481,7 @@ const ActivityLogListContent: React.FC = () => {
       {
         accessorFn: (row: UserActivityLog) => row.status,
         id: 'status',
-        header: ({ column }) => <DataGridColumnHeader title="Status" column={column} />,
+        // header: ({ column }) => <DataGridColumnHeader title="Status" column={column} />,
         enableSorting: true,
         cell: ({ row }) => getStatusBadge(row.original.status),
         meta: {
@@ -490,7 +491,10 @@ const ActivityLogListContent: React.FC = () => {
       },
       {
         id: 'actions',
-        header: ({ column }) => <DataGridColumnHeader title="Actions" column={column} />,
+        // header: ({ column }) => <DataGridColumnHeader title="Actions" column={column} />,
+        header: () => (
+          <span className="text-sm font-medium select-none cursor-default">Actions</span>
+        ),
         enableSorting: false,
         cell: ({ row }) => (
           <DropdownMenu>
@@ -587,84 +591,85 @@ const ActivityLogListContent: React.FC = () => {
     }
   };
 
-  const toolbar = (
-    // <div className="flex flex-col gap-4 p-5">
-    <div className="flex flex-col gap-4 p-3 md:p-5">
-      {/* <div className="flex items-center justify-between"> */}
-      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-        {/* <div className="flex items-center gap-4"> */}
-        <div className="flex flex-col md:flex-row items-stretch md:items-center gap-4 flex-1">
-          {/* <div className="flex-1 relative"> */}
-          <div className="relative w-full md:max-w-md">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-            <Input
-              placeholder="Search by user, activity, verse reference, query..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              // className="pl-10 max-w-md"
-              className="pl-10 w-full"
-            />
+  // Toolbar component that uses DataGrid context to get pagination state
+  const ToolbarContent = () => {
+    const { table, totalRows } = useDataGrid();
+    const pageIndex = table.getState().pagination.pageIndex;
+    const pageSize = table.getState().pagination.pageSize;
+    // Get the actual number of rows on the current page
+    const currentPageRows = table.getRowModel().rows.length;
+
+    return (
+      <div className="flex flex-col gap-4 p-3 md:p-5">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+          <div className="flex flex-col md:flex-row items-stretch md:items-center gap-4 flex-1">
+            <div className="relative w-full md:max-w-md">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Input
+                placeholder="Search by user, activity, verse reference, query..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10 w-full"
+              />
+            </div>
+            <select
+              value={userFilter}
+              onChange={(e) => setUserFilter(e.target.value)}
+              className="px-3 py-2 border border-gray-300 rounded-md text-sm bg-card w-full md:w-auto"
+            >
+              <option value="all">All Users</option>
+              <option value="Free">Free</option>
+              <option value="Premium">Premium</option>
+              <option value="Admin">Admin</option>
+              <option value="Moderator">Moderator</option>
+            </select>
+            <select
+              value={activityTypeFilter}
+              onChange={(e) => setActivityTypeFilter(e.target.value)}
+              className="px-3 py-2 border border-gray-300 rounded-md text-sm bg-card w-full md:w-auto"
+            >
+              <option value="all">All Activities</option>
+              <option value="Verse Read">Verse Read</option>
+              <option value="AI Query">AI Query</option>
+              <option value="Bookmark">Bookmark</option>
+              <option value="Share">Share</option>
+              <option value="Feedback Submitted">Feedback</option>
+              <option value="Login">Login</option>
+              <option value="Logout">Logout</option>
+            </select>
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="px-3 py-2 border border-gray-300 rounded-md text-sm bg-card w-full md:w-auto"
+            >
+              <option value="all">All Status</option>
+              <option value="Success">Success</option>
+              <option value="Error">Error</option>
+              <option value="Warning">Warning</option>
+            </select>
+            <select
+              value={dateRangeFilter}
+              onChange={(e) => setDateRangeFilter(e.target.value)}
+              className="px-3 py-2 border border-gray-300 rounded-md text-sm bg-card w-full md:w-auto"
+            >
+              <option value="all">All Time</option>
+              <option value="today">Today</option>
+              <option value="week">This Week</option>
+              <option value="month">This Month</option>
+              <option value="year">This Year</option>
+            </select>
           </div>
-          <select
-            value={userFilter}
-            onChange={(e) => setUserFilter(e.target.value)}
-            // className="px-3 py-2 border border-gray-300 rounded-md text-sm bg-card"
-            className="px-3 py-2 border border-gray-300 rounded-md text-sm bg-card w-full md:w-auto"
-          >
-            <option value="all">All Users</option>
-            <option value="Free">Free</option>
-            <option value="Premium">Premium</option>
-            <option value="Admin">Admin</option>
-            <option value="Moderator">Moderator</option>
-          </select>
-          <select
-            value={activityTypeFilter}
-            onChange={(e) => setActivityTypeFilter(e.target.value)}
-            // className="px-3 py-2 border border-gray-300 rounded-md text-sm bg-card"
-            className="px-3 py-2 border border-gray-300 rounded-md text-sm bg-card w-full md:w-auto"
-          >
-            <option value="all">All Activities</option>
-            <option value="Verse Read">Verse Read</option>
-            <option value="AI Query">AI Query</option>
-            <option value="Bookmark">Bookmark</option>
-            <option value="Share">Share</option>
-            <option value="Feedback Submitted">Feedback</option>
-            <option value="Login">Login</option>
-            <option value="Logout">Logout</option>
-          </select>
-          <select
-            value={statusFilter}
-            onChange={(e) => setStatusFilter(e.target.value)}
-            // className="px-3 py-2 border border-gray-300 rounded-md text-sm bg-card"
-            className="px-3 py-2 border border-gray-300 rounded-md text-sm bg-card w-full md:w-auto"
-          >
-            <option value="all">All Status</option>
-            <option value="Success">Success</option>
-            <option value="Error">Error</option>
-            <option value="Warning">Warning</option>
-          </select>
-          <select
-            value={dateRangeFilter}
-            onChange={(e) => setDateRangeFilter(e.target.value)}
-            // className="px-3 py-2 border border-gray-300 rounded-md text-sm bg-card"
-            className="px-3 py-2 border border-gray-300 rounded-md text-sm bg-card w-full md:w-auto"
-          >
-            <option value="all">All Time</option>
-            <option value="today">Today</option>
-            <option value="week">This Week</option>
-            <option value="month">This Month</option>
-            <option value="year">This Year</option>
-          </select>
-        </div>
-        {/* <div className="flex items-center gap-2"> */}
-        <div className="flex items-center gap-2 justify-end">
-          <span className="text-sm text-gray-600">
-            Showing {filteredLogs.length} of {activityLogs.length} activities
-          </span>
+          <div className="flex items-center gap-2 justify-end">
+            <span className="text-sm text-gray-600">
+              Showing {currentPageRows} of {totalRows} activities
+            </span>
+          </div>
         </div>
       </div>
-    </div>
-  );
+    );
+  };
+
+  const toolbar = <ToolbarContent />;
 
   if (loading) {
     return (
