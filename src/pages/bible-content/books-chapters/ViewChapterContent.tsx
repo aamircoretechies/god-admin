@@ -15,7 +15,13 @@ import { VerseDetailModal } from '@/components/verse-detail-modal/VerseDetailMod
 import { ChapterDetailModal } from '@/components/chapter-detail-modal/ChapterDetailModal';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { VALID_EXPERIENCE_LEVELS } from '@/components/verse-detail-modal/VerseDetailModal';
+// Only 4 experience levels matching user side (no Advanced Student or Scholar)
+const CHAPTER_EXPERIENCE_LEVELS = [
+  'NEW_TO_BIBLE',
+  'SOME_KNOWLEDGE',
+  'REGULAR_READER',
+  'THEOLOGICAL_TRAINING'
+] as const;
 import { fetchChapterAIExplanationHistory, type ChapterAIExplanationHistoryResponse } from '@/services/aiExplanationsApi';
 import {
   ArrowLeft,
@@ -222,36 +228,86 @@ const ViewChapterContent: React.FC = () => {
     setIsChapterModalOpen(true);
   };
 
-  // Map experience_level to UI labels
+  // Map experience_level to UI labels (only 4 levels matching user side)
   const mapExperienceLevel = (level: string): string => {
     const levelMap: Record<string, string> = {
       'NEW_TO_BIBLE': 'First Time',
       'SOME_KNOWLEDGE': 'Some Knowledge',
       'REGULAR_READER': 'Regular Reader',
-      'REGULAR': 'Regular Reader',
-      'OCCASIONAL': 'Occasionally',
-      'OCCASIONALLY': 'Occasionally',
-      'ADVANCED_STUDENT': 'Advanced Student',
-      'THEOLOGICAL': 'Theological',
-      'ADVANCED': 'Advanced Student',
-      'SCHOLAR': 'Scholar'
+      'THEOLOGICAL_TRAINING': 'Theological Training'
     };
     return levelMap[level.toUpperCase()] || level;
   };
 
-  const chapterDeepStudyTabs = [
-    'Explanation',
-    'Original',
-    'Source',
-    'Historical Context',
-    'Ground Text Analysis',
-    'Special Insights',
-    'Daily Life Application',
-    'Cross-References',
-    'Commentary Insights',
-    'Key Takeaways',
-    'Reflection Prompts'
-  ];
+  // Convert markdown to plain text for preview (strip formatting but keep structure)
+  const getPreviewText = (content: string | null | undefined, maxLength: number = 150): string => {
+    if (!content) return '';
+    
+    let text = content;
+    
+    // Remove HTML tags
+    text = text.replace(/<[^>]*>/g, '');
+    
+    // Decode HTML entities
+    text = text.replace(/&nbsp;/g, ' ');
+    text = text.replace(/&amp;/g, '&');
+    text = text.replace(/&lt;/g, '<');
+    text = text.replace(/&gt;/g, '>');
+    text = text.replace(/&quot;/g, '"');
+    text = text.replace(/&#39;/g, "'");
+    
+    // Remove markdown formatting but keep text
+    text = text.replace(/\*\*(.*?)\*\*/g, '$1');
+    text = text.replace(/__(.*?)__/g, '$1');
+    text = text.replace(/\*([^*\n]+?)\*/g, '$1');
+    text = text.replace(/_([^_\n]+?)_/g, '$1');
+    text = text.replace(/^#{1,6}\s+(.*)$/gm, '$1');
+    text = text.replace(/\[([^\]]+)\]\([^\)]+\)/g, '$1');
+    text = text.replace(/```[\s\S]*?```/g, '');
+    text = text.replace(/`([^`\n]+)`/g, '$1');
+    
+    // Clean up whitespace
+    text = text.replace(/\n{3,}/g, '\n\n');
+    text = text.replace(/[ \t]{2,}/g, ' ');
+    text = text.trim();
+    
+    // Truncate if needed
+    if (text.length > maxLength) {
+      text = text.substring(0, maxLength).trim() + '...';
+    }
+    
+    return text;
+  };
+
+  // Get all available explanation types from API response dynamically
+  // This matches what's shown on the user side - uses labels directly from API
+  // Only shows explanations for the 4 allowed experience levels
+  const getAvailableExplanationTabs = () => {
+    if (!chapterExplanations?.explanations || chapterExplanations.explanations.length === 0) {
+      // If no data, return empty array (will show empty state)
+      return [];
+    }
+
+    // Get unique labels from API, preserving the order they appear
+    // Filter to only include explanations for the 4 allowed experience levels
+    // Use a Set to track unique labels, and an array to preserve order
+    const seenLabels = new Set<string>();
+    const uniqueLabels: string[] = [];
+    const allowedLevels = new Set(CHAPTER_EXPERIENCE_LEVELS);
+    
+    chapterExplanations.explanations.forEach((exp: any) => {
+      const label = exp.label;
+      const expLevel = exp.experience_level;
+      
+      // Only include if it's one of the 4 allowed experience levels
+      if (label && allowedLevels.has(expLevel) && !seenLabels.has(label)) {
+        seenLabels.add(label);
+        uniqueLabels.push(label);
+      }
+    });
+
+    return uniqueLabels;
+  };
 
   if (loading) {
     return (
@@ -521,7 +577,7 @@ const ViewChapterContent: React.FC = () => {
                         <SelectValue placeholder="Select experience level" />
                       </SelectTrigger>
                       <SelectContent>
-                        {VALID_EXPERIENCE_LEVELS.map((level) => (
+                        {CHAPTER_EXPERIENCE_LEVELS.map((level) => (
                           <SelectItem key={level} value={level}>
                             {mapExperienceLevel(level)}
                           </SelectItem>
@@ -536,57 +592,43 @@ const ViewChapterContent: React.FC = () => {
                       <p>Loading chapter explanations...</p>
                     </div>
                   ) : chapterExplanations && chapterExplanations.explanations && chapterExplanations.explanations.length > 0 ? (
-                    chapterDeepStudyTabs.map((tabName) => {
-                      // Map tab name to explanation type
-                      const mapTabNameToExplanationType = (tab: string): string => {
-                        const mapping: Record<string, string> = {
-                          'Explanation': 'explanation',
-                          'Original': 'original',
-                          'Source': 'source',
-                          'Historical Context': 'historical_context',
-                          'Ground Text Analysis': 'ground_text_analysis',
-                          'Special Insights': 'special_insights',
-                          'Daily Life Application': 'daily_life_application',
-                          'Cross-References': 'cross_references',
-                          'Commentary Insights': 'commentary_insights',
-                          'Key Takeaways': 'key_takeaways',
-                          'Reflection Prompts': 'reflection_prompts',
-                          'Context': 'context'
-                        };
-                        return mapping[tab] || tab.toLowerCase().replace(/\s+/g, '_');
-                      };
-
-                      // Find the explanation for this tab and experience level
-                      const explanationType = mapTabNameToExplanationType(tabName);
+                    getAvailableExplanationTabs().map((tabLabel) => {
+                      // Find the explanation for this tab label and experience level
+                      // Match by label and experience level directly from API
+                      // Only show explanations for the 4 allowed experience levels
                       const explanation = chapterExplanations.explanations.find(
                         (exp: any) => {
-                          const expType = exp.explanation_type || exp.context_type || exp.field_name;
-                          return expType === explanationType && exp.experience_level === selectedExperienceLevel;
+                          const expLabel = exp.label;
+                          const expLevel = exp.experience_level;
+                          const matchesLabel = expLabel === tabLabel;
+                          const matchesExperienceLevel = expLevel === selectedExperienceLevel;
+                          const isAllowedLevel = CHAPTER_EXPERIENCE_LEVELS.includes(expLevel as any);
+                          
+                          return matchesLabel && matchesExperienceLevel && isAllowedLevel;
                         }
                       );
 
                       const hasContent = explanation?.has_content || (explanation?.content && explanation.content.trim().length > 0);
 
-                      // Get preview text (first 150 characters of content or placeholder)
-                      const getPreviewText = () => {
+                      // Get preview text (first 150 characters of cleaned content or placeholder)
+                      const getPreviewTextForDisplay = () => {
                         if (hasContent && explanation?.content) {
-                          const content = explanation.content;
-                          return content.length > 150 ? content.substring(0, 150) + '...' : content;
+                          return getPreviewText(explanation.content, 150);
                         }
-                        // Format: "TabName ExperienceLevel Not Created Content for this section is being prepared. Click to view or create."
-                        return `${tabName} ${mapExperienceLevel(selectedExperienceLevel)} Not Created Content for this section is being prepared. Click to view or create.`;
+                        // Format: "TabLabel ExperienceLevel Not Created Content for this section is being prepared. Click to view or create."
+                        return `${tabLabel} ${mapExperienceLevel(selectedExperienceLevel)} Not Created Content for this section is being prepared. Click to view or create.`;
                       };
 
                       return (
                         <div
-                          key={tabName}
+                          key={tabLabel}
                           className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-coal-100 transition-colors border-gray-200 dark:border-gray-700"
                         >
                           <div className="flex items-start justify-between">
                             <div className="flex-1">
                               <div className="flex items-center gap-2 mb-2">
                                 <h4 className="font-medium text-gray-900 dark:text-white">
-                                  {tabName}
+                                  {tabLabel}
                                 </h4>
                                 <Badge className="bg-blue-100 text-blue-800 dark:bg-sand dark:text-white text-xs">
                                   {mapExperienceLevel(selectedExperienceLevel)}
@@ -598,14 +640,14 @@ const ViewChapterContent: React.FC = () => {
                                 )}
                               </div>
                               <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-                                {getPreviewText()}
+                                {getPreviewTextForDisplay()}
                               </p>
                             </div>
                             <Button
                               variant="ghost"
                               size="sm"
                               className="ml-4"
-                              onClick={() => handleChapterTabClick(tabName)}
+                              onClick={() => handleChapterTabClick(tabLabel)}
                             >
                               <Eye className="w-4 h-4" />
                             </Button>
@@ -614,18 +656,19 @@ const ViewChapterContent: React.FC = () => {
                       );
                     })
                   ) : (
-                    // Show all tabs with "No content available" message when no data exists
-                    chapterDeepStudyTabs.map((tabName) => {
+                    // Show message when no data exists
+                    getAvailableExplanationTabs().length > 0 ? (
+                      getAvailableExplanationTabs().map((tabLabel) => {
                       return (
                         <div
-                          key={tabName}
+                          key={tabLabel}
                           className="p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-coal-100 transition-colors border-gray-200 dark:border-gray-700"
                         >
                           <div className="flex items-start justify-between">
                             <div className="flex-1">
                               <div className="flex items-center gap-2 mb-2">
                                 <h4 className="font-medium text-gray-900 dark:text-white">
-                                  {tabName}
+                                  {tabLabel}
                                 </h4>
                                 <Badge className="bg-blue-100 text-blue-800 dark:bg-sand dark:text-white text-xs">
                                   {mapExperienceLevel(selectedExperienceLevel)}
@@ -635,21 +678,27 @@ const ViewChapterContent: React.FC = () => {
                                 </Badge>
                               </div>
                               <p className="text-sm text-gray-600 dark:text-gray-400 leading-relaxed">
-                                {tabName} {mapExperienceLevel(selectedExperienceLevel)} Not Created Content for this section is being prepared. Click to view or create.
+                                {tabLabel} {mapExperienceLevel(selectedExperienceLevel)} Not Created Content for this section is being prepared. Click to view or create.
                               </p>
                             </div>
                             <Button
                               variant="ghost"
                               size="sm"
                               className="ml-4"
-                              onClick={() => handleChapterTabClick(tabName)}
+                              onClick={() => handleChapterTabClick(tabLabel)}
                             >
                               <Eye className="w-4 h-4" />
                             </Button>
                           </div>
                         </div>
                       );
-                    })
+                      })
+                    ) : (
+                      <div className="text-center py-8 text-gray-500 dark:text-gray-400">
+                        <FileText className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                        <p>No chapter explanations available. Toggle Deep Study off to view verses.</p>
+                      </div>
+                    )
                   )}
                 </div>
               )}
