@@ -289,7 +289,7 @@ const RolesManagement: React.FC = () => {
             {roles.map((role) => (
               <div
                 key={role.id}
-                className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50"
+                className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
               >
                 <div className="flex-1">
                   <div className="flex items-center gap-2 mb-1">
@@ -299,7 +299,7 @@ const RolesManagement: React.FC = () => {
                         Default
                       </Badge>
                     )}
-                    <Badge variant="secondary" className="text-xs">
+                    <Badge variant="outline" className="text-xs">
                       {role.memberCount} {role.memberCount === 1 ? 'member' : 'members'}
                     </Badge>
                   </div>

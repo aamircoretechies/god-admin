@@ -793,7 +793,9 @@ const AIExplanationManagementContent = () => {
                       </div>
                       <div>
                         <h3 className="font-semibold text-gray-900">
-                          {explanation.book} {explanation.chapter}:{explanation.verse}
+                          {/* {explanation.book} {explanation.chapter}:{explanation.verse} */}
+                          {explanation.book} {explanation.chapter}
+                          {explanation.verse ? `:${explanation.verse}` : ''}
                           {explanation.translation && (
                             <span className="text-sm font-normal text-gray-500 ml-2">
                               ({explanation.translation.abbreviation})

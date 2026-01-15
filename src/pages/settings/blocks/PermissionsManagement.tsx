@@ -316,7 +316,7 @@ const PermissionsManagement: React.FC = () => {
                       {module.permissions.map((permission) => (
                         <div
                           key={permission}
-                          className="flex items-center justify-between p-2 rounded hover:bg-gray-50"
+                          className="flex items-center justify-between p-2 rounded hover:bg-gray-50 dark:hover:text-black"
                         >
                           <Label
                             htmlFor={`${module.key}-${permission}`}

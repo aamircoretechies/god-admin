@@ -257,7 +257,7 @@ const UserManagementMembers = () => {
             members.map((member) => (
               <div
               key={member.id}
-              className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50"
+              className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
             >
               <div className="flex items-center gap-4 flex-1">
                 <div className="w-10 h-10 rounded-full bg-blue-100 flex items-center justify-center">
