@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -17,24 +17,34 @@ import {
   DialogTitle,
   DialogTrigger
 } from '@/components/ui/dialog';
-import { UserPlus, Search, AlertCircle } from 'lucide-react';
+import { UserPlus, Search, AlertCircle, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { fetchRoles, type Role } from '@/services/rolesApi';
-import { getAvailableRoles, createTeamMember } from '@/services/usersApi';
+import { getAvailableRoles, createTeamMember, fetchUsers } from '@/services/usersApi';
 
 interface AddExistingUserModalProps {
   trigger?: React.ReactNode;
   onMemberAdded?: () => void;
 }
 
+interface UserSearchResult {
+  id: string;
+  name: string;
+  email: string;
+}
+
 const AddExistingUserModal: React.FC<AddExistingUserModalProps> = ({ trigger, onMemberAdded }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const [email, setEmail] = useState('');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedUser, setSelectedUser] = useState<UserSearchResult | null>(null);
+  const [searchResults, setSearchResults] = useState<UserSearchResult[]>([]);
   const [selectedRole, setSelectedRole] = useState<string>('FREE');
   const [availableRoles, setAvailableRoles] = useState<Role[]>([]);
   const [rolesLoading, setRolesLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [searching, setSearching] = useState(false);
+  const [showResults, setShowResults] = useState(false);
+  const searchRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const loadRoles = async () => {
@@ -55,20 +65,89 @@ const AddExistingUserModal: React.FC<AddExistingUserModalProps> = ({ trigger, on
     }
   }, [isOpen]);
 
+  // Search users when query changes
+  useEffect(() => {
+    const searchUsers = async () => {
+      if (!searchQuery.trim() || searchQuery.length < 2) {
+        setSearchResults([]);
+        setShowResults(false);
+        return;
+      }
+
+      setSearching(true);
+      try {
+        const response = await fetchUsers({
+          page: 1,
+          limit: 10,
+          search: searchQuery.trim()
+        });
+
+        if (response.status === 1 && response.data?.users) {
+          const users = response.data.users.map((user: any) => ({
+            id: user.id || user.user_id,
+            name: user.name || `${user.first_name || ''} ${user.last_name || ''}`.trim() || 'No name',
+            email: user.email
+          }));
+          setSearchResults(users);
+          setShowResults(users.length > 0);
+        } else {
+          setSearchResults([]);
+          setShowResults(false);
+        }
+      } catch (error: any) {
+        console.error('Error searching users:', error);
+        setSearchResults([]);
+        setShowResults(false);
+      } finally {
+        setSearching(false);
+      }
+    };
+
+    const debounceTimer = setTimeout(() => {
+      searchUsers();
+    }, 300);
+
+    return () => clearTimeout(debounceTimer);
+  }, [searchQuery]);
+
+  // Close search results when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (searchRef.current && !searchRef.current.contains(event.target as Node)) {
+        setShowResults(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleUserSelect = (user: UserSearchResult) => {
+    setSelectedUser(user);
+    setSearchQuery(`${user.name} (${user.email})`);
+    setShowResults(false);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!email.trim()) {
-      toast.error('Email is required');
+    if (!selectedUser && !searchQuery.trim()) {
+      toast.error('Please search and select a user');
+      return;
+    }
+
+    const userEmail = selectedUser?.email || searchQuery.trim();
+    if (!userEmail) {
+      toast.error('Please select a user or enter an email address');
       return;
     }
 
     setIsSubmitting(true);
     try {
-      // For existing users, we just need to assign a role
+      // For existing users, we just need to assign a role (no password)
       // The backend should handle finding the user and assigning the role
       const response = await createTeamMember({
-        email: email.trim(),
+        email: userEmail,
         role: selectedRole as 'FREE' | 'PREMIUM' | 'ADMIN',
         custom_role_id: selectedRole !== 'ADMIN' && selectedRole !== 'FREE' && selectedRole !== 'PREMIUM' 
           ? selectedRole 
@@ -77,7 +156,9 @@ const AddExistingUserModal: React.FC<AddExistingUserModalProps> = ({ trigger, on
 
       if (response.status === 1) {
         toast.success('User added to team successfully');
-        setEmail('');
+        setSearchQuery('');
+        setSelectedUser(null);
+        setSearchResults([]);
         setSelectedRole('FREE');
         setIsOpen(false);
         
@@ -105,7 +186,9 @@ const AddExistingUserModal: React.FC<AddExistingUserModalProps> = ({ trigger, on
 
   const handleClose = () => {
     setIsOpen(false);
-    setEmail('');
+    setSearchQuery('');
+    setSelectedUser(null);
+    setSearchResults([]);
     setSelectedRole('FREE');
   };
 
@@ -130,18 +213,59 @@ const AddExistingUserModal: React.FC<AddExistingUserModalProps> = ({ trigger, on
 
         <form onSubmit={handleSubmit} className="space-y-5">
           <div className="space-y-2">
-            <Label htmlFor="user-email" className="text-sm font-medium">User Email *</Label>
-            <Input
-              id="user-email"
-              type="email"
-              placeholder="user@example.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              className="w-full"
-            />
+            <Label htmlFor="user-search" className="text-sm font-medium">Search User *</Label>
+            <div className="relative" ref={searchRef}>
+              <div className="relative">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Input
+                  id="user-search"
+                  type="text"
+                  placeholder="Search by name or email (e.g., rajat)"
+                  value={searchQuery}
+                  onChange={(e) => {
+                    setSearchQuery(e.target.value);
+                    setSelectedUser(null);
+                    if (e.target.value.length >= 2) {
+                      setShowResults(true);
+                    }
+                  }}
+                  onFocus={() => {
+                    if (searchResults.length > 0) {
+                      setShowResults(true);
+                    }
+                  }}
+                  required
+                  className="w-full pl-10 pr-10"
+                />
+                {searching && (
+                  <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 animate-spin" />
+                )}
+              </div>
+              
+              {showResults && searchResults.length > 0 && (
+                <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-auto">
+                  {searchResults.map((user) => (
+                    <button
+                      key={user.id}
+                      type="button"
+                      onClick={() => handleUserSelect(user)}
+                      className="w-full text-left px-4 py-2 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none transition-colors"
+                    >
+                      <div className="font-medium text-sm">{user.name}</div>
+                      <div className="text-xs text-gray-500">{user.email}</div>
+                    </button>
+                  ))}
+                </div>
+              )}
+              
+              {showResults && searchQuery.length >= 2 && !searching && searchResults.length === 0 && (
+                <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg p-4 text-sm text-gray-500">
+                  No users found matching "{searchQuery}"
+                </div>
+              )}
+            </div>
             <p className="text-xs text-gray-500 mt-1">
-              Enter the email address of an existing user account
+              Search for an existing user by name or email address
             </p>
           </div>
 
