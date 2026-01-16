@@ -24,14 +24,14 @@ const PromptHistory = () => {
                 View version history and changes for AI prompt templates.
               </ToolbarDescription>
             </ToolbarHeading>
-            <ToolbarActions>
+            {/* <ToolbarActions>
               <a href="#" className="btn btn-sm btn-light">
                 Back to Prompt
               </a>
               <a href="#" className="btn btn-sm btn-primary">
                 Restore Version
               </a>
-            </ToolbarActions>
+            </ToolbarActions> */}
           </Toolbar>
         </Container>
       )}

@@ -59,13 +59,13 @@ const SettingsSidebarContent = () => {
 
       // Check if there's a scrollable container
       const scrollableContent = document.getElementById('scrollable_content');
-      
+
       if (scrollableContent) {
         // For container scrolling, calculate position relative to container
         const containerRect = scrollableContent.getBoundingClientRect();
         const sectionRect = sectionElement.getBoundingClientRect();
         const scrollTop = scrollableContent.scrollTop + (sectionRect.top - containerRect.top);
-        
+
         scrollableContent.scrollTo({
           top: Math.max(0, scrollTop),
           left: 0,
@@ -84,25 +84,25 @@ const SettingsSidebarContent = () => {
     const handleSidebarClick = (event: MouseEvent) => {
       const target = event.target as HTMLElement;
       const anchorElement = target.closest('[data-scrollspy-anchor]') as HTMLElement;
-      
+
       if (anchorElement) {
         const sectionId = anchorElement.getAttribute('data-scrollspy-anchor');
         if (sectionId) {
           // Prevent Scrollspy from handling the click
           event.stopPropagation();
-          
+
           // Handle scroll immediately
           setTimeout(() => {
             scrollToSectionTop(sectionId);
           }, 10);
-          
+
           // Update active state manually
           const allAnchors = document.querySelectorAll('[data-scrollspy-anchor]');
           allAnchors.forEach((anchor) => {
-            anchor.classList.remove('scrollspy-active');
+            anchor.classList.remove('active');
           });
-          anchorElement.classList.add('scrollspy-active');
-          
+          anchorElement.classList.add('active');
+
           // Update URL hash
           if (window.history?.replaceState) {
             window.history.replaceState(null, '', `#${sectionId}`);

@@ -712,7 +712,7 @@ const AIExplanationManagementContent = () => {
                         <SelectItem value="theological">Theological</SelectItem>
                         <SelectItem value="historical">Historical</SelectItem>
                         <SelectItem value="cultural">Cultural</SelectItem>
-                        <SelectItem value="linguistic">Linguistic</SelectItem>
+                        {/* <SelectItem value="linguistic">Linguistic</SelectItem> */}
                         <SelectItem value="general">General</SelectItem>
                       </SelectContent>
                     </Select>
@@ -844,7 +844,7 @@ const AIExplanationManagementContent = () => {
                   <SelectItem value="theological">Theological</SelectItem>
                   <SelectItem value="historical">Historical</SelectItem>
                   <SelectItem value="cultural">Cultural</SelectItem>
-                  <SelectItem value="linguistic">Linguistic</SelectItem>
+                  {/* <SelectItem value="linguistic">Linguistic</SelectItem> */}
                   <SelectItem value="general">General</SelectItem>
                 </SelectContent>
               </Select>

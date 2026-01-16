@@ -217,15 +217,15 @@ const NoteDetailContent: React.FC = () => {
           // Clean emotion_tags from API (same rules as overview list)
           const tagsFromApi: string[] | undefined = Array.isArray(apiNote.emotion_tags)
             ? apiNote.emotion_tags
-                .filter((tag: string) => {
-                  if (typeof tag !== 'string') return false;
-                  // Skip JSON strings and CONTINUE_READING entries
-                  if (tag.startsWith('{') || tag.startsWith('CONTINUE_READING')) {
-                    return false;
-                  }
-                  return true;
-                })
-                .map((tag: string) => tag.charAt(0).toUpperCase() + tag.slice(1).toLowerCase())
+              .filter((tag: string) => {
+                if (typeof tag !== 'string') return false;
+                // Skip JSON strings and CONTINUE_READING entries
+                if (tag.startsWith('{') || tag.startsWith('CONTINUE_READING')) {
+                  return false;
+                }
+                return true;
+              })
+              .map((tag: string) => tag.charAt(0).toUpperCase() + tag.slice(1).toLowerCase())
             : undefined;
 
           const fullName =
@@ -561,7 +561,14 @@ const NoteDetailContent: React.FC = () => {
                 <div className="space-y-4">
                   <Textarea
                     value={editedContent}
-                    onChange={(e) => setEditedContent(e.target.value)}
+                    onChange={(e) => {
+                      const value = e.target.value;
+                      if (value.length > 250) {
+                        toast.warning('Note content limit of 250 characters reached');
+                        return;
+                      }
+                      setEditedContent(value);
+                    }}
                     className="min-h-[200px]"
                   />
                   <div>
@@ -571,7 +578,15 @@ const NoteDetailContent: React.FC = () => {
                     <input
                       type="text"
                       value={editedTags}
-                      onChange={(e) => setEditedTags(e.target.value)}
+                      onChange={(e) => {
+                        const value = e.target.value;
+                        const tags = value.split(',').filter((tag) => tag.trim() !== '');
+                        if (tags.length > 5) {
+                          toast.warning('Maximum of 5 tags allowed');
+                          return;
+                        }
+                        setEditedTags(value);
+                      }}
                       className="w-full px-3 py-2 border border-gray-300 bg-card rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                       placeholder="Faith, Trust, Comfort"
                     />

@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Avatar } from '@/components/ui/avatar';
 import { toAbsoluteUrl, getUploadedFileUrl } from '@/utils';
+import { debounce } from '@/lib/helpers';
 import {
   blockUser,
   fetchActivityLogs,
@@ -124,7 +125,109 @@ const transformActivityLog = (apiData: ActivityLogResponse): UserActivityLog => 
   };
 };
 
-const ActivityLogListContent: React.FC = () => {
+interface ToolbarContentProps {
+  searchTerm: string;
+  setSearchTerm: (value: string) => void;
+  userFilter: string;
+  setUserFilter: (value: string) => void;
+  statusFilter: string;
+  setStatusFilter: (value: string) => void;
+  dateRangeFilter: string;
+  setDateRangeFilter: (value: string) => void;
+}
+
+// Toolbar component moved outside to prevent recreation on every render
+const ToolbarContent = ({
+  searchTerm,
+  setSearchTerm,
+  userFilter,
+  setUserFilter,
+  statusFilter,
+  setStatusFilter,
+  dateRangeFilter,
+  setDateRangeFilter
+}: ToolbarContentProps) => {
+  const { table, totalRows } = useDataGrid();
+  // Get the actual number of rows on the current page
+  const currentPageRows = table.getRowModel().rows.length;
+
+  // Local state for the search input to prevent immediate parent re-renders and focus loss
+  const [localSearchTerm, setLocalSearchTerm] = useState(searchTerm);
+
+  // Sync local state with external searchTerm prop (e.g. if cleared externally)
+  useEffect(() => {
+    setLocalSearchTerm(searchTerm);
+  }, [searchTerm]);
+
+  // Debounced search update
+  const debouncedSetSearchTerm = useMemo(
+    () => debounce((value: string) => setSearchTerm(value), 300),
+    [setSearchTerm]
+  );
+
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setLocalSearchTerm(value);
+    debouncedSetSearchTerm(value);
+  };
+
+  return (
+    <div className="flex flex-col gap-4 p-3 md:p-5">
+      <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
+        <div className="flex flex-col md:flex-row items-stretch md:items-center gap-4 flex-1">
+          <div className="relative w-full md:max-w-md">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <Input
+              placeholder="Search by user, activity, verse reference, query..."
+              value={localSearchTerm}
+              onChange={handleSearchChange}
+              className="pl-10 w-full"
+            />
+          </div>
+          <select
+            value={userFilter}
+            onChange={(e) => setUserFilter(e.target.value)}
+            className="px-3 py-2 border border-gray-300 rounded-md text-sm bg-card w-full md:w-auto"
+          >
+            <option value="all">All Users</option>
+            <option value="Free">Free</option>
+            <option value="Premium">Premium</option>
+            <option value="Admin">Admin</option>
+            <option value="Moderator">Moderator</option>
+          </select>
+          <select
+            value={statusFilter}
+            onChange={(e) => setStatusFilter(e.target.value)}
+            className="px-3 py-2 border border-gray-300 rounded-md text-sm bg-card w-full md:w-auto"
+          >
+            <option value="all">All Status</option>
+            <option value="Success">Success</option>
+            <option value="Error">Error</option>
+            <option value="Warning">Warning</option>
+          </select>
+          <select
+            value={dateRangeFilter}
+            onChange={(e) => setDateRangeFilter(e.target.value)}
+            className="px-3 py-2 border border-gray-300 rounded-md text-sm bg-card w-full md:w-auto"
+          >
+            <option value="all">All Time</option>
+            <option value="today">Today</option>
+            <option value="week">This Week</option>
+            <option value="month">This Month</option>
+            <option value="year">This Year</option>
+          </select>
+        </div>
+        <div className="flex items-center gap-2 justify-end">
+          <span className="text-sm text-gray-600">
+            Showing {currentPageRows} of {totalRows} activities
+          </span>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export const ActivityLogListContent: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [userFilter, setUserFilter] = useState<string>('all');
   const [activityTypeFilter, setActivityTypeFilter] = useState<string>('all');
@@ -378,6 +481,9 @@ const ActivityLogListContent: React.FC = () => {
         //     column={column}
         //   />
         // ),
+        header: () => (
+          <span className="text-sm font-medium select-none cursor-default">User</span>
+        ),
         enableSorting: true,
         cell: ({ row }) => (
           <div className="flex items-center gap-3">
@@ -409,6 +515,9 @@ const ActivityLogListContent: React.FC = () => {
         accessorFn: (row: UserActivityLog) => row.activityType,
         id: 'activityType',
         // header: ({ column }) => <DataGridColumnHeader title="Activity Type" column={column} />,
+        header: () => (
+          <span className="text-sm font-medium select-none cursor-default">Activity Type</span>
+        ),
         enableSorting: true,
         cell: ({ row }) => getActivityTypeBadge(row.original.activityType),
         meta: {
@@ -426,6 +535,9 @@ const ActivityLogListContent: React.FC = () => {
         //     column={column}
         //   />
         // ),
+        header: () => (
+          <span className="text-sm font-medium select-none cursor-default">Details</span>
+        ),
         enableSorting: true,
         cell: ({ row }) => (
           <div className="max-w-xs">
@@ -450,6 +562,9 @@ const ActivityLogListContent: React.FC = () => {
         accessorFn: (row: UserActivityLog) => row.device,
         id: 'device',
         // header: ({ column }) => <DataGridColumnHeader title="Device" column={column} />,
+        header: () => (
+          <span className="text-sm font-medium select-none cursor-default">Device</span>
+        ),
         enableSorting: true,
         cell: ({ row }) => (
           <div className="flex items-center gap-2">
@@ -466,6 +581,9 @@ const ActivityLogListContent: React.FC = () => {
         accessorFn: (row: UserActivityLog) => row.timestamp,
         id: 'timestamp',
         // header: ({ column }) => <DataGridColumnHeader title="Date & Time" column={column} />,
+        header: () => (
+          <span className="text-sm font-medium select-none cursor-default">Time Stamp</span>
+        ),
         enableSorting: true,
         cell: ({ row }) => (
           <div className="text-sm">
@@ -482,6 +600,9 @@ const ActivityLogListContent: React.FC = () => {
         accessorFn: (row: UserActivityLog) => row.status,
         id: 'status',
         // header: ({ column }) => <DataGridColumnHeader title="Status" column={column} />,
+        header: () => (
+          <span className="text-sm font-medium select-none cursor-default">Status</span>
+        ),
         enableSorting: true,
         cell: ({ row }) => getStatusBadge(row.original.status),
         meta: {
@@ -591,197 +712,126 @@ const ActivityLogListContent: React.FC = () => {
     }
   };
 
-  // Toolbar component that uses DataGrid context to get pagination state
-  const ToolbarContent = () => {
-    const { table, totalRows } = useDataGrid();
-    const pageIndex = table.getState().pagination.pageIndex;
-    const pageSize = table.getState().pagination.pageSize;
-    // Get the actual number of rows on the current page
-    const currentPageRows = table.getRowModel().rows.length;
-
-    return (
-      <div className="flex flex-col gap-4 p-3 md:p-5">
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          <div className="flex flex-col md:flex-row items-stretch md:items-center gap-4 flex-1">
-            <div className="relative w-full md:max-w-md">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <Input
-                placeholder="Search by user, activity, verse reference, query..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10 w-full"
-              />
-            </div>
-            <select
-              value={userFilter}
-              onChange={(e) => setUserFilter(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-md text-sm bg-card w-full md:w-auto"
-            >
-              <option value="all">All Users</option>
-              <option value="Free">Free</option>
-              <option value="Premium">Premium</option>
-              <option value="Admin">Admin</option>
-              <option value="Moderator">Moderator</option>
-            </select>
-            {/* <select
-              value={activityTypeFilter}
-              onChange={(e) => setActivityTypeFilter(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-md text-sm bg-card w-full md:w-auto"
-            >
-              <option value="all">All Activities</option>
-              <option value="Verse Read">Verse Read</option>
-              <option value="AI Query">AI Query</option>
-              <option value="Bookmark">Bookmark</option>
-              <option value="Share">Share</option>
-              <option value="Feedback Submitted">Feedback</option>
-              <option value="Login">Login</option>
-              <option value="Logout">Logout</option>
-            </select> */}
-            <select
-              value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-md text-sm bg-card w-full md:w-auto"
-            >
-              <option value="all">All Status</option>
-              <option value="Success">Success</option>
-              <option value="Error">Error</option>
-              <option value="Warning">Warning</option>
-            </select>
-            <select
-              value={dateRangeFilter}
-              onChange={(e) => setDateRangeFilter(e.target.value)}
-              className="px-3 py-2 border border-gray-300 rounded-md text-sm bg-card w-full md:w-auto"
-            >
-              <option value="all">All Time</option>
-              <option value="today">Today</option>
-              <option value="week">This Week</option>
-              <option value="month">This Month</option>
-              <option value="year">This Year</option>
-            </select>
-          </div>
-          <div className="flex items-center gap-2 justify-end">
-            <span className="text-sm text-gray-600">
-              Showing {currentPageRows} of {totalRows} activities
-            </span>
-          </div>
-        </div>
-      </div>
-    );
-  };
-
-  const toolbar = <ToolbarContent />;
-
-  if (loading) {
-    return (
-      <div className="card">
-        <div className="card-body">
-          <div className="flex items-center justify-center py-12">
-            <div className="text-center">
-              <div className="spinner-border spinner-border-sm text-primary" role="status">
-                <span className="visually-hidden">Loading...</span>
-              </div>
-              <p className="text-sm text-gray-600 mt-2">Loading activity logs...</p>
-            </div>
-          </div>
-        </div>
-      </div>
-    );
-  }
-
-  if (error) {
-    return (
-      <div className="card">
-        <div className="card-body">
-          <div className="alert alert-danger">{error}</div>
-        </div>
-      </div>
-    );
-  }
+  const toolbar = (
+    <ToolbarContent
+      searchTerm={searchTerm}
+      setSearchTerm={setSearchTerm}
+      userFilter={userFilter}
+      setUserFilter={setUserFilter}
+      statusFilter={statusFilter}
+      setStatusFilter={setStatusFilter}
+      dateRangeFilter={dateRangeFilter}
+      setDateRangeFilter={setDateRangeFilter}
+    />
+  );
 
   return (
     <div className="[&_[data-container]]:overflow-y-auto [&_[data-container]]:max-h-[calc(100vh-250px)]">
-      {showBlockModal && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          {/* <div className="bg-white p-6 rounded-lg w-[400px] space-y-4"> */}
-          <div className="bg-white p-6 rounded-lg w-full max-w-[400px] mx-4 space-y-4">
-            <h2 className="text-lg font-semibold">Block User</h2>
-
-            <input
-              type="text"
-              placeholder="Reason"
-              value={reason}
-              onChange={(e) => setReason(e.target.value)}
-              className="w-full border p-2 rounded"
-            />
-
-            <input
-              type="text"
-              placeholder="Duration (e.g., 1 day)"
-              value={duration}
-              onChange={(e) => setDuration(e.target.value)}
-              className="w-full border p-2 rounded"
-            />
-
-            <div className="flex justify-end gap-2">
-              <button className="btn btn-sm btn-light" onClick={() => setShowBlockModal(false)}>
-                Cancel
-              </button>
-
-              <button className="btn btn-sm btn-danger" onClick={handleBlockUser}>
-                Block
-              </button>
+      {loading && activityLogs.length === 0 ? (
+        <div className="card">
+          <div className="card-body">
+            <div className="flex items-center justify-center py-12">
+              <div className="text-center">
+                <div className="spinner-border spinner-border-sm text-primary" role="status">
+                  <span className="visually-hidden">Loading...</span>
+                </div>
+                <p className="text-sm text-gray-600 mt-2">Loading activity logs...</p>
+              </div>
             </div>
           </div>
         </div>
-      )}
-
-      {showSuspendModal && (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-          {/* <div className="bg-white p-6 rounded-lg w-[400px] space-y-4"> */}
-          <div className="bg-white p-6 rounded-lg w-full max-w-[400px] mx-4 space-y-4">
-            <h2 className="text-lg font-semibold">Suspend User</h2>
-
-            <input
-              type="text"
-              placeholder="Reason"
-              value={reason}
-              onChange={(e) => setReason(e.target.value)}
-              className="w-full border p-2 rounded"
-            />
-
-            <input
-              type="text"
-              placeholder="Duration (e.g., 7 days)"
-              value={duration}
-              onChange={(e) => setDuration(e.target.value)}
-              className="w-full border p-2 rounded"
-            />
-
-            <div className="flex justify-end gap-2">
-              <button className="btn btn-sm btn-light" onClick={() => setShowSuspendModal(false)}>
-                Cancel
-              </button>
-
-              <button className="btn btn-sm btn-warning" onClick={handleSuspendUser}>
-                Suspend
-              </button>
-            </div>
+      ) : error ? (
+        <div className="card">
+          <div className="card-body">
+            <div className="alert alert-danger">{error}</div>
           </div>
         </div>
-      )}
+      ) : (
+        <>
+          {showBlockModal && (
+            <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+              {/* <div className="bg-white p-6 rounded-lg w-[400px] space-y-4"> */}
+              <div className="bg-white p-6 rounded-lg w-full max-w-[400px] mx-4 space-y-4">
+                <h2 className="text-lg font-semibold">Block User</h2>
 
-      <DataGrid
-        columns={columns}
-        data={filteredLogs}
-        rowSelection={true}
-        onRowSelectionChange={handleRowSelection}
-        pagination={{ size: 10 }}
-        sorting={[{ id: 'timestamp', desc: true }]}
-        toolbar={toolbar}
-        layout={{ card: true }}
-      />
+                <input
+                  type="text"
+                  placeholder="Reason"
+                  value={reason}
+                  onChange={(e) => setReason(e.target.value)}
+                  className="w-full border p-2 rounded"
+                />
+
+                <input
+                  type="text"
+                  placeholder="Duration (e.g., 1 day)"
+                  value={duration}
+                  onChange={(e) => setDuration(e.target.value)}
+                  className="w-full border p-2 rounded"
+                />
+
+                <div className="flex justify-end gap-2">
+                  <button className="btn btn-sm btn-light" onClick={() => setShowBlockModal(false)}>
+                    Cancel
+                  </button>
+
+                  <button className="btn btn-sm btn-danger" onClick={handleBlockUser}>
+                    Block
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {showSuspendModal && (
+            <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
+              {/* <div className="bg-white p-6 rounded-lg w-[400px] space-y-4"> */}
+              <div className="bg-white p-6 rounded-lg w-full max-w-[400px] mx-4 space-y-4">
+                <h2 className="text-lg font-semibold">Suspend User</h2>
+
+                <input
+                  type="text"
+                  placeholder="Reason"
+                  value={reason}
+                  onChange={(e) => setReason(e.target.value)}
+                  className="w-full border p-2 rounded"
+                />
+
+                <input
+                  type="text"
+                  placeholder="Duration (e.g., 7 days)"
+                  value={duration}
+                  onChange={(e) => setDuration(e.target.value)}
+                  className="w-full border p-2 rounded"
+                />
+
+                <div className="flex justify-end gap-2">
+                  <button className="btn btn-sm btn-light" onClick={() => setShowSuspendModal(false)}>
+                    Cancel
+                  </button>
+
+                  <button className="btn btn-sm btn-warning" onClick={handleSuspendUser}>
+                    Suspend
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
+
+          <DataGrid
+            columns={columns}
+            data={filteredLogs}
+            rowSelection={true}
+            onRowSelectionChange={handleRowSelection}
+            pagination={{ size: 10 }}
+            sorting={[{ id: 'timestamp', desc: true }]}
+            toolbar={toolbar}
+            layout={{ card: true }}
+          />
+        </>
+      )}
     </div>
   );
 };
 
-export { ActivityLogListContent };
+
