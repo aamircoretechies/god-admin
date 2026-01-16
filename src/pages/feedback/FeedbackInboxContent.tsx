@@ -420,7 +420,7 @@ const FeedbackInboxContent = () => {
                     variant="outline"
                     size="sm"
                     onClick={() => handleApprove(item.id)}
-                    disabled={item.status === 'resolved'}
+                    // disabled={item.status === 'resolved'}
                   >
                     <CheckCircle className="w-4 h-4 mr-1" />
                     Approve
@@ -429,7 +429,7 @@ const FeedbackInboxContent = () => {
                     variant="outline"
                     size="sm"
                     onClick={() => handleReject(item.id)}
-                    disabled={item.status === 'resolved'}
+                    // disabled={item.status === 'resolved'}
                   >
                     <XCircle className="w-4 h-4 mr-1" />
                     Reject

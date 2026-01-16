@@ -62,11 +62,19 @@ const SimpleLineChart = ({ data, title }: { data: any[]; title: string }) => {
           </div>
         ))}
       </div>
-      <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400">
+      {/* <div className="flex justify-between text-xs text-gray-500 dark:text-gray-400">
         {data.map((item, index) => (
           <span key={index}>{item.label}</span>
         ))}
+      </div> */}
+      <div className="flex text-xs text-gray-500 dark:text-gray-400">
+        {data.map((item, index) => (
+          <div key={index} className="flex-1 text-center">
+            {item.label}
+          </div>
+        ))}
       </div>
+
     </div>
   );
 };
@@ -123,11 +131,11 @@ const ActivityAnalyticsContent: React.FC = () => {
   // Helper function to check if a verse string is a valid, readable verse reference
   const isValidVerseReference = (verse: string): boolean => {
     if (!verse || typeof verse !== 'string') return false;
-    
+
     // Check if it's a UUID (contains hyphens and matches UUID pattern)
     const uuidPattern = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/i;
     if (uuidPattern.test(verse.trim())) return false;
-    
+
     // Check if it contains common Bible book names (case-insensitive)
     const bibleBooks = [
       'genesis', 'exodus', 'leviticus', 'numbers', 'deuteronomy', 'joshua', 'judges', 'ruth',
@@ -139,10 +147,10 @@ const ActivityAnalyticsContent: React.FC = () => {
       'thessalonians', 'timothy', 'titus', 'philemon', 'hebrews', 'james', 'peter', 'jude',
       'revelation'
     ];
-    
+
     const verseLower = verse.toLowerCase();
     const containsBookName = bibleBooks.some(book => verseLower.includes(book));
-    
+
     // Valid if it contains a book name or looks like a proper verse reference (has numbers and text)
     return containsBookName || (verse.length > 3 && /[a-zA-Z]/.test(verse) && /[0-9]/.test(verse));
   };
@@ -410,7 +418,7 @@ const ActivityAnalyticsContent: React.FC = () => {
                     <div>
                       <p className="text-sm font-medium text-gray-900">
                         Active Users {analyticsData.metrics.activeUsers.growth > 0 ? 'Up' : 'Down'}{' '}
-                        {Math.abs(analyticsData.metrics.activeUsers.growth).toFixed(1)}%  
+                        {Math.abs(analyticsData.metrics.activeUsers.growth).toFixed(1)}%
                       </p>
                       <p className="text-xs text-gray-600">
                         {analyticsData.metrics.activeUsers.value.toLocaleString()} active users in

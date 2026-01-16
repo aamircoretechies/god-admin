@@ -40,6 +40,7 @@ export const fetchActivityLogs = async (params?: {
   status?: string;
   startDate?: string;
   endDate?: string;
+  search?: string;
 }): Promise<ActivityLogsListResponse> => {
   const queryParams = new URLSearchParams();
   if (params?.page) queryParams.append('page', params.page.toString());
@@ -49,6 +50,7 @@ export const fetchActivityLogs = async (params?: {
   if (params?.status) queryParams.append('status', params.status);
   if (params?.startDate) queryParams.append('startDate', params.startDate);
   if (params?.endDate) queryParams.append('endDate', params.endDate);
+  if (params?.search) queryParams.append('search', params.search);
 
   const response = await axios.get<ActivityLogsListResponse>(
     `${API_URL}/admin/activity${queryParams.toString() ? `?${queryParams.toString()}` : ''}`
