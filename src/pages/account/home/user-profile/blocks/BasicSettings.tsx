@@ -52,7 +52,7 @@ const BasicSettings = ({ title }: IBasicSettingsProps) => {
               <td className="py-2 text-end"></td>
             </tr>
 
-            <tr>
+            {/* <tr>
               <td className="py-2 text-gray-600 font-normal">Phone Status</td>
               <td className="py-2 text-gray-800 font-normal">
                 <span
@@ -64,7 +64,7 @@ const BasicSettings = ({ title }: IBasicSettingsProps) => {
                 </span>
               </td>
               <td className="py-2 text-end"></td>
-            </tr>
+            </tr> */}
           </tbody>
         </table>
       </div>

@@ -1049,7 +1049,7 @@ const AIExplanationManagementContent = () => {
               AI Explanation Details
             </DialogTitle>
             <DialogDescription className="text-sm text-gray-600 mt-3">
-              {selectedExplanation && `${selectedExplanation.book} ${selectedExplanation.chapter}:${selectedExplanation.verse || 'no'}`}
+              {/* {selectedExplanation && `${selectedExplanation.book} ${selectedExplanation.chapter}:${selectedExplanation.verse || 'no'}`} */}
             </DialogDescription>
           </DialogHeader>
           {selectedExplanation && (

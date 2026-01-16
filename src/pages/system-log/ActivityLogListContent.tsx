@@ -248,6 +248,9 @@ export const ActivityLogListContent: React.FC = () => {
   // SELECTED USER
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
 
+  // Track blocked users locally (Set of userIds that are blocked)
+  const [blockedUsers, setBlockedUsers] = useState<Set<string>>(new Set());
+
   // Fetch activity logs from API with filters
   useEffect(() => {
     const loadActivityLogs = async () => {
@@ -646,7 +649,7 @@ export const ActivityLogListContent: React.FC = () => {
                 }}
               >
                 <Shield className="w-4 h-4 mr-2" />
-                Block User
+                {blockedUsers.has(row.original.userId) ? 'Unblock User' : 'Block User'}
               </DropdownMenuItem>
               {/* <DropdownMenuItem>
                 <UserX className="w-4 h-4 mr-2" />
@@ -670,7 +673,7 @@ export const ActivityLogListContent: React.FC = () => {
         }
       }
     ],
-    []
+    [blockedUsers]
   );
 
   const handleRowSelection = (state: any) => {
@@ -683,7 +686,18 @@ export const ActivityLogListContent: React.FC = () => {
       const res = await blockUser(selectedUserId!, reason, duration);
 
       if (res.status === 1) {
-        toast.success('User blocked successfully!');
+        // Toggle blocked status for this user
+        setBlockedUsers((prev) => {
+          const newSet = new Set(prev);
+          if (newSet.has(selectedUserId!)) {
+            newSet.delete(selectedUserId!);
+            toast.success('User unblocked successfully!');
+          } else {
+            newSet.add(selectedUserId!);
+            toast.success('User blocked successfully!');
+          }
+          return newSet;
+        });
         setShowBlockModal(false);
         setReason('');
         setDuration('');
@@ -752,7 +766,9 @@ export const ActivityLogListContent: React.FC = () => {
             <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
               {/* <div className="bg-white p-6 rounded-lg w-[400px] space-y-4"> */}
               <div className="bg-white p-6 rounded-lg w-full max-w-[400px] mx-4 space-y-4">
-                <h2 className="text-lg font-semibold">Block User</h2>
+                <h2 className="text-lg font-semibold">
+                  {selectedUserId && blockedUsers.has(selectedUserId) ? 'Unblock User' : 'Block User'}
+                </h2>
 
                 <input
                   type="text"
@@ -776,7 +792,7 @@ export const ActivityLogListContent: React.FC = () => {
                   </button>
 
                   <button className="btn btn-sm btn-danger" onClick={handleBlockUser}>
-                    Block
+                    {selectedUserId && blockedUsers.has(selectedUserId) ? 'Unblock' : 'Block'}
                   </button>
                 </div>
               </div>

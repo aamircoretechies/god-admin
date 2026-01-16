@@ -65,8 +65,13 @@ const DropdownUser = ({ menuItemRef }: IDropdownUserProps) => {
       ? getUploadedFileUrl(userAvatarPath)
       : toAbsoluteUrl(userAvatarPath);
 
-    const displayName = userName.length > 15 ? `${userName.substring(0, 15)}...` : userName;
-    const displayEmail = userEmail.length > 25 ? `${userEmail.substring(0, 25)}...` : userEmail;
+    const isOnlySpecialCharsName = !/[a-zA-Z0-9]/.test(userName);
+    const nameLimit = isOnlySpecialCharsName ? 12 : 15;
+    const displayName =
+      [...userName].length > nameLimit ? `${[...userName].slice(0, nameLimit).join('')}...` : userName;
+
+    const displayEmail =
+      [...userEmail].length > 25 ? `${[...userEmail].slice(0, 25).join('')}...` : userEmail;
 
     return (
       <div className="flex items-center justify-between px-5 py-1.5 gap-1.5">
@@ -84,12 +89,15 @@ const DropdownUser = ({ menuItemRef }: IDropdownUserProps) => {
               {displayName}
             </Link>
             {userEmail && (
-              <a
-                href={`mailto:${userEmail}`}
-                className="text-xs text-gray-600 hover:text-primary font-medium leading-none"
-              >
+              // <a
+              //   href={`mailto:${userEmail}`}
+              //   className="text-xs text-gray-600 hover:text-primary font-medium leading-none"
+              // >
+              //   {displayEmail}
+              // </a>
+              <span className="text-xs text-gray-600 font-medium leading-none cursor-default">
                 {displayEmail}
-              </a>
+              </span>
             )}
           </div>
         </div>

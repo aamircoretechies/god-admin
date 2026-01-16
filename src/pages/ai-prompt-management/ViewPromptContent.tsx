@@ -338,8 +338,14 @@ const ViewPromptContent: React.FC = () => {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900">{promptData.title}</h2>
-          <p className="text-gray-600 mt-1">{promptData.description}</p>
+          <h2 className="text-2xl font-bold text-gray-900">
+            {promptData.title.length > 30 ? `${promptData.title.slice(0, 30)}...` : promptData.title}
+          </h2>
+          <p className="text-gray-600 mt-1">
+            {promptData.description.length > 35
+              ? `${promptData.description.slice(0, 35)}...`
+              : promptData.description}
+          </p>
         </div>
         <div className="flex items-center gap-2">
           {/* <Button variant="outline" onClick={handleDuplicate} disabled={duplicating}>

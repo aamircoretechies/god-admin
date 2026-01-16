@@ -97,8 +97,8 @@ const DataGridPagination = () => {
     >
       {!hideRowsPerPage && (
         <div className="flex items-center space-x-2 order-2 md:order-1 pb-2 md:pb-0">
-          <div className="text-sm text-muted-foreground">Rows per page</div>
-          <Select
+          <div className="text-sm text-muted-foreground"></div>
+          {/* <Select
             value={`${table.getState().pagination.pageSize}`}
             onValueChange={(value) => {
               table.setPageSize(Number(value));
@@ -114,7 +114,7 @@ const DataGridPagination = () => {
                 </SelectItem>
               ))}
             </SelectContent>
-          </Select>
+          </Select> */}
         </div>
       )}
       <div className="flex items-center gap-2 order-1 md:order-2 pt-2 md:pt-0">

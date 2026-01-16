@@ -92,6 +92,16 @@ const PersonalInfo = () => {
   const handleAvatarChange = (selectedAvatar: IImageInputFile[]) => {
     // Only allow changes when in edit mode
     if (!isEditing) return;
+
+    // Check if a file was selected and validate its type
+    if (selectedAvatar.length > 0 && selectedAvatar[0].file) {
+      const fileType = selectedAvatar[0].file.type;
+      if (fileType !== 'image/jpeg' && fileType !== 'image/png') {
+        toast.error('Only JPEG or PNG images are allowed');
+        return;
+      }
+    }
+
     // Just update the local state - don't upload yet
     setAvatar(selectedAvatar);
     checkForChanges(firstNameValue, lastNameValue, selectedAvatar);
@@ -427,7 +437,13 @@ const PersonalInfo = () => {
                     <p className="text-xs text-gray-500 mt-1">{firstNameValue.length}/20 characters</p>
                   </div>
                 ) : (
-                  firstNameValue || '-'
+                  (() => {
+                    const isOnlySpecial = !/[a-zA-Z0-9]/.test(firstNameValue);
+                    const limit = isOnlySpecial ? 12 : 15;
+                    return [...firstNameValue].length > limit
+                      ? `${[...firstNameValue].slice(0, limit).join('')}...`
+                      : firstNameValue || '-';
+                  })()
                 )}
               </td>
               <td className="py-2 text-center"></td>
@@ -455,7 +471,13 @@ const PersonalInfo = () => {
                     <p className="text-xs text-gray-500 mt-1">{lastNameValue.length}/20 characters</p>
                   </div>
                 ) : (
-                  lastNameValue || '-'
+                  (() => {
+                    const isOnlySpecial = !/[a-zA-Z0-9]/.test(lastNameValue);
+                    const limit = isOnlySpecial ? 12 : 15;
+                    return [...lastNameValue].length > limit
+                      ? `${[...lastNameValue].slice(0, limit).join('')}...`
+                      : lastNameValue || '-';
+                  })()
                 )}
               </td>
               <td className="py-2 text-center"></td>
