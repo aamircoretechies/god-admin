@@ -17,7 +17,8 @@ import {
   DialogTitle,
   DialogTrigger
 } from '@/components/ui/dialog';
-import { UserPlus, Search, AlertCircle, Loader2 } from 'lucide-react';
+import { KeenIcon } from '@/components';
+import { Alert } from '@/components/alert';
 import { toast } from 'sonner';
 import { fetchRoles, type Role } from '@/services/rolesApi';
 import { getAvailableRoles, createTeamMember, fetchUsers } from '@/services/usersApi';
@@ -124,7 +125,7 @@ const AddExistingUserModal: React.FC<AddExistingUserModalProps> = ({ trigger, on
 
   const handleUserSelect = (user: UserSearchResult) => {
     setSelectedUser(user);
-    setSearchQuery(`${user.name} (${user.email})`);
+    setSearchQuery(user.email);
     setShowResults(false);
   };
 
@@ -196,8 +197,8 @@ const AddExistingUserModal: React.FC<AddExistingUserModalProps> = ({ trigger, on
   };
 
   const defaultTrigger = (
-    <Button variant="outline" size="sm">
-      <UserPlus className="w-4 h-4 mr-2" />
+    <Button variant="outline" size="sm" className="gap-2">
+      <KeenIcon icon="user-tick" />
       Add Existing User
     </Button>
   );
@@ -206,133 +207,161 @@ const AddExistingUserModal: React.FC<AddExistingUserModalProps> = ({ trigger, on
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>{trigger || defaultTrigger}</DialogTrigger>
 
-      <DialogContent className="sm:max-w-lg">
-        <DialogHeader className="space-y-3 pb-4">
-          <DialogTitle className="text-xl font-semibold">Add Existing User to Team</DialogTitle>
-          <DialogDescription className="text-sm text-gray-600">
-            Add an existing user to your team by entering their email address and assigning a role.
-          </DialogDescription>
+      <DialogContent className="sm:max-w-lg p-0 overflow-hidden border-0 shadow-2xl">
+        <DialogHeader className="px-8 py-6 border-b border-gray-100 bg-white">
+          <div className="flex items-center gap-4">
+            <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shadow-sm border border-primary/5">
+              <KeenIcon icon="user-tick" className="text-2xl" />
+            </div>
+            <div>
+              <DialogTitle className="text-xl font-bold text-gray-900 tracking-tight">Add Existing User to Team</DialogTitle>
+              <DialogDescription className="text-sm text-gray-500 mt-1 font-medium">
+                Search and assign roles to existing members.
+              </DialogDescription>
+            </div>
+          </div>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-5">
-          <div className="space-y-2">
-            <Label htmlFor="user-search" className="text-sm font-medium">Search User *</Label>
-            <div className="relative" ref={searchRef}>
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                <Input
-                  id="user-search"
-                  type="text"
-                  placeholder="Search by name or email (e.g., rajat)"
-                  value={searchQuery}
-                  onChange={(e) => {
-                    setSearchQuery(e.target.value);
-                    setSelectedUser(null);
-                    if (e.target.value.length >= 2) {
-                      setShowResults(true);
-                    }
-                  }}
-                  onFocus={() => {
-                    if (searchResults.length > 0) {
-                      setShowResults(true);
-                    }
-                  }}
-                  required
-                  className="w-full pl-10 pr-10"
-                />
-                {searching && (
-                  <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 animate-spin" />
+        <form onSubmit={handleSubmit} className="flex flex-col">
+          <div className="px-8 py-8 space-y-7">
+            <div className="space-y-2.5">
+              <Label htmlFor="user-search" className="text-sm font-semibold text-gray-800">Search User *</Label>
+              <div className="relative" ref={searchRef}>
+                <div className="relative group">
+                  <KeenIcon
+                    icon="magnifier"
+                    className="absolute left-3.5 top-1/2 transform -translate-y-1/2 text-gray-400 text-lg transition-colors group-focus-within:text-primary"
+                  />
+                  <Input
+                    id="user-search"
+                    type="text"
+                    placeholder="Search by name or email (e.g., rajat)"
+                    value={searchQuery}
+                    onChange={(e) => {
+                      setSearchQuery(e.target.value);
+                      setSelectedUser(null);
+                      if (e.target.value.length >= 2) {
+                        setShowResults(true);
+                      }
+                    }}
+                    onFocus={() => {
+                      if (searchResults.length > 0) {
+                        setShowResults(true);
+                      }
+                    }}
+                    required
+                    className="w-full pl-11 pr-10 h-11 bg-gray-50/50 border-gray-200 focus:bg-white focus:ring-2 focus:ring-primary/10 transition-all rounded-lg"
+                  />
+                  {searching && (
+                    <KeenIcon
+                      icon="spinner"
+                      className="absolute right-3.5 top-1/2 transform -translate-y-1/2 text-primary text-lg animate-spin"
+                    />
+                  )}
+                </div>
+
+                {showResults && searchResults.length > 0 && (
+                  <div className="absolute z-50 w-full mt-2 bg-white border border-gray-100 rounded-xl shadow-[0_10px_40px_rgba(0,0,0,0.08)] max-h-60 overflow-auto p-2 animate-in fade-in slide-in-from-top-2 duration-300">
+                    {searchResults.map((user) => (
+                      <button
+                        key={user.id}
+                        type="button"
+                        onClick={() => handleUserSelect(user)}
+                        className="w-full text-left px-3 py-2.5 hover:bg-primary-light rounded-lg group transition-all flex items-center gap-3"
+                      >
+                        <div className="w-9 h-9 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 group-hover:bg-primary-clarity group-hover:text-primary transition-all shadow-sm">
+                          <KeenIcon icon="user" className="text-base" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <div className="font-bold text-sm text-gray-900 truncate group-hover:text-primary transition-colors">
+                            {user.name}
+                          </div>
+                          <div className="text-xs text-gray-500 truncate font-medium">{user.email}</div>
+                        </div>
+                        <KeenIcon icon="right" className="text-gray-300 opacity-0 group-hover:opacity-100 transform translate-x-[-10px] group-hover:translate-x-0 transition-all text-sm" />
+                      </button>
+                    ))}
+                  </div>
+                )}
+
+                {showResults && searchQuery.length >= 2 && !searching && searchResults.length === 0 && (
+                  <div className="absolute z-50 w-full mt-2 bg-white border border-gray-100 rounded-xl shadow-xl p-5 text-sm text-gray-500 text-center animate-in fade-in slide-in-from-top-2 duration-200">
+                    <p className="font-medium">No users found matching "{searchQuery}"</p>
+                  </div>
                 )}
               </div>
+              <p className="text-[11px] text-gray-400 mt-1.5 flex items-center gap-1.5 px-0.5">
+                <KeenIcon icon="information" className="text-xs" />
+                Search for an existing user by name or email address
+              </p>
+            </div>
 
-              {showResults && searchResults.length > 0 && (
-                <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-auto">
-                  {searchResults.map((user) => (
-                    <button
-                      key={user.id}
-                      type="button"
-                      onClick={() => handleUserSelect(user)}
-                      className="w-full text-left px-4 py-2 hover:bg-gray-100 focus:bg-gray-100 focus:outline-none transition-colors"
-                    >
-                      <div className="font-medium text-sm">{user.name}</div>
-                      <div className="text-xs text-gray-500">{user.email}</div>
-                    </button>
-                  ))}
-                </div>
-              )}
-
-              {showResults && searchQuery.length >= 2 && !searching && searchResults.length === 0 && (
-                <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg p-4 text-sm text-gray-500">
-                  No users found matching "{searchQuery}"
-                </div>
+            <div className="space-y-2.5">
+              <Label htmlFor="existing-user-role" className="text-sm font-semibold text-gray-800">Role *</Label>
+              <Select
+                value={selectedRole}
+                onValueChange={setSelectedRole}
+                disabled={rolesLoading}
+              >
+                <SelectTrigger id="existing-user-role" className="w-full h-11 bg-gray-50/50 border-gray-200 focus:bg-white focus:ring-2 focus:ring-primary/10 transition-all rounded-lg">
+                  <SelectValue placeholder="Select role" />
+                </SelectTrigger>
+                <SelectContent className="rounded-xl shadow-xl">
+                  <SelectItem value="ADMIN">Admin (Full Access)</SelectItem>
+                  <SelectItem value="PREMIUM">Premium</SelectItem>
+                  <SelectItem value="FREE">Free (Basic Access)</SelectItem>
+                  {availableRoles.length > 0 && (
+                    <>
+                      <div className="px-2 py-2 text-[11px] font-bold text-gray-400 uppercase tracking-wider border-t mt-1.5 pt-3">Custom Roles</div>
+                      {availableRoles.map((role) => (
+                        <SelectItem key={role.id} value={role.id}>
+                          {role.name}
+                          {role.description && <span className="text-gray-400 font-normal"> - {role.description}</span>}
+                        </SelectItem>
+                      ))}
+                    </>
+                  )}
+                </SelectContent>
+              </Select>
+              {rolesLoading && (
+                <p className="text-[11px] text-primary mt-1 animate-pulse px-0.5">Loading roles...</p>
               )}
             </div>
-            <p className="text-xs text-gray-500 mt-1">
-              Search for an existing user by name or email address
-            </p>
-          </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="existing-user-role" className="text-sm font-medium">Role *</Label>
-            <Select
-              value={selectedRole}
-              onValueChange={setSelectedRole}
-              disabled={rolesLoading}
-            >
-              <SelectTrigger id="existing-user-role" className="w-full">
-                <SelectValue placeholder="Select role" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="ADMIN">Admin (Full Access)</SelectItem>
-                <SelectItem value="PREMIUM">Premium</SelectItem>
-                <SelectItem value="FREE">Free (Basic Access)</SelectItem>
-                {availableRoles.length > 0 && (
-                  <>
-                    <div className="px-2 py-1.5 text-xs font-semibold text-gray-500 border-t mt-1 pt-2">Custom Roles</div>
-                    {availableRoles.map((role) => (
-                      <SelectItem key={role.id} value={role.id}>
-                        {role.name}
-                        {role.description && ` - ${role.description}`}
-                      </SelectItem>
-                    ))}
-                  </>
-                )}
-              </SelectContent>
-            </Select>
-            {rolesLoading && (
-              <p className="text-xs text-gray-500 mt-1">Loading roles...</p>
-            )}
-          </div>
-
-          <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
-            <div className="flex items-start gap-3">
-              <AlertCircle className="w-5 h-5 text-blue-600 mt-0.5 flex-shrink-0" />
-              <div className="text-sm text-blue-800">
-                <p className="font-medium mb-1.5">Note:</p>
-                <p className="leading-relaxed">
-                  If the user doesn't exist, you'll need to create a new team member instead.
-                  The user will be assigned the selected role and gain access based on that role's permissions.
+            <Alert variant="primary" icon="information-2" className="mt-2 border-0 bg-primary/5 rounded-xl px-4 py-4">
+              <div className="flex flex-col gap-1.5">
+                <p className="font-bold text-primary text-xs uppercase tracking-wider">Note:</p>
+                <p className="leading-relaxed text-[13px] text-gray-600 font-medium">
+                  If the user doesn't exist, you'll need to create a new team member.
+                  The user will be assigned the selected role and permissions.
                 </p>
               </div>
-            </div>
+            </Alert>
           </div>
 
-          <div className="flex justify-end gap-3 pt-4 border-t">
+          <div className="px-8 py-6 bg-gray-50/50 border-t border-gray-100 flex justify-end gap-3.5">
             <Button
               type="button"
               variant="outline"
               onClick={handleClose}
               disabled={isSubmitting}
-              className="min-w-[80px]"
+              className="min-w-[100px] h-11 font-semibold rounded-lg hover:bg-white transition-all shadow-sm active:scale-[0.98]"
             >
               Cancel
             </Button>
             <Button
               type="submit"
               disabled={isSubmitting}
-              className="bg-primary hover:bg-primary/90 min-w-[120px]"
+              className="bg-primary hover:bg-primary/90 min-w-[140px] h-11 font-bold rounded-lg shadow-[0_4px_14px_rgba(0,0,0,0.1)] transition-all active:scale-[0.98]"
             >
-              {isSubmitting ? 'Adding...' : 'Add to Team'}
+              {isSubmitting ? (
+                <div className="flex items-center gap-2">
+                  <KeenIcon icon="spinner" className="animate-spin text-lg" />
+                  <span>Adding...</span>
+                </div>
+              ) : (
+                'Add to Team'
+              )}
             </Button>
           </div>
         </form>
