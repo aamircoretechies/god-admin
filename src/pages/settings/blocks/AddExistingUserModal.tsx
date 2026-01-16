@@ -130,7 +130,7 @@ const AddExistingUserModal: React.FC<AddExistingUserModalProps> = ({ trigger, on
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!selectedUser && !searchQuery.trim()) {
       toast.error('Please search and select a user');
       return;
@@ -146,12 +146,15 @@ const AddExistingUserModal: React.FC<AddExistingUserModalProps> = ({ trigger, on
     try {
       // For existing users, we just need to assign a role (no password)
       // The backend should handle finding the user and assigning the role
+      const isCustomRole = selectedRole !== 'ADMIN' && selectedRole !== 'FREE' && selectedRole !== 'PREMIUM';
       const response = await createTeamMember({
         email: userEmail,
-        role: selectedRole as 'FREE' | 'PREMIUM' | 'ADMIN',
-        custom_role_id: selectedRole !== 'ADMIN' && selectedRole !== 'FREE' && selectedRole !== 'PREMIUM' 
-          ? selectedRole 
-          : undefined
+        // /* role: selectedRole as 'FREE' | 'PREMIUM' | 'ADMIN', */
+        // /* custom_role_id: selectedRole !== 'ADMIN' && selectedRole !== 'FREE' && selectedRole !== 'PREMIUM' 
+        //   ? selectedRole 
+        //   : undefined */
+        role: 'FREE', // Enforced as per requirement
+        custom_role_id: isCustomRole ? selectedRole : undefined
       });
 
       if (response.status === 1) {
@@ -161,7 +164,7 @@ const AddExistingUserModal: React.FC<AddExistingUserModalProps> = ({ trigger, on
         setSearchResults([]);
         setSelectedRole('FREE');
         setIsOpen(false);
-        
+
         if (onMemberAdded) {
           onMemberAdded();
         }
@@ -171,7 +174,7 @@ const AddExistingUserModal: React.FC<AddExistingUserModalProps> = ({ trigger, on
     } catch (error: any) {
       console.error('Error adding existing user:', error);
       const errorMessage = error?.response?.data?.message || error?.message || 'Failed to add user to team';
-      
+
       if (error?.response?.status === 403 || errorMessage.toLowerCase().includes('forbidden') || errorMessage.toLowerCase().includes('unauthorized')) {
         toast.error('You are not authorized to add team members. Please contact a super admin.');
       } else if (errorMessage.toLowerCase().includes('not found') || errorMessage.toLowerCase().includes('does not exist')) {
@@ -241,7 +244,7 @@ const AddExistingUserModal: React.FC<AddExistingUserModalProps> = ({ trigger, on
                   <Loader2 className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4 animate-spin" />
                 )}
               </div>
-              
+
               {showResults && searchResults.length > 0 && (
                 <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg max-h-60 overflow-auto">
                   {searchResults.map((user) => (
@@ -257,7 +260,7 @@ const AddExistingUserModal: React.FC<AddExistingUserModalProps> = ({ trigger, on
                   ))}
                 </div>
               )}
-              
+
               {showResults && searchQuery.length >= 2 && !searching && searchResults.length === 0 && (
                 <div className="absolute z-50 w-full mt-1 bg-white border border-gray-200 rounded-md shadow-lg p-4 text-sm text-gray-500">
                   No users found matching "{searchQuery}"
@@ -315,10 +318,10 @@ const AddExistingUserModal: React.FC<AddExistingUserModalProps> = ({ trigger, on
           </div>
 
           <div className="flex justify-end gap-3 pt-4 border-t">
-            <Button 
-              type="button" 
-              variant="outline" 
-              onClick={handleClose} 
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleClose}
               disabled={isSubmitting}
               className="min-w-[80px]"
             >

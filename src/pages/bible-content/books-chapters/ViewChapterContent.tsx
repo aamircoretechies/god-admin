@@ -252,7 +252,7 @@ const ViewChapterContent: React.FC = () => {
   const mapExperienceLevel = (level: string): string => {
     const levelMap: Record<string, string> = {
       'NEW_TO_BIBLE': 'First Time',
-      'SOME_KNOWLEDGE': 'Some Knowledge',
+      'SOME_KNOWLEDGE': 'Occasional',
       'REGULAR_READER': 'Regular Reader',
       'THEOLOGICAL_TRAINING': 'Theological Training'
     };

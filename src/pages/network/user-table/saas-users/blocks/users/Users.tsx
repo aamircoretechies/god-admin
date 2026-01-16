@@ -103,8 +103,8 @@ const SaaSUsersToolbar = ({
             </SelectTrigger>
             <SelectContent className="w-32">
               <SelectItem value="latest">Latest</SelectItem>
-              <SelectItem value="older">Older</SelectItem>
-              {/* <SelectItem value="oldest">Oldest</SelectItem> */}
+              {/* <SelectItem value="older">Older</SelectItem> */}
+              <SelectItem value="oldest">Oldest</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -207,8 +207,13 @@ const Users = ({ hideRowsPerPage = false }: UsersProps) => {
        }, */
       {
         accessorFn: (row: IUsersData) => row.joinDate || '2024-01-15',
-        id: 'joinDate',
+        id: 'Join Date',
         // header: ({ column }) => <DataGridColumnHeader title="Join Date" column={column} />,
+         header: () => (
+          <span className="font-medium text-sm text-gray-900 ml-2">
+            Join Date
+          </span>
+        ),
         enableSorting: false,
         cell: (info: any) => (
           <span className="text-sm text-gray-800 font-medium">
@@ -233,7 +238,12 @@ const Users = ({ hideRowsPerPage = false }: UsersProps) => {
       }, */
       {
         id: 'actions',
-        header: ({ column }) => <DataGridColumnHeader title="Actions" column={column} />,
+        // header: ({ column }) => <DataGridColumnHeader title="Actions" column={column} />,
+         header: () => (
+          <span className="font-medium text-sm text-gray-900 ml-2">
+            Actions
+          </span>
+        ),
         enableSorting: false,
         enableHiding: false,
         cell: (info: any) => (
