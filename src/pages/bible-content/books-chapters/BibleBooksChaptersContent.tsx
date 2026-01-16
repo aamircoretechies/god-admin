@@ -477,37 +477,6 @@ const BibleBooksChaptersContent = () => {
                   {filteredBooks.length} books
                 </span>
               </div>
-              {/* Show pagination if we have multiple pages OR if we have 20 books (indicating more might exist) */}
-              {(totalPages > 1 || books.length === 20) && (
-                <div className="flex items-center gap-2 flex-grow justify-end">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
-                    disabled={currentPage === 1 || loadingBooks}
-                  >
-                    Previous
-                  </Button>
-                  <span className="text-sm text-gray-600 whitespace-nowrap">
-                    Page {currentPage} of {totalPages > 1 ? totalPages : '...'}
-                  </span>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => {
-                      if (totalPages > 1) {
-                        setCurrentPage((prev) => Math.min(totalPages, prev + 1));
-                      } else {
-                        // If totalPages is unknown but we have 20 books, try next page
-                        setCurrentPage((prev) => prev + 1);
-                      }
-                    }}
-                    disabled={(totalPages > 1 && currentPage === totalPages) || loadingBooks}
-                  >
-                    Next
-                  </Button>
-                </div>
-              )}
             </div>
           </div>
         </CardContent>
@@ -736,6 +705,38 @@ const BibleBooksChaptersContent = () => {
             </div>
           </CardContent>
         </Card>
+      )}
+
+      {/* Pagination */}
+      {(totalPages > 1 || books.length === 20) && (
+        <div className="flex items-center justify-end gap-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+            disabled={currentPage === 1 || loadingBooks}
+          >
+            Previous
+          </Button>
+          <span className="text-sm text-gray-600 whitespace-nowrap">
+            Page {currentPage} of {totalPages > 1 ? totalPages : '...'}
+          </span>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => {
+              if (totalPages > 1) {
+                setCurrentPage((prev) => Math.min(totalPages, prev + 1));
+              } else {
+                // If totalPages is unknown but we have 20 books, try next page
+                setCurrentPage((prev) => prev + 1);
+              }
+            }}
+            disabled={(totalPages > 1 && currentPage === totalPages) || loadingBooks}
+          >
+            Next
+          </Button>
+        </div>
       )}
 
       {/* Verse Detail Modal */}

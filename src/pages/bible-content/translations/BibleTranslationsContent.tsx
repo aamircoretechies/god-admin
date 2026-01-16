@@ -916,10 +916,10 @@ const BibleTranslationsContent = () => {
                       <Clock className="w-4 h-4 text-gray-500" />
                       <span className="text-gray-600">Updated: {translation.lastUpdated}</span>
                     </div>
-                    <div className="flex items-center space-x-2">
+                    {/* <div className="flex items-center space-x-2">
                       <FileText className="w-4 h-4 text-gray-500" />
                       <span className="text-gray-600">{translation.fileSize}</span>
-                    </div>
+                    </div> */}
                   </div>
 
                   {/* <div className="flex justify-between items-center pt-3 border-t"> */}

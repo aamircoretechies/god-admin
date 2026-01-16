@@ -101,6 +101,7 @@ const PromptListContent: React.FC = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
   const [duplicatingId, setDuplicatingId] = useState<string | null>(null);
+  const [allCategories, setAllCategories] = useState<string[]>([]);
   const pageSize = 10;
 
   // Convert formatted category back to API format (e.g., "Verse Explanation" -> "VerseExplanation")
@@ -152,6 +153,32 @@ const PromptListContent: React.FC = () => {
 
     return () => clearTimeout(debounceTimer);
   }, [currentPage, statusFilter, categoryFilter, searchTerm]);
+
+  // Fetch all categories on mount (for dropdown options)
+  useEffect(() => {
+    const loadAllCategories = async () => {
+      try {
+        const response = await fetchPrompts({
+          page: 1,
+          limit: 1000, // Fetch a large number to get all categories
+          status: undefined,
+          category: undefined,
+          search: undefined
+        });
+
+        if (response.status === 1 && response.data) {
+          const transformed = response.data.map(transformPrompt);
+          const categories = new Set(transformed.map((p) => p.category));
+          setAllCategories(Array.from(categories).sort());
+        }
+      } catch (err) {
+        // Silently fail - categories will be empty
+        console.error('Failed to load categories:', err);
+      }
+    };
+
+    loadAllCategories();
+  }, []);
 
   // Reset to page 1 when filters change
   useEffect(() => {
@@ -320,29 +347,41 @@ const PromptListContent: React.FC = () => {
       {
         accessorFn: (row: AIPrompt) => row,
         id: 'title',
-        header: ({ column }) => (
-          <DataGridColumnHeader
-            title="Prompt Name"
-            filter={<ColumnInputFilter column={column} />}
-            column={column}
-          />
+        // header: ({ column }) => (
+        //   <DataGridColumnHeader
+        //     title="Prompt Name"
+        //     filter={<ColumnInputFilter column={column} />}
+        //     column={column}
+        //   />
+        // ),
+        header: () => (
+          <span className="text-sm font-medium select-none cursor-default">Prompt Name</span>
         ),
         enableSorting: true,
-        cell: ({ row }) => (
-          <div className="flex flex-col">
-            <Link
-              to={`/ai-prompt-management/view/${row.original.id}`}
-              className="text-sm font-medium text-gray-900 hover:text-primary-active mb-1"
-            >
-              {row.original.title}
-            </Link>
-            <span className="text-xs text-gray-500 line-clamp-2">{row.original.description}</span>
-            <div className="flex items-center gap-2 mt-1">
-              {getCategoryBadge(row.original.category)}
-              {getRoleBadge(row.original.targetRole)}
+        cell: ({ row }) => {
+          const truncateText = (text: string, maxLength: number): string => {
+            if (text.length <= maxLength) return text;
+            return text.substring(0, maxLength) + '..';
+          };
+
+          return (
+            <div className="flex flex-col">
+              <Link
+                to={`/ai-prompt-management/view/${row.original.id}`}
+                className="text-sm font-medium text-gray-900 hover:text-primary-active mb-1"
+              >
+                {truncateText(row.original.title, 30)}
+              </Link>
+              <span className="text-xs text-gray-500 line-clamp-2">
+                {truncateText(row.original.description, 35)}
+              </span>
+              <div className="flex items-center gap-2 mt-1">
+                {getCategoryBadge(row.original.category)}
+                {getRoleBadge(row.original.targetRole)}
+              </div>
             </div>
-          </div>
-        ),
+          );
+        },
         meta: {
           headerClassName: 'min-w-[300px]',
           cellClassName: 'text-gray-800 font-normal'
@@ -351,7 +390,7 @@ const PromptListContent: React.FC = () => {
       {
         accessorFn: (row: AIPrompt) => row.status,
         id: 'status',
-        header: ({ column }) => <DataGridColumnHeader title="Status" column={column} />,
+        // header: ({ column }) => <DataGridColumnHeader title="Status" column={column} />,
         enableSorting: true,
         cell: ({ row }) => getStatusBadge(row.original.status),
         meta: {
@@ -362,7 +401,7 @@ const PromptListContent: React.FC = () => {
       {
         accessorFn: (row: AIPrompt) => row.language,
         id: 'language',
-        header: ({ column }) => <DataGridColumnHeader title="Language" column={column} />,
+        // header: ({ column }) => <DataGridColumnHeader title="Language" column={column} />,
         enableSorting: true,
         cell: ({ row }) => (
           <Badge variant="outline" className="text-xs">
@@ -377,12 +416,12 @@ const PromptListContent: React.FC = () => {
       {
         accessorFn: (row: AIPrompt) => row.updatedAt,
         id: 'updatedAt',
-        header: ({ column }) => <DataGridColumnHeader title="Last Updated" column={column} />,
+        // header: ({ column }) => <DataGridColumnHeader title="Last Updated" column={column} />,
         enableSorting: true,
         cell: ({ row }) => (
           <div className="text-sm">
             <p>{formatDate(row.original.updatedAt)}</p>
-            <p className="text-xs text-gray-500">v{row.original.version}</p>
+            {/* <p className="text-xs text-gray-500">v{row.original.version}</p> */}
           </div>
         ),
         meta: {
@@ -392,7 +431,10 @@ const PromptListContent: React.FC = () => {
       },
       {
         id: 'actions',
-        header: ({ column }) => <DataGridColumnHeader title="Actions" column={column} />,
+        // header: ({ column }) => <DataGridColumnHeader title="Actions" column={column} />,
+        header: () => (
+          <span className="text-sm font-medium select-none cursor-default">Actions</span>
+        ),
         enableSorting: false,
         cell: ({ row }) => (
           <DropdownMenu>
@@ -460,11 +502,10 @@ const PromptListContent: React.FC = () => {
     []
   );
 
-  // Get unique categories from prompts
+  // Get unique categories from all available categories
   const uniqueCategories = useMemo(() => {
-    const categories = new Set(prompts.map((p) => p.category));
-    return Array.from(categories).sort();
-  }, [prompts]);
+    return allCategories;
+  }, [allCategories]);
 
   const toolbar = (
     <div className="flex flex-col gap-4 p-3 md:p-5">
