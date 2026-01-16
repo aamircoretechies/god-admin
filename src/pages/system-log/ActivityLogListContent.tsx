@@ -227,6 +227,45 @@ const ToolbarContent = ({
   );
 };
 
+// Actions cell component defined outside to avoid closure issues
+const ActionsCell = ({ 
+  userId, 
+  isBlocked, 
+  onBlockClick, 
+  onSuspendClick 
+}: { 
+  userId: string; 
+  isBlocked: boolean;
+  onBlockClick: () => void;
+  onSuspendClick: () => void;
+}) => {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="sm">
+          <MoreVertical className="w-4 h-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem asChild>
+          <Link to={`/system-log/user/${userId}`}>
+            <Eye className="w-4 h-4 mr-2" />
+            View User Activity
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={onBlockClick}>
+          <Shield className="w-4 h-4 mr-2" />
+          {isBlocked ? 'Unblock User' : 'Block User'}
+        </DropdownMenuItem>
+        <DropdownMenuItem onClick={onSuspendClick}>
+          <UserX className="w-4 h-4 mr-2" />
+          Suspend User
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+};
+
 export const ActivityLogListContent: React.FC = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [userFilter, setUserFilter] = useState<string>('all');
@@ -248,8 +287,8 @@ export const ActivityLogListContent: React.FC = () => {
   // SELECTED USER
   const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
 
-  // Track blocked users locally (Set of userIds that are blocked)
-  const [blockedUsers, setBlockedUsers] = useState<Set<string>>(new Set());
+  // Track blocked users locally (Array of userIds that are blocked)
+  const [blockedUsers, setBlockedUsers] = useState<string[]>([]);
 
   // Fetch activity logs from API with filters
   useEffect(() => {
@@ -462,8 +501,8 @@ export const ActivityLogListContent: React.FC = () => {
     );
   };
 
-  const columns = useMemo<ColumnDef<UserActivityLog>[]>(
-    () => [
+  // Create columns without useMemo to ensure cell renderers always have latest blockedUsers
+  const columns: ColumnDef<UserActivityLog>[] = [
       // {
       //   accessorKey: 'id',
       //   header: () => <DataGridRowSelectAll />,
@@ -620,61 +659,31 @@ export const ActivityLogListContent: React.FC = () => {
           <span className="text-sm font-medium select-none cursor-default">Actions</span>
         ),
         enableSorting: false,
-        cell: ({ row }) => (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="sm">
-                <MoreVertical className="w-4 h-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem asChild>
-                <Link to={`/system-log/user/${row.original.userId}`}>
-                  <Eye className="w-4 h-4 mr-2" />
-                  View User Activity
-                </Link>
-              </DropdownMenuItem>
-              {/* <DropdownMenuItem>
-                <AlertTriangle className="w-4 h-4 mr-2" />
-                Flag Activity
-              </DropdownMenuItem> */}
-              {/* <DropdownMenuItem>
-                <Shield className="w-4 h-4 mr-2" />
-                Block User
-              </DropdownMenuItem> */}
-              <DropdownMenuItem
-                onClick={() => {
-                  setSelectedUserId(row.original.userId);
-                  setShowBlockModal(true);
-                }}
-              >
-                <Shield className="w-4 h-4 mr-2" />
-                {blockedUsers.has(row.original.userId) ? 'Unblock User' : 'Block User'}
-              </DropdownMenuItem>
-              {/* <DropdownMenuItem>
-                <UserX className="w-4 h-4 mr-2" />
-                Suspend User
-              </DropdownMenuItem> */}
-              <DropdownMenuItem
-                onClick={() => {
-                  setSelectedUserId(row.original.userId);
-                  setShowSuspendModal(true);
-                }}
-              >
-                <UserX className="w-4 h-4 mr-2" />
-                Suspend User
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        ),
+        cell: ({ row }) => {
+          const userId = row.original.userId;
+          // Always check against current blockedUsers state (not from closure)
+          const isBlocked = blockedUsers.includes(userId);
+          return (
+            <ActionsCell 
+              userId={userId}
+              isBlocked={isBlocked}
+              onBlockClick={() => {
+                setSelectedUserId(userId);
+                setShowBlockModal(true);
+              }}
+              onSuspendClick={() => {
+                setSelectedUserId(userId);
+                setShowSuspendModal(true);
+              }}
+            />
+          );
+        },
         meta: {
           headerClassName: 'w-40',
           cellClassName: 'text-gray-800 font-medium'
         }
       }
-    ],
-    [blockedUsers]
-  );
+    ];
 
   const handleRowSelection = (state: any) => {
     const selectedRowIds = Object.keys(state);
@@ -688,15 +697,13 @@ export const ActivityLogListContent: React.FC = () => {
       if (res.status === 1) {
         // Toggle blocked status for this user
         setBlockedUsers((prev) => {
-          const newSet = new Set(prev);
-          if (newSet.has(selectedUserId!)) {
-            newSet.delete(selectedUserId!);
+          if (prev.includes(selectedUserId!)) {
             toast.success('User unblocked successfully!');
+            return prev.filter((id) => id !== selectedUserId!);
           } else {
-            newSet.add(selectedUserId!);
             toast.success('User blocked successfully!');
+            return [...prev, selectedUserId!];
           }
-          return newSet;
         });
         setShowBlockModal(false);
         setReason('');
@@ -767,7 +774,7 @@ export const ActivityLogListContent: React.FC = () => {
               {/* <div className="bg-white p-6 rounded-lg w-[400px] space-y-4"> */}
               <div className="bg-white p-6 rounded-lg w-full max-w-[400px] mx-4 space-y-4">
                 <h2 className="text-lg font-semibold">
-                  {selectedUserId && blockedUsers.has(selectedUserId) ? 'Unblock User' : 'Block User'}
+                  {selectedUserId && blockedUsers.includes(selectedUserId) ? 'Unblock User' : 'Block User'}
                 </h2>
 
                 <input
@@ -792,7 +799,7 @@ export const ActivityLogListContent: React.FC = () => {
                   </button>
 
                   <button className="btn btn-sm btn-danger" onClick={handleBlockUser}>
-                    {selectedUserId && blockedUsers.has(selectedUserId) ? 'Unblock' : 'Block'}
+                    {selectedUserId && blockedUsers.includes(selectedUserId) ? 'Unblock' : 'Block'}
                   </button>
                 </div>
               </div>
