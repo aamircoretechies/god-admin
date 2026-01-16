@@ -188,11 +188,19 @@ const PromptSourceFilters: React.FC<PromptSourceFiltersProps> = ({
       if (!whitelistSources.includes(source)) {
         setWhitelistSources([...whitelistSources, source]);
         setSelectedWhitelistSource(''); // Reset dropdown
+        // Remove from blacklist if it exists there
+        if (blacklistSources.includes(source)) {
+          setBlacklistSources(blacklistSources.filter(s => s !== source));
+        }
       }
     } else {
       if (!blacklistSources.includes(source)) {
         setBlacklistSources([...blacklistSources, source]);
         setSelectedBlacklistSource(''); // Reset dropdown
+        // Remove from whitelist if it exists there
+        if (whitelistSources.includes(source)) {
+          setWhitelistSources(whitelistSources.filter(s => s !== source));
+        }
       }
     }
   };
@@ -213,11 +221,19 @@ const PromptSourceFilters: React.FC<PromptSourceFiltersProps> = ({
       if (!whitelistCustomSources.includes(newSource.trim())) {
         setWhitelistCustomSources([...whitelistCustomSources, newSource.trim()]);
         setNewWhitelistCustomSource('');
+        // Remove from blacklist if it exists there
+        if (blacklistCustomSources.includes(newSource.trim())) {
+          setBlacklistCustomSources(blacklistCustomSources.filter(s => s !== newSource.trim()));
+        }
       }
     } else {
       if (!blacklistCustomSources.includes(newSource.trim())) {
         setBlacklistCustomSources([...blacklistCustomSources, newSource.trim()]);
         setNewBlacklistCustomSource('');
+        // Remove from whitelist if it exists there
+        if (whitelistCustomSources.includes(newSource.trim())) {
+          setWhitelistCustomSources(whitelistCustomSources.filter(s => s !== newSource.trim()));
+        }
       }
     }
   };
@@ -295,7 +311,7 @@ const PromptSourceFilters: React.FC<PromptSourceFiltersProps> = ({
                   {whitelistSources.map((source) => {
                     const option = sourceOptions.find(opt => opt.value === source);
                     return (
-                      <Badge key={source} variant="secondary" className="flex items-center gap-1">
+                      <Badge key={source} variant="outline" className="flex items-center gap-1">
                         {option?.label || source}
                         {!readOnly && (
                           <button
@@ -309,7 +325,7 @@ const PromptSourceFilters: React.FC<PromptSourceFiltersProps> = ({
                     );
                   })}
                   {whitelistCustomSources.map((source) => (
-                    <Badge key={source} variant="secondary" className="flex items-center gap-1">
+                    <Badge key={source} variant="outline" className="flex items-center gap-1">
                       {source}
                       {!readOnly && (
                         <button
@@ -382,7 +398,7 @@ const PromptSourceFilters: React.FC<PromptSourceFiltersProps> = ({
                 {whitelistCustomSources.length > 0 && (
                   <div className="flex flex-wrap gap-2 mt-2">
                     {whitelistCustomSources.map((source) => (
-                      <Badge key={source} variant="secondary" className="flex items-center gap-1">
+                      <Badge key={source} variant="outline" className="flex items-center gap-1">
                         {source}
                         {!readOnly && (
                           <button
@@ -492,7 +508,7 @@ const PromptSourceFilters: React.FC<PromptSourceFiltersProps> = ({
                   {blacklistSources.map((source) => {
                     const option = sourceOptions.find(opt => opt.value === source);
                     return (
-                      <Badge key={source} variant="secondary" className="flex items-center gap-1">
+                      <Badge key={source} variant="outline" className="flex items-center gap-1">
                         {option?.label || source}
                         {!readOnly && (
                           <button
@@ -506,7 +522,7 @@ const PromptSourceFilters: React.FC<PromptSourceFiltersProps> = ({
                     );
                   })}
                   {blacklistCustomSources.map((source) => (
-                    <Badge key={source} variant="secondary" className="flex items-center gap-1">
+                    <Badge key={source} variant="outline" className="flex items-center gap-1">
                       {source}
                       {!readOnly && (
                         <button
@@ -551,6 +567,39 @@ const PromptSourceFilters: React.FC<PromptSourceFiltersProps> = ({
                       ))}
                   </SelectContent>
                 </Select>
+                {(blacklistSources.length > 0 || blacklistCustomSources.length > 0) && (
+                  <div className="flex flex-wrap gap-2 mt-2">
+                    {blacklistSources.map((source) => {
+                      const option = sourceOptions.find(opt => opt.value === source);
+                      return (
+                        <Badge key={source} variant="outline" className="flex items-center gap-1">
+                          {option?.label || source}
+                          {!readOnly && (
+                            <button
+                              onClick={() => removeSource('blacklist', source)}
+                              className="ml-1 hover:bg-gray-300 rounded-full p-0.5"
+                            >
+                              <X className="w-3 h-3" />
+                            </button>
+                          )}
+                        </Badge>
+                      );
+                    })}
+                    {blacklistCustomSources.map((source) => (
+                      <Badge key={source} variant="secondary" className="flex items-center gap-1">
+                        {source}
+                        {!readOnly && (
+                          <button
+                            onClick={() => removeCustomSource('blacklist', source)}
+                            className="ml-1 hover:bg-gray-300 rounded-full p-0.5"
+                          >
+                            <X className="w-3 h-3" />
+                          </button>
+                        )}
+                      </Badge>
+                    ))}
+                  </div>
+                )}
               </div>
 
               <div>
@@ -631,12 +680,11 @@ const PromptSourceFilters: React.FC<PromptSourceFiltersProps> = ({
           {blacklist && !readOnly && (
             <div className="pt-4 border-t space-y-4">
               <div>
-                <Label>Add More Sources</Label>
+                <Label>Add Sources to Exclude</Label>
                 <Select
                   value={selectedBlacklistSource}
                   onValueChange={(value) => {
                     addSource('blacklist', value);
-                    handleSaveFilter('blacklist');
                   }}
                 >
                   <SelectTrigger className="mt-2">
@@ -653,6 +701,71 @@ const PromptSourceFilters: React.FC<PromptSourceFiltersProps> = ({
                   </SelectContent>
                 </Select>
               </div>
+              <div>
+                <Label>Custom Sources</Label>
+                <div className="flex gap-2 mt-2">
+                  <Input
+                    placeholder="Enter custom source name"
+                    value={newBlacklistCustomSource}
+                    onChange={(e) => setNewBlacklistCustomSource(e.target.value)}
+                    onKeyPress={(e) => {
+                      if (e.key === 'Enter') {
+                        e.preventDefault();
+                        addCustomSource('blacklist');
+                      }
+                    }}
+                    disabled={readOnly}
+                  />
+                  <Button
+                    onClick={() => addCustomSource('blacklist')}
+                    disabled={readOnly || !newBlacklistCustomSource.trim()}
+                    size="sm"
+                  >
+                    <Plus className="w-4 h-4" />
+                  </Button>
+                </div>
+              </div>
+              <div>
+                <Label>Notes (Optional)</Label>
+                <Textarea
+                  placeholder="Add notes about why these sources are blacklisted..."
+                  value={blacklistNotes}
+                  onChange={(e) => setBlacklistNotes(e.target.value)}
+                  rows={3}
+                  disabled={readOnly}
+                />
+              </div>
+              <Button
+                onClick={() => handleSaveFilter('blacklist')}
+                disabled={saving || (blacklistSources.length === 0 && blacklistCustomSources.length === 0)}
+                className="w-full"
+              >
+                {saving ? (
+                  <>
+                    <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+                    Saving...
+                  </>
+                ) : (
+                  <>
+                    <Save className="w-4 h-4 mr-2" />
+                    Save Blacklist
+                  </>
+                )}
+              </Button>
+              {(blacklistSources.length > 0 || blacklistCustomSources.length > 0) && (
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    setBlacklistSources([]);
+                    setBlacklistCustomSources([]);
+                  }}
+                  disabled={saving}
+                  className="w-full text-red-600 hover:text-red-700"
+                >
+                  <X className="w-4 h-4 mr-2" />
+                  Remove All Sources
+                </Button>
+              )}
             </div>
           )}
         </CardContent>
