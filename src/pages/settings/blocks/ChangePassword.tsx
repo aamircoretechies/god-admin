@@ -65,7 +65,7 @@ const ChangePassword = () => {
 
     try {
       // Use the API_URL utility to construct the correct endpoint
-      const apiUrl = `https://api.growondaily.com/auth/change-password`;
+      const apiUrl = `https://api.growondaily.com/api/auth/change-password`;
 
       const response = await axios.put(
         apiUrl,
