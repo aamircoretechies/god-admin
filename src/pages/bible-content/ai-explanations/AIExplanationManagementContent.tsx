@@ -1101,8 +1101,8 @@ const AIExplanationManagementContent = () => {
 
               {/* Verse Text Section */}
               <div className="space-y-2 pt-2 border-t border-gray-200">
-                <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Verse Text</label>
-                <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                <label className="text-xs font-medium text-gray-500 uppercase tracking-wide dark:text-white">Verse Text</label>
+                <div className="bg-gray-50 rounded-lg p-4 border border-gray-200 dark:bg-card">
                   {loadingVerseText ? (
                     <div className="flex items-center gap-2 text-sm text-gray-500">
                       <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-gray-500"></div>
@@ -1118,10 +1118,10 @@ const AIExplanationManagementContent = () => {
 
               {/* Explanation Section */}
               <div className="space-y-2 pt-2 border-t border-gray-200">
-                <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Explanation</label>
-                <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                <label className="text-xs font-medium text-gray-500 uppercase tracking-wide dark:text-white">Explanation</label>
+                <div className="bg-gray-50 rounded-lg p-4 border border-gray-200 dark:bg-card">
                   <div
-                    className="text-sm text-gray-700 leading-relaxed prose prose-sm max-w-none prose-headings:font-semibold prose-p:mb-4 prose-strong:font-semibold prose-code:bg-gray-200 prose-code:px-1 prose-code:rounded prose-pre:bg-gray-100 prose-pre:p-4 prose-pre:rounded prose-ul:list-disc prose-ol:list-decimal prose-li:ml-4"
+                    className="text-sm text-gray-700 dark:bg-card dark:text-white leading-relaxed prose prose-sm max-w-none prose-headings:font-semibold prose-p:mb-4 prose-strong:font-semibold prose-code:bg-gray-200 prose-code:px-1 prose-code:rounded prose-pre:bg-gray-100 prose-pre:p-4 prose-pre:rounded prose-ul:list-disc prose-ol:list-decimal prose-li:ml-4"
                     dangerouslySetInnerHTML={{ __html: markdownToHtml(selectedExplanation.explanation) || 'No content available' }}
                   />
                 </div>

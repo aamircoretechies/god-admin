@@ -10,6 +10,7 @@ import { Label } from '@/components/ui/label';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { BookOpen, Calendar, Edit, Trash2, Loader2, RotateCcw, AlertCircle } from 'lucide-react';
 import { toast } from 'sonner';
+import { DeleteUserModal } from '../../pages/network/user-table/user-detail/blocks/DeleteUserModal';
 // Only 4 experience levels matching user side (no Advanced Student or Scholar)
 const CHAPTER_EXPERIENCE_LEVELS = [
   'NEW_TO_BIBLE',
@@ -43,12 +44,12 @@ const mapExperienceLevel = (level: string | undefined): string => {
 // Convert markdown to HTML for proper display (like user side)
 const markdownToHtml = (content: string | null | undefined): string => {
   if (!content) return '';
-  
+
   let html = content;
-  
+
   // First, clean up any existing HTML tags that shouldn't be there
   html = html.replace(/<\/?p>/g, '\n');
-  
+
   // Decode HTML entities first
   html = html.replace(/&nbsp;/g, ' ');
   html = html.replace(/&amp;/g, '&');
@@ -56,7 +57,7 @@ const markdownToHtml = (content: string | null | undefined): string => {
   html = html.replace(/&gt;/g, '>');
   html = html.replace(/&quot;/g, '"');
   html = html.replace(/&#39;/g, "'");
-  
+
   // Convert markdown headings to HTML
   html = html.replace(/^######\s+(.*)$/gm, '<h6>$1</h6>');
   html = html.replace(/^#####\s+(.*)$/gm, '<h5>$1</h5>');
@@ -64,43 +65,43 @@ const markdownToHtml = (content: string | null | undefined): string => {
   html = html.replace(/^###\s+(.*)$/gm, '<h3>$1</h3>');
   html = html.replace(/^##\s+(.*)$/gm, '<h2>$1</h2>');
   html = html.replace(/^#\s+(.*)$/gm, '<h1>$1</h1>');
-  
+
   // Convert markdown bold (**text** or __text__) - do this first
   html = html.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
   html = html.replace(/__(.*?)__/g, '<strong>$1</strong>');
-  
+
   // Convert markdown italic (*text* or _text_) - do this after bold
   // Since bold is already converted, remaining single asterisks/underscores are italic
   html = html.replace(/\*([^*\n]+?)\*/g, '<em>$1</em>');
   html = html.replace(/_([^_\n]+?)_/g, '<em>$1</em>');
-  
+
   // Convert markdown links [text](url)
   html = html.replace(/\[([^\]]+)\]\(([^\)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer">$1</a>');
-  
+
   // Convert markdown code blocks (```code```)
   html = html.replace(/```([\s\S]*?)```/g, '<pre><code>$1</code></pre>');
   html = html.replace(/`([^`\n]+)`/g, '<code>$1</code>');
-  
+
   // Convert markdown horizontal rules
   html = html.replace(/^[-*]{3,}$/gm, '<hr />');
-  
+
   // Convert line breaks first (split by double newlines for paragraphs)
   const paragraphs = html.split(/\n\s*\n/);
   html = paragraphs.map(para => {
     para = para.trim();
     if (!para) return '';
-    
+
     // Check if it's a heading (already converted)
     if (para.match(/^<h[1-6]>/)) {
       return para;
     }
-    
+
     // Check if it's a list
     const listItems = para.split('\n').filter(line => {
       const trimmed = line.trim();
       return trimmed.match(/^[-*+]\s+/) || trimmed.match(/^\d+\.\s+/);
     });
-    
+
     if (listItems.length > 0) {
       // It's a list
       const isOrdered = listItems[0].trim().match(/^\d+\./);
@@ -111,15 +112,15 @@ const markdownToHtml = (content: string | null | undefined): string => {
       }).join('\n');
       return `<${tag}>${items}</${tag}>`;
     }
-    
+
     // Regular paragraph - convert single newlines to <br />
     para = para.replace(/\n/g, '<br />');
     return `<p>${para}</p>`;
   }).filter(p => p).join('\n');
-  
+
   // Clean up multiple spaces
   html = html.replace(/[ \t]{2,}/g, ' ');
-  
+
   return html;
 };
 
@@ -169,6 +170,7 @@ const ChapterDetailModal: React.FC<ChapterDetailModalProps> = ({ isOpen, onClose
   const [saving, setSaving] = useState(false);
   const [regenerating, setRegenerating] = useState(false);
   const [currentExplanation, setCurrentExplanation] = useState<any | null>(null);
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
 
   // Load chapter explanation history
   const loadChapterExplanationHistory = useCallback(async () => {
@@ -180,12 +182,12 @@ const ChapterDetailModal: React.FC<ChapterDetailModalProps> = ({ isOpen, onClose
       const response = await fetchChapterAIExplanationHistory(chapter.chapterId);
       if (response.status === 1 && response.data) {
         setChapterExplanationHistory(response.data);
-        
+
         // Find the specific explanation for the current tab and experience level
         // Only show explanations for the 4 allowed experience levels
         const experienceLevel = chapter.experienceLevel || 'NEW_TO_BIBLE';
         const allowedLevels = new Set(CHAPTER_EXPERIENCE_LEVELS);
-        
+
         // Match by label first (preferred), then fallback to type mapping
         const explanation = response.data.explanations.find(
           (exp: any) => {
@@ -194,28 +196,28 @@ const ChapterDetailModal: React.FC<ChapterDetailModalProps> = ({ isOpen, onClose
             const matchesLabel = expLabel === chapter.tabName;
             const matchesExperienceLevel = expLevel === experienceLevel;
             const isAllowedLevel = allowedLevels.has(expLevel);
-            
+
             // Only match if it's an allowed experience level
             if (!isAllowedLevel) {
               return false;
             }
-            
+
             // First try to match by label (most accurate)
             if (matchesLabel && matchesExperienceLevel) {
               return true;
             }
-            
+
             // Fallback: match by explanation type if label doesn't match
             if (!matchesLabel && matchesExperienceLevel) {
               const explanationType = mapTabLabelToExplanationType(chapter.tabName);
               const expType = exp.explanation_type || exp.context_type || exp.field_name;
               return expType === explanationType;
             }
-            
+
             return false;
           }
         );
-        
+
         setCurrentExplanation(explanation || null);
       } else {
         setHistoryError(response.message || 'Failed to load chapter explanation history');
@@ -250,7 +252,7 @@ const ChapterDetailModal: React.FC<ChapterDetailModalProps> = ({ isOpen, onClose
       // If no explanation exists, create a new one with default values
       const experienceLevel = chapter.experienceLevel || 'NEW_TO_BIBLE';
       const explanationType = mapTabLabelToExplanationType(chapter.tabName);
-      
+
       setEditFormData({
         explanation_type: explanationType,
         experience_level: experienceLevel,
@@ -343,27 +345,28 @@ const ChapterDetailModal: React.FC<ChapterDetailModalProps> = ({ isOpen, onClose
     }
   };
 
-  const handleDelete = async () => {
+  const handleDelete = () => {
     if (!currentExplanation || !chapter?.chapterId) {
       toast.error('No explanation to delete');
       return;
     }
+    setIsDeleteConfirmOpen(true);
+  };
 
-    // Confirm deletion
-    if (!window.confirm('Are you sure you want to delete this chapter explanation? This action cannot be undone.')) {
-      return;
-    }
+  const handleConfirmDelete = async () => {
+    if (!currentExplanation || !chapter?.chapterId) return;
 
     try {
       setIsDeleting(true);
-      
+
       const explanationType = currentExplanation.explanation_type || currentExplanation.context_type || currentExplanation.category || mapTabLabelToExplanationType(chapter.tabName);
       const experienceLevel = currentExplanation.experience_level || chapter.experienceLevel || 'NEW_TO_BIBLE';
-      
+
       const response = await deleteChapterAIExplanation(chapter.chapterId, explanationType, experienceLevel);
 
       if (response.status === 1) {
         toast.success('Chapter explanation deleted successfully');
+        setIsDeleteConfirmOpen(false);
         // Reload the explanation history
         await loadChapterExplanationHistory();
         // Notify parent component to refresh its data
@@ -519,7 +522,7 @@ const ChapterDetailModal: React.FC<ChapterDetailModalProps> = ({ isOpen, onClose
                   </div>
                 ) : (
                   <div className="bg-gray-50 dark:bg-gray-300 p-4 rounded-lg">
-                    <div 
+                    <div
                       className="text-gray-900 dark:bg-gray-300 dark:text-white leading-relaxed prose prose-sm max-w-none prose-headings:font-semibold prose-p:mb-4 prose-strong:font-semibold prose-code:bg-gray-200 prose-code:px-1 prose-code:rounded prose-pre:bg-gray-100 prose-pre:p-4 prose-pre:rounded prose-ul:list-disc prose-ol:list-decimal prose-li:ml-4"
                       dangerouslySetInnerHTML={{ __html: markdownToHtml(currentExplanation?.content) || 'No content available' }}
                     />
@@ -527,7 +530,7 @@ const ChapterDetailModal: React.FC<ChapterDetailModalProps> = ({ isOpen, onClose
                       <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
                         <p className="text-sm font-medium text-gray-700 dark:text-white mb-2">Sources:</p>
                         <p className="text-sm text-gray-600 dark:text-white">
-                          {Array.isArray(currentExplanation.sources) 
+                          {Array.isArray(currentExplanation.sources)
                             ? currentExplanation.sources.join(', ')
                             : currentExplanation.sources}
                         </p>
@@ -630,6 +633,20 @@ const ChapterDetailModal: React.FC<ChapterDetailModalProps> = ({ isOpen, onClose
           )}
         </DialogContent>
       </Dialog>
+
+      <DeleteUserModal
+        isOpen={isDeleteConfirmOpen}
+        onOpenChange={setIsDeleteConfirmOpen}
+        onConfirm={handleConfirmDelete}
+        isDeleting={isDeleting}
+        title="Delete AI Explanation"
+        description={
+          <>
+            Are you sure you want to delete this AI explanation for <strong>{chapter.book} Chapter {chapter.chapter} - {chapter.tabName}</strong>? This action <strong>cannot be undone</strong>.
+          </>
+        }
+        confirmButtonText="Delete Explanation"
+      />
     </Dialog>
   );
 };

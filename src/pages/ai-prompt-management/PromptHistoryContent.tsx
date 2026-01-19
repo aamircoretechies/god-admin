@@ -216,8 +216,8 @@ const PromptHistoryContent: React.FC = () => {
                     <CardTitle>Prompt Content</CardTitle>
                   </CardHeader>
                   <CardContent>
-                    <div className="bg-gray-50 p-4 rounded-lg">
-                      <pre className="text-sm font-mono whitespace-pre-wrap text-gray-800">
+                    <div className="bg-gray-300 p-4 rounded-lg">
+                      <pre className="text-sm font-mono whitespace-pre-wrap text-gray-800 ">
                         {selectedVersionData.content}
                       </pre>
                     </div>

@@ -30,6 +30,7 @@ import {
   type UpdateAIExplanationRequest
 } from '@/services/aiExplanationsApi';
 import { toast } from 'sonner';
+import { DeleteUserModal } from '../../pages/network/user-table/user-detail/blocks/DeleteUserModal';
 
 interface VerseDetailModalProps {
   isOpen: boolean;
@@ -171,6 +172,8 @@ const VerseDetailModal: React.FC<VerseDetailModalProps> = ({ isOpen, onClose, ve
   const [editFormData, setEditFormData] = useState<UpdateAIExplanationRequest | null>(null);
   const [saving, setSaving] = useState(false);
   const [regeneratingId, setRegeneratingId] = useState<string | null>(null);
+  const [isDeleteConfirmOpen, setIsDeleteConfirmOpen] = useState(false);
+  const [explanationToDelete, setExplanationToDelete] = useState<any | null>(null);
 
   const loadAIExplanationHistory = useCallback(async () => {
     if (!verse?.verseId) return;
@@ -253,24 +256,27 @@ const VerseDetailModal: React.FC<VerseDetailModalProps> = ({ isOpen, onClose, ve
     setEditFormData(null);
   };
 
-  const handleDeleteExplanation = async (explanation: any) => {
+  const handleDeleteExplanation = (explanation: any) => {
     if (!verse?.verseId) return;
+    setExplanationToDelete(explanation);
+    setIsDeleteConfirmOpen(true);
+  };
 
-    // Confirm deletion
-    if (!window.confirm('Are you sure you want to delete this explanation? This action cannot be undone.')) {
-      return;
-    }
+  const handleConfirmDelete = async () => {
+    if (!verse?.verseId || !explanationToDelete) return;
 
     try {
       // Get explanation_type and experience_level
-      const explanationType = explanation.explanation_type || explanation.context_type || explanation.category || 'general';
-      const experienceLevel = explanation.experience_level || 'NEW_TO_BIBLE';
+      const explanationType = explanationToDelete.explanation_type || explanationToDelete.context_type || explanationToDelete.category || 'general';
+      const experienceLevel = explanationToDelete.experience_level || 'NEW_TO_BIBLE';
 
-      setDeletingId(explanation.explanation_id);
+      setDeletingId(explanationToDelete.explanation_id);
       const response = await deleteAIExplanation(verse.verseId, explanationType, experienceLevel);
 
       if (response.status === 1) {
         toast.success('Explanation deleted successfully');
+        setIsDeleteConfirmOpen(false);
+        setExplanationToDelete(null);
         // Reload the explanation history
         await loadAIExplanationHistory();
         // Adjust page if current page becomes empty
@@ -681,6 +687,20 @@ const VerseDetailModal: React.FC<VerseDetailModalProps> = ({ isOpen, onClose, ve
           )}
         </DialogContent>
       </Dialog>
+
+      <DeleteUserModal
+        isOpen={isDeleteConfirmOpen}
+        onOpenChange={setIsDeleteConfirmOpen}
+        onConfirm={handleConfirmDelete}
+        isDeleting={!!deletingId}
+        title="Delete AI Explanation"
+        description={
+          <>
+            Are you sure you want to delete this AI explanation for <strong>{verse.book} {verse.chapter}:{verse.verse}</strong>? This action <strong>cannot be undone</strong>.
+          </>
+        }
+        confirmButtonText="Delete Explanation"
+      />
     </Dialog>
   );
 };
