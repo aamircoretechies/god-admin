@@ -40,6 +40,7 @@ import {
 } from '@/services/rolesApi';
 import { usePermission, checkUserPermission } from '@/utils/permissions';
 import { useAuthContext } from '@/auth';
+import { DeleteUserModal } from '../../network/user-table/user-detail/blocks/DeleteUserModal';
 
 interface RoleFormData {
   name: string;
@@ -64,6 +65,11 @@ const RolesManagement: React.FC = () => {
     description: ''
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  // Delete Modal State
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [roleToDelete, setRoleToDelete] = useState<Role | null>(null);
+  const [isDeletingRole, setIsDeletingRole] = useState(false);
 
   const loadRoles = async () => {
     try {
@@ -161,7 +167,7 @@ const RolesManagement: React.FC = () => {
     }
   };
 
-  const handleDeleteRole = async (role: Role) => {
+  const handleDeleteRole = (role: Role) => {
     if (role.isDefault) {
       toast.error('Cannot delete default roles');
       return;
@@ -172,14 +178,20 @@ const RolesManagement: React.FC = () => {
       return;
     }
 
-    if (!window.confirm(`Are you sure you want to delete the role "${role.name}"? This action cannot be undone.`)) {
-      return;
-    }
+    setRoleToDelete(role);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!roleToDelete) return;
 
     try {
-      const response = await deleteRole(role.id);
+      setIsDeletingRole(true);
+      const response = await deleteRole(roleToDelete.id);
       if (response.status === 1) {
         toast.success('Role deleted successfully');
+        setIsDeleteModalOpen(false);
+        setRoleToDelete(null);
         await loadRoles();
       } else {
         toast.error(response.message || 'Failed to delete role');
@@ -187,6 +199,8 @@ const RolesManagement: React.FC = () => {
     } catch (err: any) {
       console.error('Error deleting role:', err);
       toast.error(err?.response?.data?.message || err?.message || 'Failed to delete role');
+    } finally {
+      setIsDeletingRole(false);
     }
   };
 
@@ -211,8 +225,8 @@ const RolesManagement: React.FC = () => {
           </CardTitle>
           <Dialog open={isCreateDialogOpen} onOpenChange={setIsCreateDialogOpen}>
             <DialogTrigger asChild>
-              <Button 
-                size="sm" 
+              <Button
+                size="sm"
                 className="btn btn-sm btn-primary"
                 disabled={!canCreate}
                 title={!canCreate ? 'You do not have permission to create roles' : ''}
@@ -221,16 +235,19 @@ const RolesManagement: React.FC = () => {
                 Create Role
               </Button>
             </DialogTrigger>
-            <DialogContent className="sm:max-w-md">
-              <DialogHeader>
-                <DialogTitle>Create New Role</DialogTitle>
-                <DialogDescription>
-                  Create a new role with custom permissions. You can assign permissions after creating the role.
-                </DialogDescription>
+            <DialogContent className="sm:max-w-lg p-0 overflow-hidden border-0 shadow-2xl">
+              <DialogHeader className="px-8 py-6 border-b border-gray-100 bg-white dark:bg-card">
+                <div className="flex flex-col gap-1">
+                  <DialogTitle className="text-xl font-bold text-gray-900 dark:text-sand tracking-tight">Create New Role</DialogTitle>
+                  <DialogDescription className="text-sm text-gray-500 dark:text-white font-medium leading-relaxed">
+                    Create a new role with custom permissions. You can assign permissions after creating the role.
+                  </DialogDescription>
+                </div>
               </DialogHeader>
-              <div className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="role-name">Role Name *</Label>
+
+              <div className="px-8 py-8 space-y-6">
+                <div className="space-y-2.5 dark:bg-card">
+                  <Label htmlFor="role-name" className="text-sm font-semibold text-gray-800 dark:text-white">Role Name *</Label>
                   <Input
                     id="role-name"
                     type="text"
@@ -238,26 +255,40 @@ const RolesManagement: React.FC = () => {
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     required
+                    className="h-11 bg-gray-50 dark:bg-gray-300 border-gray-200 dark:border-gray-700 focus:bg-white focus:ring-2 focus:ring-primary/10 transition-all rounded-lg"
                   />
                 </div>
-                <div className="space-y-2">
-                  <Label htmlFor="role-description">Description</Label>
+                <div className="space-y-2.5">
+                  <Label htmlFor="role-description" className="text-sm font-semibold text-gray-800 dark:text-white">Description</Label>
                   <Textarea
                     id="role-description"
                     placeholder="Describe the role's purpose and responsibilities"
                     value={formData.description}
                     onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                    rows={3}
+                    rows={4}
+                    className="bg-gray-50 dark:bg-gray-300 border-gray-200 dark:border-gray-700 focus:bg-white focus:ring-2 focus:ring-primary/10 transition-all rounded-lg resize-none"
                   />
                 </div>
-                <div className="flex justify-end space-x-2 pt-4">
-                  <Button type="button" variant="outline" onClick={handleCloseCreateDialog} disabled={isSubmitting}>
-                    Cancel
-                  </Button>
-                  <Button type="button" onClick={handleCreateRole} disabled={isSubmitting}>
-                    {isSubmitting ? 'Creating...' : 'Create Role'}
-                  </Button>
-                </div>
+              </div>
+
+              <div className="px-8 py-6 bg-gray-50/50 dark:bg-card border-t border-gray-100 dark:border-gray-800 flex justify-end gap-3.5">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleCloseCreateDialog}
+                  disabled={isSubmitting}
+                  className="min-w-[100px] h-11 font-semibold rounded-lg hover:bg-white dark:hover:bg-gray-800  dark:hover:text-black transition-all shadow-sm active:scale-[0.98]"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="button"
+                  onClick={handleCreateRole}
+                  disabled={isSubmitting}
+                  className="bg-[#1b2529] hover:bg-[#1b2529]/90 dark:hover:bg-sand text-white min-w-[140px] h-11 font-bold rounded-lg shadow-[0_4px_14px_rgba(0,0,0,0.1)] transition-all active:scale-[0.98]"
+                >
+                  {isSubmitting ? 'Creating...' : 'Create Role'}
+                </Button>
               </div>
             </DialogContent>
           </Dialog>
@@ -317,7 +348,7 @@ const RolesManagement: React.FC = () => {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem 
+                    <DropdownMenuItem
                       onClick={() => handleEditRole(role)}
                       disabled={!canEdit}
                       title={!canEdit ? 'You do not have permission to edit roles' : ''}
@@ -344,57 +375,76 @@ const RolesManagement: React.FC = () => {
 
       {/* Edit Role Dialog */}
       <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-      <DialogContent className="sm:max-w-lg">
-        <DialogHeader className="space-y-3 pb-4">
-          <DialogTitle className="text-xl font-semibold">Edit Role</DialogTitle>
-          <DialogDescription className="text-sm text-gray-600">
-            Update the role name and description. To manage permissions, use the Permissions Management section.
-          </DialogDescription>
-        </DialogHeader>
-        <div className="space-y-5">
-          <div className="space-y-2">
-            <Label htmlFor="edit-role-name" className="text-sm font-medium">Role Name *</Label>
-            <Input
-              id="edit-role-name"
-              type="text"
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              required
-              className="w-full"
-            />
+        <DialogContent className="sm:max-w-lg p-0 overflow-hidden border-0 shadow-2xl">
+          <DialogHeader className="px-8 py-6 border-b border-gray-100 bg-white dark:bg-card">
+            <div className="flex flex-col gap-1">
+              <DialogTitle className="text-xl font-bold text-gray-900 dark:text-sand tracking-tight">Edit Role</DialogTitle>
+              <DialogDescription className="text-sm text-gray-500 dark:text-white font-medium leading-relaxed">
+                Update the role name and description. To manage permissions, use the Permissions Management section.
+              </DialogDescription>
+            </div>
+          </DialogHeader>
+
+          <div className="px-8 py-8 space-y-6">
+            <div className="space-y-2.5">
+              <Label htmlFor="edit-role-name" className="text-sm font-semibold text-gray-800 dark:text-white">Role Name *</Label>
+              <Input
+                id="edit-role-name"
+                type="text"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                required
+                className="h-11 bg-gray-50 dark:bg-gray-300 border-gray-200 dark:border-gray-700 focus:bg-white focus:ring-2 focus:ring-primary/10 transition-all rounded-lg"
+              />
+            </div>
+            <div className="space-y-2.5">
+              <Label htmlFor="edit-role-description" className="text-sm font-semibold text-gray-800 dark:text-white">Description</Label>
+              <Textarea
+                id="edit-role-description"
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                rows={4}
+                className="bg-gray-50 dark:bg-gray-300 border-gray-200 dark:border-gray-700 focus:bg-white focus:ring-2 focus:ring-primary/10 transition-all rounded-lg resize-none"
+              />
+            </div>
           </div>
-          <div className="space-y-2">
-            <Label htmlFor="edit-role-description" className="text-sm font-medium">Description</Label>
-            <Textarea
-              id="edit-role-description"
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              rows={3}
-              className="w-full"
-            />
-          </div>
-          <div className="flex justify-end gap-3 pt-4 border-t">
-            <Button 
-              type="button" 
-              variant="outline" 
-              onClick={handleCloseEditDialog} 
+
+          <div className="px-8 py-6 bg-card dark:bg-gray-800/30 border-t border-gray-100 dark:border-gray-800 flex justify-end gap-3.5">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={handleCloseEditDialog}
               disabled={isSubmitting}
-              className="min-w-[80px]"
+              className="min-w-[100px] h-11 font-semibold rounded-lg hover:bg-white dark:hover:bg-gray-800 dark:hover:text-black transition-all shadow-sm active:scale-[0.98]"
             >
               Cancel
             </Button>
-            <Button 
-              type="button" 
-              onClick={handleUpdateRole} 
+            <Button
+              type="button"
+              onClick={handleUpdateRole}
               disabled={isSubmitting}
-              className="min-w-[120px]"
+              className="bg-[#1b2529] hover:bg-[#1b2529]/90 dark:hover:bg-sand text-white min-w-[140px] h-11 font-bold rounded-lg shadow-[0_4px_14px_rgba(0,0,0,0.1)] transition-all active:scale-[0.98]"
             >
               {isSubmitting ? 'Saving...' : 'Save Changes'}
             </Button>
           </div>
-        </div>
-      </DialogContent>
+        </DialogContent>
       </Dialog>
+
+      {/* Delete Role Confirmation */}
+      <DeleteUserModal
+        isOpen={isDeleteModalOpen}
+        onOpenChange={setIsDeleteModalOpen}
+        onConfirm={handleConfirmDelete}
+        isDeleting={isDeletingRole}
+        title="Delete Role"
+        description={
+          <>
+            Are you sure you want to delete the role <strong>"{roleToDelete?.name}"</strong>? This action <strong>cannot be undone</strong> and will permanently remove this role from the system.
+          </>
+        }
+        confirmButtonText="Delete Role"
+      />
     </Card>
   );
 };
