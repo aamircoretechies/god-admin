@@ -343,6 +343,7 @@ const AIFlagReviewContent = () => {
                     <Button
                       variant="outline"
                       size="sm"
+                      disabled={true}
                       onClick={() => handleApprove(flag.id)}
                       className="text-green-600 hover:text-green-700"
                     >
@@ -352,6 +353,7 @@ const AIFlagReviewContent = () => {
                     <Button
                       variant="outline"
                       size="sm"
+                      disabled={true}
                       onClick={() => handleReject(flag.id)}
                       className="text-red-600 hover:text-red-700"
                     >

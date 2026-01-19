@@ -415,7 +415,7 @@ const PromptSourceFilters: React.FC<PromptSourceFiltersProps> = ({
               </div>
 
               <div>
-                <Label>Notes (Optional)</Label>
+                <Label className="block mb-3">Notes (Optional)</Label>
                 <Textarea
                   placeholder="Add notes about why these sources are whitelisted..."
                   value={whitelistNotes}
@@ -645,7 +645,7 @@ const PromptSourceFilters: React.FC<PromptSourceFiltersProps> = ({
               </div>
 
               <div>
-                <Label>Notes (Optional)</Label>
+                <Label  className="block mb-3">Notes (Optional)</Label>
                 <Textarea
                   placeholder="Add notes about why these sources are blacklisted..."
                   value={blacklistNotes}

@@ -15,6 +15,7 @@ import { deleteTeamMember } from '@/services/usersApi';
 import { fetchTeamMembers, type TeamMember } from '@/services/dashboardApi';
 import { toast } from 'sonner';
 import { usePermission } from '@/utils/permissions';
+import { DeleteUserModal } from '@/pages/network/user-table/user-detail/blocks/DeleteUserModal';
 
 interface Member {
   id: string;
@@ -58,6 +59,11 @@ const UserManagementMembers = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Modal State
+  const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
+  const [memberToDelete, setMemberToDelete] = useState<string | null>(null);
+  const [isDeletingMember, setIsDeletingMember] = useState(false);
+
   useEffect(() => {
     const loadTeamMembers = async () => {
       try {
@@ -97,13 +103,20 @@ const UserManagementMembers = () => {
     loadTeamMembers();
   }, []);
 
-  const handleDeleteMember = async (memberId: string) => {
-    if (!window.confirm('Are you sure you want to remove this team member?')) {
-      return;
-    }
+  const handleDeleteMember = (memberId: string) => {
+    // if (!window.confirm('Are you sure you want to remove this team member?')) {
+    //   return;
+    // }
+    setMemberToDelete(memberId);
+    setIsDeleteModalOpen(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!memberToDelete) return;
 
     try {
-      const response = await deleteTeamMember(memberId);
+      setIsDeletingMember(true);
+      const response = await deleteTeamMember(memberToDelete);
       if (response.status === 1) {
         toast.success('Team member removed successfully');
         // Reload members
@@ -138,6 +151,10 @@ const UserManagementMembers = () => {
       } else {
         toast.error(errorMessage);
       }
+    } finally {
+      setIsDeletingMember(false);
+      setIsDeleteModalOpen(false);
+      setMemberToDelete(null);
     }
   };
 
@@ -288,10 +305,10 @@ const UserManagementMembers = () => {
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
-                    <DropdownMenuItem>
+                    {/* <DropdownMenuItem>
                       <Edit className="w-4 h-4 mr-2" />
                       Edit Member
-                    </DropdownMenuItem>
+                    </DropdownMenuItem> */}
                     <DropdownMenuItem
                       className="text-red-600"
                       onClick={() => handleDeleteMember(member.id)}
@@ -308,6 +325,20 @@ const UserManagementMembers = () => {
           )}
         </div>
       </CardContent>
+
+      <DeleteUserModal
+        isOpen={isDeleteModalOpen}
+        onOpenChange={setIsDeleteModalOpen}
+        onConfirm={handleConfirmDelete}
+        isDeleting={isDeletingMember}
+        title="Remove Team Member"
+        description={
+          <>
+            Are you sure you want to remove this team member? This action <strong>cannot be undone</strong> and will remove their access to the admin dashboard.
+          </>
+        }
+        confirmButtonText="Remove Member"
+      />
     </Card>
   );
 };

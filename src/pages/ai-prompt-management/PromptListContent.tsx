@@ -391,6 +391,9 @@ const PromptListContent: React.FC = () => {
         accessorFn: (row: AIPrompt) => row.status,
         id: 'status',
         // header: ({ column }) => <DataGridColumnHeader title="Status" column={column} />,
+        header: () => (
+          <span className="text-sm font-medium select-none cursor-default">Status</span>
+        ),
         enableSorting: true,
         cell: ({ row }) => getStatusBadge(row.original.status),
         meta: {
@@ -402,6 +405,9 @@ const PromptListContent: React.FC = () => {
         accessorFn: (row: AIPrompt) => row.language,
         id: 'language',
         // header: ({ column }) => <DataGridColumnHeader title="Language" column={column} />,
+        header: () => (
+          <span className="text-sm font-medium select-none cursor-default">Language</span>
+        ),
         enableSorting: true,
         cell: ({ row }) => (
           <Badge variant="outline" className="text-xs">
@@ -417,6 +423,9 @@ const PromptListContent: React.FC = () => {
         accessorFn: (row: AIPrompt) => row.updatedAt,
         id: 'updatedAt',
         // header: ({ column }) => <DataGridColumnHeader title="Last Updated" column={column} />,
+        header: () => (
+          <span className="text-sm font-medium select-none cursor-default">Update At</span>
+        ),
         enableSorting: true,
         cell: ({ row }) => (
           <div className="text-sm">

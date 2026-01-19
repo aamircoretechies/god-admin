@@ -319,26 +319,35 @@ const NoteDetailContent: React.FC = () => {
           }
 
           // Fetch linked verses for today's reflection and display exactly as returned
-          try {
-            const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
-            const linkedResponse = await fetchLinkedVerses(timezone);
+          // try {
+          //   const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC';
+          //   const linkedResponse = await fetchLinkedVerses(timezone);
 
-            if (
-              linkedResponse.status === 1 &&
-              linkedResponse.data &&
-              Array.isArray(linkedResponse.data.linked_verses)
-            ) {
-              setNote((prev) => ({
-                ...prev,
-                linkedVerses: linkedResponse.data.linked_verses
-              }));
-              setLinkedVersesMessage(
-                linkedResponse.data.message || 'No linked verses found for this reflection'
-              );
-            }
-          } catch {
-            // If linked verses API fails, keep existing linkedVerses
-          }
+          //   if (
+          //     linkedResponse.status === 1 &&
+          //     linkedResponse.data &&
+          //     Array.isArray(linkedResponse.data.linked_verses)
+          //   ) {
+          //     setNote((prev) => ({
+          //       ...prev,
+          //       linkedVerses: linkedResponse.data.linked_verses
+          //     }));
+          //     setLinkedVersesMessage(
+          //       linkedResponse.data.message || 'No linked verses found for this reflection'
+          //     );
+          //   }
+          // } catch {
+
+          // }
+          const parsedLinkedVerses = parseVerseId(
+            typeof apiNote.verse_id === 'string' ? apiNote.verse_id : null
+          );
+
+          setNote((prev) => ({
+            ...prev,
+            linkedVerses: parsedLinkedVerses
+          }));
+
         } else {
           toast.error('Failed to load note details');
         }

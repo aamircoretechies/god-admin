@@ -112,7 +112,7 @@ const BibleBooksChaptersContent = () => {
             bookOrder: book.book_order
           }));
           setBooks(transformedBooks);
-          
+
           // Update pagination metadata
           if (response.pagination) {
             setTotalPages(response.pagination.totalPages || 1);

@@ -20,11 +20,11 @@ import { fetchActivityAnalytics, type ActivityAnalyticsResponse } from '@/servic
 // Simple chart components (placeholder for actual chart library)
 const SimpleBarChart = ({ data, title }: { data: any[]; title: string }) => (
   <div className="space-y-2">
-    <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">{title}</h4>
+    <h4 className="text-sm font-medium text-gray-700 dark:text-white">{title}</h4>
     <div className="space-y-1">
       {data.map((item, index) => (
         <div key={index} className="flex items-center gap-2">
-          <div className="w-20 text-xs text-gray-500 dark:text-gray-400">
+          <div className="w-20 text-xs text-gray-500 dark:text-white">
             {item.label || ''}
           </div>
           <div className="flex-1 bg-gray-200 dark:bg-gray-700 rounded-full h-2">
@@ -33,7 +33,7 @@ const SimpleBarChart = ({ data, title }: { data: any[]; title: string }) => (
               style={{ width: `${item.percentage}%` }}
             ></div>
           </div>
-          <div className="w-12 text-xs font-medium text-gray-900 dark:text-gray-100 text-right">
+          <div className="w-12 text-xs font-medium text-gray-900 dark:text-white text-right">
             {item.value}
           </div>
         </div>
@@ -48,7 +48,7 @@ const SimpleLineChart = ({ data, title }: { data: any[]; title: string }) => {
 
   return (
     <div className="space-y-2">
-      <h4 className="text-sm font-medium text-gray-700 dark:text-gray-300">{title}</h4>
+      <h4 className="text-sm font-medium text-gray-700 dark:text-white">{title}</h4>
       <div className="h-32 flex items-end gap-1 pt-6">
         {data.map((item, index) => (
           <div
@@ -67,7 +67,7 @@ const SimpleLineChart = ({ data, title }: { data: any[]; title: string }) => {
           <span key={index}>{item.label}</span>
         ))}
       </div> */}
-      <div className="flex text-xs text-gray-500 dark:text-gray-400">
+      <div className="flex text-xs text-gray-500 dark:text-white">
         {data.map((item, index) => (
           <div key={index} className="flex-1 text-center">
             {item.label}

@@ -386,8 +386,13 @@ const NotesOverviewContent: React.FC = () => {
       },
       {
         accessorFn: (row: Note) => row.linkedVerses,
-        id: 'linkedVerses',
+        id: 'inkedVerses',
         // header: ({ column }) => <DataGridColumnHeader title="Linked Verses" column={column} />,
+         header: () => (
+          <span className="text-sm font-medium select-none cursor-default">
+            Linked Verses
+          </span>
+        ),
         enableSorting: true,
         cell: ({ row }) => (
           <div className="flex flex-wrap gap-1">
@@ -411,6 +416,11 @@ const NotesOverviewContent: React.FC = () => {
         accessorFn: (row: Note) => row.tags,
         id: 'tags',
         // header: ({ column }) => <DataGridColumnHeader title="Tags" column={column} />,
+         header: () => (
+          <span className="text-sm font-medium select-none cursor-default">
+            Tags
+          </span>
+        ),
         enableSorting: true,
         cell: ({ row }) => (
           <div className="flex flex-wrap gap-1">
@@ -438,6 +448,11 @@ const NotesOverviewContent: React.FC = () => {
         accessorFn: (row: Note) => row.status,
         id: 'status',
         // header: ({ column }) => <DataGridColumnHeader title="Status" column={column} />,
+         header: () => (
+          <span className="text-sm font-medium select-none cursor-default">
+            Status
+          </span>
+        ),
         enableSorting: true,
         cell: ({ row }) => getStatusBadge(row.original.status),
         meta: {
@@ -449,6 +464,11 @@ const NotesOverviewContent: React.FC = () => {
         accessorFn: (row: Note) => row.createdAt,
         id: 'createdAt',
         // header: ({ column }) => <DataGridColumnHeader title="Created" column={column} />,
+         header: () => (
+          <span className="text-sm font-medium select-none cursor-default">
+           CreatedAt
+          </span>
+        ),
         enableSorting: true,
         cell: ({ row }) => (
           <div className="text-sm">
@@ -624,7 +644,7 @@ const NotesOverviewContent: React.FC = () => {
             onChange={(e) => setStatusFilter(e.target.value)}
             className="px-3 py-2 border border-gray-300 rounded-md text-sm dark:bg-card dark:text-white"
           > */}
-          <select
+          {/* <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
             className="px-3 py-2 border border-gray-300 rounded-md text-sm dark:bg-card dark:text-white w-full md:w-auto"
@@ -632,8 +652,8 @@ const NotesOverviewContent: React.FC = () => {
             <option value="all">All Status</option>
             <option value="active">Active</option>
             <option value="flagged">Flagged</option>
-            {/* <option value="deleted">Deleted</option> */}
-          </select>
+            <option value="deleted">Deleted</option>
+          </select> */}
           {/* <select
             value={userFilter}
             onChange={(e) => setUserFilter(e.target.value)}
@@ -679,7 +699,7 @@ const NotesOverviewContent: React.FC = () => {
               </>
             ) : (
               <>
-                Showing <b>{totalCount}</b> total notes
+                Showing <b>{totalCount}</b> Total Notes
               </>
             )}
           </span>

@@ -185,14 +185,23 @@ const AddMemberForm = () => {
         // Using a custom event that the Members component can listen to
         window.dispatchEvent(new CustomEvent('teamMemberAdded'));
       } else {
-        throw new Error(response.message || 'Failed to create team member');
+        // Extract validation error from successful response but status 0 if applicable
+        const validationError = (response as any).data?.errors?.[0]?.message;
+        throw new Error(validationError || response.message || 'Failed to create team member');
       }
     } catch (error: any) {
       console.error('Error adding member:', error);
+
+      // Extract specific validation message from API response
+      const responseData = error?.response?.data;
+      const validationError = responseData?.data?.errors?.[0]?.message;
+
       const errorMessage =
-        error?.response?.data?.message ||
+        validationError ||
+        responseData?.message ||
         error?.message ||
         'Error adding member. Please try again.';
+
       toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);

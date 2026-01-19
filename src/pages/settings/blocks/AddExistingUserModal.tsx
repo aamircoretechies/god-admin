@@ -208,7 +208,7 @@ const AddExistingUserModal: React.FC<AddExistingUserModalProps> = ({ trigger, on
       <DialogTrigger asChild>{trigger || defaultTrigger}</DialogTrigger>
 
       <DialogContent className="sm:max-w-lg p-0 overflow-hidden border-0 shadow-2xl">
-        <DialogHeader className="px-8 py-6 border-b border-gray-100 bg-white">
+        <DialogHeader className="px-8 py-6 border-b border-gray-100 bg-white dark:bg-card">
           <div className="flex items-center gap-4">
             <div className="w-12 h-12 rounded-2xl bg-primary/10 flex items-center justify-center text-primary shadow-sm border border-primary/5">
               <KeenIcon icon="user-tick" className="text-2xl" />
@@ -250,7 +250,7 @@ const AddExistingUserModal: React.FC<AddExistingUserModalProps> = ({ trigger, on
                       }
                     }}
                     required
-                    className="w-full pl-11 pr-10 h-11 bg-gray-50/50 border-gray-200 focus:bg-white focus:ring-2 focus:ring-primary/10 transition-all rounded-lg"
+                    className="w-full pl-11 pr-10 h-11 bg-gray-300 border-gray-200 focus:bg-card focus:ring-2 focus:ring-primary/10 transition-all rounded-lg"
                   />
                   {searching && (
                     <KeenIcon
@@ -303,7 +303,7 @@ const AddExistingUserModal: React.FC<AddExistingUserModalProps> = ({ trigger, on
                 onValueChange={setSelectedRole}
                 disabled={rolesLoading}
               >
-                <SelectTrigger id="existing-user-role" className="w-full h-11 bg-gray-50/50 border-gray-200 focus:bg-white focus:ring-2 focus:ring-primary/10 transition-all rounded-lg">
+                <SelectTrigger id="existing-user-role" className="w-full h-11 bg-gray-300 border-gray-200 focus:bg-card focus:ring-2 focus:ring-primary/10 transition-all rounded-lg">
                   <SelectValue placeholder="Select role" />
                 </SelectTrigger>
                 <SelectContent className="rounded-xl shadow-xl">
@@ -339,7 +339,7 @@ const AddExistingUserModal: React.FC<AddExistingUserModalProps> = ({ trigger, on
             </Alert>
           </div>
 
-          <div className="px-8 py-6 bg-gray-50/50 border-t border-gray-100 flex justify-end gap-3.5">
+          <div className="px-8 py-6 bg-gray-50/50 border-t border-gray-100 flex justify-end gap-3.5 dark:bg-card">
             <Button
               type="button"
               variant="outline"

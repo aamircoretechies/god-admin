@@ -621,7 +621,7 @@ const BibleContentDashboardContent = () => {
               <Button
                 className="w-full justify-start"
                 variant="outline"
-                onClick={() => navigate('/bible-content/moderation')}
+                onClick={() => navigate('/feedback/ai-flags')}
               >
                 <AlertCircle className="w-4 h-4 mr-2" />
                 View Flagged Content

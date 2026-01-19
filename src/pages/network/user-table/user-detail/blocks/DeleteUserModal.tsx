@@ -1,3 +1,4 @@
+import { ReactNode } from 'react';
 import { toAbsoluteUrl } from '@/utils';
 import {
     Dialog,
@@ -14,13 +15,19 @@ interface DeleteUserModalProps {
     onOpenChange: (open: boolean) => void;
     onConfirm: () => void;
     isDeleting: boolean;
+    title?: string;
+    description?: ReactNode;
+    confirmButtonText?: string;
 }
 
 const DeleteUserModal = ({
     isOpen,
     onOpenChange,
     onConfirm,
-    isDeleting
+    isDeleting,
+    title = "Confirm Deletion",
+    description,
+    confirmButtonText
 }: DeleteUserModalProps) => {
     return (
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
@@ -45,11 +52,15 @@ const DeleteUserModal = ({
                     </div>
 
                     <h3 className="text-lg font-medium text-gray-900 text-center mb-3">
-                        Confirm Deletion
+                        {title}
                     </h3>
 
                     <div className="text-2sm text-center text-gray-700 mb-7 px-10">
-                        Are you sure you want to delete this user? This action <strong>cannot be undone</strong> and will permanently delete all user data including activities, bookmarks, and preferences.
+                        {description || (
+                            <>
+                                Are you sure you want to delete this user? This action <strong>cannot be undone</strong> and will permanently delete all user data including activities, bookmarks, and preferences.
+                            </>
+                        )}
                     </div>
 
                     <div className="flex justify-center gap-2.5 w-full">
@@ -67,7 +78,7 @@ const DeleteUserModal = ({
                             disabled={isDeleting}
                             className="btn btn-danger min-w-[120px]"
                         >
-                            {isDeleting ? 'Deleting...' : 'Delete User'}
+                            {isDeleting ? 'Deleting...' : (confirmButtonText || 'Delete User')}
                         </Button>
                     </div>
                 </DialogBody>
