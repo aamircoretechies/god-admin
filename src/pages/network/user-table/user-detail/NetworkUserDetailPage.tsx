@@ -110,9 +110,10 @@ const NetworkUserDetailPage = () => {
               <div className="flex items-center gap-2">
                 <button
                   onClick={() => navigate(-1)}
-                  className="btn btn-sm btn-icon btn-light"
+                  className="btn btn-sm btn-light flex items-center gap-1"
                 >
                   <KeenIcon icon="black-left" />
+                  Back
                 </button>
                 <ToolbarPageTitle />
               </div>
