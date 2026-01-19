@@ -11,11 +11,11 @@ import { Alert } from '@/components';
 const loginSchema = Yup.object().shape({
   email: Yup.string()
     .email('Wrong email format')
-    .min(3, 'Minimum 3 symbols')
+    .min(8, 'Minimum 8 symbols')
     .max(50, 'Maximum 50 symbols')
     .required('Email is required'),
   password: Yup.string()
-    .min(3, 'Minimum 3 symbols')
+    .min(8, 'Password must be 8+ character with upper, lower, number & special character')
     .max(50, 'Maximum 50 symbols')
     .required('Password is required'),
   remember: Yup.boolean()

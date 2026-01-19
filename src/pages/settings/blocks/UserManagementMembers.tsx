@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Users, UserPlus, MoreVertical, Edit, Trash2, Mail, AlertCircle } from 'lucide-react';
+import { Users, UserPlus, MoreVertical, Edit, Trash2, Mail, AlertCircle, ChevronLeft, ChevronRight } from 'lucide-react';
 import { AddMemberModal } from './AddMemberModal';
 import { AddExistingUserModal } from './AddExistingUserModal';
 import {
@@ -63,6 +63,15 @@ const UserManagementMembers = () => {
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [memberToDelete, setMemberToDelete] = useState<string | null>(null);
   const [isDeletingMember, setIsDeletingMember] = useState(false);
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 5;
+
+  // Calculate pagination
+  const totalMembers = members.length;
+  const totalPages = Math.ceil(totalMembers / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedMembers = members.slice(startIndex, endIndex);
 
   useEffect(() => {
     const loadTeamMembers = async () => {
@@ -138,6 +147,7 @@ const UserManagementMembers = () => {
             };
           });
           setMembers(transformedMembers);
+          setCurrentPage(1);
         }
       } else {
         toast.error(response.message || 'Failed to remove team member');
@@ -248,6 +258,7 @@ const UserManagementMembers = () => {
                       };
                     });
                     setMembers(transformedMembers);
+                    setCurrentPage(1);
                   }
                 }}
               />
@@ -271,7 +282,7 @@ const UserManagementMembers = () => {
               <p>No team members found</p>
             </div>
           ) : (
-            members.map((member) => (
+            paginatedMembers.map((member) => (
               <div
                 key={member.id}
                 className="flex items-center justify-between p-4 border rounded-lg hover:bg-gray-50 dark:hover:bg-gray-800"
@@ -324,6 +335,35 @@ const UserManagementMembers = () => {
             ))
           )}
         </div>
+
+        {/* Pagination Controls */}
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between pt-4 border-t border-gray-100 dark:border-gray-800 mt-4">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+              disabled={currentPage === 1}
+              className="btn btn-light btn-sm"
+            >
+              <ChevronLeft className="w-4 h-4 mr-1" />
+              Previous
+            </Button>
+            <span className="text-sm text-gray-600 dark:text-gray-400 font-medium">
+              Showing {startIndex + 1}-{Math.min(endIndex, totalMembers)} of {totalMembers}
+            </span>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+              disabled={currentPage === totalPages}
+              className="btn btn-light btn-sm"
+            >
+              Next
+              <ChevronRight className="w-4 h-4 ml-1" />
+            </Button>
+          </div>
+        )}
       </CardContent>
 
       <DeleteUserModal

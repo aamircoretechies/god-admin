@@ -122,8 +122,8 @@ const AddMemberForm = () => {
       return;
     }
     // Check trimmed length for character limit
-    if (trimmedFirstName.length > 50) {
-      toast.error('First Name must be 50 characters or less');
+    if (trimmedFirstName.length > 20) {
+      toast.error('First Name must be 20 characters or less');
       setIsSubmitting(false);
       return;
     }
@@ -133,8 +133,8 @@ const AddMemberForm = () => {
       return;
     }
     // Check trimmed length for character limit
-    if (trimmedLastName.length > 50) {
-      toast.error('Last Name must be 50 characters or less');
+    if (trimmedLastName.length > 20) {
+      toast.error('Last Name must be 20 characters or less');
       setIsSubmitting(false);
       return;
     }
@@ -258,16 +258,16 @@ const AddMemberForm = () => {
                   onChange={(e) => {
                     const value = e.target.value;
                     // Limit to 50 characters
-                    if (value.length <= 50) {
+                    if (value.length <= 20) {
                       handleInputChange('first_name', value);
                     }
                   }}
-                  maxLength={50}
+                  maxLength={20}
                   required
                   className="h-10"
                 />
                 <p className="text-xs text-gray-500 mt-1">
-                  {formData.first_name.length}/50 characters
+                  {formData.first_name.length}/20 characters
                 </p>
               </div>
 
@@ -283,16 +283,16 @@ const AddMemberForm = () => {
                   onChange={(e) => {
                     const value = e.target.value;
                     // Limit to 50 characters
-                    if (value.length <= 50) {
+                    if (value.length <= 20) {
                       handleInputChange('last_name', value);
                     }
                   }}
-                  maxLength={50}
+                  maxLength={20}
                   required
                   className="h-10"
                 />
                 <p className="text-xs text-gray-500 mt-1">
-                  {formData.last_name.length}/50 characters
+                  {formData.last_name.length}/20 characters
                 </p>
               </div>
             </div>
@@ -369,7 +369,7 @@ const AddMemberForm = () => {
                 <SelectContent>
                   <SelectItem value="FREE">FREE</SelectItem>
                   <SelectItem value="PREMIUM">PREMIUM</SelectItem>
-                  <SelectItem value="ADMIN">ADMIN</SelectItem>
+                  {/* <SelectItem value="ADMIN">ADMIN</SelectItem> */}
                 </SelectContent>
               </Select>
             </div>
