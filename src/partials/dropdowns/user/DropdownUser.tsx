@@ -59,11 +59,13 @@ const DropdownUser = ({ menuItemRef }: IDropdownUserProps) => {
     const userEmail = currentUser?.email || '';
     const userRole = currentUser?.role || 'USER';
     const userAvatarPath =
-      currentUser?.profile_picture || currentUser?.pic || '/media/avatars/300-2.png';
+      currentUser?.profile_picture || currentUser?.pic || '';
 
-    const userAvatar = userAvatarPath.startsWith('/uploads')
-      ? getUploadedFileUrl(userAvatarPath)
-      : toAbsoluteUrl(userAvatarPath);
+    const userAvatar = userAvatarPath
+      ? (userAvatarPath.startsWith('/uploads')
+        ? getUploadedFileUrl(userAvatarPath)
+        : toAbsoluteUrl(userAvatarPath))
+      : '';
 
     const isOnlySpecialCharsName = !/[a-zA-Z0-9]/.test(userName);
     const nameLimit = isOnlySpecialCharsName ? 12 : 15;
@@ -76,11 +78,19 @@ const DropdownUser = ({ menuItemRef }: IDropdownUserProps) => {
     return (
       <div className="flex items-center justify-between px-5 py-1.5 gap-1.5">
         <div className="flex items-center gap-2">
-          <img
-            className="size-9 rounded-full border-2 border-success"
-            src={userAvatar}
-            alt={userName}
-          />
+          {userAvatar ? (
+            <img
+              className="size-9 rounded-full border-2 border-success"
+              src={userAvatar}
+              alt={userName}
+            />
+          ) : (
+            <div className="size-9 rounded-full border-2 border-success bg-blue-100 flex items-center justify-center">
+              <span className="text-blue-600 font-bold text-xs">
+                {userName.charAt(0).toUpperCase()}
+              </span>
+            </div>
+          )}
           <div className="flex flex-col gap-1.5">
             <Link
               to="/account/home/user-profile"

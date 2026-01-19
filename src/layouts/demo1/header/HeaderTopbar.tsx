@@ -18,12 +18,19 @@ const HeaderTopbar = () => {
   const itemAppsRef = useRef<any>(null);
   const itemUserRef = useRef<any>(null);
   const itemNotificationsRef = useRef<any>(null);
-  
+
   // Get user avatar URL
-  const userAvatarPath = currentUser?.profile_picture || currentUser?.pic || '/media/avatars/300-2.png';
-  const userAvatar = userAvatarPath.startsWith('/uploads')
-    ? getUploadedFileUrl(userAvatarPath)
-    : toAbsoluteUrl(userAvatarPath);
+  const userAvatarPath = currentUser?.profile_picture || currentUser?.pic || '';
+  const userAvatar = userAvatarPath
+    ? (userAvatarPath.startsWith('/uploads')
+      ? getUploadedFileUrl(userAvatarPath)
+      : toAbsoluteUrl(userAvatarPath))
+    : '';
+
+  const userName = currentUser?.fullname ||
+    (currentUser?.first_name && currentUser?.last_name
+      ? `${currentUser.first_name} ${currentUser.last_name}`
+      : currentUser?.first_name || 'User');
 
   const handleShow = () => {
     window.dispatchEvent(new Event('resize'));
@@ -140,11 +147,19 @@ const HeaderTopbar = () => {
           }}
         >
           <MenuToggle className="btn btn-icon rounded-full">
-            <img
-              className="size-9 rounded-full border-2 border-success shrink-0"
-              src={userAvatar}
-              alt={currentUser?.fullname || 'User'}
-            />
+            {userAvatar ? (
+              <img
+                className="size-9 rounded-full border-2 border-success shrink-0"
+                src={userAvatar}
+                alt={userName}
+              />
+            ) : (
+              <div className="size-9 rounded-full border-2 border-success bg-blue-100 flex items-center justify-center shrink-0">
+                <span className="text-blue-600 font-bold text-xs">
+                  {userName.charAt(0).toUpperCase()}
+                </span>
+              </div>
+            )}
           </MenuToggle>
           {DropdownUser({ menuItemRef: itemUserRef })}
         </MenuItem>

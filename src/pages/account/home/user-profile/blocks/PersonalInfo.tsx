@@ -10,7 +10,7 @@ import { toast } from 'sonner';
 
 // Helper to get full URL for profile picture
 const getProfilePictureUrl = (path: string | null | undefined): string => {
-  if (!path) return toAbsoluteUrl('/media/avatars/300-2.png');
+  if (!path) return ''; // toAbsoluteUrl('/media/avatars/300-2.png');
   // If path starts with /uploads, it's from the backend
   if (path.startsWith('/uploads')) {
     return getUploadedFileUrl(path);
@@ -32,12 +32,15 @@ const PersonalInfo = () => {
   const [hasChanges, setHasChanges] = useState(false);
   const [firstNameError, setFirstNameError] = useState<string | null>(null);
   const [lastNameError, setLastNameError] = useState<string | null>(null);
+  const [isAvatarRemoved, setIsAvatarRemoved] = useState(false);
 
   const [avatar, setAvatar] = useState<IImageInputFile[]>(() => {
-    return [{ dataURL: getProfilePictureUrl(null) }];
+    const initialPath = currentUser?.profile_picture || currentUser?.pic;
+    return [{ dataURL: getProfilePictureUrl(initialPath) }];
   });
   const [originalAvatar, setOriginalAvatar] = useState<IImageInputFile[]>(() => {
-    return [{ dataURL: getProfilePictureUrl(null) }];
+    const initialPath = currentUser?.profile_picture || currentUser?.pic;
+    return [{ dataURL: getProfilePictureUrl(initialPath) }];
   });
 
   const handleFirstNameChange = (value: string) => {
@@ -48,7 +51,7 @@ const PersonalInfo = () => {
     }
     setFirstNameValue(value);
     setFirstNameError(null);
-    checkForChanges(value, lastNameValue, avatar);
+    checkForChanges(value, lastNameValue, avatar, isAvatarRemoved);
   };
 
   const handleLastNameChange = (value: string) => {
@@ -59,13 +62,13 @@ const PersonalInfo = () => {
     }
     setLastNameValue(value);
     setLastNameError(null);
-    checkForChanges(firstNameValue, value, avatar);
+    checkForChanges(firstNameValue, value, avatar, isAvatarRemoved);
   };
 
-  const checkForChanges = (firstName: string, lastName: string, currentAvatar: IImageInputFile[]) => {
+  const checkForChanges = (firstName: string, lastName: string, currentAvatar: IImageInputFile[], isRemoved: boolean = isAvatarRemoved) => {
     const firstNameChanged = firstName !== originalFirstName;
     const lastNameChanged = lastName !== originalLastName;
-    const avatarChanged = JSON.stringify(currentAvatar) !== JSON.stringify(originalAvatar);
+    const avatarChanged = JSON.stringify(currentAvatar) !== JSON.stringify(originalAvatar) || isRemoved;
     setHasChanges(firstNameChanged || lastNameChanged || avatarChanged);
   };
 
@@ -83,6 +86,7 @@ const PersonalInfo = () => {
     setFirstNameValue(originalFirstName);
     setLastNameValue(originalLastName);
     setAvatar(originalAvatar);
+    setIsAvatarRemoved(false);
     setFirstNameError(null);
     setLastNameError(null);
     setIsEditing(false);
@@ -103,8 +107,9 @@ const PersonalInfo = () => {
     }
 
     // Just update the local state - don't upload yet
+    setIsAvatarRemoved(false);
     setAvatar(selectedAvatar);
-    checkForChanges(firstNameValue, lastNameValue, selectedAvatar);
+    checkForChanges(firstNameValue, lastNameValue, selectedAvatar, false);
   };
 
   const loadProfile = async () => {
@@ -125,6 +130,7 @@ const PersonalInfo = () => {
         const avatarUrl = getProfilePictureUrl(userAvatar);
         setAvatar([{ dataURL: avatarUrl }]);
         setOriginalAvatar([{ dataURL: avatarUrl }]);
+        setIsAvatarRemoved(false);
 
         // Update auth context with new profile data
         if (setCurrentUser) {
@@ -161,6 +167,7 @@ const PersonalInfo = () => {
           const avatarUrl = getProfilePictureUrl(userAvatar);
           setAvatar([{ dataURL: avatarUrl }]);
           setOriginalAvatar([{ dataURL: avatarUrl }]);
+          setIsAvatarRemoved(false);
 
           // Update auth context with new profile data
           if (setCurrentUser) {
@@ -235,13 +242,16 @@ const PersonalInfo = () => {
         last_name: lastNameValue
       };
 
-      // Update profile picture if changed
+      // Update profile picture if changed or explicitly removed
       let profilePictureUpdated = false;
-      if (avatar.length > 0 && avatar[0].file) {
+      let pictureUpdateMessage = '';
+      if ((avatar.length > 0 && avatar[0].file) || isAvatarRemoved) {
         try {
-          const pictureResponse = await updateAdminProfilePicture(avatar[0].file);
+          const pictureResponse = await updateAdminProfilePicture(avatar[0]?.file || null);
           if (pictureResponse.status === 1 && pictureResponse.data) {
             profilePictureUpdated = true;
+            pictureUpdateMessage = pictureResponse.message;
+            setIsAvatarRemoved(false);
             // Update avatar URL with server response
             if (pictureResponse.data.user.profile_picture) {
               const newAvatarUrl = getProfilePictureUrl(pictureResponse.data.user.profile_picture);
@@ -251,6 +261,15 @@ const PersonalInfo = () => {
                 setCurrentUser({
                   ...currentUser,
                   profile_picture: pictureResponse.data.user.profile_picture
+                } as any);
+              }
+            } else {
+              // Image was removed, result is null
+              setAvatar([]);
+              if (setCurrentUser) {
+                setCurrentUser({
+                  ...currentUser,
+                  profile_picture: null
                 } as any);
               }
             }
@@ -281,9 +300,9 @@ const PersonalInfo = () => {
 
           // Show success message
           if (profilePictureUpdated) {
-            toast.success('Profile and picture updated successfully');
+            toast.success(pictureUpdateMessage || response.message || 'Profile and picture updated successfully');
           } else {
-            toast.success('Profile updated successfully');
+            toast.success(response.message || 'Profile updated successfully');
           }
 
           // Refresh profile data
@@ -297,7 +316,7 @@ const PersonalInfo = () => {
         // Only picture was updated
         setOriginalAvatar(avatar);
         setHasChanges(false);
-        toast.success('Profile picture updated successfully');
+        toast.success(pictureUpdateMessage || 'Profile picture updated successfully');
         await loadProfile();
       }
 
@@ -369,12 +388,10 @@ const PersonalInfo = () => {
                             className="btn btn-icon btn-icon-xs btn-light shadow-default absolute z-1 size-5 -top-0.5 -end-0.5 rounded-full"
                             onClick={async (e) => {
                               e.stopPropagation();
-                              // Remove avatar - set to default
-                              const defaultAvatar = '/media/avatars/300-2.png';
-                              setAvatar([{ dataURL: toAbsoluteUrl(defaultAvatar) }]);
-                              // Note: To actually remove profile picture from server, you'd need a delete endpoint
-                              // For now, just update UI
-                              checkForChanges(firstNameValue, lastNameValue, [{ dataURL: toAbsoluteUrl(defaultAvatar) }]);
+                              // Remove avatar - set to empty
+                              setAvatar([]);
+                              setIsAvatarRemoved(true);
+                              checkForChanges(firstNameValue, lastNameValue, [], true);
                             }}
                           >
                             <KeenIcon icon="cross" />
@@ -385,7 +402,7 @@ const PersonalInfo = () => {
                         </span>
                         <div
                           className="image-input-placeholder rounded-full border-2 border-success image-input-empty:border-gray-300"
-                          style={{ backgroundImage: `url(${toAbsoluteUrl('/media/avatars/blank.png')})` }}
+                          style={{ backgroundImage: (avatar.length === 0 || !avatar[0].dataURL) ? 'none' : `url(${toAbsoluteUrl('/media/avatars/blank.png')})` }}
                         >
                           {avatar.length > 0 && <img src={avatar[0].dataURL} alt="avatar" className="w-full h-full rounded-full object-cover" />}
                           <div className="flex items-center justify-center cursor-pointer h-5 left-0 right-0 bottom-0 bg-dark-clarity absolute">
@@ -511,7 +528,7 @@ const PersonalInfo = () => {
           <button
             className="btn btn-sm btn-primary"
             onClick={handleSave}
-            disabled={isSaving || (!hasChanges && JSON.stringify(avatar) === JSON.stringify(originalAvatar))}
+            disabled={isSaving || (!hasChanges && JSON.stringify(avatar) === JSON.stringify(originalAvatar) && !isAvatarRemoved)}
           >
             {isSaving ? (
               <>

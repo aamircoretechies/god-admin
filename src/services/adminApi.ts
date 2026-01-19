@@ -79,10 +79,15 @@ export const updateAdminProfile = async (
  * Update admin profile picture
  */
 export const updateAdminProfilePicture = async (
-  file: File
+  file: File | null
 ): Promise<UpdateProfilePictureResponse> => {
   const formData = new FormData();
-  formData.append('profile_picture', file);
+  if (file) {
+    formData.append('profile_picture', file);
+  } else {
+    // If null is passed, we send an empty string to signal removal
+    formData.append('profile_picture', '');
+  }
 
   const response = await axios.put<UpdateProfilePictureResponse>(
     `${API_URL}/admin/profile/picture`,
