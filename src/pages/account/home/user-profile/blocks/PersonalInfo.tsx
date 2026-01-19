@@ -49,6 +49,14 @@ const PersonalInfo = () => {
       setFirstNameError('First name must be 20 characters or less');
       return;
     }
+
+    // Allow only one special character
+    const specialChars = value.match(/[^a-zA-Z0-9\s]/g) || [];
+    if (specialChars.length > 1) {
+      toast.error('Only one special character is allowed');
+      return;
+    }
+
     setFirstNameValue(value);
     setFirstNameError(null);
     checkForChanges(value, lastNameValue, avatar, isAvatarRemoved);
@@ -60,6 +68,14 @@ const PersonalInfo = () => {
       setLastNameError('Last name must be 20 characters or less');
       return;
     }
+
+    // Allow only one special character
+    const specialChars = value.match(/[^a-zA-Z0-9\s]/g) || [];
+    if (specialChars.length > 1) {
+      toast.error('Only one special character is allowed');
+      return;
+    }
+
     setLastNameValue(value);
     setLastNameError(null);
     checkForChanges(firstNameValue, value, avatar, isAvatarRemoved);
@@ -97,11 +113,19 @@ const PersonalInfo = () => {
     // Only allow changes when in edit mode
     if (!isEditing) return;
 
-    // Check if a file was selected and validate its type
+    // Check if a file was selected and validate its type and size
     if (selectedAvatar.length > 0 && selectedAvatar[0].file) {
-      const fileType = selectedAvatar[0].file.type;
+      const file = selectedAvatar[0].file;
+      const fileType = file.type;
+
       if (fileType !== 'image/jpeg' && fileType !== 'image/png') {
         toast.error('Only JPEG or PNG images are allowed');
+        return;
+      }
+
+      // 1 MB limit check
+      if (file.size > 1024 * 1024) {
+        toast.error('Image size must be 1 MB or less to upload.');
         return;
       }
     }
@@ -278,7 +302,11 @@ const PersonalInfo = () => {
           }
         } catch (error: any) {
           console.error('Error updating profile picture:', error);
-          toast.error(error?.response?.data?.message || error?.message || 'Failed to update profile picture');
+          if (error?.response?.status === 413) {
+            toast.error('Image size must be 1 MB or less to upload.');
+          } else {
+            toast.error(error?.response?.data?.message || error?.message || 'Failed to update profile picture');
+          }
           setIsSaving(false);
           return;
         }
