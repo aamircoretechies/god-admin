@@ -181,12 +181,25 @@ interface AIExplanation {
 // Transform API response to component format
 const transformExplanation = (apiData: AIExplanationResponse): AIExplanation => {
   const contentType = (apiData as any).content_type || (apiData.verse && apiData.verse.verse ? 'verse' : 'chapter');
+
+  let bookName = apiData.verse?.book || (apiData as any).book?.long_name || '';
+
+  // Fix for book name display when it's a book-level explanation (verse is null/missing)
+  // This handles cases where apiData.verse.book contains a numeric ID instead of the name
+  if (!apiData.verse?.verse && apiData.verse_ref) {
+    // Try to extract book name from verse_ref (e.g. "1 Samuel Chapter 4" -> "1 Samuel")
+    const chapterMatch = apiData.verse_ref.match(/^(.*?)\s+Chapter\s+\d+$/i);
+    if (chapterMatch) {
+      bookName = chapterMatch[1];
+    }
+  }
+
   return {
     id: apiData.explanation_id,
     contentId: apiData.verse?.verse_id || (apiData as any).content_id || apiData.explanation_id.split('_')[0],
     contentType: contentType as 'verse' | 'chapter',
     verseId: apiData.verse?.verse_id,
-    book: apiData.verse?.book || (apiData as any).book?.long_name || '',
+    book: bookName,
     chapter: apiData.verse.chapter,
     verse: apiData.verse.verse,
     verseText: '', // Dummy - not in API
