@@ -298,9 +298,9 @@ const VerseDetailModal: React.FC<VerseDetailModalProps> = ({ isOpen, onClose, ve
     if (!verse?.verseId) return;
 
     // Confirm regeneration
-    if (!window.confirm('Are you sure you want to regenerate this explanation? This will replace the current content with a new AI-generated explanation.')) {
-      return;
-    }
+    // if (!window.confirm('Are you sure you want to regenerate this explanation? This will replace the current content with a new AI-generated explanation.')) {
+    //   return;
+    // }
 
     try {
       // Get explanation_type and experience_level
@@ -494,7 +494,7 @@ const VerseDetailModal: React.FC<VerseDetailModalProps> = ({ isOpen, onClose, ve
                                   ) : (
                                     <RotateCcw className="w-3 h-3 mr-1" />
                                   )}
-                                  Regenerate
+                                  {/* Regenerate */}
                                 </Button>
                                 <Button
                                   variant="outline"

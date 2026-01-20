@@ -142,6 +142,12 @@ const stripMarkdownForPreview = (content: string | null | undefined): string => 
   return text.trim();
 };
 
+const formatExperienceLevel = (level: string | undefined): string => {
+  if (!level) return '';
+  const formatted = level.replace(/_/g, ' ');
+  return formatted.toLowerCase() === 'some knowledge' ? 'Occasional' : formatted;
+};
+
 interface AIExplanation {
   id: string;
   contentId: string;
@@ -927,7 +933,7 @@ const AIExplanationManagementContent = () => {
                       </Badge>
                       {explanation.experienceLevel && (
                         <Badge variant="outline" className="bg-gray-50 text-gray-700 border-gray-200">
-                          {explanation.experienceLevel.replace(/_/g, ' ')}
+                          {formatExperienceLevel(explanation.experienceLevel)}
                         </Badge>
                       )}
                     </div>
@@ -994,14 +1000,14 @@ const AIExplanationManagementContent = () => {
                           Approve
                         </Button>
                       )}
-                      <Button
+                      {/* <Button
                         variant="outline"
                         size="sm"
                         onClick={() => handleDelete(explanation.id)}
                       >
                         <Trash2 className="w-4 h-4 mr-1" />
                         Delete
-                      </Button>
+                      </Button> */}
                     </div>
                   </div>
                 </div>
@@ -1085,7 +1091,7 @@ const AIExplanationManagementContent = () => {
                   {selectedExplanation.experienceLevel && (
                     <div className="space-y-1.5">
                       <label className="text-xs font-medium text-gray-500 uppercase tracking-wide">Experience Level</label>
-                      <p className="text-sm text-gray-900 font-medium">{selectedExplanation.experienceLevel.replace(/_/g, ' ')}</p>
+                      <p className="text-sm text-gray-900 font-medium">{formatExperienceLevel(selectedExplanation.experienceLevel)}</p>
                     </div>
                   )}
                   {selectedExplanation.translation && (
