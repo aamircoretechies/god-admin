@@ -39,7 +39,7 @@ const ResetPasswordCheckEmail = () => {
         </div>
 
         <div className="flex justify-center mb-5">
-          <Link
+          {/* <Link
             to={
               currentLayout?.name === 'auth-branded'
                 ? '/auth/reset-password/changed'
@@ -48,7 +48,19 @@ const ResetPasswordCheckEmail = () => {
             className="btn btn-primary flex justify-center"
           >
             Skip for now
+          </Link> */}
+
+          <Link
+            to={
+              currentLayout?.name === 'auth-branded'
+                ? '/auth/login'
+                : '/auth/classic/login'
+            }
+            className="btn btn-primary flex justify-center"
+          >
+            Skip for now
           </Link>
+
         </div>
 
         <div className="flex items-center justify-center gap-1">
