@@ -57,7 +57,8 @@ const SaaSUsersToolbar = ({
   return (
     <div className="card-header flex-wrap gap-2 border-b-0 px-5">
       <h3 className="card-title font-medium text-sm">
-        Showing {table.getState().pagination.pageSize} of {totalRows} users
+         {/* Showing {table.getState().pagination.pageSize} of {totalRows} users */}
+        Showing 10 of {totalRows} users
       </h3>
 
       <div className="flex flex-wrap gap-2 lg:gap-5">
@@ -209,7 +210,7 @@ const Users = ({ hideRowsPerPage = false }: UsersProps) => {
         accessorFn: (row: IUsersData) => row.joinDate || '2024-01-15',
         id: 'Join Date',
         // header: ({ column }) => <DataGridColumnHeader title="Join Date" column={column} />,
-         header: () => (
+        header: () => (
           <span className="font-medium text-sm text-gray-900 ml-2">
             Join Date
           </span>
@@ -239,7 +240,7 @@ const Users = ({ hideRowsPerPage = false }: UsersProps) => {
       {
         id: 'actions',
         // header: ({ column }) => <DataGridColumnHeader title="Actions" column={column} />,
-         header: () => (
+        header: () => (
           <span className="font-medium text-sm text-gray-900 ml-2">
             Actions
           </span>
@@ -299,53 +300,97 @@ const Users = ({ hideRowsPerPage = false }: UsersProps) => {
   const [sortFilter, setSortFilter] = useState<string>('latest');
   const [searchInput, setSearchInput] = useState('');
   const [debouncedSearch, setDebouncedSearch] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [totalRows, setTotalRows] = useState(0);
+  const pageSize = 10;
 
   // Debounce search input
   React.useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedSearch(searchInput);
+      setCurrentPage(1); // Reset to first page on search
     }, 500);
 
     return () => clearTimeout(timer);
   }, [searchInput]);
 
+  // Reset to first page when filters change
+  React.useMemo(() => {
+    setCurrentPage(1);
+  }, [statusFilter, sortFilter]);
+
   // Custom fetch function that includes search and filters
   const customFetchData = React.useCallback(
     async (params: any) => {
-      return fetchUsersForDataGrid(params, debouncedSearch, statusFilter, sortFilter);
+      const response = await fetchUsersForDataGrid(
+        { ...params, pageIndex: currentPage - 1, pageSize },
+        debouncedSearch,
+        statusFilter,
+        sortFilter
+      );
+      setTotalRows(response.totalCount);
+      return response;
     },
-    [debouncedSearch, statusFilter, sortFilter]
+    [debouncedSearch, statusFilter, sortFilter, currentPage]
   );
 
   // SaaSUsersToolbar extracted to top level
 
   // Create a unique key that changes when filters change to force remount
   const dataGridKey = React.useMemo(() => {
-    return `users-grid-${debouncedSearch}-${statusFilter}-${sortFilter}`;
-  }, [debouncedSearch, statusFilter, sortFilter]);
+    return `users-grid-${debouncedSearch}-${statusFilter}-${sortFilter}-${currentPage}`;
+  }, [debouncedSearch, statusFilter, sortFilter, currentPage]);
 
   return (
-    <DataGrid
-      key={dataGridKey}
-      columns={columns}
-      rowSelection={true}
-      onRowSelectionChange={handleRowSelection}
-      pagination={{ size: 5, hideRowsPerPage }}
-      sorting={[{ id: 'joinDate', desc: true }]}
-      toolbar={
-        <SaaSUsersToolbar
-          statusFilter={statusFilter}
-          setStatusFilter={setStatusFilter}
-          sortFilter={sortFilter}
-          setSortFilter={setSortFilter}
-          searchInput={searchInput}
-          setSearchInput={setSearchInput}
+    <div className="grid gap-5">
+      <div className="card">
+        <DataGrid
+          key={dataGridKey}
+          columns={columns}
+          rowSelection={true}
+          onRowSelectionChange={handleRowSelection}
+          //           // pagination={{ size: 5, hideRowsPerPage }}
+          pagination={{ size: 10, hideRowsPerPage }}
+          sorting={[{ id: 'joinDate', desc: true }]}
+          toolbar={
+            <SaaSUsersToolbar
+              statusFilter={statusFilter}
+              setStatusFilter={setStatusFilter}
+              sortFilter={sortFilter}
+              setSortFilter={setSortFilter}
+              searchInput={searchInput}
+              setSearchInput={setSearchInput}
+            />
+          }
+          layout={{ card: true }}
+          serverSide={true}
+          onFetchData={customFetchData}
         />
-      }
-      layout={{ card: true }}
-      serverSide={true}
-      onFetchData={customFetchData}
-    />
+
+        <div className="card-footer flex justify-between items-center px-5 py-4">
+          <div className="text-sm text-gray-600 font-medium">
+            Showing {totalRows > 0 ? (currentPage - 1) * pageSize + 1 : 0} to{' '}
+            {Math.min(currentPage * pageSize, totalRows)} of {totalRows} users
+          </div>
+          <div className="flex gap-2">
+            <button
+              className="btn btn-sm btn-outline btn-primary font-medium"
+              disabled={currentPage === 1}
+              onClick={() => setCurrentPage((prev) => prev - 1)}
+            >
+              Previous
+            </button>
+            <button
+              className="btn btn-sm btn-outline btn-primary font-medium"
+              disabled={currentPage * pageSize >= totalRows}
+              onClick={() => setCurrentPage((prev) => prev + 1)}
+            >
+              Next
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 

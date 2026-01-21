@@ -34,9 +34,12 @@ export interface TDataGridProps<TData extends object> {
     cellBorder?: boolean;
     card?: boolean;
     classes?: {
-      table?: '';
-      container?: '';
-      root?: '';
+      //       table?: '';
+      //       container?: '';
+      //       root?: '';
+      table?: string;
+      container?: string;
+      root?: string;
     };
   };
   pagination?: {

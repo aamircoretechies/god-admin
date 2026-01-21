@@ -38,7 +38,9 @@ import {
   Tablet,
   CheckCircle,
   XCircle,
-  Clock
+  Clock,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -134,6 +136,7 @@ interface ToolbarContentProps {
   setStatusFilter: (value: string) => void;
   dateRangeFilter: string;
   setDateRangeFilter: (value: string) => void;
+  totalActivities: number;
 }
 
 // Toolbar component moved outside to prevent recreation on every render
@@ -145,7 +148,8 @@ const ToolbarContent = ({
   statusFilter,
   setStatusFilter,
   dateRangeFilter,
-  setDateRangeFilter
+  setDateRangeFilter,
+  totalActivities
 }: ToolbarContentProps) => {
   const { table, totalRows } = useDataGrid();
   // Get the actual number of rows on the current page
@@ -202,7 +206,7 @@ const ToolbarContent = ({
           >
             <option value="all">All Status</option>
             <option value="Success">Success</option>
-            <option value="Error">Error</option>
+            {/* <option value="Error">Error</option> */}
             <option value="Warning">Warning</option>
           </select>
           <select
@@ -219,7 +223,8 @@ const ToolbarContent = ({
         </div>
         <div className="flex items-center gap-2 justify-end">
           <span className="text-sm text-gray-600">
-            Showing {currentPageRows} of {totalRows} activities
+            {/* Showing {currentPageRows} of {totalRows} activities */}
+            Showing {currentPageRows} of {totalActivities} activities
           </span>
         </div>
       </div>
@@ -228,13 +233,13 @@ const ToolbarContent = ({
 };
 
 // Actions cell component defined outside to avoid closure issues
-const ActionsCell = ({ 
-  userId, 
-  isBlocked, 
-  onBlockClick, 
-  onSuspendClick 
-}: { 
-  userId: string; 
+const ActionsCell = ({
+  userId,
+  isBlocked,
+  onBlockClick,
+  onSuspendClick
+}: {
+  userId: string;
   isBlocked: boolean;
   onBlockClick: () => void;
   onSuspendClick: () => void;
@@ -275,6 +280,11 @@ export const ActivityLogListContent: React.FC = () => {
   const [activityLogs, setActivityLogs] = useState<UserActivityLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Custom pagination state
+  const [currentPage, setCurrentPage] = useState(1);
+  // const [pageSize] = useState(10);
+  const [pageSize] = useState(10);
 
   // MODALS STATE
   const [showBlockModal, setShowBlockModal] = useState(false);
@@ -397,6 +407,19 @@ export const ActivityLogListContent: React.FC = () => {
     return activityLogs;
   }, [activityLogs]);
 
+  // Custom pagination calculations
+  const totalPages = Math.ceil(filteredLogs.length / pageSize);
+  const paginatedLogs = useMemo(() => {
+    const start = (currentPage - 1) * pageSize;
+    const end = start + pageSize;
+    return filteredLogs.slice(start, end);
+  }, [filteredLogs, currentPage, pageSize]);
+
+  // Reset to first page when filters change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, userFilter, activityTypeFilter, statusFilter, dateRangeFilter]);
+
   const getStatusBadge = (status: string) => {
     switch (status) {
       case 'Success':
@@ -503,187 +526,205 @@ export const ActivityLogListContent: React.FC = () => {
 
   // Create columns without useMemo to ensure cell renderers always have latest blockedUsers
   const columns: ColumnDef<UserActivityLog>[] = [
-      // {
-      //   accessorKey: 'id',
-      //   header: () => <DataGridRowSelectAll />,
-      //   cell: ({ row }) => <DataGridRowSelect row={row} />,
-      //   enableSorting: false,
-      //   enableHiding: false,
-      //   meta: {
-      //     headerClassName: 'w-12'
-      //   }
-      // },
-      {
-        accessorFn: (row: UserActivityLog) => row,
-        id: 'user',
-        // header: ({ column }) => (
-        //   <DataGridColumnHeader
-        //     title="User"
-        //     filter={<ColumnInputFilter column={column} />}
-        //     column={column}
-        //   />
-        // ),
-        header: () => (
-          <span className="text-sm font-medium select-none cursor-default">User</span>
-        ),
-        enableSorting: true,
-        cell: ({ row }) => (
-          <div className="flex items-center gap-3">
-            <Avatar className="w-8 h-8">
-              <img
-                src={row.original.userAvatar.startsWith('http') ? row.original.userAvatar : toAbsoluteUrl(row.original.userAvatar)}
-                alt={row.original.userName}
-                className="w-full h-full object-cover rounded-full"
-              />
-            </Avatar>
-            <div className="flex flex-col">
-              <Link
-                to={`/system-log/user/${row.original.userId}`}
-                className="text-sm font-medium text-gray-900 hover:text-primary-active"
-              >
-                {row.original.userName}
-              </Link>
-              <span className="text-xs text-gray-500">{row.original.userEmail}</span>
-              {getRoleBadge(row.original.userRole)}
-            </div>
-          </div>
-        ),
-        meta: {
-          headerClassName: 'min-w-[200px]',
-          cellClassName: 'text-gray-800 font-normal'
-        }
-      },
-      {
-        accessorFn: (row: UserActivityLog) => row.activityType,
-        id: 'activityType',
-        // header: ({ column }) => <DataGridColumnHeader title="Activity Type" column={column} />,
-        header: () => (
-          <span className="text-sm font-medium select-none cursor-default">Activity Type</span>
-        ),
-        enableSorting: true,
-        cell: ({ row }) => getActivityTypeBadge(row.original.activityType),
-        meta: {
-          headerClassName: 'min-w-[140px]',
-          cellClassName: 'text-gray-800 font-normal'
-        }
-      },
-      {
-        accessorFn: (row: UserActivityLog) => row.details,
-        id: 'details',
-        // header: ({ column }) => (
-        //   <DataGridColumnHeader
-        //     title="Details"
-        //     filter={<ColumnInputFilter column={column} />}
-        //     column={column}
-        //   />
-        // ),
-        header: () => (
-          <span className="text-sm font-medium select-none cursor-default">Details</span>
-        ),
-        enableSorting: true,
-        cell: ({ row }) => (
-          <div className="max-w-xs">
-            <p className="text-sm text-gray-900 truncate">{row.original.details}</p>
-            {row.original.queryText && (
-              <p className="text-xs text-gray-500 truncate">"{row.original.queryText}"</p>
-            )}
-            {row.original.bookReference && (
-              <p className="text-xs text-amber-600">
-                {row.original.bookReference} {row.original.chapterReference}:
-                {row.original.verseReference}
-              </p>
-            )}
-          </div>
-        ),
-        meta: {
-          headerClassName: 'min-w-[200px]',
-          cellClassName: 'text-gray-800 font-normal'
-        }
-      },
-      {
-        accessorFn: (row: UserActivityLog) => row.device,
-        id: 'device',
-        // header: ({ column }) => <DataGridColumnHeader title="Device" column={column} />,
-        header: () => (
-          <span className="text-sm font-medium select-none cursor-default">Device</span>
-        ),
-        enableSorting: true,
-        cell: ({ row }) => (
-          <div className="flex items-center gap-2">
-            {getDeviceIcon(row.original.device)}
-            <span className="text-sm">{row.original.device}</span>
-          </div>
-        ),
-        meta: {
-          headerClassName: 'min-w-[120px]',
-          cellClassName: 'text-gray-800 font-normal'
-        }
-      },
-      {
-        accessorFn: (row: UserActivityLog) => row.timestamp,
-        id: 'timestamp',
-        // header: ({ column }) => <DataGridColumnHeader title="Date & Time" column={column} />,
-        header: () => (
-          <span className="text-sm font-medium select-none cursor-default">Time Stamp</span>
-        ),
-        enableSorting: true,
-        cell: ({ row }) => (
-          <div className="text-sm">
-            <p>{formatDate(row.original.timestamp)}</p>
-            <p className="text-xs text-gray-500">{row.original.location}</p>
-          </div>
-        ),
-        meta: {
-          headerClassName: 'min-w-[140px]',
-          cellClassName: 'text-gray-800 font-normal'
-        }
-      },
-      {
-        accessorFn: (row: UserActivityLog) => row.status,
-        id: 'status',
-        // header: ({ column }) => <DataGridColumnHeader title="Status" column={column} />,
-        header: () => (
-          <span className="text-sm font-medium select-none cursor-default">Status</span>
-        ),
-        enableSorting: true,
-        cell: ({ row }) => getStatusBadge(row.original.status),
-        meta: {
-          headerClassName: 'min-w-[100px]',
-          cellClassName: 'text-gray-800 font-normal'
-        }
-      },
-      {
-        id: 'actions',
-        // header: ({ column }) => <DataGridColumnHeader title="Actions" column={column} />,
-        header: () => (
-          <span className="text-sm font-medium select-none cursor-default">Actions</span>
-        ),
-        enableSorting: false,
-        cell: ({ row }) => {
-          const userId = row.original.userId;
-          // Always check against current blockedUsers state (not from closure)
-          const isBlocked = blockedUsers.includes(userId);
-          return (
-            <ActionsCell 
-              userId={userId}
-              isBlocked={isBlocked}
-              onBlockClick={() => {
-                setSelectedUserId(userId);
-                setShowBlockModal(true);
-              }}
-              onSuspendClick={() => {
-                setSelectedUserId(userId);
-                setShowSuspendModal(true);
-              }}
+    // {
+    //   accessorKey: 'id',
+    //   header: () => <DataGridRowSelectAll />,
+    //   cell: ({ row }) => <DataGridRowSelect row={row} />,
+    //   enableSorting: false,
+    //   enableHiding: false,
+    //   meta: {
+    //     headerClassName: 'w-12'
+    //   }
+    // },
+    {
+      accessorFn: (row: UserActivityLog) => row,
+      id: 'user',
+      // header: ({ column }) => (
+      //   <DataGridColumnHeader
+      //     title="User"
+      //     filter={<ColumnInputFilter column={column} />}
+      //     column={column}
+      //   />
+      // ),
+      header: () => (
+        <span className="text-sm font-medium select-none cursor-default">User</span>
+      ),
+      enableSorting: true,
+      cell: ({ row }) => (
+        <div className="flex items-center gap-3">
+          <Avatar className="w-8 h-8">
+            <img
+              src={row.original.userAvatar.startsWith('http') ? row.original.userAvatar : toAbsoluteUrl(row.original.userAvatar)}
+              alt={row.original.userName}
+              className="w-full h-full object-cover rounded-full"
             />
-          );
-        },
-        meta: {
-          headerClassName: 'w-40',
-          cellClassName: 'text-gray-800 font-medium'
-        }
+          </Avatar>
+          <div className="flex flex-col">
+            {/* <Link
+              to={`/system-log/user/${row.original.userId}`}
+              className="text-sm font-medium text-gray-900 hover:text-primary-active"
+            >
+              {row.original.userName}
+            </Link> */}
+            <Link
+              to={`/system-log/user/${row.original.userId}`}
+              className="text-sm font-medium text-gray-900 hover:text-primary-active"
+            >
+              {row.original.userName.length > 25
+                ? `${row.original.userName.slice(0, 25)}...`
+                : row.original.userName}
+            </Link>
+            {/* <span className="text-xs text-gray-500">{row.original.userEmail}</span> */}
+            <span className="text-xs text-gray-500">
+              {row.original.userEmail.length > 30
+                ? `${row.original.userEmail.slice(0, 30)}...`
+                : row.original.userEmail}
+            </span>
+            {getRoleBadge(row.original.userRole)}
+          </div>
+        </div>
+      ),
+      meta: {
+        headerClassName: 'min-w-[200px]',
+        cellClassName: 'text-gray-800 font-normal'
       }
-    ];
+    },
+    {
+      accessorFn: (row: UserActivityLog) => row.activityType,
+      id: 'activityType',
+      // header: ({ column }) => <DataGridColumnHeader title="Activity Type" column={column} />,
+      header: () => (
+        <span className="text-sm font-medium select-none cursor-default">Activity Type</span>
+      ),
+      enableSorting: true,
+      cell: ({ row }) => getActivityTypeBadge(row.original.activityType),
+      meta: {
+        headerClassName: 'min-w-[140px]',
+        cellClassName: 'text-gray-800 font-normal'
+      }
+    },
+    {
+      accessorFn: (row: UserActivityLog) => row.details,
+      id: 'details',
+      // header: ({ column }) => (
+      //   <DataGridColumnHeader
+      //     title="Details"
+      //     filter={<ColumnInputFilter column={column} />}
+      //     column={column}
+      //   />
+      // ),
+      header: () => (
+        <span className="text-sm font-medium select-none cursor-default">Details</span>
+      ),
+      enableSorting: true,
+      cell: ({ row }) => (
+        <div className="max-w-xs">
+          {/* <p className="text-sm text-gray-900 truncate">{row.original.details}</p> */}
+          <p className="text-sm text-gray-900 truncate">
+            {row.original.details.length > 35
+              ? `${row.original.details.slice(0, 35)}...`
+              : row.original.details}
+          </p>
+          {row.original.queryText && (
+            <p className="text-xs text-gray-500 truncate">"{row.original.queryText}"</p>
+          )}
+          {row.original.bookReference && (
+            <p className="text-xs text-amber-600">
+              {row.original.bookReference} {row.original.chapterReference}:
+              {row.original.verseReference}
+            </p>
+          )}
+        </div>
+      ),
+      meta: {
+        headerClassName: 'min-w-[200px]',
+        cellClassName: 'text-gray-800 font-normal'
+      }
+    },
+    {
+      accessorFn: (row: UserActivityLog) => row.device,
+      id: 'device',
+      // header: ({ column }) => <DataGridColumnHeader title="Device" column={column} />,
+      header: () => (
+        <span className="text-sm font-medium select-none cursor-default">Device</span>
+      ),
+      enableSorting: true,
+      cell: ({ row }) => (
+        <div className="flex items-center gap-2">
+          {getDeviceIcon(row.original.device)}
+          <span className="text-sm">{row.original.device}</span>
+        </div>
+      ),
+      meta: {
+        headerClassName: 'min-w-[120px]',
+        cellClassName: 'text-gray-800 font-normal'
+      }
+    },
+    {
+      accessorFn: (row: UserActivityLog) => row.timestamp,
+      id: 'timestamp',
+      // header: ({ column }) => <DataGridColumnHeader title="Date & Time" column={column} />,
+      header: () => (
+        <span className="text-sm font-medium select-none cursor-default">Time Stamp</span>
+      ),
+      enableSorting: true,
+      cell: ({ row }) => (
+        <div className="text-sm">
+          <p>{formatDate(row.original.timestamp)}</p>
+          <p className="text-xs text-gray-500">{row.original.location}</p>
+        </div>
+      ),
+      meta: {
+        headerClassName: 'min-w-[140px]',
+        cellClassName: 'text-gray-800 font-normal'
+      }
+    },
+    {
+      accessorFn: (row: UserActivityLog) => row.status,
+      id: 'status',
+      // header: ({ column }) => <DataGridColumnHeader title="Status" column={column} />,
+      header: () => (
+        <span className="text-sm font-medium select-none cursor-default">Status</span>
+      ),
+      enableSorting: true,
+      cell: ({ row }) => getStatusBadge(row.original.status),
+      meta: {
+        headerClassName: 'min-w-[100px]',
+        cellClassName: 'text-gray-800 font-normal'
+      }
+    },
+    {
+      id: 'actions',
+      // header: ({ column }) => <DataGridColumnHeader title="Actions" column={column} />,
+      header: () => (
+        <span className="text-sm font-medium select-none cursor-default">Actions</span>
+      ),
+      enableSorting: false,
+      cell: ({ row }) => {
+        const userId = row.original.userId;
+        // Always check against current blockedUsers state (not from closure)
+        const isBlocked = blockedUsers.includes(userId);
+        return (
+          <ActionsCell
+            userId={userId}
+            isBlocked={isBlocked}
+            onBlockClick={() => {
+              setSelectedUserId(userId);
+              setShowBlockModal(true);
+            }}
+            onSuspendClick={() => {
+              setSelectedUserId(userId);
+              setShowSuspendModal(true);
+            }}
+          />
+        );
+      },
+      meta: {
+        headerClassName: 'w-40',
+        cellClassName: 'text-gray-800 font-medium'
+      }
+    }
+  ];
 
   const handleRowSelection = (state: any) => {
     const selectedRowIds = Object.keys(state);
@@ -743,11 +784,12 @@ export const ActivityLogListContent: React.FC = () => {
       setStatusFilter={setStatusFilter}
       dateRangeFilter={dateRangeFilter}
       setDateRangeFilter={setDateRangeFilter}
+      totalActivities={filteredLogs.length}
     />
   );
 
   return (
-    <div className="[&_[data-container]]:overflow-y-auto [&_[data-container]]:max-h-[calc(100vh-250px)]">
+    <div>
       {loading && activityLogs.length === 0 ? (
         <div className="card">
           <div className="card-body">
@@ -841,16 +883,57 @@ export const ActivityLogListContent: React.FC = () => {
             </div>
           )}
 
-          <DataGrid
+          {/* DataGrid with commented out pagination prop */}
+          {/* pagination={{ size: 10 }} */}
+          {/* <DataGrid
             columns={columns}
-            data={filteredLogs}
+            data={paginatedLogs}
             rowSelection={true}
             onRowSelectionChange={handleRowSelection}
-            pagination={{ size: 10 }}
             sorting={[{ id: 'timestamp', desc: true }]}
             toolbar={toolbar}
             layout={{ card: true }}
+          /> */}
+          <DataGrid
+            columns={columns}
+            data={paginatedLogs}
+            pagination={{ size: 20 }}
+            rowSelection={true}
+            onRowSelectionChange={handleRowSelection}
+            sorting={[{ id: 'timestamp', desc: true }]}
+            toolbar={toolbar}
+            // layout={{ card: true, classes: { container: '!overflow-x-visible !overflow-y-visible' } }}
+            layout={{ card: true, classes: { container: '!overflow-x-visible !overflow-y-visible' } }}
           />
+
+          {/* Custom Pagination */}
+          {totalPages > 1 && (
+            <div className="flex flex-col sm:flex-row items-center justify-between mt-6 pt-6 border-t gap-4">
+              <div className="text-sm text-gray-600">
+                Page {currentPage} of {totalPages} (Showing {paginatedLogs.length} of {filteredLogs.length} activities)
+              </div>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage((prev) => Math.max(1, prev - 1))}
+                  disabled={currentPage === 1 || loading}
+                >
+                  <ChevronLeft className="w-4 h-4 mr-1" />
+                  Previous
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setCurrentPage((prev) => Math.min(totalPages, prev + 1))}
+                  disabled={currentPage === totalPages || loading}
+                >
+                  Next
+                  <ChevronRight className="w-4 h-4 ml-1" />
+                </Button>
+              </div>
+            </div>
+          )}
         </>
       )}
     </div>
